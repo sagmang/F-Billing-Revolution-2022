@@ -1,6 +1,6 @@
 #from ast import pattern
 from calendar import c
-from cgitb import enable, text
+from cgitb import enable, reset, text
 from distutils import command
 from itertools import count
 from pydoc import describe
@@ -238,14 +238,195 @@ firsttab1.pack(side="top", fill=BOTH)
 firsttab=Frame(firsttab1, bg="#f5f3f2", height=700)
 firsttab.pack(side="top", fill=BOTH)
 
-messagelbframe=LabelFrame(firsttab,text="Default Estimate template", height=60, width=280)
-messagelbframe.place(x=5, y=15)
+ver = Label(firsttab,text="Estimate# prefix")
+ver.place(x=5,y=40)
+
+lbx = Listbox(firsttab1, height=1)
+lbx.insert(END, "EST")
+lbx.place(x=100,y=40)
+
+ver = Label(firsttab,text="Starting estimate number")
+ver.place(x=25,y=80)
+
+spin1 = Spinbox(firsttab,from_=1,to=1000000,width=15)
+spin1.place(x=50,y=100)
+
+ver = Label(firsttab,text="Header box background color")
+ver.place(x=5,y=140)
 
 win_menu = StringVar()
 winstyle = ttk.Combobox(firsttab,textvariable=win_menu)
-winstyle.place(x=22 ,y=40)
+winstyle.place(x=6 ,y=160)
+winstyle['values'] = ('Default','Black','Maroon','Green','Olive','Navy','Purple','Teal','Gray','Silver','Red','Lime','Yellow','Blue','Fuchsia','Aqua','White','ScrollBar','Background','ActiveCaption','InactiveCaption','Menu','Window','WindowFrame','MenuText','WindowText','CaptionText','ActiveBorder','InactiveBorder','AppWorkSpace','Highlight','HighlightText','BtnFace','InactiveCaptionText','BtnHighlight','3DDkShadow','3DLight','InfoText','InfoBk','Custom')
+winstyle.current(0)
+
+ver = Label(firsttab,text="Customize Estimate text labels")
+ver.place(x=5,y=190)
+
+lbx = Listbox(firsttab1, height=8, width=25)
+lbx.insert(END, "Estimate")
+lbx.insert(END, "Estimate#")
+lbx.insert(END, "Estimate date")
+lbx.insert(END, "Due date")
+lbx.insert(END, "Estimate to")
+lbx.insert(END, "Estimate total")
+lbx.place(x=5,y=220)
+
+ver = Label(firsttab,text="Default Estimate template(example,click on preview for mouse scrolling)")
+ver.place(x=248,y=55 )
+
+ver = Label(firsttab,text="Default Estimate template")
+ver.place(x=619,y=40)
+
+win_menu = StringVar()
+winstyle = ttk.Combobox(firsttab,textvariable=win_menu)
+winstyle.place(x=770 ,y=40, width=220)
 winstyle['values'] = ('Professional 1 (logo on left side)','Professional 2 (logo on right side)','Simplified 1 (logo on left side)','Simplified 2 (logo on right side)','Business Classic')
 winstyle.current(0)
+
+messagelbframe=LabelFrame(firsttab,text="Predefined terms and conditions text for estimates", height=100, width=980)
+messagelbframe.place(x=210, y=400)
+
+txt = scrolledtext.ScrolledText(firsttab, undo=True,width=115,height=4)
+txt.place(x=220,y=425)
+
+bttermadd = Button(firsttab,text="Restore defaults")
+bttermadd.place(x=32,y=450)
+
+################### tab07 ###################################
+firsttab1=Frame(tab07, relief=GROOVE, bg="#f8f8f2")
+firsttab1.pack(side="top", fill=BOTH)
+
+firsttab=Frame(firsttab1, bg="#f5f3f2", height=700)
+firsttab.pack(side="top", fill=BOTH)
+
+messagelbframe=LabelFrame(firsttab,text="Template advanced settings", height=250, width=1150)
+messagelbframe.place(x=2, y=10)
+
+fbill = Label(firsttab,text="Template",font="arial 10 bold").place(x=20,y=30)
+
+ver = Label(firsttab,text="Professional 1 (logo on left side)")
+ver.place(x=20,y=60)
+
+ver = Label(firsttab,text="Professional 2 (logo on right side)")
+ver.place(x=20,y=90)
+
+ver = Label(firsttab,text="Simplified 1 (logo on left side)")
+ver.place(x=20,y=120)
+
+ver = Label(firsttab,text="Simplified 2 (logo on right side)")
+ver.place(x=20,y=150)
+
+ver = Label(firsttab,text="Business Classic")
+ver.place(x=20,y=180)
+
+fbill = Label(firsttab,text="Page size",font="arial 10 bold").place(x=255,y=30)
+
+win_menu = StringVar()
+winstyle = ttk.Combobox(firsttab,textvariable=win_menu)
+winstyle.place(x=225 ,y=60)
+winstyle['values'] = ('Letter','A4')
+winstyle.current(0)
+
+win_menu = StringVar()
+winstyle = ttk.Combobox(firsttab,textvariable=win_menu)
+winstyle.place(x=225,y=90)
+winstyle['values'] = ('Letter','A4')
+winstyle.current(0)
+
+win_menu = StringVar()
+winstyle = ttk.Combobox(firsttab,textvariable=win_menu)
+winstyle.place(x=225,y=120)
+winstyle['values'] = ('Letter','A4')
+winstyle.current(0)
+
+win_menu = StringVar()
+winstyle = ttk.Combobox(firsttab,textvariable=win_menu)
+winstyle.place(x=225,y=150)
+winstyle['values'] = ('Letter','A4')
+winstyle.current(0)
+
+win_menu = StringVar()
+winstyle = ttk.Combobox(firsttab,textvariable=win_menu)
+winstyle.place(x=225,y=180)
+winstyle['values'] = ('Letter','A4')
+winstyle.current(0)
+
+fbill = Label(firsttab,text="Right Margin(mm)",font="arial 10 bold").place(x=450,y=30)
+
+spin1 = Spinbox(firsttab,from_=5,to=20,width=10)
+spin1.place(x=465,y=60)
+
+spin1 = Spinbox(firsttab,from_=5,to=20,width=10)
+spin1.place(x=465,y=90)
+
+spin1 = Spinbox(firsttab,from_=5,to=20,width=10)
+spin1.place(x=465,y=120)
+
+spin1 = Spinbox(firsttab,from_=5,to=20,width=10)
+spin1.place(x=465,y=150)
+
+spin1 = Spinbox(firsttab,from_=5,to=20,width=10)
+spin1.place(x=465,y=180)
+
+
+fbill = Label(firsttab,text="'Invoice to'block position shift(mm)",font="arial 10 bold").place(x=650,y=30)
+
+lbl1 = Label(firsttab, text="Left : ").place(x=651,y=60)
+lbl1 = Label(firsttab, text="Left : ").place(x=651,y=90)
+lbl1 = Label(firsttab, text="Left : ").place(x=651,y=120)
+lbl1 = Label(firsttab, text="Left : ").place(x=651,y=150)
+
+spin1 = Spinbox(firsttab,from_=-10,to=100,width=10)
+spin1.place(x=685,y=60)
+
+spin1 = Spinbox(firsttab,from_=-10,to=100,width=10)
+spin1.place(x=685,y=90)
+
+spin1 = Spinbox(firsttab,from_=-10,to=100,width=10)
+spin1.place(x=685,y=120)
+
+spin1 = Spinbox(firsttab,from_=-10,to=100,width=10)
+spin1.place(x=685,y=150)
+
+lbl1 = Label(firsttab, text="Top : ").place(x=785,y=60)
+lbl1 = Label(firsttab, text="Top : ").place(x=785,y=90)
+lbl1 = Label(firsttab, text="Top : ").place(x=785,y=120)
+lbl1 = Label(firsttab, text="Top : ").place(x=785,y=150)
+
+spin1 = Spinbox(firsttab,from_=0,to=100,width=10)
+spin1.place(x=820,y=60)
+
+spin1 = Spinbox(firsttab,from_=0,to=100,width=10)
+spin1.place(x=820,y=90)
+
+spin1 = Spinbox(firsttab,from_=0,to=100,width=10)
+spin1.place(x=820,y=120)
+
+spin1 = Spinbox(firsttab,from_=0,to=100,width=10)
+spin1.place(x=820,y=150)
+
+bttermadd = Button(firsttab,image=redo,compound = LEFT,text="Refresh preview",width=105)
+bttermadd.place(x=1000,y=50)
+
+bttermadd = Button(firsttab,image=saves,compound = LEFT,text="Save Settings",width=105)
+bttermadd.place(x=1000,y=140)
+
+bttermadd = Button(firsttab,text="Restore defaults",width=15)
+bttermadd.place(x=1000,y=180)
+
+ver = Label(firsttab,text="By positioning 'Invoice to'block,the customer name/address can be displayed in right place in the windowed envelope. If you networking, you need to setup this on all computer.\nExample:(Left:20 and Top:10 means that shift 'Invoice to'block to right 20mm and shift down 10mm) Original position Left:0 Top:0")
+ver.place(x=50,y=210)
+
+
+win_menu = StringVar()
+winstyle = ttk.Combobox(firsttab,textvariable=win_menu)
+winstyle.place(x=2 ,y=270, width=220)
+winstyle['values'] = ('Professional 1 (logo on left side)','Professional 2 (logo on right side)','Simplified 1 (logo on left side)','Simplified 2 (logo on right side)','Business Classic')
+winstyle.current(0)
+
+ver = Label(firsttab,text="Selected template preview (example, click on preview for mouse scrolling)")
+ver.place(x=230,y=270)
 
 
 root.mainloop()
