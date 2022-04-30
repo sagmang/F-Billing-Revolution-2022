@@ -33,6 +33,13 @@ from openpyxl import load_workbook
 import shutil
 import csv
 import json
+from tkPDFViewer import tkPDFViewer as pdf
+
+
+fbilldb = mysql.connector.connect(
+    host="localhost", user="root", password="", database="fbillingsintgrtd", port="3306"
+)
+fbcursor = fbilldb.cursor()
 
 root=Tk()
 root.geometry("1300x730")
@@ -69,6 +76,7 @@ mark2 = PhotoImage(file="images/mark2.png")
 photo10 = PhotoImage(file = "images/text-message.png")
 addnew = PhotoImage(file="images/plus.png")
 delete = PhotoImage(file="images/delete_E.png")
+
 tabControl = ttk.Notebook(root)
 tab1 = ttk.Frame(tabControl)
 tab2 = ttk.Frame(tabControl)
@@ -285,13 +293,21 @@ winstyle['values'] = ('Professional 1 (logo on left side)','Professional 2 (logo
 winstyle.current(0)
 
 messagelbframe=LabelFrame(firsttab,text="Predefined terms and conditions text for estimates", height=100, width=980)
-messagelbframe.place(x=210, y=400)
+messagelbframe.place(x=248, y=400)
 
 txt = scrolledtext.ScrolledText(firsttab, undo=True,width=115,height=4)
-txt.place(x=220,y=425)
+txt.place(x=260,y=425)
 
 bttermadd = Button(firsttab,text="Restore defaults")
 bttermadd.place(x=32,y=450)
+
+#lbx = Listbox(firsttab1, height=18, width=162, bg="grey")
+#lbx.place(x=248,y=90)
+v1 = pdf.ShowPdf()
+v2 = v1.pdf_view(firsttab1,width = 120, height = 16)
+v2.place(x=248,y=90)
+
+
 
 ################### tab07 ###################################
 firsttab1=Frame(tab07, relief=GROOVE, bg="#f8f8f2")
@@ -406,13 +422,13 @@ spin1.place(x=820,y=120)
 spin1 = Spinbox(firsttab,from_=0,to=100,width=10)
 spin1.place(x=820,y=150)
 
-bttermadd = Button(firsttab,image=redo,compound = LEFT,text="Refresh preview",width=105)
+bttermadd = Button(firsttab,image=photo8,compound = LEFT,text="Refresh preview",width=115)
 bttermadd.place(x=1000,y=50)
 
-bttermadd = Button(firsttab,image=saves,compound = LEFT,text="Save Settings",width=105)
+bttermadd = Button(firsttab,image=saves,compound = LEFT,text="Save Settings",width=115)
 bttermadd.place(x=1000,y=140)
 
-bttermadd = Button(firsttab,text="Restore defaults",width=15)
+bttermadd = Button(firsttab,text="Restore defaults",width=16)
 bttermadd.place(x=1000,y=180)
 
 ver = Label(firsttab,text="By positioning 'Invoice to'block,the customer name/address can be displayed in right place in the windowed envelope. If you networking, you need to setup this on all computer.\nExample:(Left:20 and Top:10 means that shift 'Invoice to'block to right 20mm and shift down 10mm) Original position Left:0 Top:0")
@@ -427,6 +443,14 @@ winstyle.current(0)
 
 ver = Label(firsttab,text="Selected template preview (example, click on preview for mouse scrolling)")
 ver.place(x=230,y=270)
+ 
+
+#lbx = Listbox(firsttab, height=11, width=201, bg="grey")
+#lbx.place(x=2,y=309)
+v1 = pdf.ShowPdf()
+v2 = v1.pdf_view(firsttab1,width = 151, height = 10)
+v2.place(x=2,y=309)
+
 
 
 root.mainloop()
