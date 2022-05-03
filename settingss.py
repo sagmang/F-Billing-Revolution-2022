@@ -34,6 +34,7 @@ import shutil
 import csv
 import json
 from tkPDFViewer import tkPDFViewer as pdf
+from tkinter import Tk, Canvas
 
 
 fbilldb = mysql.connector.connect(
@@ -301,11 +302,49 @@ txt.place(x=260,y=425)
 bttermadd = Button(firsttab,text="Restore defaults")
 bttermadd.place(x=32,y=450)
 
-#lbx = Listbox(firsttab1, height=18, width=162, bg="grey")
-#lbx.place(x=248,y=90)
-v1 = pdf.ShowPdf()
-v2 = v1.pdf_view(firsttab1,width = 120, height = 16)
-v2.place(x=248,y=90)
+
+frame = Frame(
+    firsttab,
+    width=953,
+    height=300
+    )
+frame.pack(expand=True, fill=BOTH)
+frame.place(x=247,y=90)
+canvas=Canvas(
+    frame,
+    bg='grey',
+    width=953,
+    height=300,
+    scrollregion=(0,0,700,700)
+    )
+
+vertibar=Scrollbar(
+    frame,
+    orient=VERTICAL
+    )
+vertibar.pack(side=RIGHT,fill=Y)
+vertibar.config(command=canvas.yview)
+canvas.config(width=953,height=300)
+
+canvas.config(
+    yscrollcommand=vertibar.set
+    )
+canvas.pack(expand=True,side=LEFT,fill=BOTH)
+canvas.create_rectangle(100, 20, 850, 675 , outline='yellow',fill='white')
+
+
+ver = Label(firsttab,text="Title text goes here..." ,background="white")
+ver.place(x=655,y=175)
+ver = Label(firsttab,text="Your Company Logo" ,background="white" ,font=30)
+ver.place(x=475,y=235)
+ver = Label(firsttab,text="Estimate#" ,background="white")
+ver.place(x=445,y=295)
+ver = Label(firsttab,text="Estimate date" ,background="white")
+ver.place(x=445,y=315)
+ver = Label(firsttab,text="Due date" ,background="white")
+ver.place(x=445,y=335)
+ver = Label(firsttab,text="Terms" ,background="white")
+ver.place(x=445,y=355)
 
 
 
@@ -447,9 +486,38 @@ ver.place(x=230,y=270)
 
 #lbx = Listbox(firsttab, height=11, width=201, bg="grey")
 #lbx.place(x=2,y=309)
-v1 = pdf.ShowPdf()
-v2 = v1.pdf_view(firsttab1,width = 151, height = 10)
-v2.place(x=2,y=309)
+#v1 = pdf.ShowPdf()
+#v2 = v1.pdf_view(firsttab1,width = 151, height = 10)
+#v2.place(x=2,y=309)
+
+frame = Frame(
+    firsttab,
+    width=1200,
+    height=155
+    )
+frame.pack(expand=True, fill=BOTH)
+frame.place(x=2,y=309)
+canvas=Canvas(
+    frame,
+    bg='grey',
+    width=1200,
+    height=155,
+    scrollregion=(0,0,700,700)
+    )
+
+vertibar=Scrollbar(
+    frame,
+    orient=VERTICAL
+    )
+vertibar.pack(side=RIGHT,fill=Y)
+vertibar.config(command=canvas.yview)
+canvas.config(width=1200,height=155)
+
+canvas.config(
+    yscrollcommand=vertibar.set
+    )
+canvas.pack(expand=True,side=LEFT,fill=BOTH)
+canvas.create_rectangle(20, 20, 1175, 680 , outline='yellow',fill='white')
 
 
 
