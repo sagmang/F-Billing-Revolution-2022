@@ -287,12 +287,6 @@ ver.place(x=248,y=55 )
 ver = Label(firsttab,text="Default Estimate template")
 ver.place(x=619,y=40)
 
-win_menu = StringVar()
-winstyle = ttk.Combobox(firsttab,textvariable=win_menu)
-winstyle.place(x=770 ,y=40, width=220)
-winstyle['values'] = ('Professional 1 (logo on left side)','Professional 2 (logo on right side)','Simplified 1 (logo on left side)','Simplified 2 (logo on right side)','Business Classic')
-winstyle.current(0)
-
 messagelbframe=LabelFrame(firsttab,text="Predefined terms and conditions text for estimates", height=100, width=980)
 messagelbframe.place(x=248, y=400)
 
@@ -303,50 +297,92 @@ bttermadd = Button(firsttab,text="Restore defaults")
 bttermadd.place(x=32,y=450)
 
 
+#------------Professional 1 (logo on left side)-------------
+
 frame = Frame(
-    firsttab,
-    width=953,
-    height=300
-    )
+          firsttab,
+          width=953,
+          height=300
+        )
 frame.pack(expand=True, fill=BOTH)
 frame.place(x=247,y=90)
 canvas=Canvas(
-    frame,
-    bg='grey',
-    width=953,
-    height=300,
-    scrollregion=(0,0,700,700)
-    )
+          frame,
+          bg='grey',
+          width=953,
+          height=300,
+          scrollregion=(0,0,700,700)
+        )
 
 vertibar=Scrollbar(
-    frame,
-    orient=VERTICAL
-    )
+          frame,
+          orient=VERTICAL
+        )
 vertibar.pack(side=RIGHT,fill=Y)
 vertibar.config(command=canvas.yview)
 canvas.config(width=953,height=300)
 
 canvas.config(
-    yscrollcommand=vertibar.set
-    )
+          yscrollcommand=vertibar.set
+        )
 canvas.pack(expand=True,side=LEFT,fill=BOTH)
-canvas.create_rectangle(100, 20, 850, 675 , outline='yellow',fill='white')
+canvas.create_rectangle(100, 10, 850, 687 , outline='yellow',fill='white')
+canvas.create_text(500, 50, text="Title text goes here...", fill="black", font=('Helvetica 10'))
+canvas.create_text(285, 110, text="Your Company Logo", fill="black", font=('Helvetica 18 bold'))
+
+canvas.create_text(202, 150, text="Estimate#", fill="black", font=('Helvetica 11'))
+canvas.create_text(215, 170, text="Estimate date", fill="black", font=('Helvetica 11'))
+canvas.create_text(200, 190, text="Due date", fill="black", font=('Helvetica 11'))
+canvas.create_text(191, 210, text="Terms", fill="black", font=('Helvetica 11'))
+canvas.create_text(205, 230, text="Order ref.#", fill="black", font=('Helvetica 11'))
+canvas.create_text(350, 150, text="EST1/2022", fill="black", font=('Helvetica 11'))
+canvas.create_text(350, 170, text="03-05-2022", fill="black", font=('Helvetica 11'))
+canvas.create_text(350, 190, text="18-05-2022", fill="black", font=('Helvetica 11'))
+canvas.create_text(340, 210, text="NET 15", fill="black", font=('Helvetica 11'))      
+
+canvas.create_text(720, 80, text="Your Company Name", fill="black", font=('Helvetica 12 '))
+canvas.create_text(750, 110, text="Address line 1", fill="black", font=('Helvetica 10'))
+canvas.create_text(750, 125, text="Address line 2", fill="black", font=('Helvetica 10'))
+canvas.create_text(750, 140, text="Address line 3", fill="black", font=('Helvetica 10'))
+canvas.create_text(750, 155, text="Address line 4", fill="black", font=('Helvetica 10'))
+canvas.create_text(745, 170, text="Phone: 555-5555", fill="black", font=('Helvetica 10'))
+canvas.create_text(745, 185, text="Sales tax reg No.", fill="black", font=('Helvetica 10'))
+canvas.create_text(750, 205, text="Estimate", fill="black", font=('Helvetica 14 bold'))
+canvas.create_text(746, 225, text="TAX EXEMPTED", fill="black", font=('Helvetica 10'))
+      
+canvas.create_text(210, 260, text="Estimate to", fill="black", font=('Helvetica 10 underline'))
+canvas.create_text(203, 280, text="John Doe", fill="black", font=('Helvetica 10 '))
+canvas.create_text(246, 295, text="381 South Bedford Road", fill="black", font=('Helvetica 10'))
+canvas.create_text(255, 310, text="Bedford Corners, NY 10549", fill="black", font=('Helvetica 10'))
+canvas.create_text(215, 325, text="United States", fill="black", font=('Helvetica 10'))
+canvas.create_text(550, 260, text="Ship to", fill="black", font=('Helvetica 10 underline'))
+canvas.create_text(556, 280, text="John Doe", fill="black", font=('Helvetica 10 '))
+canvas.create_text(598, 295, text="381 South Bedford Road", fill="black", font=('Helvetica 10'))
+canvas.create_text(608, 310, text="Bedford Corners, NY 10549", fill="black", font=('Helvetica 10'))
+canvas.create_text(568, 325, text="United States", fill="black", font=('Helvetica 10'))
+
+canvas.create_text(275, 520, text="Multiline comment text goes here..", fill="black", font=('Helvetica 10'))
+canvas.create_text(182, 530, text="...", fill="black", font=('Helvetica 10'))
+canvas.create_text(182, 540, text="...", fill="black", font=('Helvetica 10'))
+canvas.create_text(182, 550, text="...", fill="black", font=('Helvetica 10'))
+
+canvas.create_text(500, 600, text="Terms and Conditions", fill="black", font=('Helvetica 10'))
+canvas.create_line(150, 620, 795, 620)
+canvas.create_text(280, 645, text="Page footer text goes here...", fill="black", font=('Helvetica 10'))
+canvas.create_text(720, 645, text="Page 1 of 1", fill="black", font=('Helvetica 10'))
 
 
-ver = Label(firsttab,text="Title text goes here..." ,background="white")
-ver.place(x=655,y=175)
-ver = Label(firsttab,text="Your Company Logo" ,background="white" ,font=30)
-ver.place(x=475,y=235)
-ver = Label(firsttab,text="Estimate#" ,background="white")
-ver.place(x=445,y=295)
-ver = Label(firsttab,text="Estimate date" ,background="white")
-ver.place(x=445,y=315)
-ver = Label(firsttab,text="Due date" ,background="white")
-ver.place(x=445,y=335)
-ver = Label(firsttab,text="Terms" ,background="white")
-ver.place(x=445,y=355)
+#----------------Professional 2 (logo on right side)------------------
+  
 
+      
 
+win_menu = StringVar()
+winstyle = ttk.Combobox(firsttab,textvariable=win_menu)
+winstyle.place(x=770 ,y=40, width=220)
+winstyle['values'] = ('Professional 1 (logo on left side)','Professional 2 (logo on right side)','Simplified 1 (logo on left side)','Simplified 2 (logo on right side)','Business Classic')
+winstyle.current(0)
+#winstyle.bind("<<ComboboxSelected>>", maindropmenu)
 
 ################### tab07 ###################################
 firsttab1=Frame(tab07, relief=GROOVE, bg="#f8f8f2")
@@ -482,13 +518,6 @@ winstyle.current(0)
 
 ver = Label(firsttab,text="Selected template preview (example, click on preview for mouse scrolling)")
 ver.place(x=230,y=270)
- 
-
-#lbx = Listbox(firsttab, height=11, width=201, bg="grey")
-#lbx.place(x=2,y=309)
-#v1 = pdf.ShowPdf()
-#v2 = v1.pdf_view(firsttab1,width = 151, height = 10)
-#v2.place(x=2,y=309)
 
 frame = Frame(
     firsttab,
@@ -517,8 +546,55 @@ canvas.config(
     yscrollcommand=vertibar.set
     )
 canvas.pack(expand=True,side=LEFT,fill=BOTH)
-canvas.create_rectangle(20, 20, 1175, 680 , outline='yellow',fill='white')
+canvas.create_rectangle(10, 10, 1190, 690 , outline='yellow',fill='white')
 
+#------------Professional 1 (logo on left side)------------- 
+
+canvas.create_text(600, 45, text="Title text goes here...", fill="black", font=('Helvetica 10'))
+
+canvas.create_text(250, 70, text="Your Company Logo", fill="black", font=('Helvetica 18 bold'))
+
+canvas.create_text(130, 110, text="Invoice#", fill="black", font=('Helvetica 11'))
+canvas.create_text(141, 130, text="Invoice date", fill="black", font=('Helvetica 11'))
+canvas.create_text(130, 150, text="Due date", fill="black", font=('Helvetica 11'))
+canvas.create_text(120, 170, text="Terms", fill="black", font=('Helvetica 11'))
+canvas.create_text(134, 190, text="Order ref.#", fill="black", font=('Helvetica 11'))
+canvas.create_text(347, 110, text="INV1/2022", fill="black", font=('Helvetica 11'))
+canvas.create_text(350, 130, text="03-05-2022", fill="black", font=('Helvetica 11'))
+canvas.create_text(350, 150, text="18-05-2022", fill="black", font=('Helvetica 11'))
+canvas.create_text(340, 170, text="NET 15", fill="black", font=('Helvetica 11'))
+
+canvas.create_text(1050, 65, text="Your Company Name", fill="black", font=('Helvetica 12 '))
+canvas.create_text(1085, 95, text="Address line 1", fill="black", font=('Helvetica 10'))
+canvas.create_text(1085, 110, text="Address line 2", fill="black", font=('Helvetica 10'))
+canvas.create_text(1085, 125, text="Address line 3", fill="black", font=('Helvetica 10'))
+canvas.create_text(1085, 140, text="Address line 4", fill="black", font=('Helvetica 10'))
+canvas.create_text(1080, 155, text="Phone: 555-5555", fill="black", font=('Helvetica 10'))
+canvas.create_text(1080, 170, text="Sales tax reg No.", fill="black", font=('Helvetica 10'))
+canvas.create_text(1094, 190, text="Invoice", fill="black", font=('Helvetica 14 bold'))
+canvas.create_text(1080, 210, text="TAX EXEMPTED", fill="black", font=('Helvetica 10'))
+
+canvas.create_text(140, 215, text="Bill to", fill="black", font=('Helvetica 10 underline'))
+canvas.create_text(149, 230, text="John Doe", fill="black", font=('Helvetica 10 '))
+canvas.create_text(191, 245, text="381 South Bedford Road", fill="black", font=('Helvetica 10'))
+canvas.create_text(200, 260, text="Bedford Corners, NY 10549", fill="black", font=('Helvetica 10'))
+canvas.create_text(160, 275, text="United States", fill="black", font=('Helvetica 10'))
+canvas.create_text(550, 215, text="Ship to", fill="black", font=('Helvetica 10 underline'))
+canvas.create_text(556, 230, text="John Doe", fill="black", font=('Helvetica 10 '))
+canvas.create_text(598, 245, text="381 South Bedford Road", fill="black", font=('Helvetica 10'))
+canvas.create_text(608, 260, text="Bedford Corners, NY 10549", fill="black", font=('Helvetica 10'))
+canvas.create_text(568, 275, text="United States", fill="black", font=('Helvetica 10'))
+
+canvas.create_text(200, 500, text="Multiline comment text goes here..", fill="black", font=('Helvetica 10'))
+canvas.create_text(106, 510, text="...", fill="black", font=('Helvetica 10'))
+canvas.create_text(106, 520, text="...", fill="black", font=('Helvetica 10'))
+canvas.create_text(106, 530, text="...", fill="black", font=('Helvetica 10'))
+
+canvas.create_text(600, 580, text="Terms and Conditions", fill="black", font=('Helvetica 10'))
+canvas.create_line(110, 600, 1120, 600)
+canvas.create_text(620, 620, text="Invoices are payable on receipt unless other terms, negotiated and noted on the invoice. By accepting delivery of goods, Buyer agrees to pay the invoiced cost for those goods,\nand agrees to be bound to thses contract terms. No acceptance may vary these terms unless specifically agreed in writing by Seller ", fill="black", font=('Helvetica 10'))
+canvas.create_text(196, 650, text="Page footer text goes here...", fill="black", font=('Helvetica 10'))
+canvas.create_text(1090, 650, text="Page 1 of 1", fill="black", font=('Helvetica 10'))
 
 
 root.mainloop()
