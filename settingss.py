@@ -273,15 +273,44 @@ winstyle1.current(0)
 ver = Label(fifthtab,text="Customize Estimate text labels")
 ver.place(x=5,y=190)
 
+# est_lbx = Listbox(fifthtab1, height=8, width=25)
+# est_lbx.insert(END, "Estimate\n" )
+# est_lbx.insert(END, "Estimate#\n")
+# est_lbx.insert(END, "Estimate date\n") 
+# est_lbx.insert(END, "Due date\n")
+# est_lbx.insert(END, "Estimate to\n")
+# est_lbx.insert(END, "Estimate total\n")
+# est_lbx.place(x=5,y=220)
+# def get_stringvar(event):
+#     SV.set(ST1.get("Estimate#", END))
 
-lbx = Listbox(fifthtab1, height=8, width=25)
-lbx.insert(END, "Estimate")
-lbx.insert(END, "Estimate#")
-lbx.insert(END, "Estimate date")
-lbx.insert(END, "Due date")
-lbx.insert(END, "Estimate to")
-lbx.insert(END, "Estimate total")
-lbx.place(x=5,y=220)
+# SV = StringVar()
+
+# ST1 = Text(fifthtab1,height=1, width=25)
+# ST1.place(x=5,y=370)
+# ST1.bind('<KeyRelease>', get_stringvar)
+
+est_lbx1 = Text(fifthtab1, height=1, width=25, font=('Calibri 10'))
+est_lbx1.insert(END, "Estimate")
+est_lbx1.place(x=5,y=220)
+est_lbx2 = Text(fifthtab1,height=1, width=25, font=('Calibri 10'))
+est_lbx2.insert(END, "Estimate#")
+est_lbx2.place(x=5,y=240)
+est_lbx3 = Text(fifthtab1,height=1, width=25, font=('Calibri 10'))
+est_lbx3.insert(END, "Estimate date")
+est_lbx3.place(x=5,y=260) 
+est_lbx4 = Text(fifthtab1,height=1, width=25, font=('Calibri 10'))
+est_lbx4.insert(END, "Due date")
+est_lbx4.place(x=5,y=280)
+est_lbx5 = Text(fifthtab1,height=1, width=25, font=('Calibri 10'))
+est_lbx5.insert(END, "Estimate to")
+est_lbx5.place(x=5,y=300)
+est_lbx6 = Text(fifthtab1, height=3,width=25, font=('Calibri 10'))
+est_lbx6.insert(END, "Estimate total")
+est_lbx6.place(x=5,y=320)
+
+
+s1 = StringVar(fifthtab1, "Estimate")
 
 
 ver = Label(fifthtab,text="Default Estimate template(example,click on preview for mouse scrolling)")
@@ -340,7 +369,7 @@ def maindropmenu(event):
       canvas.create_text(750, 155, text="Address line 4", fill="black", font=('Helvetica 10'))
       canvas.create_text(745, 170, text="Phone: 555-5555", fill="black", font=('Helvetica 10'))
       canvas.create_text(745, 185, text="Sales tax reg No.", fill="black", font=('Helvetica 10'))
-      canvas.create_text(750, 205, text="Estimate", fill="black", font=('Helvetica 14 bold'))
+      canvas.create_text(750, 205, text=s1.get(), fill="black", font=('Helvetica 14 bold'))
       canvas.create_text(746, 225, text="TAX EXEMPTED", fill="black", font=('Helvetica 10'))
       
       canvas.create_text(210, 260, text="Estimate to", fill="black", font=('Helvetica 10 underline'))
@@ -353,16 +382,70 @@ def maindropmenu(event):
       canvas.create_text(598, 295, text="381 South Bedford Road", fill="black", font=('Helvetica 10'))
       canvas.create_text(608, 310, text="Bedford Corners, NY 10549", fill="black", font=('Helvetica 10'))
       canvas.create_text(568, 325, text="United States", fill="black", font=('Helvetica 10'))
+      
+      tree=ttk.Treeview(canvas, column=("c1", "c2","c3", "c4", "c5"), show='headings',height= 0, style='mystyle.Treeview')
+      
+      tree.column("# 1", anchor=E, stretch=NO, width=100)
+      tree.heading("# 1", text="ID/SKU")
+      tree.column("# 2", anchor=E, stretch=NO, width=350)
+      tree.heading("# 2", text="Product/Service - Description")
+      tree.column("# 3", anchor=E, stretch=NO, width=80)
+      tree.heading("# 3", text="Quantity")
+      tree.column("# 4", anchor=E, stretch=NO, width=90)
+      tree.heading("# 4", text="Unit Price")
+      tree.column("# 5", anchor=E, stretch=NO, width=80)
+      tree.heading("# 5", text="Price")
+      
+      window = canvas.create_window(120, 340, anchor="nw", window=tree)
 
-      canvas.create_text(275, 520, text="Multiline comment text goes here..", fill="black", font=('Helvetica 10'))
-      canvas.create_text(182, 530, text="...", fill="black", font=('Helvetica 10'))
-      canvas.create_text(182, 540, text="...", fill="black", font=('Helvetica 10'))
-      canvas.create_text(182, 550, text="...", fill="black", font=('Helvetica 10'))
+      canvas.create_line(120, 390, 820, 390 )
+      canvas.create_line(120, 340, 120, 365 )
+      canvas.create_line(120, 365, 120, 390 )
+      canvas.create_line(820, 340, 820, 540 )
+      canvas.create_line(740, 340, 740, 540 )
+      canvas.create_line(570, 340, 570, 540 )
+      canvas.create_line(570, 415, 820, 415 )
+      canvas.create_line(570, 440, 820, 440 )
+      canvas.create_line(570, 465, 820, 465 )
+      canvas.create_line(570, 490, 820, 490 )
+      canvas.create_line(570, 515, 820, 515 )
+      canvas.create_line(650, 340, 650, 390 )
+      canvas.create_line(220, 340, 220, 390 )
+      canvas.create_line(570, 540, 820, 540 )
+
+      canvas.create_text(165, 372, text="PROD-0001", fill="black", font=('Helvetica 10'))
+      canvas.create_text(370, 372, text="Example product - Description text...", fill="black", font=('Helvetica 10'))
+      canvas.create_text(610, 372, text="1", fill="black", font=('Helvetica 10'))
+      canvas.create_text(710, 372, text="$200.00", fill="black", font=('Helvetica 10'))
+      canvas.create_text(790, 372, text="$200.00", fill="black", font=('Helvetica 10'))
+
+      canvas.create_text(650, 404, text="Subtotal", fill="black", font=('Helvetica 10'))
+      canvas.create_text(790, 404, text="$200.00", fill="black", font=('Helvetica 10'))
+
+      canvas.create_text(650, 428, text="TAX1", fill="black", font=('Helvetica 10'))
+      canvas.create_text(792, 428, text="$18.00", fill="black", font=('Helvetica 10'))
+
+      canvas.create_text(650, 454, text="Shipping and handling", fill="black", font=('Helvetica 10'))
+      canvas.create_text(792, 454, text="$20.00", fill="black", font=('Helvetica 10'))
+
+      canvas.create_text(790, 479, text="$238.00", fill="black", font=('Helvetica 10 bold'))
+      canvas.create_text(650, 479, text="Estimate total", fill="black", font=('Helvetica 10 bold'))
+
+      canvas.create_text(790, 502, text="$100.00", fill="black", font=('Helvetica 10'))
+      canvas.create_text(650, 502, text="Total Paid", fill="black", font=('Helvetica 10'))
+
+      canvas.create_text(790, 526, text="$138.00", fill="black", font=('Helvetica 10'))
+      canvas.create_text(650, 526, text="Balance", fill="black", font=('Helvetica 10'))
+
+      canvas.create_text(275, 550, text="Multiline comment text goes here..", fill="black", font=('Helvetica 10'))
+      canvas.create_text(182, 560, text="...", fill="black", font=('Helvetica 10'))
+      canvas.create_text(182, 570, text="...", fill="black", font=('Helvetica 10'))
+      canvas.create_text(182, 580, text="...", fill="black", font=('Helvetica 10'))
       
       canvas.create_text(500, 600, text="Terms and Conditions", fill="black", font=('Helvetica 10'))
       canvas.create_line(150, 620, 795, 620)
-      canvas.create_text(280, 645, text="Page footer text goes here...", fill="black", font=('Helvetica 10'))
-      canvas.create_text(720, 645, text="Page 1 of 1", fill="black", font=('Helvetica 10'))
+      canvas.create_text(280, 655, text="Page footer text goes here...", fill="black", font=('Helvetica 10'))
+      canvas.create_text(720, 655, text="Page 1 of 1", fill="black", font=('Helvetica 10'))
       print('hai')
 
 #----------------Professional 2 (logo on right side)------------------
@@ -415,15 +498,69 @@ def maindropmenu(event):
       canvas.create_text(608, 310, text="Bedford Corners, NY 10549", fill="black", font=('Helvetica 10'))
       canvas.create_text(568, 325, text="United States", fill="black", font=('Helvetica 10'))
 
-      canvas.create_text(275, 520, text="Multiline comment text goes here..", fill="black", font=('Helvetica 10'))
-      canvas.create_text(182, 530, text="...", fill="black", font=('Helvetica 10'))
-      canvas.create_text(182, 540, text="...", fill="black", font=('Helvetica 10'))
-      canvas.create_text(182, 550, text="...", fill="black", font=('Helvetica 10'))
+      tree=ttk.Treeview(canvas, column=("c1", "c2","c3", "c4", "c5"), show='headings',height= 0, style='mystyle.Treeview')
+      
+      tree.column("# 1", anchor=E, stretch=NO, width=100)
+      tree.heading("# 1", text="ID/SKU")
+      tree.column("# 2", anchor=E, stretch=NO, width=350)
+      tree.heading("# 2", text="Product/Service - Description")
+      tree.column("# 3", anchor=E, stretch=NO, width=80)
+      tree.heading("# 3", text="Quantity")
+      tree.column("# 4", anchor=E, stretch=NO, width=90)
+      tree.heading("# 4", text="Unit Price")
+      tree.column("# 5", anchor=E, stretch=NO, width=80)
+      tree.heading("# 5", text="Price")
+      
+      window = canvas.create_window(120, 340, anchor="nw", window=tree)
+
+      canvas.create_line(120, 390, 820, 390 )
+      canvas.create_line(120, 340, 120, 365 )
+      canvas.create_line(120, 365, 120, 390 )
+      canvas.create_line(820, 340, 820, 540 )
+      canvas.create_line(740, 340, 740, 540 )
+      canvas.create_line(570, 340, 570, 540 )
+      canvas.create_line(570, 415, 820, 415 )
+      canvas.create_line(570, 440, 820, 440 )
+      canvas.create_line(570, 465, 820, 465 )
+      canvas.create_line(570, 490, 820, 490 )
+      canvas.create_line(570, 515, 820, 515 )
+      canvas.create_line(650, 340, 650, 390 )
+      canvas.create_line(220, 340, 220, 390 )
+      canvas.create_line(570, 540, 820, 540 )
+
+      canvas.create_text(165, 372, text="PROD-0001", fill="black", font=('Helvetica 10'))
+      canvas.create_text(370, 372, text="Example product - Description text...", fill="black", font=('Helvetica 10'))
+      canvas.create_text(610, 372, text="1", fill="black", font=('Helvetica 10'))
+      canvas.create_text(710, 372, text="$200.00", fill="black", font=('Helvetica 10'))
+      canvas.create_text(790, 372, text="$200.00", fill="black", font=('Helvetica 10'))
+
+      canvas.create_text(650, 404, text="Subtotal", fill="black", font=('Helvetica 10'))
+      canvas.create_text(790, 404, text="$200.00", fill="black", font=('Helvetica 10'))
+
+      canvas.create_text(650, 428, text="TAX1", fill="black", font=('Helvetica 10'))
+      canvas.create_text(792, 428, text="$18.00", fill="black", font=('Helvetica 10'))
+
+      canvas.create_text(650, 454, text="Shipping and handling", fill="black", font=('Helvetica 10'))
+      canvas.create_text(792, 454, text="$20.00", fill="black", font=('Helvetica 10'))
+
+      canvas.create_text(790, 479, text="$238.00", fill="black", font=('Helvetica 10 bold'))
+      canvas.create_text(650, 479, text="Estimate total", fill="black", font=('Helvetica 10 bold'))
+
+      canvas.create_text(790, 502, text="$100.00", fill="black", font=('Helvetica 10'))
+      canvas.create_text(650, 502, text="Total Paid", fill="black", font=('Helvetica 10'))
+
+      canvas.create_text(790, 526, text="$138.00", fill="black", font=('Helvetica 10'))
+      canvas.create_text(650, 526, text="Balance", fill="black", font=('Helvetica 10'))
+
+      canvas.create_text(275, 550, text="Multiline comment text goes here..", fill="black", font=('Helvetica 10'))
+      canvas.create_text(182, 560, text="...", fill="black", font=('Helvetica 10'))
+      canvas.create_text(182, 570, text="...", fill="black", font=('Helvetica 10'))
+      canvas.create_text(182, 580, text="...", fill="black", font=('Helvetica 10'))
 
       canvas.create_text(500, 600, text="Terms and Conditions", fill="black", font=('Helvetica 10'))
       canvas.create_line(150, 620, 795, 620)
-      canvas.create_text(280, 645, text="Page footer text goes here...", fill="black", font=('Helvetica 10'))
-      canvas.create_text(720, 645, text="Page 1 of 1", fill="black", font=('Helvetica 10'))
+      canvas.create_text(280, 655, text="Page footer text goes here...", fill="black", font=('Helvetica 10'))
+      canvas.create_text(720, 655, text="Page 1 of 1", fill="black", font=('Helvetica 10'))
 
 
 #----------------Simplified 1 (logo on left side)------------------ 
@@ -475,15 +612,63 @@ def maindropmenu(event):
       canvas.create_text(608, 310, text="Bedford Corners, NY 10549", fill="black", font=('Helvetica 10'))
       canvas.create_text(568, 325, text="United States", fill="black", font=('Helvetica 10'))
 
-      canvas.create_text(275, 520, text="Multiline comment text goes here..", fill="black", font=('Helvetica 10'))
-      canvas.create_text(182, 530, text="...", fill="black", font=('Helvetica 10'))
-      canvas.create_text(182, 540, text="...", fill="black", font=('Helvetica 10'))
-      canvas.create_text(182, 550, text="...", fill="black", font=('Helvetica 10'))
+      tree=ttk.Treeview(canvas, column=("c1", "c2","c3"), show='headings',height= 0, style='mystyle.Treeview')
+      
+      tree.column("# 1", anchor=E, stretch=NO, width=530)
+      tree.heading("# 1", text="Product/Service - Description")
+      tree.column("# 2", anchor=E, stretch=NO, width=90)
+      tree.heading("# 2", text="Quantity")
+      tree.column("# 3", anchor=E, stretch=NO, width=80)
+      tree.heading("# 3", text="Price")
+      
+      window = canvas.create_window(120, 340, anchor="nw", window=tree)
+
+      canvas.create_line(120, 390, 820, 390 )
+      canvas.create_line(120, 340, 120, 365 )
+      canvas.create_line(120, 365, 120, 390 )
+      canvas.create_line(820, 340, 820, 540 )
+      canvas.create_line(740, 340, 740, 540 )
+      canvas.create_line(570, 390, 570, 540 )
+      canvas.create_line(570, 415, 820, 415 )
+      canvas.create_line(570, 440, 820, 440 )
+      canvas.create_line(570, 465, 820, 465 )
+      canvas.create_line(570, 490, 820, 490 )
+      canvas.create_line(570, 515, 820, 515 )
+      canvas.create_line(650, 340, 650, 390 )
+      canvas.create_line(570, 540, 820, 540 )
+
+      
+      canvas.create_text(370, 372, text="Example product - Description text...", fill="black", font=('Helvetica 10'))
+      canvas.create_text(710, 372, text="1", fill="black", font=('Helvetica 10'))
+      canvas.create_text(790, 372, text="$200.00", fill="black", font=('Helvetica 10'))
+
+      canvas.create_text(650, 404, text="Subtotal", fill="black", font=('Helvetica 10'))
+      canvas.create_text(790, 404, text="$200.00", fill="black", font=('Helvetica 10'))
+
+      canvas.create_text(650, 428, text="TAX1", fill="black", font=('Helvetica 10'))
+      canvas.create_text(792, 428, text="$18.00", fill="black", font=('Helvetica 10'))
+
+      canvas.create_text(650, 454, text="Shipping and handling", fill="black", font=('Helvetica 10'))
+      canvas.create_text(792, 454, text="$20.00", fill="black", font=('Helvetica 10'))
+
+      canvas.create_text(790, 479, text="$238.00", fill="black", font=('Helvetica 10 bold'))
+      canvas.create_text(650, 479, text="Estimate total", fill="black", font=('Helvetica 10 bold'))
+
+      canvas.create_text(790, 502, text="$100.00", fill="black", font=('Helvetica 10'))
+      canvas.create_text(650, 502, text="Total Paid", fill="black", font=('Helvetica 10'))
+
+      canvas.create_text(790, 526, text="$138.00", fill="black", font=('Helvetica 10'))
+      canvas.create_text(650, 526, text="Balance", fill="black", font=('Helvetica 10'))
+
+      canvas.create_text(275, 550, text="Multiline comment text goes here..", fill="black", font=('Helvetica 10'))
+      canvas.create_text(182, 560, text="...", fill="black", font=('Helvetica 10'))
+      canvas.create_text(182, 570, text="...", fill="black", font=('Helvetica 10'))
+      canvas.create_text(182, 580, text="...", fill="black", font=('Helvetica 10'))
 
       canvas.create_text(500, 600, text="Terms and Conditions", fill="black", font=('Helvetica 10'))
       canvas.create_line(150, 620, 795, 620)
-      canvas.create_text(280, 645, text="Page footer text goes here...", fill="black", font=('Helvetica 10'))
-      canvas.create_text(720, 645, text="Page 1 of 1", fill="black", font=('Helvetica 10'))
+      canvas.create_text(280, 655, text="Page footer text goes here...", fill="black", font=('Helvetica 10'))
+      canvas.create_text(720, 655, text="Page 1 of 1", fill="black", font=('Helvetica 10'))
 
 #----------------Simplified 2 (logo on right side)------------------ 
     elif menuvar == 'Simplified 2 (logo on right side)':
@@ -534,15 +719,63 @@ def maindropmenu(event):
       canvas.create_text(608, 310, text="Bedford Corners, NY 10549", fill="black", font=('Helvetica 10'))
       canvas.create_text(568, 325, text="United States", fill="black", font=('Helvetica 10'))
 
-      canvas.create_text(275, 520, text="Multiline comment text goes here..", fill="black", font=('Helvetica 10'))
-      canvas.create_text(182, 530, text="...", fill="black", font=('Helvetica 10'))
-      canvas.create_text(182, 540, text="...", fill="black", font=('Helvetica 10'))
-      canvas.create_text(182, 550, text="...", fill="black", font=('Helvetica 10'))
+      tree=ttk.Treeview(canvas, column=("c1", "c2","c3"), show='headings',height= 0, style='mystyle.Treeview')
+      
+      tree.column("# 1", anchor=E, stretch=NO, width=530)
+      tree.heading("# 1", text="Product/Service - Description")
+      tree.column("# 2", anchor=E, stretch=NO, width=90)
+      tree.heading("# 2", text="Quantity")
+      tree.column("# 3", anchor=E, stretch=NO, width=80)
+      tree.heading("# 3", text="Price")
+      
+      window = canvas.create_window(120, 340, anchor="nw", window=tree)
+
+      canvas.create_line(120, 390, 820, 390 )
+      canvas.create_line(120, 340, 120, 365 )
+      canvas.create_line(120, 365, 120, 390 )
+      canvas.create_line(820, 340, 820, 540 )
+      canvas.create_line(740, 340, 740, 540 )
+      canvas.create_line(570, 390, 570, 540 )
+      canvas.create_line(570, 415, 820, 415 )
+      canvas.create_line(570, 440, 820, 440 )
+      canvas.create_line(570, 465, 820, 465 )
+      canvas.create_line(570, 490, 820, 490 )
+      canvas.create_line(570, 515, 820, 515 )
+      canvas.create_line(650, 340, 650, 390 )
+      canvas.create_line(570, 540, 820, 540 )
+
+      
+      canvas.create_text(370, 372, text="Example product - Description text...", fill="black", font=('Helvetica 10'))
+      canvas.create_text(710, 372, text="1", fill="black", font=('Helvetica 10'))
+      canvas.create_text(790, 372, text="$200.00", fill="black", font=('Helvetica 10'))
+
+      canvas.create_text(650, 404, text="Subtotal", fill="black", font=('Helvetica 10'))
+      canvas.create_text(790, 404, text="$200.00", fill="black", font=('Helvetica 10'))
+
+      canvas.create_text(650, 428, text="TAX1", fill="black", font=('Helvetica 10'))
+      canvas.create_text(792, 428, text="$18.00", fill="black", font=('Helvetica 10'))
+
+      canvas.create_text(650, 454, text="Shipping and handling", fill="black", font=('Helvetica 10'))
+      canvas.create_text(792, 454, text="$20.00", fill="black", font=('Helvetica 10'))
+
+      canvas.create_text(790, 479, text="$238.00", fill="black", font=('Helvetica 10 bold'))
+      canvas.create_text(650, 479, text="Estimate total", fill="black", font=('Helvetica 10 bold'))
+
+      canvas.create_text(790, 502, text="$100.00", fill="black", font=('Helvetica 10'))
+      canvas.create_text(650, 502, text="Total Paid", fill="black", font=('Helvetica 10'))
+
+      canvas.create_text(790, 526, text="$138.00", fill="black", font=('Helvetica 10'))
+      canvas.create_text(650, 526, text="Balance", fill="black", font=('Helvetica 10'))
+
+      canvas.create_text(275, 550, text="Multiline comment text goes here..", fill="black", font=('Helvetica 10'))
+      canvas.create_text(182, 560, text="...", fill="black", font=('Helvetica 10'))
+      canvas.create_text(182, 570, text="...", fill="black", font=('Helvetica 10'))
+      canvas.create_text(182, 580, text="...", fill="black", font=('Helvetica 10'))
 
       canvas.create_text(500, 600, text="Terms and Conditions", fill="black", font=('Helvetica 10'))
       canvas.create_line(150, 620, 795, 620)
-      canvas.create_text(280, 645, text="Page footer text goes here...", fill="black", font=('Helvetica 10'))
-      canvas.create_text(720, 645, text="Page 1 of 1", fill="black", font=('Helvetica 10'))
+      canvas.create_text(280, 655, text="Page footer text goes here...", fill="black", font=('Helvetica 10'))
+      canvas.create_text(720, 655, text="Page 1 of 1", fill="black", font=('Helvetica 10'))
 
 #----------------Business Classic------------------ 
     elif menuvar == 'Business Classic':
@@ -584,17 +817,66 @@ def maindropmenu(event):
       canvas.create_text(776, 180, text="EST1/2022", fill="black", font=('Helvetica 11'))
       canvas.create_text(776, 210, text="05 May 2022", fill="black", font=('Helvetica 11'))
       canvas.create_text(776, 240, text="20-05-2022", fill="black", font=('Helvetica 11'))
+
+      tree=ttk.Treeview(canvas, column=("c1", "c2","c3", "c4", "c5"), show='headings',height= 0, style='mystyle.Treeview')
       
-      canvas.create_line(150, 500, 800, 500, fill='orange')
-      canvas.create_text(275, 520, text="Multiline comment text goes here..", fill="black", font=('Helvetica 10'))
+      tree.column("# 1", anchor=E, stretch=NO, width=200)
+      tree.heading("# 1", text="Product/Service")
+      tree.column("# 2", anchor=E, stretch=NO, width=250)
+      tree.heading("# 2", text="Description")
+      tree.column("# 3", anchor=E, stretch=NO, width=90)
+      tree.heading("# 3", text="Unit Price")
+      tree.column("# 4", anchor=E, stretch=NO, width=80)
+      tree.heading("# 4", text="Quantity")
+      tree.column("# 5", anchor=E, stretch=NO, width=80)
+      tree.heading("# 5", text="Price")
+      
+      window = canvas.create_window(120, 255, anchor="nw", window=tree)
+
+      canvas.create_line(120, 295, 820, 295 )
+      canvas.create_line(120, 255, 120, 295 )
+      canvas.create_line(320, 255, 320, 295 )
+      canvas.create_line(570, 255, 570, 295 )
+      canvas.create_line(660, 255, 660, 295 )
+      canvas.create_line(740, 255, 740, 295 )
+      canvas.create_line(820, 255, 820, 445 )
+      canvas.create_line(570, 320, 820, 320 )
+      canvas.create_line(570, 345, 820, 345 )
+      canvas.create_line(570, 370, 820, 370 )
+      canvas.create_line(570, 395, 820, 395 )
+      canvas.create_line(570, 420, 820, 420 )
+      canvas.create_line(570, 445, 820, 445 )
+      
+      canvas.create_text(160, 285, text="PROD-0001", fill="black", font=('Helvetica 10'))
+      canvas.create_text(450, 285, text="Example product - Description text...", fill="black", font=('Helvetica 10'))
+      canvas.create_text(630, 285, text="$200.00", fill="black", font=('Helvetica 10'))
+      canvas.create_text(700, 285, text="1", fill="black", font=('Helvetica 10'))
+      canvas.create_text(790, 285, text="$200.00", fill="black", font=('Helvetica 10'))
+
+      canvas.create_text(790, 310, text="$200.00", fill="black", font=('Helvetica 10'))
+      canvas.create_text(795, 335, text="$18.00", fill="black", font=('Helvetica 10'))
+      canvas.create_text(795, 360, text="$20.00", fill="black", font=('Helvetica 10'))
+      canvas.create_text(790, 385, text="$238.00", fill="black", font=('Helvetica 10 bold'))
+      canvas.create_text(790, 410, text="$100.00", fill="black", font=('Helvetica 10'))
+      canvas.create_text(790, 435, text="$138.00", fill="black", font=('Helvetica 10'))
+
+      canvas.create_text(595, 310, text="Subtotal", fill="black", font=('Helvetica 10'))
+      canvas.create_text(585, 335, text="TAX1", fill="black", font=('Helvetica 10'))
+      canvas.create_text(635, 360, text="Shipping and handling", fill="black", font=('Helvetica 10'))
+      canvas.create_text(615, 385, text="Estimate total", fill="black", font=('Helvetica 10 bold'))
+      canvas.create_text(600, 410, text="Total Paid", fill="black", font=('Helvetica 10'))
+      canvas.create_text(595, 435, text="Balance", fill="black", font=('Helvetica 10'))
+
+      canvas.create_line(150, 470, 800, 470, fill='orange')
+      canvas.create_text(275, 500, text="Multiline comment text goes here..", fill="black", font=('Helvetica 10'))
+      canvas.create_text(182, 510, text="...", fill="black", font=('Helvetica 10'))
+      canvas.create_text(182, 520, text="...", fill="black", font=('Helvetica 10'))
       canvas.create_text(182, 530, text="...", fill="black", font=('Helvetica 10'))
-      canvas.create_text(182, 540, text="...", fill="black", font=('Helvetica 10'))
-      canvas.create_text(182, 550, text="...", fill="black", font=('Helvetica 10'))
       
       canvas.create_text(500, 600, text="Terms and Conditions", fill="black", font=('Helvetica 10'))
       canvas.create_line(150, 620, 795, 620, fill='orange')
-      canvas.create_text(280, 645, text="Page footer text goes here...", fill="black", font=('Helvetica 10'))
-      canvas.create_text(720, 645, text="Page 1 of 1", fill="black", font=('Helvetica 10'))
+      canvas.create_text(280, 655, text="Page footer text goes here...", fill="black", font=('Helvetica 10'))
+      canvas.create_text(720, 655, text="Page 1 of 1", fill="black", font=('Helvetica 10'))
     else:
         pass
 
@@ -787,6 +1069,63 @@ def adv_maindropmenu(event):
         canvas.create_text(598, 245, text="381 South Bedford Road", fill="black", font=('Helvetica 10'))
         canvas.create_text(608, 260, text="Bedford Corners, NY 10549", fill="black", font=('Helvetica 10'))
         canvas.create_text(568, 275, text="United States", fill="black", font=('Helvetica 10'))
+        
+        tree=ttk.Treeview(canvas, column=("c1", "c2","c3", "c4", "c5"), show='headings',height= 0, style='mystyle.Treeview')
+      
+        tree.column("# 1", anchor=E, stretch=NO, width=150)
+        tree.heading("# 1", text="ID/SKU")
+        tree.column("# 2", anchor=E, stretch=NO, width=400)
+        tree.heading("# 2", text="Product/Service - Description")
+        tree.column("# 3", anchor=E, stretch=NO, width=150)
+        tree.heading("# 3", text="Quantity")
+        tree.column("# 4", anchor=E, stretch=NO, width=150)
+        tree.heading("# 4", text="Unit Price")
+        tree.column("# 5", anchor=E, stretch=NO, width=150)
+        tree.heading("# 5", text="Price")
+      
+        window = canvas.create_window(120, 290, anchor="nw", window=tree)
+
+        canvas.create_line(120, 330, 1120, 330 )
+        canvas.create_line(120, 290, 120, 330 )
+        canvas.create_line(270, 290, 270, 330 )
+        canvas.create_line(670, 290, 670, 330 )
+        canvas.create_line(820, 290, 820, 330 )
+        canvas.create_line(970, 290, 970, 330 )
+        canvas.create_line(1120, 290, 1120, 330 )
+        canvas.create_line(670, 330, 670, 480)
+        canvas.create_line(970, 330, 970, 480)
+        canvas.create_line(1120, 330, 1120, 480)
+        canvas.create_line(670, 355, 1120, 355)
+        canvas.create_line(670, 380, 1120, 380)
+        canvas.create_line(670, 405, 1120, 405)
+        canvas.create_line(670, 430, 1120, 430)
+        canvas.create_line(670, 455, 1120, 455)
+        canvas.create_line(670, 480, 1120, 480)
+
+        canvas.create_text(165, 320, text="PROD-0001", fill="black", font=('Helvetica 10'))
+        canvas.create_text(400, 320, text="Example product - Description text...", fill="black", font=('Helvetica 10'))
+        canvas.create_text(740, 320, text="1", fill="black", font=('Helvetica 10'))
+        canvas.create_text(890, 320, text="$200.00", fill="black", font=('Helvetica 10'))
+        canvas.create_text(1090, 320, text="$200.00", fill="black", font=('Helvetica 10'))
+
+        canvas.create_text(820, 345, text="Subtotal", fill="black", font=('Helvetica 10'))
+        canvas.create_text(1090, 345, text="$200.00", fill="black", font=('Helvetica 10'))
+
+        canvas.create_text(820, 370, text="TAX1", fill="black", font=('Helvetica 10'))
+        canvas.create_text(1095, 370, text="$18.00", fill="black", font=('Helvetica 10'))
+
+        canvas.create_text(820, 395, text="Shipping and handling", fill="black", font=('Helvetica 10'))
+        canvas.create_text(1095, 395, text="$20.00", fill="black", font=('Helvetica 10'))
+
+        canvas.create_text(1090, 420, text="$238.00", fill="black", font=('Helvetica 10 bold'))
+        canvas.create_text(820, 420, text="Invoice total", fill="black", font=('Helvetica 10 bold'))
+
+        canvas.create_text(1090, 445, text="$100.00", fill="black", font=('Helvetica 10'))
+        canvas.create_text(820, 445, text="Total Paid", fill="black", font=('Helvetica 10'))
+
+        canvas.create_text(1090, 465, text="$138.00", fill="black", font=('Helvetica 10'))
+        canvas.create_text(820, 465, text="Balance", fill="black", font=('Helvetica 10'))
+
 
         canvas.create_text(200, 500, text="Multiline comment text goes here..", fill="black", font=('Helvetica 10'))
         canvas.create_text(106, 510, text="...", fill="black", font=('Helvetica 10'))
@@ -848,6 +1187,62 @@ def adv_maindropmenu(event):
         canvas.create_text(598, 245, text="381 South Bedford Road", fill="black", font=('Helvetica 10'))
         canvas.create_text(608, 260, text="Bedford Corners, NY 10549", fill="black", font=('Helvetica 10'))
         canvas.create_text(568, 275, text="United States", fill="black", font=('Helvetica 10'))
+
+        tree=ttk.Treeview(canvas, column=("c1", "c2","c3", "c4", "c5"), show='headings',height= 0, style='mystyle.Treeview')
+      
+        tree.column("# 1", anchor=E, stretch=NO, width=150)
+        tree.heading("# 1", text="ID/SKU")
+        tree.column("# 2", anchor=E, stretch=NO, width=400)
+        tree.heading("# 2", text="Product/Service - Description")
+        tree.column("# 3", anchor=E, stretch=NO, width=150)
+        tree.heading("# 3", text="Quantity")
+        tree.column("# 4", anchor=E, stretch=NO, width=150)
+        tree.heading("# 4", text="Unit Price")
+        tree.column("# 5", anchor=E, stretch=NO, width=150)
+        tree.heading("# 5", text="Price")
+      
+        window = canvas.create_window(120, 290, anchor="nw", window=tree)
+
+        canvas.create_line(120, 330, 1120, 330 )
+        canvas.create_line(120, 290, 120, 330 )
+        canvas.create_line(270, 290, 270, 330 )
+        canvas.create_line(670, 290, 670, 330 )
+        canvas.create_line(820, 290, 820, 330 )
+        canvas.create_line(970, 290, 970, 330 )
+        canvas.create_line(1120, 290, 1120, 330 )
+        canvas.create_line(670, 330, 670, 480)
+        canvas.create_line(970, 330, 970, 480)
+        canvas.create_line(1120, 330, 1120, 480)
+        canvas.create_line(670, 355, 1120, 355)
+        canvas.create_line(670, 380, 1120, 380)
+        canvas.create_line(670, 405, 1120, 405)
+        canvas.create_line(670, 430, 1120, 430)
+        canvas.create_line(670, 455, 1120, 455)
+        canvas.create_line(670, 480, 1120, 480)
+
+        canvas.create_text(165, 320, text="PROD-0001", fill="black", font=('Helvetica 10'))
+        canvas.create_text(400, 320, text="Example product - Description text...", fill="black", font=('Helvetica 10'))
+        canvas.create_text(740, 320, text="1", fill="black", font=('Helvetica 10'))
+        canvas.create_text(890, 320, text="$200.00", fill="black", font=('Helvetica 10'))
+        canvas.create_text(1090, 320, text="$200.00", fill="black", font=('Helvetica 10'))
+
+        canvas.create_text(820, 345, text="Subtotal", fill="black", font=('Helvetica 10'))
+        canvas.create_text(1090, 345, text="$200.00", fill="black", font=('Helvetica 10'))
+
+        canvas.create_text(820, 370, text="TAX1", fill="black", font=('Helvetica 10'))
+        canvas.create_text(1095, 370, text="$18.00", fill="black", font=('Helvetica 10'))
+
+        canvas.create_text(820, 395, text="Shipping and handling", fill="black", font=('Helvetica 10'))
+        canvas.create_text(1095, 395, text="$20.00", fill="black", font=('Helvetica 10'))
+
+        canvas.create_text(1090, 420, text="$238.00", fill="black", font=('Helvetica 10 bold'))
+        canvas.create_text(820, 420, text="Invoice total", fill="black", font=('Helvetica 10 bold'))
+
+        canvas.create_text(1090, 445, text="$100.00", fill="black", font=('Helvetica 10'))
+        canvas.create_text(820, 445, text="Total Paid", fill="black", font=('Helvetica 10'))
+
+        canvas.create_text(1090, 465, text="$138.00", fill="black", font=('Helvetica 10'))
+        canvas.create_text(820, 465, text="Balance", fill="black", font=('Helvetica 10'))
 
         canvas.create_text(200, 500, text="Multiline comment text goes here..", fill="black", font=('Helvetica 10'))
         canvas.create_text(106, 510, text="...", fill="black", font=('Helvetica 10'))
@@ -911,6 +1306,54 @@ def adv_maindropmenu(event):
         canvas.create_text(608, 260, text="Bedford Corners, NY 10549", fill="black", font=('Helvetica 10'))
         canvas.create_text(568, 275, text="United States", fill="black", font=('Helvetica 10'))
 
+        tree=ttk.Treeview(canvas, column=("c1", "c2","c3"), show='headings',height= 0, style='mystyle.Treeview')
+      
+        tree.column("# 1", anchor=E, stretch=NO, width=700)
+        tree.heading("# 1", text="Product/Service - Description")
+        tree.column("# 2", anchor=E, stretch=NO, width=150)
+        tree.heading("# 2", text="Quantity")
+        tree.column("# 3", anchor=E, stretch=NO, width=150)
+        tree.heading("# 3", text="Price")
+      
+        window = canvas.create_window(120, 290, anchor="nw", window=tree)
+
+        canvas.create_line(120, 330, 1120, 330 )
+        canvas.create_line(120, 290, 120, 330 )
+        canvas.create_line(820, 290, 820, 330 )
+        canvas.create_line(970, 290, 970, 330 )
+        canvas.create_line(1120, 290, 1120, 330 )
+        canvas.create_line(670, 330, 670, 480)
+        canvas.create_line(970, 330, 970, 480)
+        canvas.create_line(1120, 330, 1120, 480)
+        canvas.create_line(670, 355, 1120, 355)
+        canvas.create_line(670, 380, 1120, 380)
+        canvas.create_line(670, 405, 1120, 405)
+        canvas.create_line(670, 430, 1120, 430)
+        canvas.create_line(670, 455, 1120, 455)
+        canvas.create_line(670, 480, 1120, 480)
+
+        canvas.create_text(250, 320, text="Example product - Description text...", fill="black", font=('Helvetica 10'))
+        canvas.create_text(900, 320, text="1", fill="black", font=('Helvetica 10'))
+        canvas.create_text(1090, 320, text="$200.00", fill="black", font=('Helvetica 10'))
+
+        canvas.create_text(820, 345, text="Subtotal", fill="black", font=('Helvetica 10'))
+        canvas.create_text(1090, 345, text="$200.00", fill="black", font=('Helvetica 10'))
+
+        canvas.create_text(820, 370, text="TAX1", fill="black", font=('Helvetica 10'))
+        canvas.create_text(1095, 370, text="$18.00", fill="black", font=('Helvetica 10'))
+
+        canvas.create_text(820, 395, text="Shipping and handling", fill="black", font=('Helvetica 10'))
+        canvas.create_text(1095, 395, text="$20.00", fill="black", font=('Helvetica 10'))
+
+        canvas.create_text(1090, 420, text="$238.00", fill="black", font=('Helvetica 10 bold'))
+        canvas.create_text(820, 420, text="Invoice total", fill="black", font=('Helvetica 10 bold'))
+
+        canvas.create_text(1090, 445, text="$100.00", fill="black", font=('Helvetica 10'))
+        canvas.create_text(820, 445, text="Total Paid", fill="black", font=('Helvetica 10'))
+
+        canvas.create_text(1090, 465, text="$138.00", fill="black", font=('Helvetica 10'))
+        canvas.create_text(820, 465, text="Balance", fill="black", font=('Helvetica 10'))
+
         canvas.create_text(200, 500, text="Multiline comment text goes here..", fill="black", font=('Helvetica 10'))
         canvas.create_text(106, 510, text="...", fill="black", font=('Helvetica 10'))
         canvas.create_text(106, 520, text="...", fill="black", font=('Helvetica 10'))
@@ -973,27 +1416,53 @@ def adv_maindropmenu(event):
         canvas.create_text(608, 260, text="Bedford Corners, NY 10549", fill="black", font=('Helvetica 10'))
         canvas.create_text(568, 275, text="United States", fill="black", font=('Helvetica 10'))
 
-        canvas.create_text(200, 500, text="Multiline comment text goes here..", fill="black", font=('Helvetica 10'))
-        canvas.create_text(106, 510, text="...", fill="black", font=('Helvetica 10'))
-        canvas.create_text(106, 520, text="...", fill="black", font=('Helvetica 10'))
-        canvas.create_text(106, 530, text="...", fill="black", font=('Helvetica 10'))
+        tree=ttk.Treeview(canvas, column=("c1", "c2","c3"), show='headings',height= 0, style='mystyle.Treeview')
+      
+        tree.column("# 1", anchor=E, stretch=NO, width=700)
+        tree.heading("# 1", text="Product/Service - Description")
+        tree.column("# 2", anchor=E, stretch=NO, width=150)
+        tree.heading("# 2", text="Quantity")
+        tree.column("# 3", anchor=E, stretch=NO, width=150)
+        tree.heading("# 3", text="Price")
+      
+        window = canvas.create_window(120, 290, anchor="nw", window=tree)
 
-        canvas.create_text(600, 580, text="Terms and Conditions", fill="black", font=('Helvetica 10'))
-        canvas.create_line(110, 600, 1120, 600)
-        canvas.create_text(620, 620, text="Invoices are payable on receipt unless other terms, negotiated and noted on the invoice. By accepting delivery of goods, Buyer agrees to pay the invoiced cost for those goods,\nand agrees to be bound to thses contract terms. No acceptance may vary these terms unless specifically agreed in writing by Seller ", fill="black", font=('Helvetica 10'))
-        canvas.create_text(196, 650, text="Page footer text goes here...", fill="black", font=('Helvetica 10'))
-        canvas.create_text(1090, 650, text="Page 1 of 1", fill="black", font=('Helvetica 10'))
+        canvas.create_line(120, 330, 1120, 330 )
+        canvas.create_line(120, 290, 120, 330 )
+        canvas.create_line(820, 290, 820, 330 )
+        canvas.create_line(970, 290, 970, 330 )
+        canvas.create_line(1120, 290, 1120, 330 )
+        canvas.create_line(670, 330, 670, 480)
+        canvas.create_line(970, 330, 970, 480)
+        canvas.create_line(1120, 330, 1120, 480)
+        canvas.create_line(670, 355, 1120, 355)
+        canvas.create_line(670, 380, 1120, 380)
+        canvas.create_line(670, 405, 1120, 405)
+        canvas.create_line(670, 430, 1120, 430)
+        canvas.create_line(670, 455, 1120, 455)
+        canvas.create_line(670, 480, 1120, 480)
 
-        canvas.create_text(140, 215, text="Bill to", fill="black", font=('Helvetica 10 underline'))
-        canvas.create_text(149, 230, text="John Doe", fill="black", font=('Helvetica 10 '))
-        canvas.create_text(191, 245, text="381 South Bedford Road", fill="black", font=('Helvetica 10'))
-        canvas.create_text(200, 260, text="Bedford Corners, NY 10549", fill="black", font=('Helvetica 10'))
-        canvas.create_text(160, 275, text="United States", fill="black", font=('Helvetica 10'))
-        canvas.create_text(550, 215, text="Ship to", fill="black", font=('Helvetica 10 underline'))
-        canvas.create_text(556, 230, text="John Doe", fill="black", font=('Helvetica 10 '))
-        canvas.create_text(598, 245, text="381 South Bedford Road", fill="black", font=('Helvetica 10'))
-        canvas.create_text(608, 260, text="Bedford Corners, NY 10549", fill="black", font=('Helvetica 10'))
-        canvas.create_text(568, 275, text="United States", fill="black", font=('Helvetica 10'))
+        canvas.create_text(250, 320, text="Example product - Description text...", fill="black", font=('Helvetica 10'))
+        canvas.create_text(900, 320, text="1", fill="black", font=('Helvetica 10'))
+        canvas.create_text(1090, 320, text="$200.00", fill="black", font=('Helvetica 10'))
+
+        canvas.create_text(820, 345, text="Subtotal", fill="black", font=('Helvetica 10'))
+        canvas.create_text(1090, 345, text="$200.00", fill="black", font=('Helvetica 10'))
+
+        canvas.create_text(820, 370, text="TAX1", fill="black", font=('Helvetica 10'))
+        canvas.create_text(1095, 370, text="$18.00", fill="black", font=('Helvetica 10'))
+
+        canvas.create_text(820, 395, text="Shipping and handling", fill="black", font=('Helvetica 10'))
+        canvas.create_text(1095, 395, text="$20.00", fill="black", font=('Helvetica 10'))
+
+        canvas.create_text(1090, 420, text="$238.00", fill="black", font=('Helvetica 10 bold'))
+        canvas.create_text(820, 420, text="Invoice total", fill="black", font=('Helvetica 10 bold'))
+
+        canvas.create_text(1090, 445, text="$100.00", fill="black", font=('Helvetica 10'))
+        canvas.create_text(820, 445, text="Total Paid", fill="black", font=('Helvetica 10'))
+
+        canvas.create_text(1090, 465, text="$138.00", fill="black", font=('Helvetica 10'))
+        canvas.create_text(820, 465, text="Balance", fill="black", font=('Helvetica 10'))
 
         canvas.create_text(200, 500, text="Multiline comment text goes here..", fill="black", font=('Helvetica 10'))
         canvas.create_text(106, 510, text="...", fill="black", font=('Helvetica 10'))
@@ -1023,7 +1492,7 @@ def adv_maindropmenu(event):
         canvas.config(yscrollcommand=vertibar.set)
         canvas.pack(expand=True,side=LEFT,fill=BOTH)
         canvas.create_rectangle(10, 10, 1190, 690 , outline='yellow',fill='white')
-        canvas.create_text(600, 45, text="Title text goes here...4", fill="black", font=('Helvetica 10'))
+        canvas.create_text(600, 45, text="Title text goes here...", fill="black", font=('Helvetica 10'))
         canvas.create_line(100, 60, 1120, 60, fill="orange")
         #canvas.create_line(1000, 60, 600, 60, fill="grey")
 
@@ -1037,6 +1506,73 @@ def adv_maindropmenu(event):
         canvas.create_text(536, 170, text="Phone: 555-5555", fill="black", font=('Helvetica 10'))
         canvas.create_text(536, 190, text="Sales tax reg No.", fill="black", font=('Helvetica 10'))
         canvas.create_text(524, 210, text="Invoice", fill="black", font=('Helvetica 14 bold'))
+
+        canvas.create_text(749, 95, text="John Doe", fill="black", font=('Helvetica 10 '))
+        canvas.create_text(791, 110, text="381 South Bedford Road", fill="black", font=('Helvetica 10'))
+        canvas.create_text(800, 125, text="Bedford Corners, NY 10549", fill="black", font=('Helvetica 10'))
+        canvas.create_text(760, 140, text="United States", fill="black", font=('Helvetica 10'))
+
+        canvas.create_text(745, 160, text="Invoice", fill="black", font=('Helvetica 11'))
+        canvas.create_text(760, 180, text="Invoice date", fill="black", font=('Helvetica 11'))
+        canvas.create_text(750, 200, text="Due date", fill="black", font=('Helvetica 11'))
+
+        canvas.create_text(947, 160, text="INV1/2022", fill="black", font=('Helvetica 11'))
+        canvas.create_text(950, 180, text="06-05-2022", fill="black", font=('Helvetica 11'))
+        canvas.create_text(950, 200, text="21-05-2022", fill="black", font=('Helvetica 11'))
+
+        tree=ttk.Treeview(canvas, column=("c1", "c2","c3", "c4", "c5"), show='headings',height= 0, style='mystyle.Treeview')
+      
+        tree.column("# 1", anchor=E, stretch=NO, width=150)
+        tree.heading("# 1", text="Product/Service")
+        tree.column("# 2", anchor=E, stretch=NO, width=400)
+        tree.heading("# 2", text="Description")
+        tree.column("# 3", anchor=E, stretch=NO, width=150)
+        tree.heading("# 3", text="Unit Price")
+        tree.column("# 4", anchor=E, stretch=NO, width=150)
+        tree.heading("# 4", text="Quantity")
+        tree.column("# 5", anchor=E, stretch=NO, width=150)
+        tree.heading("# 5", text="Price")
+      
+        window = canvas.create_window(120, 230, anchor="nw", window=tree)
+
+        canvas.create_line(120, 270, 1120, 270 )
+        canvas.create_line(120, 230, 120, 270 )
+        canvas.create_line(270, 230, 270, 270 )
+        canvas.create_line(670, 230, 670, 270 )
+        canvas.create_line(820, 230, 820, 270 )
+        canvas.create_line(970, 230, 970, 270 )
+        canvas.create_line(1120, 230, 1120, 270)
+        canvas.create_line(1120, 270, 1120, 420)
+        canvas.create_line(670, 295, 1120, 295)
+        canvas.create_line(670, 320, 1120, 320)
+        canvas.create_line(670, 345, 1120, 345)
+        canvas.create_line(670, 370, 1120, 370)
+        canvas.create_line(670, 395, 1120, 395)
+        canvas.create_line(670, 420, 1120, 420)
+
+        canvas.create_text(165, 260, text="PROD-0001", fill="black", font=('Helvetica 10'))
+        canvas.create_text(400, 260, text="Example product - Description text...", fill="black", font=('Helvetica 10'))
+        canvas.create_text(740, 260, text="$200.00", fill="black", font=('Helvetica 10'))
+        canvas.create_text(890, 260, text="1", fill="black", font=('Helvetica 10'))
+        canvas.create_text(1090, 260, text="$200.00", fill="black", font=('Helvetica 10'))
+
+        canvas.create_text(697, 285, text="Subtotal", fill="black", font=('Helvetica 10'))
+        canvas.create_text(1090, 285, text="$200.00", fill="black", font=('Helvetica 10'))
+
+        canvas.create_text(692, 310, text="TAX1", fill="black", font=('Helvetica 10'))
+        canvas.create_text(1095, 310, text="$18.00", fill="black", font=('Helvetica 10'))
+
+        canvas.create_text(737, 335, text="Shipping and handling", fill="black", font=('Helvetica 10'))
+        canvas.create_text(1095, 335, text="$20.00", fill="black", font=('Helvetica 10'))
+
+        canvas.create_text(1090, 360, text="$238.00", fill="black", font=('Helvetica 10 bold'))
+        canvas.create_text(715, 360, text="Invoice total", fill="black", font=('Helvetica 10 bold'))
+
+        canvas.create_text(1090, 385, text="$100.00", fill="black", font=('Helvetica 10'))
+        canvas.create_text(705, 385, text="Total Paid", fill="black", font=('Helvetica 10'))
+
+        canvas.create_text(1090, 410, text="$138.00", fill="black", font=('Helvetica 10'))
+        canvas.create_text(700, 410, text="Balance", fill="black", font=('Helvetica 10'))
 
         canvas.create_line(100, 480, 1120, 480, fill="orange")
         canvas.create_text(200, 500, text="Multiline comment text goes here..", fill="black", font=('Helvetica 10'))
