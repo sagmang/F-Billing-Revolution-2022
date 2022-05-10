@@ -310,6 +310,7 @@ est_lbx6.insert(END, "Estimate total")
 est_lbx6.place(x=5,y=320)
 
 
+
 s1 = StringVar(fifthtab1, "Estimate")
 
 
@@ -319,14 +320,36 @@ ver.place(x=248,y=55 )
 ver = Label(fifthtab,text="Default Estimate template")
 ver.place(x=619,y=40)
 
+#data=StringVar()
+
 messagelbframe=LabelFrame(fifthtab,text="Predefined terms and conditions text for estimates", height=100, width=980)
 messagelbframe.place(x=248, y=400)
 
 txt = scrolledtext.ScrolledText(fifthtab, undo=True,width=115,height=4)
 txt.place(x=260,y=425)
 
+# def button_command():
+#     text = entry1.get()
+#     print(text)
+#     return None
+
+
+# entry1=Entry(fifthtab, width=155)
+# entry1.place(x=260, y=425)
+
+# lbl01 = Label(fifthtab,text=" 1",font="arial 10 bold").place(x=260,y=435)
+
 bttermadd = Button(fifthtab,text="Restore defaults")
 bttermadd.place(x=32,y=450)
+
+# def display():
+#           string = entryval.get()
+#           canvas.create_text(50,50, text = string)
+# entryval = Entry(fifthtab)
+# entryval.entry1.place(x=260, y=425)
+
+# bttermadd = Button(fifthtab,text="Restore defaults", command = display)
+# bttermadd.place(x=32,y=450)
 
 
 #------------Professional 1 (logo on left side)-------------
@@ -383,8 +406,11 @@ def maindropmenu(event):
       canvas.create_text(608, 310, text="Bedford Corners, NY 10549", fill="black", font=('Helvetica 10'))
       canvas.create_text(568, 325, text="United States", fill="black", font=('Helvetica 10'))
       
+      s = ttk.Style()
+      s.configure('Treeview.Heading', background=''+ win_menu1.get(),State='DISABLE')
+
       tree=ttk.Treeview(canvas, column=("c1", "c2","c3", "c4", "c5"), show='headings',height= 0, style='mystyle.Treeview')
-      
+
       tree.column("# 1", anchor=E, stretch=NO, width=100)
       tree.heading("# 1", text="ID/SKU")
       tree.column("# 2", anchor=E, stretch=NO, width=350)
@@ -444,6 +470,9 @@ def maindropmenu(event):
       
       canvas.create_text(500, 600, text="Terms and Conditions", fill="black", font=('Helvetica 10'))
       canvas.create_line(150, 620, 795, 620)
+      
+
+      canvas.create_text(280, 640, text= "", fill="black", font=('Helvetica 10'))
       canvas.create_text(280, 655, text="Page footer text goes here...", fill="black", font=('Helvetica 10'))
       canvas.create_text(720, 655, text="Page 1 of 1", fill="black", font=('Helvetica 10'))
       print('hai')
@@ -886,6 +915,8 @@ winstyle2.place(x=770 ,y=40, width=220)
 winstyle2.bind("<<ComboboxSelected>>", maindropmenu)
 winstyle2["values"] = ("Professional 1 (logo on left side)","Professional 2 (logo on right side)","Simplified 1 (logo on left side)","Simplified 2 (logo on right side)","Business Classic")
 winstyle2.current(0)
+
+
 
 ################### tab07 ###################################
 seventhtab1=Frame(tab07, relief=GROOVE, bg="#f8f8f2")
