@@ -304,6 +304,18 @@ def mainpage():
     cbut4 = checkb4.get()
     cbut5 = checkb5.get()
     cbut6 = checkb6.get()
+    est_prefix = est_str.get()
+    #est_header = win_menu1.get
+    est_text1 = est_str1.get()
+    est_text2 = est_str2.get()
+    est_text3 = est_str3.get()
+    est_text4 = est_str4.get()
+    est_text5 = est_str5.get()
+    est_text6 = est_str6.get()
+    est_predefined = est_str7.get()
+    est_default = win_menu2.get()
+    est_spin1 = spin1.get()
+
     child = exctree.get_children()
     var = json.dumps(child)
     sql = "select image from company"
@@ -315,26 +327,26 @@ def mainpage():
     if not i:
       if filename == "":
         print(12)
-        sql = 'insert into company(name, address, email,salestaxno,currency,currencysign,currsignplace,  decimalseperator,excurrency,dateformat,exdate,taxtype,printimageornot,tax1name,tax1rate,printtax1,  tax2name,tax2rate,printtax2,attachment_file_type,miscellanoustab_cbutton1,miscellanoustab_cbutton2,miscellanoustab_cbutton3,miscellanoustab_cbutton4,miscellanoustab_cbutton5,miscellanoustab_cbutton6) values(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s,%s, %s,%s,%s,%s,%s,%s,%s,%s,%s)'
-        val = (company_name,company_address,company_mail,company_salestax,currency,currencysign,  currencysign_placement,decimal_sepator,currency_example,date_format,example_dateformat,tax,printimage,  tax1name,tax1rate,printtax1,tax2name,tax2rate,printtax2,radiobut,cbut1,cbut2,cbut3,cbut4,cbut5,cbut6)
+        sql = 'insert into company(name, address, email,salestaxno,currency,currencysign,currsignplace,  decimalseperator,excurrency,dateformat,exdate,taxtype,printimageornot,tax1name,tax1rate,printtax1,  tax2name,tax2rate,printtax2,attachment_file_type,miscellanoustab_cbutton1,miscellanoustab_cbutton2,miscellanoustab_cbutton3,miscellanoustab_cbutton4,miscellanoustab_cbutton5,miscellanoustab_cbutton6,Estimate_prefix,Customizeestimatetextlabels,Customizeestimatetextlabels1,Customizeestimatetextlabels2,Customizeestimatetextlabels3,Customizeestimatetextlabels4,Customizeestimatetextlabels5,Defaultestimatetemplate,Startingestimatenumber) values(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s,%s, %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'
+        val = (company_name,company_address,company_mail,company_salestax,currency,currencysign,  currencysign_placement,decimal_sepator,currency_example,date_format,example_dateformat,tax,printimage,  tax1name,tax1rate,printtax1,tax2name,tax2rate,printtax2,radiobut,cbut1,cbut2,cbut3,cbut4,cbut5,cbut6,est_prefix,est_text1,est_text2,est_text3,est_text4,est_text5,est_text6,est_default,est_spin1)
         fbcursor.execute(sql, val)
         fbilldb.commit()
       else:
         shutil.copyfile(filename, os.getcwd()+'/images/'+filename.split('/')[-1])
-        sql = 'insert into company(name, address, email,salestaxno,currency,currencysign,currsignplace,  decimalseperator,excurrency,dateformat,exdate,taxtype,printimageornot,tax1name,tax1rate,printtax1,  tax2name,tax2rate,printtax2,image,attachment_file_type,miscellanoustab_cbutton1,miscellanoustab_cbutton2,miscellanoustab_cbutton3,miscellanoustab_cbutton4,miscellanoustab_cbutton5,miscellanoustab_cbutton6) values(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,  %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'
-        val = (company_name,company_address,company_mail,company_salestax,currency,currencysign,  currencysign_placement,decimal_sepator,currency_example,date_format,example_dateformat,tax,printimage,  tax1name,tax1rate,printtax1,tax2name,tax2rate,printtax2,filename.split('/')[-1],radiobut,cbut1,cbut2,cbut3,cbut4,cbut5,cbut6)
+        sql = 'insert into company(name, address, email,salestaxno,currency,currencysign,currsignplace,  decimalseperator,excurrency,dateformat,exdate,taxtype,printimageornot,tax1name,tax1rate,printtax1,  tax2name,tax2rate,printtax2,image,attachment_file_type,miscellanoustab_cbutton1,miscellanoustab_cbutton2,miscellanoustab_cbutton3,miscellanoustab_cbutton4,miscellanoustab_cbutton5,miscellanoustab_cbutton6,Estimate_prefix,Customizeestimatetextlabels,Customizeestimatetextlabels1,Customizeestimatetextlabels2,Customizeestimatetextlabels3,Customizeestimatetextlabels4,Customizeestimatetextlabels5,Defaultestimatetemplate,Startingestimatenumber) values(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'
+        val = (company_name,company_address,company_mail,company_salestax,currency,currencysign,  currencysign_placement,decimal_sepator,currency_example,date_format,example_dateformat,tax,printimage,  tax1name,tax1rate,printtax1,tax2name,tax2rate,printtax2,filename.split('/')[-1],radiobut,cbut1,cbut2,cbut3,cbut4,cbut5,cbut6,est_prefix,est_text1,est_text2,est_text3,est_text4,est_text5,est_text6,est_default,est_spin1)
         fbcursor.execute(sql, val)
         fbilldb.commit()
     else:
       if filename == "":
-        sql = "update company set name=%s, address=%s, email=%s,salestaxno=%s,currency=%s,currencysign=%s,  currsignplace=%s,decimalseperator=%s,excurrency=%s,dateformat=%s,exdate=%s,taxtype=%s,  printimageornot=%s,tax1name=%s,tax1rate=%s,printtax1=%s,tax2name=%s,tax2rate=%s,printtax2=%s,attachment_file_type=%s,miscellanoustab_cbutton1=%s,miscellanoustab_cbutton2=%s,miscellanoustab_cbutton3=%s,miscellanoustab_cbutton4=%s,miscellanoustab_cbutton5=%s,miscellanoustab_cbutton6=%s"
-        val = (company_name,company_address,company_mail,company_salestax,currency,currencysign,  currencysign_placement,decimal_sepator,currency_example,date_format,example_dateformat,tax,printimage,  tax1name,tax1rate,printtax1,tax2name,tax2rate,printtax2,radiobut,cbut1,cbut2,cbut3,cbut4,cbut5,cbut6)
+        sql = "update company set name=%s, address=%s, email=%s,salestaxno=%s,currency=%s,currencysign=%s,  currsignplace=%s,decimalseperator=%s,excurrency=%s,dateformat=%s,exdate=%s,taxtype=%s,  printimageornot=%s,tax1name=%s,tax1rate=%s,printtax1=%s,tax2name=%s,tax2rate=%s,printtax2=%s,attachment_file_type=%s,miscellanoustab_cbutton1=%s,miscellanoustab_cbutton2=%s,miscellanoustab_cbutton3=%s,miscellanoustab_cbutton4=%s,miscellanoustab_cbutton5=%s,miscellanoustab_cbutton6=%s,Estimate_prefix=%s,Customizeestimatetextlabels=%s,Customizeestimatetextlabels1=%s,Customizeestimatetextlabels2=%s,Customizeestimatetextlabels3=%s,Customizeestimatetextlabels4=%s,Customizeestimatetextlabels5=%s,Defaultestimatetemplate=%s,Startingestimatenumber=%s"
+        val = (company_name,company_address,company_mail,company_salestax,currency,currencysign,  currencysign_placement,decimal_sepator,currency_example,date_format,example_dateformat,tax,printimage,  tax1name,tax1rate,printtax1,tax2name,tax2rate,printtax2,radiobut,cbut1,cbut2,cbut3,cbut4,cbut5,cbut6,est_prefix,est_text1,est_text2,est_text3,est_text4,est_text5,est_text6,est_default,est_spin1)
         fbcursor.execute(sql, val)
         fbilldb.commit()
       else:
         shutil.copyfile(filename, os.getcwd()+'/images/'+filename.split('/')[-1])
-        sql = "update company set name=%s, address=%s, email=%s,salestaxno=%s,currency=%s,currencysign=%s,  currsignplace=%s,decimalseperator=%s,excurrency=%s,dateformat=%s,exdate=%s,taxtype=%s,  printimageornot=%s,tax1name=%s,tax1rate=%s,printtax1=%s,tax2name=%s,tax2rate=%s,printtax2=%s,image=%s,attachment_file_type=%s,miscellanoustab_cbutton1=%s,miscellanoustab_cbutton2=%s,miscellanoustab_cbutton3=%s,miscellanoustab_cbutton4=%s,miscellanoustab_cbutton5=%s,miscellanoustab_cbutton6=%s"
-        val = (company_name,company_address,company_mail,company_salestax,currency,currencysign,  currencysign_placement,decimal_sepator,currency_example,date_format,example_dateformat,tax,printimage,  tax1name,tax1rate,printtax1,tax2name,tax2rate,printtax2,filename.split('/')[-1],radiobut,cbut1,cbut2,cbut3,cbut4,cbut5,cbut6)
+        sql = "update company set name=%s, address=%s, email=%s,salestaxno=%s,currency=%s,currencysign=%s,  currsignplace=%s,decimalseperator=%s,excurrency=%s,dateformat=%s,exdate=%s,taxtype=%s,  printimageornot=%s,tax1name=%s,tax1rate=%s,printtax1=%s,tax2name=%s,tax2rate=%s,printtax2=%s,image=%s,attachment_file_type=%s,miscellanoustab_cbutton1=%s,miscellanoustab_cbutton2=%s,miscellanoustab_cbutton3=%s,miscellanoustab_cbutton4=%s,miscellanoustab_cbutton5=%s,miscellanoustab_cbutton6=%s,Estimate_prefix=%s,Customizeestimatetextlabels=%s,Customizeestimatetextlabels1=%s,Customizeestimatetextlabels2=%s,Customizeestimatetextlabels3=%s,Customizeestimatetextlabels4=%s,Customizeestimatetextlabels5=%s,Defaultestimatetemplate=%s,Startingestimatenumber=%s"
+        val = (company_name,company_address,company_mail,company_salestax,currency,currencysign,  currencysign_placement,decimal_sepator,currency_example,date_format,example_dateformat,tax,printimage,  tax1name,tax1rate,printtax1,tax2name,tax2rate,printtax2,filename.split('/')[-1],radiobut,cbut1,cbut2,cbut3,cbut4,cbut5,cbut6,est_prefix,est_text1,est_text2,est_text3,est_text4,est_text5,est_text6,est_default,est_spin1)
         fbcursor.execute(sql, val)
         fbilldb.commit()
       
@@ -2157,12 +2169,18 @@ def mainpage():
   fifthtab=Frame(fifthtab1, bg="#f5f3f2", height=700)
   fifthtab.pack(side="top", fill=BOTH)
 
+  sql = "select * from company"
+  fbcursor.execute(sql)
+  estdata = fbcursor.fetchone()
+  print(estdata)
+
   ver = Label(fifthtab,text="Estimate# prefix")
   ver.place(x=5,y=40)
 
-  lbx = Listbox(fifthtab1, height=1)
-  lbx.insert(END, "EST")
-  lbx.place(x=100,y=40)
+  est_str = StringVar() 
+  est_entry = Entry(fifthtab, textvariable=est_str)
+  est_entry.place(x=100,y=40)
+  est_str.set('EST')
 
   ver = Label(fifthtab,text="Starting estimate number")
   ver.place(x=25,y=80)
@@ -2176,47 +2194,46 @@ def mainpage():
   win_menu1 = StringVar()
   winstyle1 = ttk.Combobox(fifthtab,textvariable=win_menu1)
   winstyle1.place(x=6 ,y=160)
+  est_win1 = win_menu1.get()
   winstyle1['values'] = ('Default','Black','Maroon','Green','Olive','Navy','Purple','Teal','Gray','Silver','Red','Lime','Yellow','Blue','Fuchsia','Aqua','White','ScrollBar','Background','ActiveCaption','InactiveCaption','Menu','Window','WindowFrame','MenuText','WindowText','CaptionText','ActiveBorder','InactiveBorder','AppWorkSpace','Highlight','HighlightText','BtnFace','InactiveCaptionText','BtnHighlight','3DDkShadow','3DLight','InfoText','InfoBk','Custom')
   winstyle1.current(0)
 
   ver = Label(fifthtab,text="Customize Estimate text labels")
   ver.place(x=5,y=190)
-
-# est_lbx = Listbox(fifthtab1, height=8, width=25)
-# est_lbx.insert(END, "Estimate\n" )
-# est_lbx.insert(END, "Estimate#\n")
-# est_lbx.insert(END, "Estimate date\n") 
-# est_lbx.insert(END, "Due date\n")
-# est_lbx.insert(END, "Estimate to\n")
-# est_lbx.insert(END, "Estimate total\n")
-# est_lbx.place(x=5,y=220)
-# def get_stringvar(event):
-#     SV.set(ST1.get("Estimate#", END))
-
-# SV = StringVar()
-
-# ST1 = Text(fifthtab1,height=1, width=25)
-# ST1.place(x=5,y=370)
-# ST1.bind('<KeyRelease>', get_stringvar)
-
-  est_lbx1 = Text(fifthtab1, height=1, width=25, font=('Calibri 10'))
-  est_lbx1.insert(END, "Estimate")
+  
+  est_str1 = StringVar() 
+  est_lbx1 = Entry(fifthtab, width=30,textvariable=est_str1)
   est_lbx1.place(x=5,y=220)
-  est_lbx2 = Text(fifthtab1,height=1, width=25, font=('Calibri 10'))
-  est_lbx2.insert(END, "Estimate#")
+  est_str1.set('Estimate')
+  
+  est_str2 = StringVar() 
+  est_lbx2 = Entry(fifthtab, width=30,textvariable=est_str2)
   est_lbx2.place(x=5,y=240)
-  est_lbx3 = Text(fifthtab1,height=1, width=25, font=('Calibri 10'))
-  est_lbx3.insert(END, "Estimate date")
+  est_str2.set('Estimate#')
+  
+  est_str3 = StringVar() 
+  est_lbx3 = Entry(fifthtab,width=30,textvariable=est_str3)
   est_lbx3.place(x=5,y=260) 
-  est_lbx4 = Text(fifthtab1,height=1, width=25, font=('Calibri 10'))
-  est_lbx4.insert(END, "Due date")
+  est_str3.set('Estimate date')
+
+  est_str4 = StringVar() 
+  est_lbx4 = Entry(fifthtab,width=30,textvariable=est_str4)
   est_lbx4.place(x=5,y=280)
-  est_lbx5 = Text(fifthtab1,height=1, width=25, font=('Calibri 10'))
-  est_lbx5.insert(END, "Estimate to")
+  est_str4.set('Due date')
+
+  est_str5 = StringVar() 
+  est_lbx5 = Entry(fifthtab,width=30,textvariable=est_str5)
   est_lbx5.place(x=5,y=300)
-  est_lbx6 = Text(fifthtab1, height=3,width=25, font=('Calibri 10'))
-  est_lbx6.insert(END, "Estimate total")
+  est_str5.set('Estimate to')
+
+  est_str6 = StringVar() 
+  est_lbx6 = Entry(fifthtab, width=30,textvariable=est_str6)
   est_lbx6.place(x=5,y=320)
+  est_str6.set('Estimate total')
+
+
+  # est_lbx6 = Text(fifthtab, height=3,width=25, font=('Calibri 10'))
+  # est_lbx6.place(x=5,y=320)
 
 
 
@@ -2229,27 +2246,27 @@ def mainpage():
   ver = Label(fifthtab,text="Default Estimate template")
   ver.place(x=619,y=40)
 
-#data=StringVar()
 
-  messagelbframe=LabelFrame(fifthtab,text="Predefined terms and conditions text for estimates", height=100, width=980)
-  messagelbframe.place(x=248, y=400)
 
-  txt = scrolledtext.ScrolledText(fifthtab, undo=True,width=115,height=4)
-  txt.place(x=260,y=425)
+  messagelbframe=LabelFrame(fifthtab,text="Predefined terms and conditions text for estimates", height=70, width=980)
+  messagelbframe.place(x=248, y=396)
+
+  # txt = scrolledtext.ScrolledText(fifthtab, undo=True,width=115,height=0)
+  # txt.place(x=260,y=413)
 
 # def button_command():
 #     text = entry1.get()
 #     print(text)
 #     return None
 
-
-# entry1=Entry(fifthtab, width=155)
-# entry1.place(x=260, y=425)
+  est_str7 = StringVar() 
+  entry1=Entry(fifthtab, width=155,textvariable=est_str7)
+  entry1.place(x=260, y=415)
 
 # lbl01 = Label(fifthtab,text=" 1",font="arial 10 bold").place(x=260,y=435)
 
   bttermadd = Button(fifthtab,text="Restore defaults")
-  bttermadd.place(x=32,y=450)
+  bttermadd.place(x=32,y=430)
 
 # def display():
 #           string = entryval.get()
@@ -2315,7 +2332,7 @@ def mainpage():
         canvas.create_text(568, 325, text="United States", fill="black", font=('Helvetica 10'))
       
         s = ttk.Style()
-        s.configure('Treeview.Heading', background=''+ win_menu1.get(),State='DISABLE')
+        s.configure('Treeview.Heading', background=est_win1,State='DISABLE')
 
         tree=ttk.Treeview(canvas, column=("c1", "c2","c3", "c4", "c5"), show='headings',height= 0, style='mystyle.Treeview')
 
