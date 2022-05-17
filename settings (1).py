@@ -315,7 +315,7 @@ def mainpage():
     est_text4 = est_str4.get()
     est_text5 = est_str5.get()
     est_text6 = est_str6.get()
-    est_predefined = est_str7.get()
+    est_predefined = est_str7.get(1.0,END)
     est_default = win_menu2.get()
     est_spin1 = spin1.get()
     adv_default = adv_win_menu8.get()
@@ -2178,6 +2178,8 @@ def mainpage():
   estdata = fbcursor.fetchone()
   print(estdata)
 
+
+
   ver = Label(fifthtab,text="Estimate# prefix")
   ver.place(x=5,y=40)
 
@@ -2192,10 +2194,29 @@ def mainpage():
   ver = Label(fifthtab,text="Starting estimate number")
   ver.place(x=25,y=80)
 
-  spin1 = Spinbox(fifthtab,to=1000000,width=15)
+  def callback(input):
+      
+    if input.isdigit():
+        print(input)
+        return True
+                          
+    elif input is "":
+        print(input)
+        return True
+  
+    else:
+        print(input)
+        return False
+
+  spin1 = Spinbox(fifthtab,from_=0,to=1000000,width=15)
+  reg = fifthtab.register(callback)
+  
+  spin1.config(validate ="key", 
+         validatecommand =(reg, '%S'))
   if not estdata:
     pass
   else:
+    spin1.delete(0, END)
     spin1.insert(0,estdata[38])
   spin1.place(x=50,y=100)
 
@@ -2279,29 +2300,35 @@ def mainpage():
   messagelbframe.place(x=248, y=396)
 
   
-  est_str7 = StringVar() 
-  entry1=Entry(fifthtab, width=155,textvariable=est_str7)
-  if not estdata:
+  # est_str7 = StringVar() 
+  # entry1=Entry(fifthtab, width=155,textvariable=est_str7)
+  # if not estdata:
+  #   pass
+  # else:
+  #   entry1.insert(0, estdata[39])
+  # entry1.place(x=260, y=415, height=36)
+  
+  est_str7 = scrolledtext.ScrolledText(fifthtab)
+  if  not estdata:
     pass
   else:
-    entry1.insert(0, estdata[39])
-  entry1.place(x=260, y=415, height=36)
-
+    est_str7.insert('1.0', estdata[39])
+  est_str7.place(x=260,y=415,height=38,width=950)
 
 
   def restore_defaulttt1():
         est_lbx1.delete(0, 'end')
-        est_lbx1.insert(0, estdata[31])
+        est_lbx1.insert(0, 'Estimate')
         est_lbx2.delete(0, 'end')
-        est_lbx2.insert(0,estdata[33])
+        est_lbx2.insert(0,'Estimate#')
         est_lbx3.delete(0, 'end')
-        est_lbx3.insert(0, estdata[34])
+        est_lbx3.insert(0, 'Estimate date')
         est_lbx4.delete(0, 'end')
-        est_lbx4.insert(0, estdata[35])
+        est_lbx4.insert(0, 'Due date')
         est_lbx5.delete(0, 'end')
-        est_lbx5.insert(0, estdata[36])
+        est_lbx5.insert(0, 'Estimate to')
         est_lbx6.delete(0, 'end')
-        est_lbx6.insert(0, estdata[37])
+        est_lbx6.insert(0, 'Estimate total')
 
   bttermadd_01 = Button(fifthtab,text="Restore defaults", command=restore_defaulttt1)
   bttermadd_01.place(x=32,y=430)
@@ -2311,45 +2338,56 @@ def mainpage():
   def maindropmenu(event):
       menuvar=win_menu2.get()
       print(menuvar,"hello")
+      sql = "select * from company"
+      fbcursor.execute(sql)
+      estdata1 = fbcursor.fetchone()
 
       if menuvar == 'Professional 1 (logo on left side)':
         frame = Frame(fifthtab, width=953, height=300)
         frame.pack(expand=True, fill=BOTH)
         frame.place(x=247,y=90)
         canvas=Canvas(frame, bg='grey', width=953, height=300, scrollregion=(0,0,700,700))
-      
+              
         vertibar=Scrollbar(frame, orient=VERTICAL)
         vertibar.pack(side=RIGHT,fill=Y)
         vertibar.config(command=canvas.yview)
-      
+          
         canvas.config(width=953,height=300)
         canvas.config(yscrollcommand=vertibar.set)
         canvas.pack(expand=True,side=LEFT,fill=BOTH)
-        canvas.create_rectangle(100, 10, 850, 687 , outline='yellow',fill='white')
-        canvas.create_text(500, 50, text="Title text goes here...", fill="black", font=('Helvetica 10'))
-        #canvas.create_image(120,0, anchor=NW, image=est_logo)  
-        # canvas.create_text(285, 110, text="Your Company Logo", fill="black", font=('Helvetica 18 bold'))
-      
-        canvas.create_text(202, 150, text=""+est_str2.get(), fill="black", font=('Helvetica 11'))
-        canvas.create_text(215, 170, text=""+est_str3.get(), fill="black", font=('Helvetica 11'))
-        canvas.create_text(200, 190, text=""+est_str4.get(), fill="black", font=('Helvetica 11'))
-        canvas.create_text(191, 210, text="Terms", fill="black", font=('Helvetica 11'))
-        canvas.create_text(205, 230, text="Order ref.#", fill="black", font=('Helvetica 11'))
-        canvas.create_text(350, 150, text="EST1/2022", fill="black", font=('Helvetica 11'))
-        canvas.create_text(350, 170, text="05-05-2022", fill="black", font=('Helvetica 11'))
-        canvas.create_text(350, 190, text="20-05-2022", fill="black", font=('Helvetica 11'))
-        canvas.create_text(340, 210, text="NET 15", fill="black", font=('Helvetica 11'))
-      
-        canvas.create_text(720, 80, text=" "+comname.get(), fill="black", font=('Helvetica 12 '))
-        canvas.create_text(750, 110, text="Address line 1", fill="black", font=('Helvetica 10'))
-        canvas.create_text(750, 125, text="Address line 2", fill="black", font=('Helvetica 10'))
-        canvas.create_text(750, 140, text="Address line 3", fill="black", font=('Helvetica 10'))
-        canvas.create_text(750, 155, text="Address line 4", fill="black", font=('Helvetica 10'))
-        canvas.create_text(745, 170, text="Phone: 555-5555", fill="black", font=('Helvetica 10'))
-        canvas.create_text(745, 185, text="Sales tax reg No.", fill="black", font=('Helvetica 10'))
-        canvas.create_text(750, 205, text=" "+est_str1.get(), fill="black", font=('Helvetica 14 bold'))
-        canvas.create_text(746, 225, text="TAX EXEMPTED", fill="black", font=('Helvetica 10'))
-      
+        canvas.create_rectangle(100, 8, 850, 687 , outline='yellow',fill='white')
+        canvas.create_text(500, 25, text="Title text goes here...", fill="black", font=('Helvetica 10'))
+        try:
+          est_image = Image.open("images/"+estdata1[13])
+          est_resize_image = est_image.resize((200,100))
+          est_image = ImageTk.PhotoImage(est_resize_image)
+
+          est_btlogo = Label(canvas,width=200,height=100,image = est_image) 
+          window_image = canvas.create_window(175, 45, anchor="nw", window=est_btlogo)
+          est_btlogo.photo = est_image
+        except:
+          pass  
+        canvas.create_text(202, 160, text=""+est_str2.get(), fill="black", font=('Helvetica 11'))
+        canvas.create_text(215, 180, text=""+est_str3.get(), fill="black", font=('Helvetica 11'))
+        canvas.create_text(200, 200, text=""+est_str4.get(), fill="black", font=('Helvetica 11'))
+        canvas.create_text(191, 220, text="Terms", fill="black", font=('Helvetica 11'))
+        canvas.create_text(205, 240, text="Order ref.#", fill="black", font=('Helvetica 11'))
+        canvas.create_text(350, 160, text="EST1/2022", fill="black", font=('Helvetica 11'))
+        canvas.create_text(350, 180, text="05-05-2022", fill="black", font=('Helvetica 11'))
+        canvas.create_text(350, 200, text="20-05-2022", fill="black", font=('Helvetica 11'))
+        canvas.create_text(340, 220, text="NET 15", fill="black", font=('Helvetica 11'))
+          
+        canvas.create_text(720, 60, text=" "+comname.get(), fill="black", font=('Helvetica 12 '))
+        # canvas.create_text(700, 200, text=""+caddent.get('1.0', 'end-1c'), fill="black", font=('Helvetica 10'), width=125)
+        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0)
+        T_address.tag_configure('tag_name',justify='right')
+        T_address.insert('1.0', estdata1[2])
+        T_address.tag_add('tag_name','1.0', 'end')
+        T_address_window = canvas.create_window(520, 80, anchor="nw", window=T_address)
+        canvas.create_text(695, 180, text=" "+comsalestax.get(), fill="black", font=('Helvetica 10'))
+        canvas.create_text(700, 205, text=" "+est_str1.get(), fill="black", font=('Helvetica 14 bold'))
+        canvas.create_text(706, 225, text="TAX EXEMPTED", fill="black", font=('Helvetica 10'))
+          
         canvas.create_text(210, 260, text=""+est_str5.get(), fill="black", font=('Helvetica 10 underline'))
         canvas.create_text(203, 280, text="John Doe", fill="black", font=('Helvetica 10 '))
         canvas.create_text(246, 295, text="381 South Bedford Road", fill="black", font=('Helvetica 10'))
@@ -2376,7 +2414,7 @@ def mainpage():
         tree.heading("# 4", text="Unit Price")
         tree.column("# 5", anchor=E, stretch=NO, width=80)
         tree.heading("# 5", text="Price")
-      
+          
         window = canvas.create_window(120, 340, anchor="nw", window=tree)
 
         canvas.create_line(120, 390, 820, 390 )
@@ -2397,40 +2435,135 @@ def mainpage():
         canvas.create_text(165, 372, text="PROD-0001", fill="black", font=('Helvetica 10'))
         canvas.create_text(370, 372, text="Example product - Description text...", fill="black", font=('Helvetica 10'))
         canvas.create_text(610, 372, text="1", fill="black", font=('Helvetica 10'))
-        canvas.create_text(704, 372, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
-        canvas.create_text(784, 372, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    
+        if comcursignpla.get() == "before amount":
+          canvas.create_text(704, 372, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+
+        elif comcursignpla.get() == "after amount":
+          canvas.create_text(704, 372, text="200"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+
+        elif comcursignpla.get() == "before amount with space":
+          canvas.create_text(704, 372, text=""+comcursign.get()+" 200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+
+        elif comcursignpla.get() == "after amount with space":
+          canvas.create_text(704, 372, text="200"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+
+        else:
+          pass
+        # canvas.create_text(704, 372, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        if comcursignpla.get() == "before amount":
+          canvas.create_text(784, 372, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+
+        elif comcursignpla.get() == "after amount":
+          canvas.create_text(784, 372, text="200"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+
+        elif comcursignpla.get() == "before amount with space":
+          canvas.create_text(784, 372, text=""+comcursign.get()+" 200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+
+        elif comcursignpla.get() == "after amount with space":
+          canvas.create_text(784, 372, text="200"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        else:
+          pass
+        # canvas.create_text(784, 372, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
 
         canvas.create_text(650, 404, text="Subtotal", fill="black", font=('Helvetica 10'))
-        canvas.create_text(784, 404, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        if comcursignpla.get() == "before amount":
+          canvas.create_text(784, 404, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "after amount":
+          canvas.create_text(784, 404, text="200"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+
+        elif comcursignpla.get() == "before amount with space":
+          canvas.create_text(784, 404, text=""+comcursign.get()+" 200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "after amount with space":
+          canvas.create_text(784, 404, text="200"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        else:
+          pass
+        # canvas.create_text(784, 404, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
 
         canvas.create_text(650, 428, text="TAX1", fill="black", font=('Helvetica 10'))
-        canvas.create_text(786, 428, text=""+comcursign.get()+"18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+
+        if comcursignpla.get() == "before amount":
+          canvas.create_text(786, 428, text=""+comcursign.get()+"18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "after amount":
+          canvas.create_text(786, 428, text="18"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "before amount with space":
+          canvas.create_text(786, 428, text=""+comcursign.get()+" 18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "after amount with space":
+          canvas.create_text(786, 428, text="18"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        else:
+          pass
+        # canvas.create_text(786, 428, text=""+comcursign.get()+"18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
 
         canvas.create_text(650, 454, text="Shipping and handling", fill="black", font=('Helvetica 10'))
-        canvas.create_text(786, 454, text=""+comcursign.get()+"20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        
+        if comcursignpla.get() == "before amount":
+          canvas.create_text(786, 454, text=""+comcursign.get()+"20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "after amount":
+          canvas.create_text(786, 454, text="20"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "before amount with space":
+          canvas.create_text(786, 454, text=""+comcursign.get()+" 20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "after amount with space":
+          canvas.create_text(786, 454, text="20"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        else:
+          pass
 
-        canvas.create_text(784, 479, text=""+comcursign.get()+"238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10 bold'))
+        # canvas.create_text(786, 454, text=""+comcursign.get()+"20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+
+        if comcursignpla.get() == "before amount":
+          canvas.create_text(784, 479, text=""+comcursign.get()+"238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10 bold'))
+        elif comcursignpla.get() == "after amount":
+          canvas.create_text(784, 479, text="238"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
+        elif comcursignpla.get() == "before amount with space":
+          canvas.create_text(784, 479, text=""+comcursign.get()+" 238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10 bold'))
+        elif comcursignpla.get() == "after amount with space":
+          canvas.create_text(784, 479, text="238"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
+        else:
+          pass
+
+        # canvas.create_text(784, 479, text=""+comcursign.get()+"238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10 bold'))
         canvas.create_text(650, 479, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+        if comcursignpla.get() == "before amount":
+          canvas.create_text(784, 502, text=""+comcursign.get()+"100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "after amount":
+          canvas.create_text(784, 502, text="100"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "before amount with space":
+          canvas.create_text(784, 502, text=""+comcursign.get()+" 100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "after amount with space":
+          canvas.create_text(784, 502, text="100"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        else:
+          pass
 
-        canvas.create_text(784, 502, text=""+comcursign.get()+"100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        # canvas.create_text(784, 502, text=""+comcursign.get()+"100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
         canvas.create_text(650, 502, text="Total Paid", fill="black", font=('Helvetica 10'))
-
-        canvas.create_text(784, 526, text=""+comcursign.get()+"138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        
+        if comcursignpla.get() == "before amount":
+          canvas.create_text(784, 526, text=""+comcursign.get()+"138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "after amount":
+          canvas.create_text(784, 526, text="138"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "before amount with space":
+          canvas.create_text(784, 526, text=""+comcursign.get()+" 138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "after amount with space":
+          canvas.create_text(784, 526, text="138"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        else:
+          pass
+        # canvas.create_text(784, 526, text=""+comcursign.get()+"138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
         canvas.create_text(650, 526, text="Balance", fill="black", font=('Helvetica 10'))
 
         canvas.create_text(275, 550, text="Multiline comment text goes here..", fill="black", font=('Helvetica 10'))
         canvas.create_text(182, 560, text="...", fill="black", font=('Helvetica 10'))
         canvas.create_text(182, 570, text="...", fill="black", font=('Helvetica 10'))
         canvas.create_text(182, 580, text="...", fill="black", font=('Helvetica 10'))
-      
+          
         canvas.create_text(500, 600, text="Terms and Conditions", fill="black", font=('Helvetica 10'))
-        canvas.create_line(150, 620, 795, 620)
-      
+        canvas.create_line(150, 608, 795, 608)
+        # canvas.create_text(280, 640, text= ""+est_str7.get(), fill="black", font=('Helvetica 10')) 
+        T = Text(canvas, height=3, width=90, font=('Helvetica 10'),borderwidth=0)
+        T.insert(END, estdata1[39])
+        T_window = canvas.create_window(155, 612, anchor="nw", window=T)
 
-        canvas.create_text(280, 640, text= ""+est_str7.get(), fill="black", font=('Helvetica 10'))
-        canvas.create_text(280, 655, text="Page footer text goes here...", fill="black", font=('Helvetica 10'))
-        canvas.create_text(720, 655, text="Page 1 of 1", fill="black", font=('Helvetica 10'))
-      
+        canvas.create_text(280, 670, text="Page footer text goes here...", fill="black", font=('Helvetica 10'))
+        canvas.create_text(720, 670, text="Page 1 of 1", fill="black", font=('Helvetica 10'))
+          
 
 #----------------Professional 2 (logo on right side)------------------
       elif menuvar == 'Professional 2 (logo on right side)':
@@ -2439,38 +2572,49 @@ def mainpage():
         frame.place(x=247,y=90)
       
         canvas=Canvas(frame, bg='grey', width=953, height=300, scrollregion=(0,0,700,700))
-      
+          
         vertibar=Scrollbar(frame, orient=VERTICAL)
         vertibar.pack(side=RIGHT,fill=Y)
         vertibar.config(command=canvas.yview)
         canvas.config(width=953,height=300)
-      
+          
         canvas.config(yscrollcommand=vertibar.set)
         canvas.pack(expand=True,side=LEFT,fill=BOTH)
         canvas.create_rectangle(100, 10, 850, 687 , outline='yellow',fill='white')
-        canvas.create_text(500, 50, text="Title text goes here...", fill="black", font=('Helvetica 10'))
-        canvas.create_text(650, 110, text="Your Company Logo", fill="black", font=('Helvetica 18 bold'))
-      
-        canvas.create_text(250, 80, text=" "+comname.get(), fill="black", font=('Helvetica 12 '))
-        canvas.create_text(225, 110, text="Address line 1", fill="black", font=('Helvetica 10'))
-        canvas.create_text(225, 125, text="Address line 2", fill="black", font=('Helvetica 10'))
-        canvas.create_text(225, 140, text="Address line 3", fill="black", font=('Helvetica 10'))
-        canvas.create_text(225, 155, text="Address line 4", fill="black", font=('Helvetica 10'))
-        canvas.create_text(234, 170, text="Phone: 555-5555", fill="black", font=('Helvetica 10'))
-        canvas.create_text(234, 185, text="Sales tax reg No.", fill="black", font=('Helvetica 10'))
+        canvas.create_text(500, 25, text="Title text goes here...", fill="black", font=('Helvetica 10'))
+        try:
+          est_image = Image.open("images/"+estdata1[13])
+          est_resize_image = est_image.resize((200,100))
+          est_image = ImageTk.PhotoImage(est_resize_image)
+
+          est_btlogo = Label(canvas,width=200,height=100,image = est_image) 
+          window_image = canvas.create_window(500, 45, anchor="nw", window=est_btlogo)
+          est_btlogo.photo = est_image
+        except:
+          pass  
+        canvas.create_text(250, 60, text=" "+comname.get(), fill="black", font=('Helvetica 12 '))
+        # canvas.create_text(215, 200, text=""+caddent.get('1.0', 'end-1c'), fill="black", font=('Helvetica 10'))
+        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0)
+        T_address.tag_configure('tag_name',justify='right')
+        T_address.insert('1.0', estdata1[2])
+        T_address.tag_add('tag_name','1.0', 'end')
+        T_address_window = canvas.create_window(100, 80, anchor="nw", window=T_address)
+        #T_address_window = canvas.create_window(175, 80, anchor="nw", window=T_address)
+
+        canvas.create_text(215, 180, text=" "+comsalestax.get(), fill="black", font=('Helvetica 10'))
         canvas.create_text(225, 205, text=""+est_str1.get(), fill="black", font=('Helvetica 14 bold'))
         canvas.create_text(232, 225, text="TAX EXEMPTED", fill="black", font=('Helvetica 10'))
-      
-        canvas.create_text(502, 150, text=""+est_str2.get(), fill="black", font=('Helvetica 11'))
-        canvas.create_text(515, 170, text=""+est_str3.get(), fill="black", font=('Helvetica 11'))
-        canvas.create_text(500, 190, text=""+est_str4.get(), fill="black", font=('Helvetica 11'))
-        canvas.create_text(491, 210, text="Terms", fill="black", font=('Helvetica 11'))
-        canvas.create_text(505, 230, text="Order ref.#", fill="black", font=('Helvetica 11'))
-        canvas.create_text(680, 150, text="EST1/2022", fill="black", font=('Helvetica 11'))
-        canvas.create_text(680, 170, text="05-05-2022", fill="black", font=('Helvetica 11'))
-        canvas.create_text(680, 190, text="20-05-2022", fill="black", font=('Helvetica 11'))
-        canvas.create_text(670, 210, text="NET 15", fill="black", font=('Helvetica 11'))      
-      
+          
+        canvas.create_text(502, 160, text=""+est_str2.get(), fill="black", font=('Helvetica 11'))
+        canvas.create_text(515, 180, text=""+est_str3.get(), fill="black", font=('Helvetica 11'))
+        canvas.create_text(500, 200, text=""+est_str4.get(), fill="black", font=('Helvetica 11'))
+        canvas.create_text(491, 220, text="Terms", fill="black", font=('Helvetica 11'))
+        canvas.create_text(505, 240, text="Order ref.#", fill="black", font=('Helvetica 11'))
+        canvas.create_text(690, 160, text="EST1/2022", fill="black", font=('Helvetica 11'))
+        canvas.create_text(690, 180, text="05-05-2022", fill="black", font=('Helvetica 11'))
+        canvas.create_text(690, 200, text="20-05-2022", fill="black", font=('Helvetica 11'))
+        canvas.create_text(680, 220, text="NET 15", fill="black", font=('Helvetica 11'))      
+          
         canvas.create_text(210, 260, text=""+est_str5.get(), fill="black", font=('Helvetica 10 underline'))
         canvas.create_text(203, 280, text="John Doe", fill="black", font=('Helvetica 10 '))
         canvas.create_text(246, 295, text="381 South Bedford Road", fill="black", font=('Helvetica 10'))
@@ -2482,8 +2626,11 @@ def mainpage():
         canvas.create_text(608, 310, text="Bedford Corners, NY 10549", fill="black", font=('Helvetica 10'))
         canvas.create_text(568, 325, text="United States", fill="black", font=('Helvetica 10'))
 
+        s = ttk.Style()
+        s.configure('mystyle_1.Treeview.Heading', background=''+win_menu1.get(),State='DISABLE')
+
         tree=ttk.Treeview(canvas, column=("c1", "c2","c3", "c4", "c5"), show='headings',height= 0, style='mystyle_1.Treeview')
-      
+          
         tree.column("# 1", anchor=E, stretch=NO, width=100)
         tree.heading("# 1", text="ID/SKU")
         tree.column("# 2", anchor=E, stretch=NO, width=350)
@@ -2494,7 +2641,7 @@ def mainpage():
         tree.heading("# 4", text="Unit Price")
         tree.column("# 5", anchor=E, stretch=NO, width=80)
         tree.heading("# 5", text="Price")
-      
+          
         window = canvas.create_window(120, 340, anchor="nw", window=tree)
 
         canvas.create_line(120, 390, 820, 390 )
@@ -2515,25 +2662,118 @@ def mainpage():
         canvas.create_text(165, 372, text="PROD-0001", fill="black", font=('Helvetica 10'))
         canvas.create_text(370, 372, text="Example product - Description text...", fill="black", font=('Helvetica 10'))
         canvas.create_text(610, 372, text="1", fill="black", font=('Helvetica 10'))
-        canvas.create_text(704, 372, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
-        canvas.create_text(784, 372, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+
+        if comcursignpla.get() == "before amount":
+          canvas.create_text(704, 372, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "after amount":
+          canvas.create_text(704, 372, text="200"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "before amount with space":
+          canvas.create_text(704, 372, text=""+comcursign.get()+" 200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "after amount with space":
+          canvas.create_text(704, 372, text="200"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        else:
+          pass
+
+        # canvas.create_text(704, 372, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+
+        if comcursignpla.get() == "before amount":
+          canvas.create_text(784, 372, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "after amount":
+          canvas.create_text(784, 372, text="200"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "before amount with space":
+          canvas.create_text(784, 372, text=""+comcursign.get()+" 200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "after amount with space":
+          canvas.create_text(784, 372, text="200"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        else:
+          pass
+
+        # canvas.create_text(784, 372, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
 
         canvas.create_text(650, 404, text="Subtotal", fill="black", font=('Helvetica 10'))
-        canvas.create_text(784, 404, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+
+        if comcursignpla.get() == "before amount":
+          canvas.create_text(784, 404, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "after amount":
+          canvas.create_text(784, 404, text="200"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "before amount with space":
+          canvas.create_text(784, 404, text=""+comcursign.get()+" 200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "after amount with space":
+          canvas.create_text(784, 404, text="200"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        else:
+          pass
+
+        # canvas.create_text(784, 404, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
 
         canvas.create_text(650, 428, text="TAX1", fill="black", font=('Helvetica 10'))
-        canvas.create_text(786, 428, text=""+comcursign.get()+"18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+
+        if comcursignpla.get() == "before amount":
+          canvas.create_text(786, 428, text=""+comcursign.get()+"18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "after amount":
+          canvas.create_text(786, 428, text="18"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "before amount with space":
+          canvas.create_text(786, 428, text=""+comcursign.get()+" 18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "after amount with space":
+          canvas.create_text(786, 428, text="18"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        else:
+          pass
+
+        # canvas.create_text(786, 428, text=""+comcursign.get()+"18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
 
         canvas.create_text(650, 454, text="Shipping and handling", fill="black", font=('Helvetica 10'))
-        canvas.create_text(786, 454, text=""+comcursign.get()+"20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
 
-        canvas.create_text(784, 479, text=""+comcursign.get()+"238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10 bold'))
+        if comcursignpla.get() == "before amount":
+          canvas.create_text(786, 454, text=""+comcursign.get()+"20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "after amount":
+          canvas.create_text(786, 454, text="20"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "before amount with space":
+          canvas.create_text(786, 454, text=""+comcursign.get()+" 20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "after amount with space":
+          canvas.create_text(786, 454, text="20"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        else:
+          pass
+
+        # canvas.create_text(786, 454, text=""+comcursign.get()+"20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+
+        if comcursignpla.get() == "before amount":
+          canvas.create_text(784, 479, text=""+comcursign.get()+"238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10 bold'))
+        elif comcursignpla.get() == "after amount":
+          canvas.create_text(784, 479, text="238"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
+        elif comcursignpla.get() == "before amount with space":
+          canvas.create_text(784, 479, text=""+comcursign.get()+" 238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10 bold'))
+        elif comcursignpla.get() == "after amount with space":
+          canvas.create_text(784, 479, text="238"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
+        else:
+          pass
+
+        # canvas.create_text(784, 479, text=""+comcursign.get()+"238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10 bold'))
         canvas.create_text(650, 479, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
 
-        canvas.create_text(784, 502, text=""+comcursign.get()+"100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
-        canvas.create_text(650, 502, text="Total Paid", fill="black", font=('Helvetica 10'))
+        if comcursignpla.get() == "before amount":
+          canvas.create_text(784, 502, text=""+comcursign.get()+"100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "after amount":
+          canvas.create_text(784, 502, text="100"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "before amount with space":
+          canvas.create_text(784, 502, text=""+comcursign.get()+" 100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "after amount with space":
+          canvas.create_text(784, 502, text="100"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        else:
+          pass
 
-        canvas.create_text(784, 526, text=""+comcursign.get()+"138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        # canvas.create_text(784, 502, text=""+comcursign.get()+"100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        canvas.create_text(650, 502, text="Total Paid", fill="black", font=('Helvetica 10'))
+        
+        if comcursignpla.get() == "before amount":
+          canvas.create_text(784, 526, text=""+comcursign.get()+"138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "after amount":
+          canvas.create_text(784, 526, text="138"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "before amount with space":
+          canvas.create_text(784, 526, text=""+comcursign.get()+" 138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "after amount with space":
+          canvas.create_text(784, 526, text="138"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        else:
+          pass
+
+        # canvas.create_text(784, 526, text=""+comcursign.get()+"138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
         canvas.create_text(650, 526, text="Balance", fill="black", font=('Helvetica 10'))
 
         canvas.create_text(275, 550, text="Multiline comment text goes here..", fill="black", font=('Helvetica 10'))
@@ -2542,12 +2782,13 @@ def mainpage():
         canvas.create_text(182, 580, text="...", fill="black", font=('Helvetica 10'))
 
         canvas.create_text(500, 600, text="Terms and Conditions", fill="black", font=('Helvetica 10'))
-        canvas.create_line(150, 620, 795, 620)
-        canvas.create_text(280, 640, text= ""+est_str7.get(), fill="black", font=('Helvetica 10'))
-        canvas.create_text(280, 655, text="Page footer text goes here...", fill="black", font=('Helvetica 10'))
-        canvas.create_text(720, 655, text="Page 1 of 1", fill="black", font=('Helvetica 10'))
-
-
+        canvas.create_line(150, 608, 795, 608)
+        # canvas.create_text(280, 640, text= ""+est_str7.get(), fill="black", font=('Helvetica 10'))
+        T = Text(canvas, height=3, width=90, font=('Helvetica 10'),borderwidth=0)
+        T.insert(END, estdata1[39])
+        T_window = canvas.create_window(155, 612, anchor="nw", window=T)
+        canvas.create_text(280, 670, text="Page footer text goes here...", fill="black", font=('Helvetica 10'))
+        canvas.create_text(720, 670, text="Page 1 of 1", fill="black", font=('Helvetica 10'))
 #----------------Simplified 1 (logo on left side)------------------ 
       elif menuvar == 'Simplified 1 (logo on left side)':
         print('hello')
@@ -2564,28 +2805,38 @@ def mainpage():
         canvas.config(yscrollcommand=vertibar.set)
         canvas.pack(expand=True,side=LEFT,fill=BOTH)
         canvas.create_rectangle(100, 10, 850, 687 , outline='yellow',fill='white')
-        canvas.create_text(500, 50, text="Title text goes here...", fill="black", font=('Helvetica 10'))
-        canvas.create_text(285, 110, text="Your Company Logo", fill="black", font=('Helvetica 18 bold'))
+        canvas.create_text(500, 25, text="Title text goes here...", fill="black", font=('Helvetica 10'))
+        try:
+          est_image = Image.open("images/"+estdata1[13])
+          est_resize_image = est_image.resize((200,100))
+          est_image = ImageTk.PhotoImage(est_resize_image)
 
-        canvas.create_text(202, 150, text=""+est_str2.get(), fill="black", font=('Helvetica 11'))
-        canvas.create_text(215, 170, text=""+est_str3.get(), fill="black", font=('Helvetica 11'))
-        canvas.create_text(200, 190, text=""+est_str4.get(), fill="black", font=('Helvetica 11'))
-        canvas.create_text(191, 210, text="Terms", fill="black", font=('Helvetica 11'))
-        canvas.create_text(205, 230, text="Order ref.#", fill="black", font=('Helvetica 11'))
-        canvas.create_text(350, 150, text="EST1/2022", fill="black", font=('Helvetica 11'))
-        canvas.create_text(350, 170, text="05-05-2022", fill="black", font=('Helvetica 11'))
-        canvas.create_text(350, 190, text="20-05-2022", fill="black", font=('Helvetica 11'))
-        canvas.create_text(340, 210, text="NET 15", fill="black", font=('Helvetica 11'))      
+          est_btlogo = Label(canvas,width=200,height=100,image = est_image) 
+          window_image = canvas.create_window(175, 45, anchor="nw", window=est_btlogo)
+          est_btlogo.photo = est_image
+        except:
+          pass  
+        canvas.create_text(202, 160, text=""+est_str2.get(), fill="black", font=('Helvetica 11'))
+        canvas.create_text(215, 180, text=""+est_str3.get(), fill="black", font=('Helvetica 11'))
+        canvas.create_text(200, 200, text=""+est_str4.get(), fill="black", font=('Helvetica 11'))
+        canvas.create_text(191, 220, text="Terms", fill="black", font=('Helvetica 11'))
+        canvas.create_text(205, 240, text="Order ref.#", fill="black", font=('Helvetica 11'))
+        canvas.create_text(350, 160, text="EST1/2022", fill="black", font=('Helvetica 11'))
+        canvas.create_text(350, 180, text="05-05-2022", fill="black", font=('Helvetica 11'))
+        canvas.create_text(350, 200, text="20-05-2022", fill="black", font=('Helvetica 11'))
+        canvas.create_text(340, 220, text="NET 15", fill="black", font=('Helvetica 11'))      
 
-        canvas.create_text(720, 80, text=" "+comname.get(), fill="black", font=('Helvetica 12 '))
-        canvas.create_text(750, 110, text="Address line 1", fill="black", font=('Helvetica 10'))
-        canvas.create_text(750, 125, text="Address line 2", fill="black", font=('Helvetica 10'))
-        canvas.create_text(750, 140, text="Address line 3", fill="black", font=('Helvetica 10'))
-        canvas.create_text(750, 155, text="Address line 4", fill="black", font=('Helvetica 10'))
-        canvas.create_text(745, 170, text="Phone: 555-5555", fill="black", font=('Helvetica 10'))
-        canvas.create_text(745, 185, text="Sales tax reg No.", fill="black", font=('Helvetica 10'))
-        canvas.create_text(750, 205, text=""+est_str1.get(), fill="black", font=('Helvetica 14 bold'))
-      
+        canvas.create_text(720, 60, text=" "+comname.get(), fill="black", font=('Helvetica 12 '))
+        #canvas.create_text(710, 200, text=caddent.get('1.0', 'end-1c'), fill="black", font=('Helvetica 10'))
+        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0)
+        T_address.tag_configure('tag_name',justify='right')
+        T_address.insert('1.0', estdata1[2])
+        T_address.tag_add('tag_name','1.0', 'end')
+        T_address_window = canvas.create_window(520, 80, anchor="nw", window=T_address)
+
+        canvas.create_text(708, 180, text=" "+comsalestax.get(), fill="black", font=('Helvetica 10'))
+        canvas.create_text(710, 205, text=""+est_str1.get(), fill="black", font=('Helvetica 14 bold'))
+          
         canvas.create_text(210, 260, text=""+est_str5.get(), fill="black", font=('Helvetica 10 underline'))
         canvas.create_text(203, 280, text="John Doe", fill="black", font=('Helvetica 10 '))
         canvas.create_text(246, 295, text="381 South Bedford Road", fill="black", font=('Helvetica 10'))
@@ -2597,15 +2848,18 @@ def mainpage():
         canvas.create_text(608, 310, text="Bedford Corners, NY 10549", fill="black", font=('Helvetica 10'))
         canvas.create_text(568, 325, text="United States", fill="black", font=('Helvetica 10'))
 
+        s = ttk.Style()
+        s.configure('mystyle_1.Treeview.Heading', background=''+win_menu1.get(),State='DISABLE')
+
         tree=ttk.Treeview(canvas, column=("c1", "c2","c3"), show='headings',height= 0, style='mystyle_1.Treeview')
-      
+          
         tree.column("# 1", anchor=E, stretch=NO, width=530)
         tree.heading("# 1", text="Product/Service - Description")
         tree.column("# 2", anchor=E, stretch=NO, width=90)
         tree.heading("# 2", text="Quantity")
         tree.column("# 3", anchor=E, stretch=NO, width=80)
         tree.heading("# 3", text="Price")
-      
+          
         window = canvas.create_window(120, 340, anchor="nw", window=tree)
 
         canvas.create_line(120, 390, 820, 390 )
@@ -2625,24 +2879,105 @@ def mainpage():
       
         canvas.create_text(370, 372, text="Example product - Description text...", fill="black", font=('Helvetica 10'))
         canvas.create_text(710, 372, text="1", fill="black", font=('Helvetica 10'))
-        canvas.create_text(784, 372, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+
+        if comcursignpla.get() == "before amount":
+          canvas.create_text(784, 372, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "after amount":
+          canvas.create_text(784, 372, text="200"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "before amount with space":
+          canvas.create_text(784, 372, text=""+comcursign.get()+" 200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "after amount with space":
+          canvas.create_text(784, 372, text="200"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        else:
+          pass
+
+        # canvas.create_text(784, 372, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
 
         canvas.create_text(650, 404, text="Subtotal", fill="black", font=('Helvetica 10'))
-        canvas.create_text(784, 404, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+
+        if comcursignpla.get() == "before amount":
+          canvas.create_text(784, 404, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "after amount":
+          canvas.create_text(784, 404, text="200"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "before amount with space":
+          canvas.create_text(784, 404, text=""+comcursign.get()+" 200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "after amount with space":
+          canvas.create_text(784, 404, text="200"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        else:
+          pass
+
+        # canvas.create_text(784, 404, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
 
         canvas.create_text(650, 428, text="TAX1", fill="black", font=('Helvetica 10'))
-        canvas.create_text(786, 428, text=""+comcursign.get()+"18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+
+        if comcursignpla.get() == "before amount":
+          canvas.create_text(786, 428, text=""+comcursign.get()+"18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "after amount":
+          canvas.create_text(786, 428, text="18"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "before amount with space":
+          canvas.create_text(786, 428, text=""+comcursign.get()+" 18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "after amount with space":
+          canvas.create_text(786, 428, text="18"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        else:
+          pass
+
+        # canvas.create_text(786, 428, text=""+comcursign.get()+"18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
 
         canvas.create_text(650, 454, text="Shipping and handling", fill="black", font=('Helvetica 10'))
-        canvas.create_text(786, 454, text=""+comcursign.get()+"20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
 
-        canvas.create_text(784, 479, text=""+comcursign.get()+"238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10 bold'))
+        if comcursignpla.get() == "before amount":
+          canvas.create_text(786, 454, text=""+comcursign.get()+"20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "after amount":
+          canvas.create_text(786, 454, text="20"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "before amount with space":
+          canvas.create_text(786, 454, text=""+comcursign.get()+" 20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "after amount with space":
+          canvas.create_text(786, 454, text="20"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        else:
+          pass
+
+        # canvas.create_text(786, 454, text=""+comcursign.get()+"20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+
+        if comcursignpla.get() == "before amount":
+          canvas.create_text(784, 479, text=""+comcursign.get()+"238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "after amount":
+          canvas.create_text(784, 479, text="238"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "before amount with space":
+          canvas.create_text(784, 479, text=""+comcursign.get()+" 238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "after amount with space":
+          canvas.create_text(784, 479, text="238"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        else:
+          pass
+
+        # canvas.create_text(784, 479, text=""+comcursign.get()+"238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10 bold'))
         canvas.create_text(650, 479, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
 
-        canvas.create_text(784, 502, text=""+comcursign.get()+"100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        if comcursignpla.get() == "before amount":
+          canvas.create_text(784, 502, text=""+comcursign.get()+"100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "after amount":
+          canvas.create_text(784, 502, text="100"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "before amount with space":
+          canvas.create_text(784, 502, text=""+comcursign.get()+" 100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "after amount with space":
+          canvas.create_text(784, 502, text="100"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        else:
+          pass
+
+        # canvas.create_text(784, 502, text=""+comcursign.get()+"100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
         canvas.create_text(650, 502, text="Total Paid", fill="black", font=('Helvetica 10'))
 
-        canvas.create_text(784, 526, text=""+comcursign.get()+"138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        if comcursignpla.get() == "before amount":
+          canvas.create_text(784, 526, text=""+comcursign.get()+"138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "after amount":
+          canvas.create_text(784, 526, text="138"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "before amount with space":
+          canvas.create_text(784, 526, text=""+comcursign.get()+" 138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "after amount with space":
+          canvas.create_text(784, 526, text="138"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        else:
+          pass
+
+        # canvas.create_text(784, 526, text=""+comcursign.get()+"138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
         canvas.create_text(650, 526, text="Balance", fill="black", font=('Helvetica 10'))
 
         canvas.create_text(275, 550, text="Multiline comment text goes here..", fill="black", font=('Helvetica 10'))
@@ -2651,10 +2986,13 @@ def mainpage():
         canvas.create_text(182, 580, text="...", fill="black", font=('Helvetica 10'))
 
         canvas.create_text(500, 600, text="Terms and Conditions", fill="black", font=('Helvetica 10'))
-        canvas.create_line(150, 620, 795, 620)
-        canvas.create_text(280, 640, text= ""+est_str7.get(), fill="black", font=('Helvetica 10'))
-        canvas.create_text(280, 655, text="Page footer text goes here...", fill="black", font=('Helvetica 10'))
-        canvas.create_text(720, 655, text="Page 1 of 1", fill="black", font=('Helvetica 10'))
+        canvas.create_line(150, 608, 795, 608)
+        # canvas.create_text(280, 640, text= ""+est_str7.get(), fill="black", font=('Helvetica 10'))
+        T = Text(canvas, height=3, width=90, font=('Helvetica 10'),borderwidth=0)
+        T.insert(END, estdata1[39])
+        T_window = canvas.create_window(155, 612, anchor="nw", window=T)
+        canvas.create_text(280, 670, text="Page footer text goes here...", fill="black", font=('Helvetica 10'))
+        canvas.create_text(720, 670, text="Page 1 of 1", fill="black", font=('Helvetica 10'))
 
 #----------------Simplified 2 (logo on right side)------------------ 
       elif menuvar == 'Simplified 2 (logo on right side)':
@@ -2672,27 +3010,37 @@ def mainpage():
         canvas.config(yscrollcommand=vertibar.set)
         canvas.pack(expand=True,side=LEFT,fill=BOTH)
         canvas.create_rectangle(100, 10, 850, 687 , outline='yellow',fill='white')
-        canvas.create_text(500, 50, text="Title text goes here...", fill="black", font=('Helvetica 10'))
-        canvas.create_text(650, 110, text="Your Company Logo", fill="black", font=('Helvetica 18 bold'))
+        canvas.create_text(500, 25, text="Title text goes here...", fill="black", font=('Helvetica 10'))
+        try:
+          est_image = Image.open("images/"+estdata1[13])
+          est_resize_image = est_image.resize((200,100))
+          est_image = ImageTk.PhotoImage(est_resize_image)
 
-        canvas.create_text(250, 80, text=" "+comname.get(), fill="black", font=('Helvetica 12 '))
-        canvas.create_text(225, 110, text="Address line 1", fill="black", font=('Helvetica 10'))
-        canvas.create_text(225, 125, text="Address line 2", fill="black", font=('Helvetica 10'))
-        canvas.create_text(225, 140, text="Address line 3", fill="black", font=('Helvetica 10'))
-        canvas.create_text(225, 155, text="Address line 4", fill="black", font=('Helvetica 10'))
-        canvas.create_text(234, 170, text="Phone: 555-5555", fill="black", font=('Helvetica 10'))
-        canvas.create_text(234, 185, text="Sales tax reg No.", fill="black", font=('Helvetica 10'))
+          est_btlogo = Label(canvas,width=200,height=100,image = est_image) 
+          window_image = canvas.create_window(500, 45, anchor="nw", window=est_btlogo)
+          est_btlogo.photo = est_image
+        except:
+          pass  
+        canvas.create_text(250, 60, text=" "+comname.get(), fill="black", font=('Helvetica 12 '))
+        # canvas.create_text(224, 200, text=""+caddent.get('1.0', 'end-1c'), fill="black", font=('Helvetica 10'))
+        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0)
+        T_address.tag_configure('tag_name',justify='right')
+        T_address.insert('1.0', estdata1[2])
+        T_address.tag_add('tag_name','1.0', 'end')
+        T_address_window = canvas.create_window(100, 80, anchor="nw", window=T_address)
+
+        canvas.create_text(224, 180, text=" "+comsalestax.get(), fill="black", font=('Helvetica 10'))
         canvas.create_text(225, 205, text=""+est_str1.get(), fill="black", font=('Helvetica 14 bold'))
 
-        canvas.create_text(502, 150, text=""+est_str2.get(), fill="black", font=('Helvetica 11'))
-        canvas.create_text(515, 170, text=""+est_str3.get(), fill="black", font=('Helvetica 11'))
-        canvas.create_text(500, 190, text=""+est_str4.get(), fill="black", font=('Helvetica 11'))
-        canvas.create_text(491, 210, text="Terms", fill="black", font=('Helvetica 11'))
-        canvas.create_text(505, 230, text="Order ref.#", fill="black", font=('Helvetica 11'))
-        canvas.create_text(680, 150, text="EST1/2022", fill="black", font=('Helvetica 11'))
-        canvas.create_text(680, 170, text="05-05-2022", fill="black", font=('Helvetica 11'))
-        canvas.create_text(680, 190, text="20-05-2022", fill="black", font=('Helvetica 11'))
-        canvas.create_text(670, 210, text="NET 15", fill="black", font=('Helvetica 11'))      
+        canvas.create_text(502, 160, text=""+est_str2.get(), fill="black", font=('Helvetica 11'))
+        canvas.create_text(515, 180, text=""+est_str3.get(), fill="black", font=('Helvetica 11'))
+        canvas.create_text(500, 200, text=""+est_str4.get(), fill="black", font=('Helvetica 11'))
+        canvas.create_text(491, 220, text="Terms", fill="black", font=('Helvetica 11'))
+        canvas.create_text(505, 240, text="Order ref.#", fill="black", font=('Helvetica 11'))
+        canvas.create_text(680, 160, text="EST1/2022", fill="black", font=('Helvetica 11'))
+        canvas.create_text(680, 180, text="05-05-2022", fill="black", font=('Helvetica 11'))
+        canvas.create_text(680, 200, text="20-05-2022", fill="black", font=('Helvetica 11'))
+        canvas.create_text(670, 220, text="NET 15", fill="black", font=('Helvetica 11'))      
 
         canvas.create_text(210, 260, text=""+est_str5.get(), fill="black", font=('Helvetica 10 underline'))
         canvas.create_text(203, 280, text="John Doe", fill="black", font=('Helvetica 10 '))
@@ -2705,15 +3053,18 @@ def mainpage():
         canvas.create_text(608, 310, text="Bedford Corners, NY 10549", fill="black", font=('Helvetica 10'))
         canvas.create_text(568, 325, text="United States", fill="black", font=('Helvetica 10'))
 
+        s = ttk.Style()
+        s.configure('mystyle_1.Treeview.Heading', background=''+win_menu1.get(),State='DISABLE')
+
         tree=ttk.Treeview(canvas, column=("c1", "c2","c3"), show='headings',height= 0, style='mystyle_1.Treeview')
-      
+          
         tree.column("# 1", anchor=E, stretch=NO, width=530)
         tree.heading("# 1", text="Product/Service - Description")
         tree.column("# 2", anchor=E, stretch=NO, width=90)
         tree.heading("# 2", text="Quantity")
         tree.column("# 3", anchor=E, stretch=NO, width=80)
         tree.heading("# 3", text="Price")
-      
+          
         window = canvas.create_window(120, 340, anchor="nw", window=tree)
 
         canvas.create_line(120, 390, 820, 390 )
@@ -2730,27 +3081,108 @@ def mainpage():
         canvas.create_line(650, 340, 650, 390 )
         canvas.create_line(570, 540, 820, 540 )
 
-      
+          
         canvas.create_text(370, 372, text="Example product - Description text...", fill="black", font=('Helvetica 10'))
         canvas.create_text(710, 372, text="1", fill="black", font=('Helvetica 10'))
-        canvas.create_text(784, 372, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+
+        if comcursignpla.get() == "before amount":
+          canvas.create_text(784, 372, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "after amount":
+          canvas.create_text(784, 372, text="200"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "before amount with space":
+          canvas.create_text(784, 372, text=""+comcursign.get()+" 200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "after amount with space":
+          canvas.create_text(784, 372, text="200"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        else:
+          pass
+
+        # canvas.create_text(784, 372, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
 
         canvas.create_text(650, 404, text="Subtotal", fill="black", font=('Helvetica 10'))
-        canvas.create_text(784, 404, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+
+        if comcursignpla.get() == "before amount":
+          canvas.create_text(784, 404, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "after amount":
+          canvas.create_text(784, 404, text="200"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "before amount with space":
+          canvas.create_text(784, 404, text=""+comcursign.get()+" 200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "after amount with space":
+          canvas.create_text(784, 404, text="200"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        else:
+          pass
+
+        # canvas.create_text(784, 404, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
 
         canvas.create_text(650, 428, text="TAX1", fill="black", font=('Helvetica 10'))
-        canvas.create_text(786, 428, text=""+comcursign.get()+"18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+
+        if comcursignpla.get() == "before amount":
+          canvas.create_text(786, 428, text=""+comcursign.get()+"18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "after amount":
+          canvas.create_text(786, 428, text="18"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "before amount with space":
+          canvas.create_text(786, 428, text=""+comcursign.get()+" 18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "after amount with space":
+          canvas.create_text(786, 428, text="18"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        else:
+          pass
+
+        # canvas.create_text(786, 428, text=""+comcursign.get()+"18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
 
         canvas.create_text(650, 454, text="Shipping and handling", fill="black", font=('Helvetica 10'))
-        canvas.create_text(786, 454, text=""+comcursign.get()+"20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
 
-        canvas.create_text(784, 479, text=""+comcursign.get()+"238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10 bold'))
+        if comcursignpla.get() == "before amount":
+          canvas.create_text(786, 454, text=""+comcursign.get()+"20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "after amount":
+          canvas.create_text(786, 454, text="20"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "before amount with space":
+          canvas.create_text(786, 454, text=""+comcursign.get()+" 20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "after amount with space":
+          canvas.create_text(786, 454, text="20"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        else:
+          pass
+
+        # canvas.create_text(786, 454, text=""+comcursign.get()+"20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+
+        if comcursignpla.get() == "before amount":
+          canvas.create_text(784, 479, text=""+comcursign.get()+"238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "after amount":
+          canvas.create_text(784, 479, text="238"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "before amount with space":
+          canvas.create_text(784, 479, text=""+comcursign.get()+" 238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "after amount with space":
+          canvas.create_text(784, 479, text="238"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        else:
+          pass
+
+        # canvas.create_text(784, 479, text=""+comcursign.get()+"238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10 bold'))
         canvas.create_text(650, 479, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
 
-        canvas.create_text(784, 502, text=""+comcursign.get()+"100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        if comcursignpla.get() == "before amount":
+          canvas.create_text(784, 502, text=""+comcursign.get()+"100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "after amount":
+          canvas.create_text(784, 502, text="100"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "before amount with space":
+          canvas.create_text(784, 502, text=""+comcursign.get()+" 100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "after amount with space":
+          canvas.create_text(784, 502, text="100"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        else:
+          pass
+
+        # canvas.create_text(784, 502, text=""+comcursign.get()+"100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
         canvas.create_text(650, 502, text="Total Paid", fill="black", font=('Helvetica 10'))
 
-        canvas.create_text(784, 526, text=""+comcursign.get()+"138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        if comcursignpla.get() == "before amount":
+          canvas.create_text(784, 526, text=""+comcursign.get()+"138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "after amount":
+          canvas.create_text(784, 526, text="138"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "before amount with space":
+          canvas.create_text(784, 526, text=""+comcursign.get()+" 138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "after amount with space":
+          canvas.create_text(784, 526, text="138"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        else:
+          pass
+
+        # canvas.create_text(784, 526, text=""+comcursign.get()+"138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
         canvas.create_text(650, 526, text="Balance", fill="black", font=('Helvetica 10'))
 
         canvas.create_text(275, 550, text="Multiline comment text goes here..", fill="black", font=('Helvetica 10'))
@@ -2759,38 +3191,53 @@ def mainpage():
         canvas.create_text(182, 580, text="...", fill="black", font=('Helvetica 10'))
 
         canvas.create_text(500, 600, text="Terms and Conditions", fill="black", font=('Helvetica 10'))
-        canvas.create_line(150, 620, 795, 620)
-        canvas.create_text(280, 640, text= ""+est_str7.get(), fill="black", font=('Helvetica 10'))
-        canvas.create_text(280, 655, text="Page footer text goes here...", fill="black", font=('Helvetica 10'))
-        canvas.create_text(720, 655, text="Page 1 of 1", fill="black", font=('Helvetica 10'))
+        canvas.create_line(150, 608, 795, 608)
+        # canvas.create_text(280, 640, text= ""+est_str7.get(), fill="black", font=('Helvetica 10'))
+        T = Text(canvas, height=3, width=90, font=('Helvetica 10'),borderwidth=0)
+        T.insert(END, estdata1[39])
+        T_window = canvas.create_window(155, 612, anchor="nw", window=T)
+        canvas.create_text(280, 670, text="Page footer text goes here...", fill="black", font=('Helvetica 10'))
+        canvas.create_text(720, 670, text="Page 1 of 1", fill="black", font=('Helvetica 10'))
 
 #----------------Business Classic------------------ 
       elif menuvar == 'Business Classic':
         frame = Frame(fifthtab, width=953, height=300)
         frame.pack(expand=True, fill=BOTH)
         frame.place(x=247,y=90)
-      
+          
         canvas=Canvas(frame, bg='grey', width=953, height=300, scrollregion=(0,0,700,700))
-      
+          
         vertibar=Scrollbar(frame, orient=VERTICAL)
         vertibar.pack(side=RIGHT,fill=Y)
         vertibar.config(command=canvas.yview)
         canvas.config(width=953,height=300)
-      
+          
         canvas.config(yscrollcommand=vertibar.set)
         canvas.pack(expand=True,side=LEFT,fill=BOTH)
         canvas.create_rectangle(100, 10, 850, 687 , outline='yellow',fill='white')
         canvas.create_text(500, 50, text="Title text goes here...", fill="black", font=('Helvetica 10'))
         canvas.create_line(150, 70, 800, 70, fill='orange')
-        canvas.create_text(300, 150, text="Your Company Logo", fill="black", font=('Helvetica 18 bold'))
+        
+        try:
+          est_image = Image.open("images/"+estdata1[13])
+          est_resize_image = est_image.resize((200,100))
+          est_image = ImageTk.PhotoImage(est_resize_image)
 
-        canvas.create_text(500, 115, text=" "+comname.get(), fill="black", font=('Helvetica 12 '))
-        canvas.create_text(525, 140, text="Address line 1", fill="black", font=('Helvetica 10'))
-        canvas.create_text(525, 155, text="Address line 2", fill="black", font=('Helvetica 10'))
-        canvas.create_text(525, 170, text="Address line 3", fill="black", font=('Helvetica 10'))
-        canvas.create_text(525, 185, text="Address line 4", fill="black", font=('Helvetica 10'))
-        canvas.create_text(534, 200, text="Phone: 555-5555", fill="black", font=('Helvetica 10'))
-        canvas.create_text(534, 215, text="Sales tax reg No.", fill="black", font=('Helvetica 10'))
+          est_btlogo = Label(canvas,width=200,height=100,image = est_image) 
+          window_image = canvas.create_window(140, 120, anchor="nw", window=est_btlogo)
+          est_btlogo.photo = est_image
+        except:
+          pass  
+
+        canvas.create_text(500, 90, text=" "+comname.get(), fill="black", font=('Helvetica 12 '))
+        # canvas.create_text(485, 220, text=""+caddent.get('1.0', 'end-1c'), fill="black", font=('Helvetica 10'))
+        T_address = Text(canvas, height=5, width=35, font=('Helvetica 10'),borderwidth=0)
+        T_address.tag_configure('tag_name',justify='right')
+        T_address.insert('1.0', estdata1[2])
+        T_address.tag_add('tag_name','1.0', 'end')
+        T_address_window = canvas.create_window(350, 100, anchor="nw", window=T_address)
+        
+        canvas.create_text(480, 210, text=" "+comsalestax.get(), fill="black", font=('Helvetica 10'))
 
         canvas.create_text(655, 100, text="John Doe", fill="black", font=('Helvetica 10 '))
         canvas.create_text(696, 120, text="381 South Bedford Road", fill="black", font=('Helvetica 10'))
@@ -2805,8 +3252,11 @@ def mainpage():
         canvas.create_text(776, 210, text="05 May 2022", fill="black", font=('Helvetica 11'))
         canvas.create_text(776, 240, text="20-05-2022", fill="black", font=('Helvetica 11'))
 
+        s = ttk.Style()
+        s.configure('mystyle_1.Treeview.Heading', background=''+win_menu1.get(),State='DISABLE')
+
         tree=ttk.Treeview(canvas, column=("c1", "c2","c3", "c4", "c5"), show='headings',height= 0, style='mystyle_1.Treeview')
-      
+          
         tree.column("# 1", anchor=E, stretch=NO, width=200)
         tree.heading("# 1", text="Product/Service")
         tree.column("# 2", anchor=E, stretch=NO, width=250)
@@ -2836,16 +3286,96 @@ def mainpage():
       
         canvas.create_text(160, 285, text="PROD-0001", fill="black", font=('Helvetica 10'))
         canvas.create_text(450, 285, text="Example product - Description text...", fill="black", font=('Helvetica 10'))
-        canvas.create_text(624, 285, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
-        canvas.create_text(700, 285, text="1", fill="black", font=('Helvetica 10'))
-        canvas.create_text(784, 285, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
 
-        canvas.create_text(784, 310, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
-        canvas.create_text(789, 335, text=""+comcursign.get()+"18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
-        canvas.create_text(789, 360, text=""+comcursign.get()+"20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
-        canvas.create_text(784, 385, text=""+comcursign.get()+"238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10 bold'))
-        canvas.create_text(784, 410, text=""+comcursign.get()+"100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
-        canvas.create_text(784, 435, text=""+comcursign.get()+"138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        if comcursignpla.get() == "before amount":
+          canvas.create_text(624, 285, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "after amount":
+          canvas.create_text(624, 285, text="200"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "before amount with space":
+          canvas.create_text(624, 285, text=""+comcursign.get()+" 200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "after amount with space":
+          canvas.create_text(624, 285, text="200"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        else:
+          pass
+        # canvas.create_text(624, 285, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        canvas.create_text(700, 285, text="1", fill="black", font=('Helvetica 10'))
+        if comcursignpla.get() == "before amount":
+          canvas.create_text(784, 285, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "after amount":
+          canvas.create_text(784, 285, text="200"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "before amount with space":
+          canvas.create_text(784, 285, text=""+comcursign.get()+" 200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "after amount with space":
+          canvas.create_text(784, 285, text="200"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        else:
+          pass
+        # canvas.create_text(784, 285, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        if comcursignpla.get() == "before amount":
+          canvas.create_text(784, 310, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "after amount":
+          canvas.create_text(784, 310, text="200"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "before amount with space":
+          canvas.create_text(784, 310, text=""+comcursign.get()+" 200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "after amount with space":
+          canvas.create_text(784, 310, text="200"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        else:
+          pass
+        # canvas.create_text(784, 310, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        if comcursignpla.get() == "before amount":
+          canvas.create_text(789, 335, text=""+comcursign.get()+"18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "after amount":
+          canvas.create_text(789, 335, text="18"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "before amount with space":
+          canvas.create_text(789, 335, text=""+comcursign.get()+" 18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "after amount with space":
+          canvas.create_text(789, 335, text="18"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        else:
+          pass
+        # canvas.create_text(789, 335, text=""+comcursign.get()+"18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        if comcursignpla.get() == "before amount":
+          canvas.create_text(789, 360, text=""+comcursign.get()+"20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "after amount":
+          canvas.create_text(789, 360, text="20"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "before amount with space":
+          canvas.create_text(789, 360, text=""+comcursign.get()+" 20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "after amount with space":
+          canvas.create_text(789, 360, text="20"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        else:
+          pass
+        # canvas.create_text(789, 360, text=""+comcursign.get()+"20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        if comcursignpla.get() == "before amount":
+          canvas.create_text(784, 385, text=""+comcursign.get()+"238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "after amount":
+          canvas.create_text(784, 385, text="238"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "before amount with space":
+          canvas.create_text(784, 385, text=""+comcursign.get()+" 238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "after amount with space":
+          canvas.create_text(784, 385, text="238"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        else:
+          pass
+        # canvas.create_text(784, 385, text=""+comcursign.get()+"238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10 bold'))
+        if comcursignpla.get() == "before amount":
+          canvas.create_text(784, 410, text=""+comcursign.get()+"100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "after amount":
+          canvas.create_text(784, 410, text="100"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "before amount with space":
+          canvas.create_text(784, 410, text=""+comcursign.get()+" 100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "after amount with space":
+          canvas.create_text(784, 410, text="100"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        else:
+          pass
+        # canvas.create_text(784, 410, text=""+comcursign.get()+"100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        if comcursignpla.get() == "before amount":
+          canvas.create_text(784, 435, text=""+comcursign.get()+"138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "after amount":
+          canvas.create_text(784, 435, text="138"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "before amount with space":
+          canvas.create_text(784, 435, text=""+comcursign.get()+" 138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+        elif comcursignpla.get() == "after amount with space":
+          canvas.create_text(784, 435, text="138"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        else:
+          pass
+        # canvas.create_text(784, 435, text=""+comcursign.get()+"138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
 
         canvas.create_text(595, 310, text="Subtotal", fill="black", font=('Helvetica 10'))
         canvas.create_text(585, 335, text="TAX1", fill="black", font=('Helvetica 10'))
@@ -2859,12 +3389,15 @@ def mainpage():
         canvas.create_text(182, 510, text="...", fill="black", font=('Helvetica 10'))
         canvas.create_text(182, 520, text="...", fill="black", font=('Helvetica 10'))
         canvas.create_text(182, 530, text="...", fill="black", font=('Helvetica 10'))
-      
+          
         canvas.create_text(500, 600, text="Terms and Conditions", fill="black", font=('Helvetica 10'))
-        canvas.create_line(150, 620, 795, 620, fill='orange')
-        canvas.create_text(280, 640, text= ""+est_str7.get(), fill="black", font=('Helvetica 10'))
-        canvas.create_text(280, 655, text="Page footer text goes here...", fill="black", font=('Helvetica 10'))
-        canvas.create_text(720, 655, text="Page 1 of 1", fill="black", font=('Helvetica 10'))
+        canvas.create_line(150, 608, 795, 608, fill='orange')
+        # canvas.create_text(280, 640, text= ""+est_str7.get(), fill="black", font=('Helvetica 10'))
+        T = Text(canvas, height=3, width=90, font=('Helvetica 10'),borderwidth=0)
+        T.insert(END, estdata1[39])
+        T_window = canvas.create_window(155, 612, anchor="nw", window=T)
+        canvas.create_text(280, 670, text="Page footer text goes here...", fill="black", font=('Helvetica 10'))
+        canvas.create_text(720, 670, text="Page 1 of 1", fill="black", font=('Helvetica 10'))
       else:
         pass
 
@@ -2886,30 +3419,30 @@ def mainpage():
     canvas.config(width=953,height=300)
     canvas.config(yscrollcommand=vertibar.set)
     canvas.pack(expand=True,side=LEFT,fill=BOTH)
-    canvas.create_rectangle(100, 10, 850, 687 , outline='yellow',fill='white')
+    canvas.create_rectangle(100, 8, 850, 687 , outline='yellow',fill='white')
     canvas.create_text(500, 50, text="Title text goes here...", fill="black", font=('Helvetica 10'))
+  
     #canvas.create_image(120,0, anchor=NW, image=est_logo)  
-    #canvas.create_text(285, 110, text="Your Company Logo", fill="black", font=('Helvetica 18 bold'))
+    canvas.create_text(285, 110, text="Your Company Logo", fill="black", font=('Helvetica 18 bold'))
       
-    canvas.create_text(202, 150, text=""+est_str2.get(), fill="black", font=('Helvetica 11'))
-    canvas.create_text(215, 170, text=""+est_str3.get(), fill="black", font=('Helvetica 11'))
-    canvas.create_text(200, 190, text=""+est_str4.get(), fill="black", font=('Helvetica 11'))
-    canvas.create_text(191, 210, text="Terms", fill="black", font=('Helvetica 11'))
-    canvas.create_text(205, 230, text="Order ref.#", fill="black", font=('Helvetica 11'))
-    canvas.create_text(350, 150, text="EST1/2022", fill="black", font=('Helvetica 11'))
-    canvas.create_text(350, 170, text="05-05-2022", fill="black", font=('Helvetica 11'))
-    canvas.create_text(350, 190, text="20-05-2022", fill="black", font=('Helvetica 11'))
-    canvas.create_text(340, 210, text="NET 15", fill="black", font=('Helvetica 11'))
+    canvas.create_text(202, 160, text=""+est_str2.get(), fill="black", font=('Helvetica 11'))
+    canvas.create_text(215, 180, text=""+est_str3.get(), fill="black", font=('Helvetica 11'))
+    canvas.create_text(200, 200, text=""+est_str4.get(), fill="black", font=('Helvetica 11'))
+    canvas.create_text(191, 220, text="Terms", fill="black", font=('Helvetica 11'))
+    canvas.create_text(205, 240, text="Order ref.#", fill="black", font=('Helvetica 11'))
+    canvas.create_text(350, 160, text="EST1/2022", fill="black", font=('Helvetica 11'))
+    canvas.create_text(350, 180, text="05-05-2022", fill="black", font=('Helvetica 11'))
+    canvas.create_text(350, 200, text="20-05-2022", fill="black", font=('Helvetica 11'))
+    canvas.create_text(340, 220, text="NET 15", fill="black", font=('Helvetica 11'))
       
-    canvas.create_text(720, 80, text=" "+comname.get(), fill="black", font=('Helvetica 12 '))
-    canvas.create_text(750, 110, text="Address line 1", fill="black", font=('Helvetica 10'))
-    canvas.create_text(750, 125, text="Address line 2", fill="black", font=('Helvetica 10'))
-    canvas.create_text(750, 140, text="Address line 3", fill="black", font=('Helvetica 10'))
-    canvas.create_text(750, 155, text="Address line 4", fill="black", font=('Helvetica 10'))
-    canvas.create_text(745, 170, text="Phone: 555-5555", fill="black", font=('Helvetica 10'))
-    canvas.create_text(745, 185, text="Sales tax reg No.", fill="black", font=('Helvetica 10'))
-    canvas.create_text(750, 205, text=" "+est_str1.get(), fill="black", font=('Helvetica 14 bold'))
-    canvas.create_text(746, 225, text="TAX EXEMPTED", fill="black", font=('Helvetica 10'))
+    canvas.create_text(720, 60, text=" "+comname.get(), fill="black", font=('Helvetica 12 '))
+    # canvas.create_text(700, 200, text=""+caddent.get('1.0', 'end-1c'), fill="black", font=('Helvetica 10'), width=125)
+    # T_address = Text(canvas, height=5, width=20 , font=('Helvetica 10'))
+    # T_address.insert(END, estdata[2])
+    # T_address_window = canvas.create_window(645, 80, anchor="nw", window=T_address)
+    canvas.create_text(700, 180, text=" "+comsalestax.get(), fill="black", font=('Helvetica 10'))
+    canvas.create_text(700, 205, text=" "+est_str1.get(), fill="black", font=('Helvetica 14 bold'))
+    canvas.create_text(706, 225, text="TAX EXEMPTED", fill="black", font=('Helvetica 10'))
       
     canvas.create_text(210, 260, text=""+est_str5.get(), fill="black", font=('Helvetica 10 underline'))
     canvas.create_text(203, 280, text="John Doe", fill="black", font=('Helvetica 10 '))
@@ -2958,25 +3491,118 @@ def mainpage():
     canvas.create_text(165, 372, text="PROD-0001", fill="black", font=('Helvetica 10'))
     canvas.create_text(370, 372, text="Example product - Description text...", fill="black", font=('Helvetica 10'))
     canvas.create_text(610, 372, text="1", fill="black", font=('Helvetica 10'))
-    canvas.create_text(704, 372, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
-    canvas.create_text(784, 372, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(704, 372, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(704, 372, text="200"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(704, 372, text=""+comcursign.get()+" 200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+
+    elif comcursignpla.get() == "after amount with space":
+      canvas.create_text(704, 372, text="200"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+
+    else:
+      pass
+    # canvas.create_text(704, 372, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(784, 372, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(784, 372, text="200"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(784, 372, text=""+comcursign.get()+" 200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+
+    elif comcursignpla.get() == "after amount with space":
+      canvas.create_text(784, 372, text="200"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+    # canvas.create_text(784, 372, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
 
     canvas.create_text(650, 404, text="Subtotal", fill="black", font=('Helvetica 10'))
-    canvas.create_text(784, 404, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(784, 404, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(784, 404, text="200"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(784, 404, text=""+comcursign.get()+" 200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+      canvas.create_text(784, 404, text="200"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+    # canvas.create_text(784, 404, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
 
     canvas.create_text(650, 428, text="TAX1", fill="black", font=('Helvetica 10'))
-    canvas.create_text(786, 428, text=""+comcursign.get()+"18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(786, 428, text=""+comcursign.get()+"18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(786, 428, text="18"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(786, 428, text=""+comcursign.get()+" 18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+      canvas.create_text(786, 428, text="18"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+    # canvas.create_text(786, 428, text=""+comcursign.get()+"18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
 
     canvas.create_text(650, 454, text="Shipping and handling", fill="black", font=('Helvetica 10'))
-    canvas.create_text(786, 454, text=""+comcursign.get()+"20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(786, 454, text=""+comcursign.get()+"20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(786, 454, text="20"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(786, 454, text=""+comcursign.get()+" 20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+      canvas.create_text(786, 454, text="20"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
 
-    canvas.create_text(784, 479, text=""+comcursign.get()+"238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10 bold'))
+    # canvas.create_text(786, 454, text=""+comcursign.get()+"20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(784, 479, text=""+comcursign.get()+"238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10 bold'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(784, 479, text="238"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(784, 479, text=""+comcursign.get()+" 238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10 bold'))
+    elif comcursignpla.get() == "after amount with space":
+      canvas.create_text(784, 479, text="238"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
+    else:
+      pass
+
+    # canvas.create_text(784, 479, text=""+comcursign.get()+"238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10 bold'))
     canvas.create_text(650, 479, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(784, 502, text=""+comcursign.get()+"100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(784, 502, text="100"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(784, 502, text=""+comcursign.get()+" 100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+      canvas.create_text(784, 502, text="100"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
 
-    canvas.create_text(784, 502, text=""+comcursign.get()+"100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    # canvas.create_text(784, 502, text=""+comcursign.get()+"100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
     canvas.create_text(650, 502, text="Total Paid", fill="black", font=('Helvetica 10'))
-
-    canvas.create_text(784, 526, text=""+comcursign.get()+"138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(784, 526, text=""+comcursign.get()+"138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(784, 526, text="138"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(784, 526, text=""+comcursign.get()+" 138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+      canvas.create_text(784, 526, text="138"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+    # canvas.create_text(784, 526, text=""+comcursign.get()+"138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
     canvas.create_text(650, 526, text="Balance", fill="black", font=('Helvetica 10'))
 
     canvas.create_text(275, 550, text="Multiline comment text goes here..", fill="black", font=('Helvetica 10'))
@@ -2985,11 +3611,15 @@ def mainpage():
     canvas.create_text(182, 580, text="...", fill="black", font=('Helvetica 10'))
       
     canvas.create_text(500, 600, text="Terms and Conditions", fill="black", font=('Helvetica 10'))
-    canvas.create_line(150, 620, 795, 620)
-    canvas.create_text(280, 640, text= ""+est_str7.get(), fill="black", font=('Helvetica 10'))
+    canvas.create_line(150, 608, 795, 608)
+    # canvas.create_text(280, 640, text= ""+est_str7.get(), fill="black", font=('Helvetica 10')) 
+    # T = Text(canvas, height=3, width=105, font=('Helvetica 10'))
+    # T.insert(END, estdata[39])
+    # T_window = canvas.create_window(105, 612, anchor="nw", window=T)
 
-    canvas.create_text(280, 655, text="Page footer text goes here...", fill="black", font=('Helvetica 10'))
-    canvas.create_text(720, 655, text="Page 1 of 1", fill="black", font=('Helvetica 10'))  
+
+    canvas.create_text(280, 670, text="Page footer text goes here...", fill="black", font=('Helvetica 10'))
+    canvas.create_text(720, 670, text="Page 1 of 1", fill="black", font=('Helvetica 10')) 
   elif estdata[32] == 'Professional 1 (logo on left side)':
     winstyle2.insert(0, estdata[32])
     frame = Frame(fifthtab, width=953, height=300)
@@ -3004,30 +3634,38 @@ def mainpage():
     canvas.config(width=953,height=300)
     canvas.config(yscrollcommand=vertibar.set)
     canvas.pack(expand=True,side=LEFT,fill=BOTH)
-    canvas.create_rectangle(100, 10, 850, 687 , outline='yellow',fill='white')
-    canvas.create_text(500, 50, text="Title text goes here...", fill="black", font=('Helvetica 10'))
-    #canvas.create_image(120,0, anchor=NW, image=est_logo)  
-    #canvas.create_text(285, 110, text="Your Company Logo", fill="black", font=('Helvetica 18 bold'))
+    canvas.create_rectangle(100, 8, 850, 687 , outline='yellow',fill='white')
+    canvas.create_text(500, 25, text="Title text goes here...", fill="black", font=('Helvetica 10'))
+    try:
+      est_image = Image.open("images/"+estdata[13])
+      est_resize_image = est_image.resize((200,100))
+      est_image = ImageTk.PhotoImage(est_resize_image)
+
+      est_btlogo = Label(canvas,width=200,height=100,image = est_image) 
+      window_image = canvas.create_window(175, 45, anchor="nw", window=est_btlogo)
+      est_btlogo.photo = est_image
+    except:
+      pass  
+    canvas.create_text(202, 160, text=""+est_str2.get(), fill="black", font=('Helvetica 11'))
+    canvas.create_text(215, 180, text=""+est_str3.get(), fill="black", font=('Helvetica 11'))
+    canvas.create_text(200, 200, text=""+est_str4.get(), fill="black", font=('Helvetica 11'))
+    canvas.create_text(191, 220, text="Terms", fill="black", font=('Helvetica 11'))
+    canvas.create_text(205, 240, text="Order ref.#", fill="black", font=('Helvetica 11'))
+    canvas.create_text(350, 160, text="EST1/2022", fill="black", font=('Helvetica 11'))
+    canvas.create_text(350, 180, text="05-05-2022", fill="black", font=('Helvetica 11'))
+    canvas.create_text(350, 200, text="20-05-2022", fill="black", font=('Helvetica 11'))
+    canvas.create_text(340, 220, text="NET 15", fill="black", font=('Helvetica 11'))
       
-    canvas.create_text(202, 150, text=""+est_str2.get(), fill="black", font=('Helvetica 11'))
-    canvas.create_text(215, 170, text=""+est_str3.get(), fill="black", font=('Helvetica 11'))
-    canvas.create_text(200, 190, text=""+est_str4.get(), fill="black", font=('Helvetica 11'))
-    canvas.create_text(191, 210, text="Terms", fill="black", font=('Helvetica 11'))
-    canvas.create_text(205, 230, text="Order ref.#", fill="black", font=('Helvetica 11'))
-    canvas.create_text(350, 150, text="EST1/2022", fill="black", font=('Helvetica 11'))
-    canvas.create_text(350, 170, text="05-05-2022", fill="black", font=('Helvetica 11'))
-    canvas.create_text(350, 190, text="20-05-2022", fill="black", font=('Helvetica 11'))
-    canvas.create_text(340, 210, text="NET 15", fill="black", font=('Helvetica 11'))
-      
-    canvas.create_text(720, 80, text=" "+comname.get(), fill="black", font=('Helvetica 12 '))
-    canvas.create_text(750, 110, text="Address line 1", fill="black", font=('Helvetica 10'))
-    canvas.create_text(750, 125, text="Address line 2", fill="black", font=('Helvetica 10'))
-    canvas.create_text(750, 140, text="Address line 3", fill="black", font=('Helvetica 10'))
-    canvas.create_text(750, 155, text="Address line 4", fill="black", font=('Helvetica 10'))
-    canvas.create_text(745, 170, text="Phone: 555-5555", fill="black", font=('Helvetica 10'))
-    canvas.create_text(745, 185, text="Sales tax reg No.", fill="black", font=('Helvetica 10'))
-    canvas.create_text(750, 205, text=" "+est_str1.get(), fill="black", font=('Helvetica 14 bold'))
-    canvas.create_text(746, 225, text="TAX EXEMPTED", fill="black", font=('Helvetica 10'))
+    canvas.create_text(720, 60, text=" "+comname.get(), fill="black", font=('Helvetica 12 '))
+    # canvas.create_text(700, 200, text=""+caddent.get('1.0', 'end-1c'), fill="black", font=('Helvetica 10'), width=125)
+    T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0)
+    T_address.tag_configure('tag_name',justify='right')
+    T_address.insert('1.0', estdata[2])
+    T_address.tag_add('tag_name','1.0', 'end')
+    T_address_window = canvas.create_window(520, 80, anchor="nw", window=T_address)
+    canvas.create_text(695, 180, text=" "+comsalestax.get(), fill="black", font=('Helvetica 10'))
+    canvas.create_text(700, 205, text=" "+est_str1.get(), fill="black", font=('Helvetica 14 bold'))
+    canvas.create_text(706, 225, text="TAX EXEMPTED", fill="black", font=('Helvetica 10'))
       
     canvas.create_text(210, 260, text=""+est_str5.get(), fill="black", font=('Helvetica 10 underline'))
     canvas.create_text(203, 280, text="John Doe", fill="black", font=('Helvetica 10 '))
@@ -3076,25 +3714,118 @@ def mainpage():
     canvas.create_text(165, 372, text="PROD-0001", fill="black", font=('Helvetica 10'))
     canvas.create_text(370, 372, text="Example product - Description text...", fill="black", font=('Helvetica 10'))
     canvas.create_text(610, 372, text="1", fill="black", font=('Helvetica 10'))
-    canvas.create_text(704, 372, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
-    canvas.create_text(784, 372, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(704, 372, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(704, 372, text="200"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(704, 372, text=""+comcursign.get()+" 200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+
+    elif comcursignpla.get() == "after amount with space":
+      canvas.create_text(704, 372, text="200"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+
+    else:
+      pass
+    # canvas.create_text(704, 372, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(784, 372, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(784, 372, text="200"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(784, 372, text=""+comcursign.get()+" 200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+
+    elif comcursignpla.get() == "after amount with space":
+      canvas.create_text(784, 372, text="200"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+    # canvas.create_text(784, 372, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
 
     canvas.create_text(650, 404, text="Subtotal", fill="black", font=('Helvetica 10'))
-    canvas.create_text(784, 404, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(784, 404, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(784, 404, text="200"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(784, 404, text=""+comcursign.get()+" 200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+      canvas.create_text(784, 404, text="200"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+    # canvas.create_text(784, 404, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
 
     canvas.create_text(650, 428, text="TAX1", fill="black", font=('Helvetica 10'))
-    canvas.create_text(786, 428, text=""+comcursign.get()+"18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(786, 428, text=""+comcursign.get()+"18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(786, 428, text="18"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(786, 428, text=""+comcursign.get()+" 18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+      canvas.create_text(786, 428, text="18"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+    # canvas.create_text(786, 428, text=""+comcursign.get()+"18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
 
     canvas.create_text(650, 454, text="Shipping and handling", fill="black", font=('Helvetica 10'))
-    canvas.create_text(786, 454, text=""+comcursign.get()+"20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(786, 454, text=""+comcursign.get()+"20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(786, 454, text="20"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(786, 454, text=""+comcursign.get()+" 20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+      canvas.create_text(786, 454, text="20"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
 
-    canvas.create_text(784, 479, text=""+comcursign.get()+"238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10 bold'))
+    # canvas.create_text(786, 454, text=""+comcursign.get()+"20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(784, 479, text=""+comcursign.get()+"238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10 bold'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(784, 479, text="238"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(784, 479, text=""+comcursign.get()+" 238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10 bold'))
+    elif comcursignpla.get() == "after amount with space":
+      canvas.create_text(784, 479, text="238"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
+    else:
+      pass
+
+    # canvas.create_text(784, 479, text=""+comcursign.get()+"238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10 bold'))
     canvas.create_text(650, 479, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(784, 502, text=""+comcursign.get()+"100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(784, 502, text="100"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(784, 502, text=""+comcursign.get()+" 100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+      canvas.create_text(784, 502, text="100"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
 
-    canvas.create_text(784, 502, text=""+comcursign.get()+"100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    # canvas.create_text(784, 502, text=""+comcursign.get()+"100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
     canvas.create_text(650, 502, text="Total Paid", fill="black", font=('Helvetica 10'))
-
-    canvas.create_text(784, 526, text=""+comcursign.get()+"138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(784, 526, text=""+comcursign.get()+"138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(784, 526, text="138"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(784, 526, text=""+comcursign.get()+" 138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+      canvas.create_text(784, 526, text="138"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+    # canvas.create_text(784, 526, text=""+comcursign.get()+"138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
     canvas.create_text(650, 526, text="Balance", fill="black", font=('Helvetica 10'))
 
     canvas.create_text(275, 550, text="Multiline comment text goes here..", fill="black", font=('Helvetica 10'))
@@ -3103,11 +3834,14 @@ def mainpage():
     canvas.create_text(182, 580, text="...", fill="black", font=('Helvetica 10'))
       
     canvas.create_text(500, 600, text="Terms and Conditions", fill="black", font=('Helvetica 10'))
-    canvas.create_line(150, 620, 795, 620)
-    canvas.create_text(280, 640, text= ""+est_str7.get(), fill="black", font=('Helvetica 10')) 
+    canvas.create_line(150, 608, 795, 608)
+    # canvas.create_text(280, 640, text= ""+est_str7.get(), fill="black", font=('Helvetica 10')) 
+    T = Text(canvas, height=3, width=90, font=('Helvetica 10'),borderwidth=0)
+    T.insert(END, estdata[39])
+    T_window = canvas.create_window(155, 612, anchor="nw", window=T)
 
-    canvas.create_text(280, 655, text="Page footer text goes here...", fill="black", font=('Helvetica 10'))
-    canvas.create_text(720, 655, text="Page 1 of 1", fill="black", font=('Helvetica 10'))
+    canvas.create_text(280, 670, text="Page footer text goes here...", fill="black", font=('Helvetica 10'))
+    canvas.create_text(720, 670, text="Page 1 of 1", fill="black", font=('Helvetica 10'))
   elif estdata[32] == 'Professional 2 (logo on right side)':
     winstyle2.insert(0, estdata[32])
     frame = Frame(fifthtab, width=953, height=300)
@@ -3124,28 +3858,37 @@ def mainpage():
     canvas.config(yscrollcommand=vertibar.set)
     canvas.pack(expand=True,side=LEFT,fill=BOTH)
     canvas.create_rectangle(100, 10, 850, 687 , outline='yellow',fill='white')
-    canvas.create_text(500, 50, text="Title text goes here...", fill="black", font=('Helvetica 10'))
-    canvas.create_text(650, 110, text="Your Company Logo", fill="black", font=('Helvetica 18 bold'))
-      
-    canvas.create_text(250, 80, text=" "+comname.get(), fill="black", font=('Helvetica 12 '))
-    canvas.create_text(225, 110, text="Address line 1", fill="black", font=('Helvetica 10'))
-    canvas.create_text(225, 125, text="Address line 2", fill="black", font=('Helvetica 10'))
-    canvas.create_text(225, 140, text="Address line 3", fill="black", font=('Helvetica 10'))
-    canvas.create_text(225, 155, text="Address line 4", fill="black", font=('Helvetica 10'))
-    canvas.create_text(234, 170, text="Phone: 555-5555", fill="black", font=('Helvetica 10'))
-    canvas.create_text(234, 185, text="Sales tax reg No.", fill="black", font=('Helvetica 10'))
+    canvas.create_text(500, 25, text="Title text goes here...", fill="black", font=('Helvetica 10'))
+    try:
+      est_image = Image.open("images/"+estdata[13])
+      est_resize_image = est_image.resize((200,100))
+      est_image = ImageTk.PhotoImage(est_resize_image)
+
+      est_btlogo = Label(canvas,width=200,height=100,image = est_image) 
+      window_image = canvas.create_window(500, 45, anchor="nw", window=est_btlogo)
+      est_btlogo.photo = est_image
+    except:
+      pass  
+    canvas.create_text(250, 60, text=" "+comname.get(), fill="black", font=('Helvetica 12 '))
+    # canvas.create_text(225, 200, text=""+caddent.get('1.0', 'end-1c'), fill="black", font=('Helvetica 10'))
+    T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0)
+    T_address.tag_configure('tag_name',justify='right')
+    T_address.insert('1.0', estdata[2])
+    T_address.tag_add('tag_name','1.0', 'end')
+    T_address_window = canvas.create_window(100, 80, anchor="nw", window=T_address)
+    canvas.create_text(225, 180, text=" "+comsalestax.get(), fill="black", font=('Helvetica 10'))
     canvas.create_text(225, 205, text=""+est_str1.get(), fill="black", font=('Helvetica 14 bold'))
     canvas.create_text(232, 225, text="TAX EXEMPTED", fill="black", font=('Helvetica 10'))
       
-    canvas.create_text(502, 150, text=""+est_str2.get(), fill="black", font=('Helvetica 11'))
-    canvas.create_text(515, 170, text=""+est_str3.get(), fill="black", font=('Helvetica 11'))
-    canvas.create_text(500, 190, text=""+est_str4.get(), fill="black", font=('Helvetica 11'))
-    canvas.create_text(491, 210, text="Terms", fill="black", font=('Helvetica 11'))
-    canvas.create_text(505, 230, text="Order ref.#", fill="black", font=('Helvetica 11'))
-    canvas.create_text(680, 150, text="EST1/2022", fill="black", font=('Helvetica 11'))
-    canvas.create_text(680, 170, text="05-05-2022", fill="black", font=('Helvetica 11'))
-    canvas.create_text(680, 190, text="20-05-2022", fill="black", font=('Helvetica 11'))
-    canvas.create_text(670, 210, text="NET 15", fill="black", font=('Helvetica 11'))      
+    canvas.create_text(502, 160, text=""+est_str2.get(), fill="black", font=('Helvetica 11'))
+    canvas.create_text(515, 180, text=""+est_str3.get(), fill="black", font=('Helvetica 11'))
+    canvas.create_text(500, 200, text=""+est_str4.get(), fill="black", font=('Helvetica 11'))
+    canvas.create_text(491, 220, text="Terms", fill="black", font=('Helvetica 11'))
+    canvas.create_text(505, 240, text="Order ref.#", fill="black", font=('Helvetica 11'))
+    canvas.create_text(690, 160, text="EST1/2022", fill="black", font=('Helvetica 11'))
+    canvas.create_text(690, 180, text="05-05-2022", fill="black", font=('Helvetica 11'))
+    canvas.create_text(690, 200, text="20-05-2022", fill="black", font=('Helvetica 11'))
+    canvas.create_text(680, 220, text="NET 15", fill="black", font=('Helvetica 11'))      
       
     canvas.create_text(210, 260, text=""+est_str5.get(), fill="black", font=('Helvetica 10 underline'))
     canvas.create_text(203, 280, text="John Doe", fill="black", font=('Helvetica 10 '))
@@ -3194,25 +3937,118 @@ def mainpage():
     canvas.create_text(165, 372, text="PROD-0001", fill="black", font=('Helvetica 10'))
     canvas.create_text(370, 372, text="Example product - Description text...", fill="black", font=('Helvetica 10'))
     canvas.create_text(610, 372, text="1", fill="black", font=('Helvetica 10'))
-    canvas.create_text(704, 372, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
-    canvas.create_text(784, 372, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(704, 372, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(704, 372, text="200"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(704, 372, text=""+comcursign.get()+" 200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+      canvas.create_text(704, 372, text="200"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+
+    # canvas.create_text(704, 372, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(784, 372, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(784, 372, text="200"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(784, 372, text=""+comcursign.get()+" 200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+      canvas.create_text(784, 372, text="200"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+
+    # canvas.create_text(784, 372, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
 
     canvas.create_text(650, 404, text="Subtotal", fill="black", font=('Helvetica 10'))
-    canvas.create_text(784, 404, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(784, 404, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(784, 404, text="200"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(784, 404, text=""+comcursign.get()+" 200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+      canvas.create_text(784, 404, text="200"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+
+    # canvas.create_text(784, 404, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
 
     canvas.create_text(650, 428, text="TAX1", fill="black", font=('Helvetica 10'))
-    canvas.create_text(786, 428, text=""+comcursign.get()+"18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(786, 428, text=""+comcursign.get()+"18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(786, 428, text="18"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(786, 428, text=""+comcursign.get()+" 18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+      canvas.create_text(786, 428, text="18"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+
+    # canvas.create_text(786, 428, text=""+comcursign.get()+"18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
 
     canvas.create_text(650, 454, text="Shipping and handling", fill="black", font=('Helvetica 10'))
-    canvas.create_text(786, 454, text=""+comcursign.get()+"20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
 
-    canvas.create_text(784, 479, text=""+comcursign.get()+"238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10 bold'))
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(786, 454, text=""+comcursign.get()+"20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(786, 454, text="20"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(786, 454, text=""+comcursign.get()+" 20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(786, 454, text="20"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+
+    # canvas.create_text(786, 454, text=""+comcursign.get()+"20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(784, 479, text=""+comcursign.get()+"238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10 bold'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(784, 479, text="238"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(784, 479, text=""+comcursign.get()+" 238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10 bold'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(784, 479, text="238"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
+    else:
+      pass
+
+    # canvas.create_text(784, 479, text=""+comcursign.get()+"238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10 bold'))
     canvas.create_text(650, 479, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
 
-    canvas.create_text(784, 502, text=""+comcursign.get()+"100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
-    canvas.create_text(650, 502, text="Total Paid", fill="black", font=('Helvetica 10'))
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(784, 502, text=""+comcursign.get()+"100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(784, 502, text="100"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(784, 502, text=""+comcursign.get()+" 100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(784, 502, text="100"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
 
-    canvas.create_text(784, 526, text=""+comcursign.get()+"138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    # canvas.create_text(784, 502, text=""+comcursign.get()+"100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    canvas.create_text(650, 502, text="Total Paid", fill="black", font=('Helvetica 10'))
+    
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(784, 526, text=""+comcursign.get()+"138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(784, 526, text="138"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(784, 526, text=""+comcursign.get()+" 138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(784, 526, text="138"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+
+    # canvas.create_text(784, 526, text=""+comcursign.get()+"138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
     canvas.create_text(650, 526, text="Balance", fill="black", font=('Helvetica 10'))
 
     canvas.create_text(275, 550, text="Multiline comment text goes here..", fill="black", font=('Helvetica 10'))
@@ -3221,10 +4057,13 @@ def mainpage():
     canvas.create_text(182, 580, text="...", fill="black", font=('Helvetica 10'))
 
     canvas.create_text(500, 600, text="Terms and Conditions", fill="black", font=('Helvetica 10'))
-    canvas.create_line(150, 620, 795, 620)
-    canvas.create_text(280, 640, text= ""+est_str7.get(), fill="black", font=('Helvetica 10'))
-    canvas.create_text(280, 655, text="Page footer text goes here...", fill="black", font=('Helvetica 10'))
-    canvas.create_text(720, 655, text="Page 1 of 1", fill="black", font=('Helvetica 10'))
+    canvas.create_line(150, 608, 795, 608)
+    # canvas.create_text(280, 640, text= ""+est_str7.get(), fill="black", font=('Helvetica 10'))
+    T = Text(canvas, height=3, width=90, font=('Helvetica 10'),borderwidth=0)
+    T.insert(END, estdata[39])
+    T_window = canvas.create_window(155, 612, anchor="nw", window=T)
+    canvas.create_text(280, 670, text="Page footer text goes here...", fill="black", font=('Helvetica 10'))
+    canvas.create_text(720, 670, text="Page 1 of 1", fill="black", font=('Helvetica 10'))
   elif estdata[32] == 'Simplified 1 (logo on left side)':
     winstyle2.insert(0, estdata[32])
     frame = Frame(fifthtab, width=953, height=300)
@@ -3240,27 +4079,37 @@ def mainpage():
     canvas.config(yscrollcommand=vertibar.set)
     canvas.pack(expand=True,side=LEFT,fill=BOTH)
     canvas.create_rectangle(100, 10, 850, 687 , outline='yellow',fill='white')
-    canvas.create_text(500, 50, text="Title text goes here...", fill="black", font=('Helvetica 10'))
-    canvas.create_text(285, 110, text="Your Company Logo", fill="black", font=('Helvetica 18 bold'))
+    canvas.create_text(500, 25, text="Title text goes here...", fill="black", font=('Helvetica 10'))
+    try:
+      est_image = Image.open("images/"+estdata[13])
+      est_resize_image = est_image.resize((200,100))
+      est_image = ImageTk.PhotoImage(est_resize_image)
 
-    canvas.create_text(202, 150, text=""+est_str2.get(), fill="black", font=('Helvetica 11'))
-    canvas.create_text(215, 170, text=""+est_str3.get(), fill="black", font=('Helvetica 11'))
-    canvas.create_text(200, 190, text=""+est_str4.get(), fill="black", font=('Helvetica 11'))
-    canvas.create_text(191, 210, text="Terms", fill="black", font=('Helvetica 11'))
-    canvas.create_text(205, 230, text="Order ref.#", fill="black", font=('Helvetica 11'))
-    canvas.create_text(350, 150, text="EST1/2022", fill="black", font=('Helvetica 11'))
-    canvas.create_text(350, 170, text="05-05-2022", fill="black", font=('Helvetica 11'))
-    canvas.create_text(350, 190, text="20-05-2022", fill="black", font=('Helvetica 11'))
-    canvas.create_text(340, 210, text="NET 15", fill="black", font=('Helvetica 11'))      
+      est_btlogo = Label(canvas,width=200,height=100,image = est_image) 
+      window_image = canvas.create_window(175, 45, anchor="nw", window=est_btlogo)
+      est_btlogo.photo = est_image
+    except:
+      pass  
+    canvas.create_text(202, 160, text=""+est_str2.get(), fill="black", font=('Helvetica 11'))
+    canvas.create_text(215, 180, text=""+est_str3.get(), fill="black", font=('Helvetica 11'))
+    canvas.create_text(200, 200, text=""+est_str4.get(), fill="black", font=('Helvetica 11'))
+    canvas.create_text(191, 220, text="Terms", fill="black", font=('Helvetica 11'))
+    canvas.create_text(205, 240, text="Order ref.#", fill="black", font=('Helvetica 11'))
+    canvas.create_text(350, 160, text="EST1/2022", fill="black", font=('Helvetica 11'))
+    canvas.create_text(350, 180, text="05-05-2022", fill="black", font=('Helvetica 11'))
+    canvas.create_text(350, 200, text="20-05-2022", fill="black", font=('Helvetica 11'))
+    canvas.create_text(340, 220, text="NET 15", fill="black", font=('Helvetica 11'))      
 
-    canvas.create_text(720, 80, text=" "+comname.get(), fill="black", font=('Helvetica 12 '))
-    canvas.create_text(750, 110, text="Address line 1", fill="black", font=('Helvetica 10'))
-    canvas.create_text(750, 125, text="Address line 2", fill="black", font=('Helvetica 10'))
-    canvas.create_text(750, 140, text="Address line 3", fill="black", font=('Helvetica 10'))
-    canvas.create_text(750, 155, text="Address line 4", fill="black", font=('Helvetica 10'))
-    canvas.create_text(745, 170, text="Phone: 555-5555", fill="black", font=('Helvetica 10'))
-    canvas.create_text(745, 185, text="Sales tax reg No.", fill="black", font=('Helvetica 10'))
-    canvas.create_text(750, 205, text=""+est_str1.get(), fill="black", font=('Helvetica 14 bold'))
+    canvas.create_text(720, 60, text=" "+comname.get(), fill="black", font=('Helvetica 12 '))
+    # canvas.create_text(710, 200, text=caddent.get('1.0', 'end-1c'), fill="black", font=('Helvetica 10'))
+    T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0)
+    T_address.tag_configure('tag_name',justify='right')
+    T_address.insert('1.0', estdata[2])
+    T_address.tag_add('tag_name','1.0', 'end')
+    T_address_window = canvas.create_window(520, 80, anchor="nw", window=T_address)
+
+    canvas.create_text(708, 170, text=" "+comsalestax.get(), fill="black", font=('Helvetica 10'))
+    canvas.create_text(710, 205, text=""+est_str1.get(), fill="black", font=('Helvetica 14 bold'))
       
     canvas.create_text(210, 260, text=""+est_str5.get(), fill="black", font=('Helvetica 10 underline'))
     canvas.create_text(203, 280, text="John Doe", fill="black", font=('Helvetica 10 '))
@@ -3304,24 +4153,105 @@ def mainpage():
       
     canvas.create_text(370, 372, text="Example product - Description text...", fill="black", font=('Helvetica 10'))
     canvas.create_text(710, 372, text="1", fill="black", font=('Helvetica 10'))
-    canvas.create_text(784, 372, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(784, 372, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(784, 372, text="200"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(784, 372, text=""+comcursign.get()+" 200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(784, 372, text="200"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+
+    # canvas.create_text(784, 372, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
 
     canvas.create_text(650, 404, text="Subtotal", fill="black", font=('Helvetica 10'))
-    canvas.create_text(784, 404, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(784, 404, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(784, 404, text="200"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(784, 404, text=""+comcursign.get()+" 200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(784, 404, text="200"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+
+    # canvas.create_text(784, 404, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
 
     canvas.create_text(650, 428, text="TAX1", fill="black", font=('Helvetica 10'))
-    canvas.create_text(786, 428, text=""+comcursign.get()+"18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(786, 428, text=""+comcursign.get()+"18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(786, 428, text="18"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(786, 428, text=""+comcursign.get()+" 18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(786, 428, text="18"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+
+    # canvas.create_text(786, 428, text=""+comcursign.get()+"18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
 
     canvas.create_text(650, 454, text="Shipping and handling", fill="black", font=('Helvetica 10'))
-    canvas.create_text(786, 454, text=""+comcursign.get()+"20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
 
-    canvas.create_text(784, 479, text=""+comcursign.get()+"238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10 bold'))
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(786, 454, text=""+comcursign.get()+"20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(786, 454, text="20"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(786, 454, text=""+comcursign.get()+" 20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(786, 454, text="20"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+
+    # canvas.create_text(786, 454, text=""+comcursign.get()+"20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(784, 479, text=""+comcursign.get()+"238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(784, 479, text="238"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(784, 479, text=""+comcursign.get()+" 238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(784, 479, text="238"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+
+    # canvas.create_text(784, 479, text=""+comcursign.get()+"238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10 bold'))
     canvas.create_text(650, 479, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
 
-    canvas.create_text(784, 502, text=""+comcursign.get()+"100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(784, 502, text=""+comcursign.get()+"100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(784, 502, text="100"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(784, 502, text=""+comcursign.get()+" 100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(784, 502, text="100"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+
+    # canvas.create_text(784, 502, text=""+comcursign.get()+"100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
     canvas.create_text(650, 502, text="Total Paid", fill="black", font=('Helvetica 10'))
 
-    canvas.create_text(784, 526, text=""+comcursign.get()+"138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(784, 526, text=""+comcursign.get()+"138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(784, 526, text="138"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(784, 526, text=""+comcursign.get()+" 138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(784, 526, text="138"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+
+    # canvas.create_text(784, 526, text=""+comcursign.get()+"138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
     canvas.create_text(650, 526, text="Balance", fill="black", font=('Helvetica 10'))
 
     canvas.create_text(275, 550, text="Multiline comment text goes here..", fill="black", font=('Helvetica 10'))
@@ -3330,10 +4260,13 @@ def mainpage():
     canvas.create_text(182, 580, text="...", fill="black", font=('Helvetica 10'))
 
     canvas.create_text(500, 600, text="Terms and Conditions", fill="black", font=('Helvetica 10'))
-    canvas.create_line(150, 620, 795, 620)
-    canvas.create_text(280, 640, text= ""+est_str7.get(), fill="black", font=('Helvetica 10'))
-    canvas.create_text(280, 655, text="Page footer text goes here...", fill="black", font=('Helvetica 10'))
-    canvas.create_text(720, 655, text="Page 1 of 1", fill="black", font=('Helvetica 10'))
+    canvas.create_line(150, 608, 795, 608)
+    # canvas.create_text(280, 640, text= ""+est_str7.get(), fill="black", font=('Helvetica 10'))
+    T = Text(canvas, height=3, width=90, font=('Helvetica 10'),borderwidth=0)
+    T.insert(END, estdata[39])
+    T_window = canvas.create_window(155, 612, anchor="nw", window=T)
+    canvas.create_text(280, 670, text="Page footer text goes here...", fill="black", font=('Helvetica 10'))
+    canvas.create_text(720, 670, text="Page 1 of 1", fill="black", font=('Helvetica 10'))
   elif estdata[32] == 'Simplified 2 (logo on right side)':
     winstyle2.insert(0, estdata[32])
     frame = Frame(fifthtab, width=953, height=300)
@@ -3350,27 +4283,36 @@ def mainpage():
     canvas.config(yscrollcommand=vertibar.set)
     canvas.pack(expand=True,side=LEFT,fill=BOTH)
     canvas.create_rectangle(100, 10, 850, 687 , outline='yellow',fill='white')
-    canvas.create_text(500, 50, text="Title text goes here...", fill="black", font=('Helvetica 10'))
-    canvas.create_text(650, 110, text="Your Company Logo", fill="black", font=('Helvetica 18 bold'))
+    canvas.create_text(500, 25, text="Title text goes here...", fill="black", font=('Helvetica 10'))
+    try:
+      est_image = Image.open("images/"+estdata[13])
+      est_resize_image = est_image.resize((200,100))
+      est_image = ImageTk.PhotoImage(est_resize_image)
 
-    canvas.create_text(250, 80, text=" "+comname.get(), fill="black", font=('Helvetica 12 '))
-    canvas.create_text(225, 110, text="Address line 1", fill="black", font=('Helvetica 10'))
-    canvas.create_text(225, 125, text="Address line 2", fill="black", font=('Helvetica 10'))
-    canvas.create_text(225, 140, text="Address line 3", fill="black", font=('Helvetica 10'))
-    canvas.create_text(225, 155, text="Address line 4", fill="black", font=('Helvetica 10'))
-    canvas.create_text(234, 170, text="Phone: 555-5555", fill="black", font=('Helvetica 10'))
-    canvas.create_text(234, 185, text="Sales tax reg No.", fill="black", font=('Helvetica 10'))
+      est_btlogo = Label(canvas,width=200,height=100,image = est_image) 
+      window_image = canvas.create_window(500, 45, anchor="nw", window=est_btlogo)
+      est_btlogo.photo = est_image
+    except:
+      pass  
+    canvas.create_text(250, 60, text=" "+comname.get(), fill="black", font=('Helvetica 12 '))
+    # canvas.create_text(224, 200, text=""+caddent.get('1.0', 'end-1c'), fill="black", font=('Helvetica 10'))
+    T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0)
+    T_address.tag_configure('tag_name',justify='right')
+    T_address.insert('1.0', estdata[2])
+    T_address.tag_add('tag_name','1.0', 'end')
+    T_address_window = canvas.create_window(100, 80, anchor="nw", window=T_address)
+    canvas.create_text(224, 180, text=" "+comsalestax.get(), fill="black", font=('Helvetica 10'))
     canvas.create_text(225, 205, text=""+est_str1.get(), fill="black", font=('Helvetica 14 bold'))
 
-    canvas.create_text(502, 150, text=""+est_str2.get(), fill="black", font=('Helvetica 11'))
-    canvas.create_text(515, 170, text=""+est_str3.get(), fill="black", font=('Helvetica 11'))
-    canvas.create_text(500, 190, text=""+est_str4.get(), fill="black", font=('Helvetica 11'))
-    canvas.create_text(491, 210, text="Terms", fill="black", font=('Helvetica 11'))
-    canvas.create_text(505, 230, text="Order ref.#", fill="black", font=('Helvetica 11'))
-    canvas.create_text(680, 150, text="EST1/2022", fill="black", font=('Helvetica 11'))
-    canvas.create_text(680, 170, text="05-05-2022", fill="black", font=('Helvetica 11'))
-    canvas.create_text(680, 190, text="20-05-2022", fill="black", font=('Helvetica 11'))
-    canvas.create_text(670, 210, text="NET 15", fill="black", font=('Helvetica 11'))      
+    canvas.create_text(502, 160, text=""+est_str2.get(), fill="black", font=('Helvetica 11'))
+    canvas.create_text(515, 180, text=""+est_str3.get(), fill="black", font=('Helvetica 11'))
+    canvas.create_text(500, 200, text=""+est_str4.get(), fill="black", font=('Helvetica 11'))
+    canvas.create_text(491, 220, text="Terms", fill="black", font=('Helvetica 11'))
+    canvas.create_text(505, 240, text="Order ref.#", fill="black", font=('Helvetica 11'))
+    canvas.create_text(680, 160, text="EST1/2022", fill="black", font=('Helvetica 11'))
+    canvas.create_text(680, 180, text="05-05-2022", fill="black", font=('Helvetica 11'))
+    canvas.create_text(680, 200, text="20-05-2022", fill="black", font=('Helvetica 11'))
+    canvas.create_text(670, 220, text="NET 15", fill="black", font=('Helvetica 11'))      
 
     canvas.create_text(210, 260, text=""+est_str5.get(), fill="black", font=('Helvetica 10 underline'))
     canvas.create_text(203, 280, text="John Doe", fill="black", font=('Helvetica 10 '))
@@ -3414,24 +4356,105 @@ def mainpage():
       
     canvas.create_text(370, 372, text="Example product - Description text...", fill="black", font=('Helvetica 10'))
     canvas.create_text(710, 372, text="1", fill="black", font=('Helvetica 10'))
-    canvas.create_text(784, 372, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(784, 372, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(784, 372, text="200"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(784, 372, text=""+comcursign.get()+" 200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(784, 372, text="200"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+
+    # canvas.create_text(784, 372, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
 
     canvas.create_text(650, 404, text="Subtotal", fill="black", font=('Helvetica 10'))
-    canvas.create_text(784, 404, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(784, 404, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(784, 404, text="200"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(784, 404, text=""+comcursign.get()+" 200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(784, 404, text="200"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+
+    # canvas.create_text(784, 404, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
 
     canvas.create_text(650, 428, text="TAX1", fill="black", font=('Helvetica 10'))
-    canvas.create_text(786, 428, text=""+comcursign.get()+"18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(786, 428, text=""+comcursign.get()+"18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(786, 428, text="18"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(786, 428, text=""+comcursign.get()+" 18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(786, 428, text="18"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+
+    # canvas.create_text(786, 428, text=""+comcursign.get()+"18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
 
     canvas.create_text(650, 454, text="Shipping and handling", fill="black", font=('Helvetica 10'))
-    canvas.create_text(786, 454, text=""+comcursign.get()+"20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
 
-    canvas.create_text(784, 479, text=""+comcursign.get()+"238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10 bold'))
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(786, 454, text=""+comcursign.get()+"20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(786, 454, text="20"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(786, 454, text=""+comcursign.get()+" 20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(786, 454, text="20"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+
+    # canvas.create_text(786, 454, text=""+comcursign.get()+"20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(784, 479, text=""+comcursign.get()+"238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(784, 479, text="238"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(784, 479, text=""+comcursign.get()+" 238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(784, 479, text="238"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+
+    # canvas.create_text(784, 479, text=""+comcursign.get()+"238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10 bold'))
     canvas.create_text(650, 479, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
 
-    canvas.create_text(784, 502, text=""+comcursign.get()+"100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(784, 502, text=""+comcursign.get()+"100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(784, 502, text="100"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(784, 502, text=""+comcursign.get()+" 100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(784, 502, text="100"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+
+    # canvas.create_text(784, 502, text=""+comcursign.get()+"100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
     canvas.create_text(650, 502, text="Total Paid", fill="black", font=('Helvetica 10'))
 
-    canvas.create_text(784, 526, text=""+comcursign.get()+"138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(784, 526, text=""+comcursign.get()+"138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(784, 526, text="138"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(784, 526, text=""+comcursign.get()+" 138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(784, 526, text="138"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+
+    # canvas.create_text(784, 526, text=""+comcursign.get()+"138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
     canvas.create_text(650, 526, text="Balance", fill="black", font=('Helvetica 10'))
 
     canvas.create_text(275, 550, text="Multiline comment text goes here..", fill="black", font=('Helvetica 10'))
@@ -3440,10 +4463,13 @@ def mainpage():
     canvas.create_text(182, 580, text="...", fill="black", font=('Helvetica 10'))
 
     canvas.create_text(500, 600, text="Terms and Conditions", fill="black", font=('Helvetica 10'))
-    canvas.create_line(150, 620, 795, 620)
-    canvas.create_text(280, 640, text= ""+est_str7.get(), fill="black", font=('Helvetica 10'))
-    canvas.create_text(280, 655, text="Page footer text goes here...", fill="black", font=('Helvetica 10'))
-    canvas.create_text(720, 655, text="Page 1 of 1", fill="black", font=('Helvetica 10'))
+    canvas.create_line(150, 608, 795, 608)
+    # canvas.create_text(280, 640, text= ""+est_str7.get(), fill="black", font=('Helvetica 10'))
+    T = Text(canvas, height=3, width=90, font=('Helvetica 10'),borderwidth=0)
+    T.insert(END, estdata[39])
+    T_window = canvas.create_window(155, 612, anchor="nw", window=T)
+    canvas.create_text(280, 670, text="Page footer text goes here...", fill="black", font=('Helvetica 10'))
+    canvas.create_text(720, 670, text="Page 1 of 1", fill="black", font=('Helvetica 10'))
   elif estdata[32] == 'Business Classic':
     winstyle2.insert(0, estdata[32])
     frame = Frame(fifthtab, width=953, height=300)
@@ -3462,15 +4488,28 @@ def mainpage():
     canvas.create_rectangle(100, 10, 850, 687 , outline='yellow',fill='white')
     canvas.create_text(500, 50, text="Title text goes here...", fill="black", font=('Helvetica 10'))
     canvas.create_line(150, 70, 800, 70, fill='orange')
-    canvas.create_text(300, 150, text="Your Company Logo", fill="black", font=('Helvetica 18 bold'))
+    
+    try:
+      est_image = Image.open("images/"+estdata[13])
+      est_resize_image = est_image.resize((200,100))
+      est_image = ImageTk.PhotoImage(est_resize_image)
 
-    canvas.create_text(500, 115, text=" "+comname.get(), fill="black", font=('Helvetica 12 '))
-    canvas.create_text(525, 140, text="Address line 1", fill="black", font=('Helvetica 10'))
-    canvas.create_text(525, 155, text="Address line 2", fill="black", font=('Helvetica 10'))
-    canvas.create_text(525, 170, text="Address line 3", fill="black", font=('Helvetica 10'))
-    canvas.create_text(525, 185, text="Address line 4", fill="black", font=('Helvetica 10'))
-    canvas.create_text(534, 200, text="Phone: 555-5555", fill="black", font=('Helvetica 10'))
-    canvas.create_text(534, 215, text="Sales tax reg No.", fill="black", font=('Helvetica 10'))
+      est_btlogo = Label(canvas,width=200,height=100,image = est_image) 
+      window_image = canvas.create_window(140, 120, anchor="nw", window=est_btlogo)
+      est_btlogo.photo = est_image
+    except:
+      pass  
+
+    canvas.create_text(500, 90, text=" "+comname.get(), fill="black", font=('Helvetica 12 '))
+    # canvas.create_text(480, 200, text=""+caddent.get('1.0', 'end-1c'), fill="black", font=('Helvetica 10'))
+    T_address = Text(canvas, height=5, width=35, font=('Helvetica 10'),borderwidth=0)
+    T_address.tag_configure('tag_name',justify='right')
+    T_address.insert('1.0', estdata[2])
+    T_address.tag_add('tag_name','1.0', 'end')
+    T_address_window = canvas.create_window(350, 100, anchor="nw", window=T_address)
+        
+        
+    canvas.create_text(480, 210, text=" "+comsalestax.get(), fill="black", font=('Helvetica 10'))
 
     canvas.create_text(655, 100, text="John Doe", fill="black", font=('Helvetica 10 '))
     canvas.create_text(696, 120, text="381 South Bedford Road", fill="black", font=('Helvetica 10'))
@@ -3519,16 +4558,96 @@ def mainpage():
       
     canvas.create_text(160, 285, text="PROD-0001", fill="black", font=('Helvetica 10'))
     canvas.create_text(450, 285, text="Example product - Description text...", fill="black", font=('Helvetica 10'))
-    canvas.create_text(624, 285, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
-    canvas.create_text(700, 285, text="1", fill="black", font=('Helvetica 10'))
-    canvas.create_text(784, 285, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
 
-    canvas.create_text(784, 310, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
-    canvas.create_text(789, 335, text=""+comcursign.get()+"18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
-    canvas.create_text(789, 360, text=""+comcursign.get()+"20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
-    canvas.create_text(784, 385, text=""+comcursign.get()+"238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10 bold'))
-    canvas.create_text(784, 410, text=""+comcursign.get()+"100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
-    canvas.create_text(784, 435, text=""+comcursign.get()+"138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(624, 285, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(624, 285, text="200"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(624, 285, text=""+comcursign.get()+" 200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(624, 285, text="200"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+    # canvas.create_text(624, 285, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    canvas.create_text(700, 285, text="1", fill="black", font=('Helvetica 10'))
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(784, 285, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(784, 285, text="200"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(784, 285, text=""+comcursign.get()+" 200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(784, 285, text="200"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+    # canvas.create_text(784, 285, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(784, 310, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(784, 310, text="200"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(784, 310, text=""+comcursign.get()+" 200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(784, 310, text="200"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+    # canvas.create_text(784, 310, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(789, 335, text=""+comcursign.get()+"18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(789, 335, text="18"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(789, 335, text=""+comcursign.get()+" 18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(789, 335, text="18"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+    # canvas.create_text(789, 335, text=""+comcursign.get()+"18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(789, 360, text=""+comcursign.get()+"20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(789, 360, text="20"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(789, 360, text=""+comcursign.get()+" 20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(789, 360, text="20"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+    # canvas.create_text(789, 360, text=""+comcursign.get()+"20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(784, 385, text=""+comcursign.get()+"238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(784, 385, text="238"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(784, 385, text=""+comcursign.get()+" 238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(784, 385, text="238"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+    # canvas.create_text(784, 385, text=""+comcursign.get()+"238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10 bold'))
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(784, 410, text=""+comcursign.get()+"100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(784, 410, text="100"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(784, 410, text=""+comcursign.get()+" 100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(784, 410, text="100"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+    # canvas.create_text(784, 410, text=""+comcursign.get()+"100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(784, 435, text=""+comcursign.get()+"138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(784, 435, text="138"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(784, 435, text=""+comcursign.get()+" 138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(784, 435, text="138"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+    # canvas.create_text(784, 435, text=""+comcursign.get()+"138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
 
     canvas.create_text(595, 310, text="Subtotal", fill="black", font=('Helvetica 10'))
     canvas.create_text(585, 335, text="TAX1", fill="black", font=('Helvetica 10'))
@@ -3544,10 +4663,13 @@ def mainpage():
     canvas.create_text(182, 530, text="...", fill="black", font=('Helvetica 10'))
       
     canvas.create_text(500, 600, text="Terms and Conditions", fill="black", font=('Helvetica 10'))
-    canvas.create_line(150, 620, 795, 620, fill='orange')
-    canvas.create_text(280, 640, text= ""+est_str7.get(), fill="black", font=('Helvetica 10'))
-    canvas.create_text(280, 655, text="Page footer text goes here...", fill="black", font=('Helvetica 10'))
-    canvas.create_text(720, 655, text="Page 1 of 1", fill="black", font=('Helvetica 10'))
+    canvas.create_line(150, 608, 795, 608, fill='orange')
+    # canvas.create_text(280, 640, text= ""+est_str7.get(), fill="black", font=('Helvetica 10'))
+    T = Text(canvas, height=3, width=90, font=('Helvetica 10'),borderwidth=0)
+    T.insert(END, estdata[39])
+    T_window = canvas.create_window(155, 612, anchor="nw", window=T)
+    canvas.create_text(280, 670, text="Page footer text goes here...", fill="black", font=('Helvetica 10'))
+    canvas.create_text(720, 670, text="Page 1 of 1", fill="black", font=('Helvetica 10'))
   else:
     pass
   winstyle2.place(x=770 ,y=40, width=220)
@@ -3561,8 +4683,8 @@ def mainpage():
 
   sql = "select * from company"
   fbcursor.execute(sql)
-  estdata = fbcursor.fetchone()
-  print(estdata)
+  advdata = fbcursor.fetchone()
+  #print(estdata)
 
 
   seventhtab=Frame(seventhtab1, bg="#f5f3f2", height=700)
@@ -3592,32 +4714,38 @@ def mainpage():
 
   adv_win_menu3 = StringVar()
   adv_winstyle3 = ttk.Combobox(seventhtab,textvariable=adv_win_menu3)
-  adv_winstyle3.place(x=225 ,y=60)
   adv_winstyle3['values'] = ('Letter','A4')
-  adv_winstyle3.current(0)
-
+  adv_win_menu3.set('Letter')
+  #adv_winstyle3.current(0)
+  adv_winstyle3.place(x=225 ,y=60)
+    
+  
   adv_win_menu4 = StringVar()
   adv_winstyle4 = ttk.Combobox(seventhtab,textvariable=adv_win_menu4)
   adv_winstyle4.place(x=225,y=90)
-  adv_winstyle4['values'] = ('Letter','A4')
+  adv_winstyle4['values'] = ("Letter","A4")
+  adv_winstyle4.set("Letter")
   adv_winstyle4.current(0)
 
   adv_win_menu5 = StringVar()
   adv_winstyle5 = ttk.Combobox(seventhtab,textvariable=adv_win_menu5)
   adv_winstyle5.place(x=225,y=120)
-  adv_winstyle5['values'] = ('Letter','A4')
+  adv_winstyle5['values'] = ("Letter","A4")
+  adv_winstyle5.set("Letter")
   adv_winstyle5.current(0)
 
   adv_win_menu6 = StringVar()
   adv_winstyle6 = ttk.Combobox(seventhtab,textvariable=adv_win_menu6)
   adv_winstyle6.place(x=225,y=150)
-  adv_winstyle6['values'] = ('Letter','A4')
+  adv_winstyle6['values'] = ("Letter","A4")
+  adv_winstyle6.set("Letter")
   adv_winstyle6.current(0)
 
   adv_win_menu7 = StringVar()
   adv_winstyle7 = ttk.Combobox(seventhtab,textvariable=adv_win_menu7)
   adv_winstyle7.place(x=225,y=180)
-  adv_winstyle7['values'] = ('Letter','A4')
+  adv_winstyle7['values'] = ("Letter","A4")
+  adv_winstyle7.set("Letter")
   adv_winstyle7.current(0)
 
   adv_fbill = Label(seventhtab,text="Right Margin(mm)",font="arial 10 bold").place(x=450,y=30)
@@ -3731,6 +4859,9 @@ def mainpage():
   def adv_maindropmenu(event):
       menuvar=adv_win_menu8.get()
       print(menuvar)
+      sql = "select * from company"
+      fbcursor.execute(sql)
+      advdata1 = fbcursor.fetchone()
 
       if menuvar == 'Professional 1 (logo on left side)':
           frame = Frame(seventhtab, width=1200, height=155)
@@ -3747,29 +4878,43 @@ def mainpage():
           canvas.pack(expand=True,side=LEFT,fill=BOTH)
           canvas.create_rectangle(10, 10, 1190, 690 , outline='yellow',fill='white')
 
-          canvas.create_text(600, 45, text="Title text goes here...", fill="black", font=('Helvetica 10'))
+          canvas.create_text(600, 25, text="Title text goes here...", fill="black", font=('Helvetica 10'))
 
-          canvas.create_text(250, 70, text="Your Company Logo", fill="black", font=('Helvetica 18 bold'))
+          try:
+            adv_image = Image.open("images/"+advdata1[13])
+            adv_resize_image = adv_image.resize((200,75))
+            adv_image = ImageTk.PhotoImage(adv_resize_image)
 
-          canvas.create_text(130, 110, text="Invoice#", fill="black", font=('Helvetica 11'))
-          canvas.create_text(141, 130, text="Invoice date", fill="black", font=('Helvetica 11'))
-          canvas.create_text(130, 150, text="Due date", fill="black", font=('Helvetica 11'))
-          canvas.create_text(120, 170, text="Terms", fill="black", font=('Helvetica 11'))
-          canvas.create_text(134, 190, text="Order ref.#", fill="black", font=('Helvetica 11'))
-          canvas.create_text(347, 110, text="INV1/2022", fill="black", font=('Helvetica 11'))
-          canvas.create_text(350, 130, text="03-05-2022", fill="black", font=('Helvetica 11'))
-          canvas.create_text(350, 150, text="18-05-2022", fill="black", font=('Helvetica 11'))
-          canvas.create_text(340, 170, text="NET 15", fill="black", font=('Helvetica 11'))
+            adv_btlogo = Label(canvas,width=200,height=75,image = adv_image) 
+            adv_window_image = canvas.create_window(150, 30, anchor="nw", window=adv_btlogo)
+            adv_btlogo.photo = adv_image
+          except:
+            pass  
+
+          canvas.create_text(130, 120, text="Invoice#", fill="black", font=('Helvetica 11'))
+          canvas.create_text(141, 140, text="Invoice date", fill="black", font=('Helvetica 11'))
+          canvas.create_text(130, 160, text="Due date", fill="black", font=('Helvetica 11'))
+          canvas.create_text(120, 180, text="Terms", fill="black", font=('Helvetica 11'))
+          canvas.create_text(134, 200, text="Order ref.#", fill="black", font=('Helvetica 11'))
+          canvas.create_text(347, 120, text="INV1/2022", fill="black", font=('Helvetica 11'))
+          canvas.create_text(350, 140, text="03-05-2022", fill="black", font=('Helvetica 11'))
+          canvas.create_text(350, 160, text="18-05-2022", fill="black", font=('Helvetica 11'))
+          canvas.create_text(340, 180, text="NET 15", fill="black", font=('Helvetica 11'))
 
           canvas.create_text(1050, 65, text=" "+comname.get(), fill="black", font=('Helvetica 12 '))
-          canvas.create_text(1085, 95, text="Address line 1", fill="black", font=('Helvetica 10'))
-          canvas.create_text(1085, 110, text="Address line 2", fill="black", font=('Helvetica 10'))
-          canvas.create_text(1085, 125, text="Address line 3", fill="black", font=('Helvetica 10'))
-          canvas.create_text(1085, 140, text="Address line 4", fill="black", font=('Helvetica 10'))
-          canvas.create_text(1080, 155, text="Phone: 555-5555", fill="black", font=('Helvetica 10'))
-          canvas.create_text(1080, 170, text="Sales tax reg No.", fill="black", font=('Helvetica 10'))
-          canvas.create_text(1094, 190, text="Invoice", fill="black", font=('Helvetica 14 bold'))
-          canvas.create_text(1080, 210, text="TAX EXEMPTED", fill="black", font=('Helvetica 10'))
+          # canvas.create_text(1080, 200, text=""+caddent.get('1.0','end-1c'), fill="black", font=('Helvetica 10'))
+          T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0)
+          T_address.tag_configure('tag_name',justify='right')
+          T_address.insert('1.0', advdata[2])
+          T_address.tag_add('tag_name','1.0', 'end')
+          T_address_window = canvas.create_window(850, 80, anchor="nw", window=T_address)
+          canvas.create_text(1050, 170, text=""+comsalestax.get(), fill="black", font=('Helvetica 10'))
+          # canvas.create_text(1085, 125, text="Address line 3", fill="black", font=('Helvetica 10'))
+          # canvas.create_text(1085, 140, text="Address line 4", fill="black", font=('Helvetica 10'))
+          # canvas.create_text(1080, 155, text="Phone: 555-5555", fill="black", font=('Helvetica 10'))
+          # canvas.create_text(1080, 170, text="Sales tax reg No.", fill="black", font=('Helvetica 10'))
+          canvas.create_text(1050, 190, text="Invoice", fill="black", font=('Helvetica 14 bold'))
+          canvas.create_text(1050, 210, text="TAX EXEMPTED", fill="black", font=('Helvetica 10'))
 
           canvas.create_text(140, 215, text="Bill to", fill="black", font=('Helvetica 10 underline'))
           canvas.create_text(149, 230, text="John Doe", fill="black", font=('Helvetica 10 '))
@@ -3784,9 +4929,9 @@ def mainpage():
 
           s = ttk.Style()
           s.configure('mystyle_2.Treeview.Heading', background='orange',State='DISABLE')
-        
+              
           tree=ttk.Treeview(canvas, column=("c1", "c2","c3", "c4", "c5"), show='headings',height= 0, style='mystyle_2.Treeview')
-      
+            
           tree.column("# 1", anchor=E, stretch=NO, width=150)
           tree.heading("# 1", text="ID/SKU")
           tree.column("# 2", anchor=E, stretch=NO, width=400)
@@ -3797,7 +4942,7 @@ def mainpage():
           tree.heading("# 4", text="Unit Price")
           tree.column("# 5", anchor=E, stretch=NO, width=150)
           tree.heading("# 5", text="Price")
-      
+            
           window = canvas.create_window(120, 290, anchor="nw", window=tree)
 
           canvas.create_line(120, 330, 1120, 330 )
@@ -3820,25 +4965,102 @@ def mainpage():
           canvas.create_text(165, 320, text="PROD-0001", fill="black", font=('Helvetica 10'))
           canvas.create_text(400, 320, text="Example product - Description text...", fill="black", font=('Helvetica 10'))
           canvas.create_text(740, 320, text="1", fill="black", font=('Helvetica 10'))
-          canvas.create_text(884, 320, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
-          canvas.create_text(1084, 320, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          if comcursignpla.get() == "before amount":
+            canvas.create_text(884, 320, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount":
+            canvas.create_text(884, 320, text="200"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "before amount with space":
+            canvas.create_text(884, 320, text=""+comcursign.get()+" 200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount with space":
+            canvas.create_text(884, 320, text="200"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          else:
+            pass
+          #canvas.create_text(884, 320, text="$200.00", fill="black", font=('Helvetica 10'))
+          if comcursignpla.get() == "before amount":
+            canvas.create_text(1080, 320, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount":
+            canvas.create_text(1080, 320, text="200"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "before amount with space":
+            canvas.create_text(1080, 320, text=""+comcursign.get()+" 200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount with space":
+            canvas.create_text(1080, 320, text="200"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          else:
+            pass
+          #canvas.create_text(1080, 320, text="$200.00", fill="black", font=('Helvetica 10'))
 
           canvas.create_text(820, 345, text="Subtotal", fill="black", font=('Helvetica 10'))
-          canvas.create_text(1084, 345, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          if comcursignpla.get() == "before amount":
+            canvas.create_text(1080, 345, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount":
+            canvas.create_text(1080, 345, text="200"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "before amount with space":
+            canvas.create_text(1080, 345, text=""+comcursign.get()+" 200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount with space":
+            canvas.create_text(1080, 345, text="200"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          else:
+            pass
+          #canvas.create_text(1080, 345, text="$200.00", fill="black", font=('Helvetica 10'))
 
           canvas.create_text(820, 370, text="TAX1", fill="black", font=('Helvetica 10'))
-          canvas.create_text(1089, 370, text=""+comcursign.get()+"18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          if comcursignpla.get() == "before amount":
+            canvas.create_text(1085, 370, text=""+comcursign.get()+"18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount":
+            canvas.create_text(1085, 370, text="18"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "before amount with space":
+            canvas.create_text(1085, 370, text=""+comcursign.get()+" 18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount with space":
+            canvas.create_text(1085, 370, text="18"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          else:
+            pass
+          #canvas.create_text(1085, 370, text="$18.00", fill="black", font=('Helvetica 10'))
 
           canvas.create_text(820, 395, text="Shipping and handling", fill="black", font=('Helvetica 10'))
-          canvas.create_text(1089, 395, text=""+comcursign.get()+"20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
-
-          canvas.create_text(1084, 420, text=""+comcursign.get()+"238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10 bold'))
+          if comcursignpla.get() == "before amount":
+            canvas.create_text(1085, 395, text=""+comcursign.get()+"20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount":
+            canvas.create_text(1085, 395, text="20"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "before amount with space":
+            canvas.create_text(1085, 395, text=""+comcursign.get()+" 20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount with space":
+            canvas.create_text(1085, 395, text="20"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          else:
+            pass
+          #canvas.create_text(1085, 395, text="$20.00", fill="black", font=('Helvetica 10'))
+          if comcursignpla.get() == "before amount":
+            canvas.create_text(1080, 420, text=""+comcursign.get()+"238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount":
+            canvas.create_text(1080, 420, text="238"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "before amount with space":
+            canvas.create_text(1080, 420, text=""+comcursign.get()+" 238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount with space":
+            canvas.create_text(1080, 420, text="238"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          else:
+            pass
+          #canvas.create_text(1080, 420, text="$238.00", fill="black", font=('Helvetica 10 bold'))
           canvas.create_text(820, 420, text="Invoice total", fill="black", font=('Helvetica 10 bold'))
-
-          canvas.create_text(1084, 445, text=""+comcursign.get()+"100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          if comcursignpla.get() == "before amount":
+            canvas.create_text(1080, 445, text=""+comcursign.get()+"100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount":
+            canvas.create_text(1080, 445, text="100"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "before amount with space":
+            canvas.create_text(1080, 445, text=""+comcursign.get()+" 100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount with space":
+            canvas.create_text(1080, 445, text="100"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          else:
+            pass
+          #canvas.create_text(1080, 445, text="$100.00", fill="black", font=('Helvetica 10'))
           canvas.create_text(820, 445, text="Total Paid", fill="black", font=('Helvetica 10'))
-
-          canvas.create_text(1084, 465, text=""+comcursign.get()+"138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          if comcursignpla.get() == "before amount":
+            canvas.create_text(1080, 465, text=""+comcursign.get()+"138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount":
+            canvas.create_text(1080, 465, text="138"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "before amount with space":
+            canvas.create_text(1080, 465, text=""+comcursign.get()+" 138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount with space":
+            canvas.create_text(1080, 465, text="138"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          else:
+            pass
+          #canvas.create_text(1080, 465, text="$138.00", fill="black", font=('Helvetica 10'))
           canvas.create_text(820, 465, text="Balance", fill="black", font=('Helvetica 10'))
 
 
@@ -3871,7 +5093,18 @@ def mainpage():
           canvas.create_rectangle(10, 10, 1190, 690 , outline='yellow',fill='white')
           canvas.create_text(600, 45, text="Title text goes here...", fill="black", font=('Helvetica 10'))
 
-          canvas.create_text(1000, 70, text="Your Company Logo", fill="black", font=('Helvetica 18 bold'))
+          try:
+            adv_image = Image.open("images/"+advdata1[13])
+            adv_resize_image = adv_image.resize((200,75))
+            adv_image = ImageTk.PhotoImage(adv_resize_image)
+
+            adv_btlogo = Label(canvas,width=200,height=75,image = adv_image) 
+            adv_window_image = canvas.create_window(850, 25, anchor="nw", window=adv_btlogo)
+            adv_btlogo.photo = adv_image
+          except:
+            pass  
+
+          # canvas.create_text(1000, 70, text="Your Company Logo", fill="black", font=('Helvetica 18 bold'))
 
           canvas.create_text(829, 110, text="Invoice#", fill="black", font=('Helvetica 11'))
           canvas.create_text(841, 130, text="Invoice date", fill="black", font=('Helvetica 11'))
@@ -3883,13 +5116,19 @@ def mainpage():
           canvas.create_text(1050, 150, text="21-05-2022", fill="black", font=('Helvetica 11'))
           canvas.create_text(1040, 170, text="NET 15", fill="black", font=('Helvetica 11'))
 
-          canvas.create_text(170, 65, text=" "+comname.get(), fill="black", font=('Helvetica 12 '))
-          canvas.create_text(130, 95, text="Address line 1", fill="black", font=('Helvetica 10'))
-          canvas.create_text(130, 110, text="Address line 2", fill="black", font=('Helvetica 10'))
-          canvas.create_text(130, 125, text="Address line 3", fill="black", font=('Helvetica 10'))
-          canvas.create_text(130, 140, text="Address line 4", fill="black", font=('Helvetica 10'))
-          canvas.create_text(136, 155, text="Phone: 555-5555", fill="black", font=('Helvetica 10'))
-          canvas.create_text(136, 170, text="Sales tax reg No.", fill="black", font=('Helvetica 10'))
+          canvas.create_text(170, 65, text=""+comname.get(), fill="black", font=('Helvetica 12 '))
+          # canvas.create_text(130, 200, text=""+caddent.get('1.0','end-1c'), fill="black", font=('Helvetica 10'))
+          T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0)
+          T_address.tag_configure('tag_name',justify='right')
+          T_address.insert('1.0', advdata[2])
+          T_address.tag_add('tag_name','1.0', 'end')
+          T_address_window = canvas.create_window(10, 80, anchor="nw", window=T_address)
+          #T_address_window = canvas.create_window(95, 80, anchor="nw", window=T_address)
+          canvas.create_text(130, 170, text=""+comsalestax.get(), fill="black", font=('Helvetica 10'))
+          # canvas.create_text(130, 125, text="Address line 3", fill="black", font=('Helvetica 10'))
+          # canvas.create_text(130, 140, text="Address line 4", fill="black", font=('Helvetica 10'))
+          # canvas.create_text(136, 155, text="Phone: 555-5555", fill="black", font=('Helvetica 10'))
+          # canvas.create_text(136, 170, text="Sales tax reg No.", fill="black", font=('Helvetica 10'))
           canvas.create_text(124, 190, text="Invoice", fill="black", font=('Helvetica 14 bold'))
 
           canvas.create_text(140, 215, text="Bill to", fill="black", font=('Helvetica 10 underline'))
@@ -3938,25 +5177,102 @@ def mainpage():
           canvas.create_text(165, 320, text="PROD-0001", fill="black", font=('Helvetica 10'))
           canvas.create_text(400, 320, text="Example product - Description text...", fill="black", font=('Helvetica 10'))
           canvas.create_text(740, 320, text="1", fill="black", font=('Helvetica 10'))
-          canvas.create_text(884, 320, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
-          canvas.create_text(1084, 320, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          if comcursignpla.get() == "before amount":
+            canvas.create_text(884, 320, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount":
+            canvas.create_text(884, 320, text="200"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "before amount with space":
+            canvas.create_text(884, 320, text=""+comcursign.get()+" 200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount with space":
+            canvas.create_text(884, 320, text="200"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          else:
+            pass
+          #canvas.create_text(1080, 320, text="$200.00", fill="black", font=('Helvetica 10'))
+          if comcursignpla.get() == "before amount":
+            canvas.create_text(1080, 320, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount":
+            canvas.create_text(1080, 320, text="200"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "before amount with space":
+            canvas.create_text(1080, 320, text=""+comcursign.get()+" 200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount with space":
+            canvas.create_text(1080, 320, text="200"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          else:
+            pass
+          #canvas.create_text(1084, 320, text="$200.00", fill="black", font=('Helvetica 10'))
 
           canvas.create_text(820, 345, text="Subtotal", fill="black", font=('Helvetica 10'))
-          canvas.create_text(1084, 345, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          if comcursignpla.get() == "before amount":
+            canvas.create_text(1080, 345, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount":
+            canvas.create_text(1080, 345, text="200"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "before amount with space":
+            canvas.create_text(1080, 345, text=""+comcursign.get()+" 200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount with space":
+            canvas.create_text(1080, 345, text="200"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          else:
+            pass
+          #canvas.create_text(1084, 345, text="$200.00", fill="black", font=('Helvetica 10'))
 
           canvas.create_text(820, 370, text="TAX1", fill="black", font=('Helvetica 10'))
-          canvas.create_text(1089, 370, text=""+comcursign.get()+"18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          if comcursignpla.get() == "before amount":
+            canvas.create_text(1085, 370, text=""+comcursign.get()+"18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount":
+            canvas.create_text(1085, 370, text="18"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "before amount with space":
+            canvas.create_text(1085, 370, text=""+comcursign.get()+" 18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount with space":
+            canvas.create_text(1085, 370, text="18"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          else:
+            pass
+          #canvas.create_text(1089, 370, text="$18.00", fill="black", font=('Helvetica 10'))
 
           canvas.create_text(820, 395, text="Shipping and handling", fill="black", font=('Helvetica 10'))
-          canvas.create_text(1089, 395, text=""+comcursign.get()+"20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
-
-          canvas.create_text(1084, 420, text=""+comcursign.get()+"238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10 bold'))
+          if comcursignpla.get() == "before amount":
+            canvas.create_text(1085, 395, text=""+comcursign.get()+"20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount":
+            canvas.create_text(1085, 395, text="20"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "before amount with space":
+            canvas.create_text(1085, 395, text=""+comcursign.get()+" 20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount with space":
+            canvas.create_text(1085, 395, text="20"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          else:
+            pass
+          #canvas.create_text(1089, 395, text="$20.00", fill="black", font=('Helvetica 10'))
+          if comcursignpla.get() == "before amount":
+            canvas.create_text(1080, 420, text=""+comcursign.get()+"238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount":
+            canvas.create_text(1080, 420, text="238"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "before amount with space":
+            canvas.create_text(1080, 420, text=""+comcursign.get()+" 238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount with space":
+            canvas.create_text(1080, 420, text="238"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          else:
+            pass
+          #canvas.create_text(1084, 420, text="$238.00", fill="black", font=('Helvetica 10 bold'))
           canvas.create_text(820, 420, text="Invoice total", fill="black", font=('Helvetica 10 bold'))
-
-          canvas.create_text(1084, 445, text=""+comcursign.get()+"100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          if comcursignpla.get() == "before amount":
+            canvas.create_text(1080, 445, text=""+comcursign.get()+"100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount":
+            canvas.create_text(1080, 445, text="100"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "before amount with space":
+            canvas.create_text(1080, 445, text=""+comcursign.get()+" 100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount with space":
+            canvas.create_text(1080, 445, text="100"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          else:
+            pass
+          #canvas.create_text(1084, 445, text="$100.00", fill="black", font=('Helvetica 10'))
           canvas.create_text(820, 445, text="Total Paid", fill="black", font=('Helvetica 10'))
-
-          canvas.create_text(1084, 465, text=""+comcursign.get()+"138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          if comcursignpla.get() == "before amount":
+            canvas.create_text(1080, 465, text=""+comcursign.get()+"138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount":
+            canvas.create_text(1080, 465, text="138"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "before amount with space":
+            canvas.create_text(1080, 465, text=""+comcursign.get()+" 138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount with space":
+            canvas.create_text(1080, 465, text="138"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          else:
+            pass
+          #canvas.create_text(1084, 465, text="$138.00", fill="black", font=('Helvetica 10'))
           canvas.create_text(820, 465, text="Balance", fill="black", font=('Helvetica 10'))
 
           canvas.create_text(200, 500, text="Multiline comment text goes here..", fill="black", font=('Helvetica 10'))
@@ -3969,7 +5285,6 @@ def mainpage():
           canvas.create_text(620, 620, text="Invoices are payable on receipt unless other terms, negotiated and noted on the invoice. By accepting delivery of goods, Buyer agrees to pay the invoiced cost for those goods,\nand agrees to be bound to thses contract terms. No acceptance may vary these terms unless specifically agreed in writing by Seller ", fill="black", font=('Helvetica 10'))
           canvas.create_text(196, 650, text="Page footer text goes here...", fill="black", font=('Helvetica 10'))
           canvas.create_text(1090, 650, text="Page 1 of 1", fill="black", font=('Helvetica 10'))
-
 
 #------------Simplified 1 (logo on left side)------------- 
 
@@ -3987,28 +5302,42 @@ def mainpage():
           canvas.config(yscrollcommand=vertibar.set)
           canvas.pack(expand=True,side=LEFT,fill=BOTH)
           canvas.create_rectangle(10, 10, 1190, 690 , outline='yellow',fill='white')
-          canvas.create_text(600, 45, text="Title text goes here...", fill="black", font=('Helvetica 10'))
-        
-          canvas.create_text(250, 70, text="Your Company Logo", fill="black", font=('Helvetica 18 bold'))
+          canvas.create_text(600, 25, text="Title text goes here...", fill="black", font=('Helvetica 10'))
+          try:
+            adv_image = Image.open("images/"+advdata1[13])
+            adv_resize_image = adv_image.resize((200,75))
+            adv_image = ImageTk.PhotoImage(adv_resize_image)
 
-          canvas.create_text(130, 110, text="Invoice#", fill="black", font=('Helvetica 11'))
-          canvas.create_text(141, 130, text="Invoice date", fill="black", font=('Helvetica 11'))
-          canvas.create_text(130, 150, text="Due date", fill="black", font=('Helvetica 11'))
-          canvas.create_text(120, 170, text="Terms", fill="black", font=('Helvetica 11'))
-          canvas.create_text(134, 190, text="Order ref.#", fill="black", font=('Helvetica 11'))
-          canvas.create_text(347, 110, text="INV1/2022", fill="black", font=('Helvetica 11'))
-          canvas.create_text(350, 130, text="06-05-2022", fill="black", font=('Helvetica 11'))
-          canvas.create_text(350, 150, text="21-05-2022", fill="black", font=('Helvetica 11'))
-          canvas.create_text(340, 170, text="NET 15", fill="black", font=('Helvetica 11'))
+            adv_btlogo = Label(canvas,width=200,height=75,image = adv_image) 
+            adv_window_image = canvas.create_window(150, 25, anchor="nw", window=adv_btlogo)
+            adv_btlogo.photo = adv_image
+          except:
+            pass  
+          #canvas.create_text(250, 70, text="Your Company Logo", fill="black", font=('Helvetica 18 bold'))
+
+          canvas.create_text(130, 120, text="Invoice#", fill="black", font=('Helvetica 11'))
+          canvas.create_text(141, 140, text="Invoice date", fill="black", font=('Helvetica 11'))
+          canvas.create_text(130, 160, text="Due date", fill="black", font=('Helvetica 11'))
+          canvas.create_text(120, 180, text="Terms", fill="black", font=('Helvetica 11'))
+          canvas.create_text(134, 200, text="Order ref.#", fill="black", font=('Helvetica 11'))
+          canvas.create_text(347, 120, text="INV1/2022", fill="black", font=('Helvetica 11'))
+          canvas.create_text(350, 140, text="06-05-2022", fill="black", font=('Helvetica 11'))
+          canvas.create_text(350, 160, text="21-05-2022", fill="black", font=('Helvetica 11'))
+          canvas.create_text(340, 180, text="NET 15", fill="black", font=('Helvetica 11'))
 
           canvas.create_text(1050, 65, text=" "+comname.get(), fill="black", font=('Helvetica 12 '))
-          canvas.create_text(1085, 95, text="Address line 1", fill="black", font=('Helvetica 10'))
-          canvas.create_text(1085, 110, text="Address line 2", fill="black", font=('Helvetica 10'))
-          canvas.create_text(1085, 125, text="Address line 3", fill="black", font=('Helvetica 10'))
-          canvas.create_text(1085, 140, text="Address line 4", fill="black", font=('Helvetica 10'))
-          canvas.create_text(1080, 155, text="Phone: 555-5555", fill="black", font=('Helvetica 10'))
-          canvas.create_text(1080, 170, text="Sales tax reg No.", fill="black", font=('Helvetica 10'))
-          canvas.create_text(1094, 190, text="Invoice", fill="black", font=('Helvetica 14 bold'))
+          # canvas.create_text(1080, 200, text=""+caddent.get('1.0','end-1c'), fill="black", font=('Helvetica 10'))
+          T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0)
+          T_address.tag_configure('tag_name',justify='right')
+          T_address.insert('1.0', advdata[2])
+          T_address.tag_add('tag_name','1.0', 'end')
+          T_address_window = canvas.create_window(850, 80, anchor="nw", window=T_address)
+          canvas.create_text(1050, 170, text=""+comsalestax.get(), fill="black", font=('Helvetica 10'))
+          # canvas.create_text(1085, 125, text="Address line 3", fill="black", font=('Helvetica 10'))
+          # canvas.create_text(1085, 140, text="Address line 4", fill="black", font=('Helvetica 10'))
+          # canvas.create_text(1080, 155, text="Phone: 555-5555", fill="black", font=('Helvetica 10'))
+          # canvas.create_text(1080, 170, text="Sales tax reg No.", fill="black", font=('Helvetica 10'))
+          canvas.create_text(1050, 190, text="Invoice", fill="black", font=('Helvetica 14 bold'))
 
           canvas.create_text(140, 215, text="Bill to", fill="black", font=('Helvetica 10 underline'))
           canvas.create_text(149, 230, text="John Doe", fill="black", font=('Helvetica 10 '))
@@ -4021,6 +5350,9 @@ def mainpage():
           canvas.create_text(608, 260, text="Bedford Corners, NY 10549", fill="black", font=('Helvetica 10'))
           canvas.create_text(568, 275, text="United States", fill="black", font=('Helvetica 10'))
 
+          s = ttk.Style()
+          s.configure('mystyle_2.Treeview.Heading', background='orange',State='DISABLE')
+
           tree=ttk.Treeview(canvas, column=("c1", "c2","c3"), show='headings',height= 0, style='mystyle_2.Treeview')
       
           tree.column("# 1", anchor=E, stretch=NO, width=700)
@@ -4029,7 +5361,7 @@ def mainpage():
           tree.heading("# 2", text="Quantity")
           tree.column("# 3", anchor=E, stretch=NO, width=150)
           tree.heading("# 3", text="Price")
-      
+            
           window = canvas.create_window(120, 290, anchor="nw", window=tree)
 
           canvas.create_line(120, 330, 1120, 330 )
@@ -4049,24 +5381,91 @@ def mainpage():
 
           canvas.create_text(250, 320, text="Example product - Description text...", fill="black", font=('Helvetica 10'))
           canvas.create_text(900, 320, text="1", fill="black", font=('Helvetica 10'))
-          canvas.create_text(1084, 320, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          if comcursignpla.get() == "before amount":
+            canvas.create_text(1080, 320, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount":
+            canvas.create_text(1080, 320, text="200"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "before amount with space":
+            canvas.create_text(1080, 320, text=""+comcursign.get()+" 200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount with space":
+            canvas.create_text(1080, 320, text="200"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          else:
+            pass
+          #canvas.create_text(1084, 320, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
 
           canvas.create_text(820, 345, text="Subtotal", fill="black", font=('Helvetica 10'))
-          canvas.create_text(1084, 345, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          if comcursignpla.get() == "before amount":
+            canvas.create_text(1080, 345, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount":
+            canvas.create_text(1080, 345, text="200"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "before amount with space":
+            canvas.create_text(1080, 345, text=""+comcursign.get()+" 200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount with space":
+            canvas.create_text(1080, 345, text="200"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          else:
+            pass
+          #canvas.create_text(1084, 345, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
 
           canvas.create_text(820, 370, text="TAX1", fill="black", font=('Helvetica 10'))
-          canvas.create_text(1089, 370, text=""+comcursign.get()+"18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          if comcursignpla.get() == "before amount":
+            canvas.create_text(1085, 370, text=""+comcursign.get()+"18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount":
+            canvas.create_text(1085, 370, text="18"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "before amount with space":
+            canvas.create_text(1085, 370, text=""+comcursign.get()+" 18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount with space":
+            canvas.create_text(1085, 370, text="18"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          else:
+            pass
+          #canvas.create_text(1089, 370, text=""+comcursign.get()+"18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
 
           canvas.create_text(820, 395, text="Shipping and handling", fill="black", font=('Helvetica 10'))
-          canvas.create_text(1089, 395, text=""+comcursign.get()+"20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
-
-          canvas.create_text(1084, 420, text=""+comcursign.get()+"238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10 bold'))
+          if comcursignpla.get() == "before amount":
+            canvas.create_text(1085, 395, text=""+comcursign.get()+"20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount":
+            canvas.create_text(1085, 395, text="20"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "before amount with space":
+            canvas.create_text(1085, 395, text=""+comcursign.get()+" 20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount with space":
+            canvas.create_text(1085, 395, text="20"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          else:
+            pass
+          #canvas.create_text(1089, 395, text=""+comcursign.get()+"20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          if comcursignpla.get() == "before amount":
+            canvas.create_text(1080, 420, text=""+comcursign.get()+"238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount":
+            canvas.create_text(1080, 420, text="238"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "before amount with space":
+            canvas.create_text(1080, 420, text=""+comcursign.get()+" 238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount with space":
+            canvas.create_text(1080, 420, text="238"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          else:
+            pass
+          #canvas.create_text(1084, 420, text=""+comcursign.get()+"238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10 bold'))
           canvas.create_text(820, 420, text="Invoice total", fill="black", font=('Helvetica 10 bold'))
-
-          canvas.create_text(1084, 445, text=""+comcursign.get()+"100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          if comcursignpla.get() == "before amount":
+            canvas.create_text(1080, 445, text=""+comcursign.get()+"100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount":
+            canvas.create_text(1080, 445, text="100"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "before amount with space":
+            canvas.create_text(1080, 445, text=""+comcursign.get()+" 100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount with space":
+            canvas.create_text(1080, 445, text="100"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          else:
+            pass
+          #canvas.create_text(1084, 445, text=""+comcursign.get()+"100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
           canvas.create_text(820, 445, text="Total Paid", fill="black", font=('Helvetica 10'))
-
-          canvas.create_text(1084, 465, text=""+comcursign.get()+"138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          if comcursignpla.get() == "before amount":
+            canvas.create_text(1080, 465, text=""+comcursign.get()+"138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount":
+            canvas.create_text(1080, 465, text="138"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "before amount with space":
+            canvas.create_text(1080, 465, text=""+comcursign.get()+" 138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount with space":
+            canvas.create_text(1080, 465, text="138"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          else:
+            pass
+          #canvas.create_text(1084, 465, text=""+comcursign.get()+"138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
           canvas.create_text(820, 465, text="Balance", fill="black", font=('Helvetica 10'))
 
           canvas.create_text(200, 500, text="Multiline comment text goes here..", fill="black", font=('Helvetica 10'))
@@ -4097,27 +5496,42 @@ def mainpage():
           canvas.config(yscrollcommand=vertibar.set)
           canvas.pack(expand=True,side=LEFT,fill=BOTH)
           canvas.create_rectangle(10, 10, 1190, 690 , outline='yellow',fill='white')
-          canvas.create_text(600, 45, text="Title text goes here...", fill="black", font=('Helvetica 10'))
+          canvas.create_text(600, 25, text="Title text goes here...", fill="black", font=('Helvetica 10'))
+          try:
+            adv_image = Image.open("images/"+advdata1[13])
+            adv_resize_image = adv_image.resize((200,75))
+            adv_image = ImageTk.PhotoImage(adv_resize_image)
 
-          canvas.create_text(1000, 70, text="Your Company Logo", fill="black", font=('Helvetica 18 bold'))
+            adv_btlogo = Label(canvas,width=200,height=75,image = adv_image) 
+            adv_window_image = canvas.create_window(850, 25, anchor="nw", window=adv_btlogo)
+            adv_btlogo.photo = adv_image
+          except:
+            pass  
 
-          canvas.create_text(829, 110, text="Invoice#", fill="black", font=('Helvetica 11'))
-          canvas.create_text(841, 130, text="Invoice date", fill="black", font=('Helvetica 11'))
-          canvas.create_text(830, 150, text="Due date", fill="black", font=('Helvetica 11'))
-          canvas.create_text(820, 170, text="Terms", fill="black", font=('Helvetica 11'))
-          canvas.create_text(834, 190, text="Order ref.#", fill="black", font=('Helvetica 11'))
-          canvas.create_text(1047, 110, text="INV1/2022", fill="black", font=('Helvetica 11'))
-          canvas.create_text(1050, 130, text="06-05-2022", fill="black", font=('Helvetica 11'))
-          canvas.create_text(1050, 150, text="21-05-2022", fill="black", font=('Helvetica 11'))
-          canvas.create_text(1040, 170, text="NET 15", fill="black", font=('Helvetica 11'))
+          # canvas.create_text(1000, 70, text="Your Company Logo", fill="black", font=('Helvetica 18 bold'))
+
+          canvas.create_text(829, 120, text="Invoice#", fill="black", font=('Helvetica 11'))
+          canvas.create_text(841, 140, text="Invoice date", fill="black", font=('Helvetica 11'))
+          canvas.create_text(830, 160, text="Due date", fill="black", font=('Helvetica 11'))
+          canvas.create_text(820, 180, text="Terms", fill="black", font=('Helvetica 11'))
+          canvas.create_text(834, 200, text="Order ref.#", fill="black", font=('Helvetica 11'))
+          canvas.create_text(1047, 120, text="INV1/2022", fill="black", font=('Helvetica 11'))
+          canvas.create_text(1050, 140, text="06-05-2022", fill="black", font=('Helvetica 11'))
+          canvas.create_text(1050, 160, text="21-05-2022", fill="black", font=('Helvetica 11'))
+          canvas.create_text(1040, 180, text="NET 15", fill="black", font=('Helvetica 11'))
 
           canvas.create_text(170, 65, text=" "+comname.get(), fill="black", font=('Helvetica 12 '))
-          canvas.create_text(130, 95, text="Address line 1", fill="black", font=('Helvetica 10'))
-          canvas.create_text(130, 110, text="Address line 2", fill="black", font=('Helvetica 10'))
-          canvas.create_text(130, 125, text="Address line 3", fill="black", font=('Helvetica 10'))
-          canvas.create_text(130, 140, text="Address line 4", fill="black", font=('Helvetica 10'))
-          canvas.create_text(136, 155, text="Phone: 555-5555", fill="black", font=('Helvetica 10'))
-          canvas.create_text(136, 170, text="Sales tax reg No.", fill="black", font=('Helvetica 10'))
+          # canvas.create_text(130, 200, text=""+caddent.get('1.0','end-1c'), fill="black", font=('Helvetica 10'))
+          T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0)
+          T_address.tag_configure('tag_name',justify='right')
+          T_address.insert('1.0', advdata[2])
+          T_address.tag_add('tag_name','1.0', 'end')
+          T_address_window = canvas.create_window(10, 80, anchor="nw", window=T_address)
+          canvas.create_text(130, 170, text=""+comsalestax.get(), fill="black", font=('Helvetica 10'))
+          # canvas.create_text(130, 125, text="Address line 3", fill="black", font=('Helvetica 10'))
+          # canvas.create_text(130, 140, text="Address line 4", fill="black", font=('Helvetica 10'))
+          # canvas.create_text(136, 155, text="Phone: 555-5555", fill="black", font=('Helvetica 10'))
+          # canvas.create_text(136, 170, text="Sales tax reg No.", fill="black", font=('Helvetica 10'))
           canvas.create_text(124, 190, text="Invoice", fill="black", font=('Helvetica 14 bold'))
 
           canvas.create_text(140, 215, text="Bill to", fill="black", font=('Helvetica 10 underline'))
@@ -4131,8 +5545,11 @@ def mainpage():
           canvas.create_text(608, 260, text="Bedford Corners, NY 10549", fill="black", font=('Helvetica 10'))
           canvas.create_text(568, 275, text="United States", fill="black", font=('Helvetica 10'))
 
+          s = ttk.Style()
+          s.configure('mystyle_2.Treeview.Heading', background='orange',State='DISABLE')
+
           tree=ttk.Treeview(canvas, column=("c1", "c2","c3"), show='headings',height= 0, style='mystyle_2.Treeview')
-        
+              
           tree.column("# 1", anchor=E, stretch=NO, width=700)
           tree.heading("# 1", text="Product/Service - Description")
           tree.column("# 2", anchor=E, stretch=NO, width=150)
@@ -4159,24 +5576,91 @@ def mainpage():
 
           canvas.create_text(250, 320, text="Example product - Description text...", fill="black", font=('Helvetica 10'))
           canvas.create_text(900, 320, text="1", fill="black", font=('Helvetica 10'))
-          canvas.create_text(1084, 320, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          if comcursignpla.get() == "before amount":
+            canvas.create_text(1080, 320, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount":
+            canvas.create_text(1080, 320, text="200"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "before amount with space":
+            canvas.create_text(1080, 320, text=""+comcursign.get()+" 200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount with space":
+            canvas.create_text(1080, 320, text="200"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          else:
+            pass
+          #canvas.create_text(1084, 320, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
 
           canvas.create_text(820, 345, text="Subtotal", fill="black", font=('Helvetica 10'))
-          canvas.create_text(1084, 345, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          if comcursignpla.get() == "before amount":
+            canvas.create_text(1080, 345, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount":
+            canvas.create_text(1080, 345, text="200"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "before amount with space":
+            canvas.create_text(1080, 345, text=""+comcursign.get()+" 200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount with space":
+            canvas.create_text(1080, 345, text="200"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          else:
+            pass
+          #canvas.create_text(1084, 345, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
 
           canvas.create_text(820, 370, text="TAX1", fill="black", font=('Helvetica 10'))
-          canvas.create_text(1089, 370, text=""+comcursign.get()+"18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          if comcursignpla.get() == "before amount":
+            canvas.create_text(1085, 370, text=""+comcursign.get()+"18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount":
+            canvas.create_text(1085, 370, text="18"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "before amount with space":
+            canvas.create_text(1085, 370, text=""+comcursign.get()+" 18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount with space":
+            canvas.create_text(1085, 370, text="18"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          else:
+            pass
+          #canvas.create_text(1089, 370, text=""+comcursign.get()+"18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
 
           canvas.create_text(820, 395, text="Shipping and handling", fill="black", font=('Helvetica 10'))
-          canvas.create_text(1089, 395, text=""+comcursign.get()+"20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
-
-          canvas.create_text(1084, 420, text=""+comcursign.get()+"238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10 bold'))
+          if comcursignpla.get() == "before amount":
+            canvas.create_text(1085, 395, text=""+comcursign.get()+"20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount":
+            canvas.create_text(1085, 395, text="20"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "before amount with space":
+            canvas.create_text(1085, 395, text=""+comcursign.get()+" 20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount with space":
+            canvas.create_text(1085, 395, text="20"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          else:
+            pass
+          #canvas.create_text(1089, 395, text=""+comcursign.get()+"20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          if comcursignpla.get() == "before amount":
+            canvas.create_text(1080, 420, text=""+comcursign.get()+"238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount":
+            canvas.create_text(1080, 420, text="238"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "before amount with space":
+            canvas.create_text(1080, 420, text=""+comcursign.get()+" 238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount with space":
+            canvas.create_text(1080, 420, text="238"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          else:
+            pass
+          #canvas.create_text(1084, 420, text=""+comcursign.get()+"238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10 bold'))
           canvas.create_text(820, 420, text="Invoice total", fill="black", font=('Helvetica 10 bold'))
-
-          canvas.create_text(1084, 445, text=""+comcursign.get()+"100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          if comcursignpla.get() == "before amount":
+            canvas.create_text(1080, 445, text=""+comcursign.get()+"100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount":
+            canvas.create_text(1080, 445, text="100"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "before amount with space":
+            canvas.create_text(1080, 445, text=""+comcursign.get()+" 100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount with space":
+            canvas.create_text(1080, 445, text="100"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          else:
+            pass
+          #canvas.create_text(1084, 445, text=""+comcursign.get()+"100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
           canvas.create_text(820, 445, text="Total Paid", fill="black", font=('Helvetica 10'))
-
-          canvas.create_text(1084, 465, text=""+comcursign.get()+"138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          if comcursignpla.get() == "before amount":
+            canvas.create_text(1080, 465, text=""+comcursign.get()+"138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount":
+            canvas.create_text(1080, 465, text="138"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "before amount with space":
+            canvas.create_text(1080, 465, text=""+comcursign.get()+" 138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount with space":
+            canvas.create_text(1080, 465, text="138"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          else:
+            pass
+          #canvas.create_text(1084, 465, text=""+comcursign.get()+"138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
           canvas.create_text(820, 465, text="Balance", fill="black", font=('Helvetica 10'))
 
           canvas.create_text(200, 500, text="Multiline comment text goes here..", fill="black", font=('Helvetica 10'))
@@ -4189,7 +5673,6 @@ def mainpage():
           canvas.create_text(620, 620, text="Invoices are payable on receipt unless other terms, negotiated and noted on the invoice. By accepting delivery of goods, Buyer agrees to pay the invoiced cost for those goods,\nand agrees to be bound to thses contract terms. No acceptance may vary these terms unless specifically agreed in writing by Seller ", fill="black", font=('Helvetica 10'))
           canvas.create_text(196, 650, text="Page footer text goes here...", fill="black", font=('Helvetica 10'))
           canvas.create_text(1090, 650, text="Page 1 of 1", fill="black", font=('Helvetica 10'))
-
 
   #------------Business Classic------------- 
 
@@ -4211,15 +5694,34 @@ def mainpage():
           canvas.create_line(100, 60, 1120, 60, fill="orange")
           #canvas.create_line(1000, 60, 600, 60, fill="grey")
 
-          canvas.create_text(250, 155, text="Your Company Logo", fill="black", font=('Helvetica 18 bold'))
+          try:
+            adv_image = Image.open("images/"+advdata1[13])
+            adv_resize_image = adv_image.resize((200,100))
+            adv_image = ImageTk.PhotoImage(adv_resize_image)
 
-          canvas.create_text(560, 95, text=" "+comname.get(), fill="black", font=('Helvetica 12 '))
-          canvas.create_text(530, 110, text="Address line 1", fill="black", font=('Helvetica 10'))
-          canvas.create_text(530, 125, text="Address line 2", fill="black", font=('Helvetica 10'))
-          canvas.create_text(530, 140, text="Address line 3", fill="black", font=('Helvetica 10'))
-          canvas.create_text(530, 155, text="Address line 4", fill="black", font=('Helvetica 10'))
-          canvas.create_text(536, 170, text="Phone: 555-5555", fill="black", font=('Helvetica 10'))
-          canvas.create_text(536, 190, text="Sales tax reg No.", fill="black", font=('Helvetica 10'))
+            adv_btlogo = Label(canvas,width=200,height=100,image = adv_image) 
+            adv_window_image = canvas.create_window(140, 100, anchor="nw", window=adv_btlogo)
+            adv_btlogo.photo = adv_image
+          except:
+            pass  
+
+
+          # canvas.create_text(250, 155, text="Your Company Logo", fill="black", font=('Helvetica 18 bold'))
+
+          canvas.create_text(560, 85, text=" "+comname.get(), fill="black", font=('Helvetica 12 '))
+          # canvas.create_text(535, 200, text=""+caddent.get('1.0', 'end-1c'), fill="black", font=('Helvetica 10'))
+          T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0)
+          T_address.tag_configure('tag_name',justify='right')
+          T_address.insert('1.0', advdata[2])
+          T_address.tag_add('tag_name','1.0', 'end')
+          T_address_window = canvas.create_window(350, 100, anchor="nw", window=T_address)
+          # adv_btlabel = Label(canvas,width=20,height=10,text=""+caddent.get('1.0', 'end-1c')) 
+          # adv_window_label = canvas.create_window(530, 110, anchor="nw", window=adv_btlabel)
+          canvas.create_text(530, 190, text=""+comsalestax.get(), fill="black", font=('Helvetica 10'))
+          # canvas.create_text(530, 140, text="Address line 3", fill="black", font=('Helvetica 10'))
+          # canvas.create_text(530, 155, text="Address line 4", fill="black", font=('Helvetica 10'))
+          # canvas.create_text(536, 170, text="Phone: 555-5555", fill="black", font=('Helvetica 10'))
+          # canvas.create_text(536, 190, text="Sales tax reg No.", fill="black", font=('Helvetica 10'))
           canvas.create_text(524, 210, text="Invoice", fill="black", font=('Helvetica 14 bold'))
 
           canvas.create_text(749, 95, text="John Doe", fill="black", font=('Helvetica 10 '))
@@ -4234,6 +5736,8 @@ def mainpage():
           canvas.create_text(947, 160, text="INV1/2022", fill="black", font=('Helvetica 11'))
           canvas.create_text(950, 180, text="06-05-2022", fill="black", font=('Helvetica 11'))
           canvas.create_text(950, 200, text="21-05-2022", fill="black", font=('Helvetica 11'))
+          s = ttk.Style()
+          s.configure('mystyle_2.Treeview.Heading', background='orange',State='DISABLE')
 
           tree=ttk.Treeview(canvas, column=("c1", "c2","c3", "c4", "c5"), show='headings',height= 0, style='mystyle_2.Treeview')
         
@@ -4247,7 +5751,7 @@ def mainpage():
           tree.heading("# 4", text="Quantity")
           tree.column("# 5", anchor=E, stretch=NO, width=150)
           tree.heading("# 5", text="Price")
-        
+              
           window = canvas.create_window(120, 230, anchor="nw", window=tree)
 
           canvas.create_line(120, 270, 1120, 270 )
@@ -4267,26 +5771,103 @@ def mainpage():
 
           canvas.create_text(165, 260, text="PROD-0001", fill="black", font=('Helvetica 10'))
           canvas.create_text(400, 260, text="Example product - Description text...", fill="black", font=('Helvetica 10'))
-          canvas.create_text(734, 260, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          if comcursignpla.get() == "before amount":
+            canvas.create_text(734, 260, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount":
+            canvas.create_text(734, 260, text="200"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "before amount with space":
+            canvas.create_text(734, 260, text=""+comcursign.get()+" 200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount with space":
+            canvas.create_text(734, 260, text="200"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          else:
+            pass
+          #canvas.create_text(734, 260, text="$200.00", fill="black", font=('Helvetica 10'))
           canvas.create_text(890, 260, text="1", fill="black", font=('Helvetica 10'))
-          canvas.create_text(1084, 260, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          if comcursignpla.get() == "before amount":
+            canvas.create_text(1080, 260, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount":
+            canvas.create_text(1080, 260, text="200"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "before amount with space":
+            canvas.create_text(1080, 260, text=""+comcursign.get()+" 200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount with space":
+            canvas.create_text(1080, 260, text="200"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          else:
+            pass
+          # canvas.create_text(1080, 260, text="$200.00", fill="black", font=('Helvetica 10'))
 
           canvas.create_text(697, 285, text="Subtotal", fill="black", font=('Helvetica 10'))
-          canvas.create_text(1084, 285, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          if comcursignpla.get() == "before amount":
+            canvas.create_text(1080, 285, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount":
+            canvas.create_text(1080, 285, text="200"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "before amount with space":
+            canvas.create_text(1080, 285, text=""+comcursign.get()+" 200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount with space":
+            canvas.create_text(1080, 285, text="200"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          else:
+            pass
+          #canvas.create_text(1080, 285, text="$200.00", fill="black", font=('Helvetica 10'))
 
           canvas.create_text(692, 310, text="TAX1", fill="black", font=('Helvetica 10'))
-          canvas.create_text(1089, 310, text=""+comcursign.get()+"18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          if comcursignpla.get() == "before amount":
+            canvas.create_text(1085, 310, text=""+comcursign.get()+"18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount":
+            canvas.create_text(1085, 310, text="18"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "before amount with space":
+            canvas.create_text(1085, 310, text=""+comcursign.get()+" 18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount with space":
+            canvas.create_text(1085, 310, text="18"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          else:
+            pass
+          #canvas.create_text(1085, 310, text="$18.00", fill="black", font=('Helvetica 10'))
 
           canvas.create_text(737, 335, text="Shipping and handling", fill="black", font=('Helvetica 10'))
-          canvas.create_text(1089, 335, text=""+comcursign.get()+"20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
-
-          canvas.create_text(1084, 360, text=""+comcursign.get()+"238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10 bold'))
+          if comcursignpla.get() == "before amount":
+            canvas.create_text(1085, 335, text=""+comcursign.get()+"20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount":
+            canvas.create_text(1085, 335, text="20"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "before amount with space":
+            canvas.create_text(1085, 335, text=""+comcursign.get()+" 20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount with space":
+            canvas.create_text(1085, 335, text="20"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          else:
+            pass
+          #canvas.create_text(1085, 335, text="$20.00", fill="black", font=('Helvetica 10'))
+          if comcursignpla.get() == "before amount":
+            canvas.create_text(1080, 360, text=""+comcursign.get()+"238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount":
+            canvas.create_text(1080, 360, text="238"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "before amount with space":
+            canvas.create_text(1080, 360, text=""+comcursign.get()+" 238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount with space":
+            canvas.create_text(1080, 360, text="238"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          else:
+            pass
+          #canvas.create_text(1080, 360, text="$238.00", fill="black", font=('Helvetica 10 bold'))
           canvas.create_text(715, 360, text="Invoice total", fill="black", font=('Helvetica 10 bold'))
-
-          canvas.create_text(1084, 385, text=""+comcursign.get()+"100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          if comcursignpla.get() == "before amount":
+            canvas.create_text(1080, 385, text=""+comcursign.get()+"100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount":
+            canvas.create_text(1080, 385, text="100"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "before amount with space":
+            canvas.create_text(1080, 385, text=""+comcursign.get()+" 100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount with space":
+            canvas.create_text(1080, 385, text="100"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          else:
+            pass
+          #canvas.create_text(1080, 385, text="100.00", fill="black", font=('Helvetica 10'))
           canvas.create_text(705, 385, text="Total Paid", fill="black", font=('Helvetica 10'))
-
-          canvas.create_text(1084, 410, text=""+comcursign.get()+"138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          if comcursignpla.get() == "before amount":
+            canvas.create_text(1080, 410, text=""+comcursign.get()+"138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount":
+            canvas.create_text(1080, 410, text="138"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "before amount with space":
+            canvas.create_text(1080, 410, text=""+comcursign.get()+" 138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+          elif comcursignpla.get() == "after amount with space":
+            canvas.create_text(1080, 410, text="138"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          else:
+            pass
+          #canvas.create_text(1080, 410, text="$138.00", fill="black", font=('Helvetica 10'))
           canvas.create_text(700, 410, text="Balance", fill="black", font=('Helvetica 10'))
 
           canvas.create_line(100, 480, 1120, 480, fill="orange")
@@ -4307,7 +5888,7 @@ def mainpage():
   adv_winstyle8 = ttk.Combobox(seventhtab,textvariable=adv_win_menu8)
   adv_winstyle8.bind("<<ComboboxSelected>>", adv_maindropmenu)
   adv_winstyle8["values"] = ("Professional 1 (logo on left side)","Professional 2 (logo on right side)","Simplified 1 (logo on left side)","Simplified 2 (logo on right side)","Business Classic")
-  if not estdata:
+  if not advdata:
     adv_winstyle8.current(0)
     frame = Frame(seventhtab, width=1200, height=155)
     frame.pack(expand=True, fill=BOTH)
@@ -4327,25 +5908,30 @@ def mainpage():
 
     canvas.create_text(250, 70, text="Your Company Logo", fill="black", font=('Helvetica 18 bold'))
 
-    canvas.create_text(130, 110, text="Invoice#", fill="black", font=('Helvetica 11'))
-    canvas.create_text(141, 130, text="Invoice date", fill="black", font=('Helvetica 11'))
-    canvas.create_text(130, 150, text="Due date", fill="black", font=('Helvetica 11'))
-    canvas.create_text(120, 170, text="Terms", fill="black", font=('Helvetica 11'))
-    canvas.create_text(134, 190, text="Order ref.#", fill="black", font=('Helvetica 11'))
-    canvas.create_text(347, 110, text="INV1/2022", fill="black", font=('Helvetica 11'))
-    canvas.create_text(350, 130, text="03-05-2022", fill="black", font=('Helvetica 11'))
-    canvas.create_text(350, 150, text="18-05-2022", fill="black", font=('Helvetica 11'))
-    canvas.create_text(340, 170, text="NET 15", fill="black", font=('Helvetica 11'))
+    canvas.create_text(130, 120, text="Invoice#", fill="black", font=('Helvetica 11'))
+    canvas.create_text(141, 140, text="Invoice date", fill="black", font=('Helvetica 11'))
+    canvas.create_text(130, 160, text="Due date", fill="black", font=('Helvetica 11'))
+    canvas.create_text(120, 180, text="Terms", fill="black", font=('Helvetica 11'))
+    canvas.create_text(134, 200, text="Order ref.#", fill="black", font=('Helvetica 11'))
+    canvas.create_text(347, 120, text="INV1/2022", fill="black", font=('Helvetica 11'))
+    canvas.create_text(350, 140, text="03-05-2022", fill="black", font=('Helvetica 11'))
+    canvas.create_text(350, 160, text="18-05-2022", fill="black", font=('Helvetica 11'))
+    canvas.create_text(340, 180, text="NET 15", fill="black", font=('Helvetica 11'))
 
     canvas.create_text(1050, 65, text=" "+comname.get(), fill="black", font=('Helvetica 12 '))
-    canvas.create_text(1085, 95, text="Address line 1", fill="black", font=('Helvetica 10'))
-    canvas.create_text(1085, 110, text="Address line 2", fill="black", font=('Helvetica 10'))
-    canvas.create_text(1085, 125, text="Address line 3", fill="black", font=('Helvetica 10'))
-    canvas.create_text(1085, 140, text="Address line 4", fill="black", font=('Helvetica 10'))
-    canvas.create_text(1080, 155, text="Phone: 555-5555", fill="black", font=('Helvetica 10'))
-    canvas.create_text(1080, 170, text="Sales tax reg No.", fill="black", font=('Helvetica 10'))
-    canvas.create_text(1094, 190, text="Invoice", fill="black", font=('Helvetica 14 bold'))
-    canvas.create_text(1080, 210, text="TAX EXEMPTED", fill="black", font=('Helvetica 10'))
+    # canvas.create_text(1080, 200, text=""+caddent.get('1.0','end-1c'), fill="black", font=('Helvetica 10'))
+    # T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0)
+    # T_address.tag_configure('tag_name',justify='right')
+    # T_address.insert('1.0', advdata[2])
+    # T_address.tag_add('tag_name','1.0', 'end')
+    # T_address_window = canvas.create_window(850, 80, anchor="nw", window=T_address)
+    canvas.create_text(1050, 170, text=""+comsalestax.get(), fill="black", font=('Helvetica 10'))
+    # canvas.create_text(1085, 125, text="Address line 3", fill="black", font=('Helvetica 10'))
+    # canvas.create_text(1085, 140, text="Address line 4", fill="black", font=('Helvetica 10'))
+    # canvas.create_text(1080, 155, text="Phone: 555-5555", fill="black", font=('Helvetica 10'))
+    # canvas.create_text(1080, 170, text="Sales tax reg No.", fill="black", font=('Helvetica 10'))
+    canvas.create_text(1050, 190, text="Invoice", fill="black", font=('Helvetica 14 bold'))
+    canvas.create_text(1050, 210, text="TAX EXEMPTED", fill="black", font=('Helvetica 10'))
 
     canvas.create_text(140, 215, text="Bill to", fill="black", font=('Helvetica 10 underline'))
     canvas.create_text(149, 230, text="John Doe", fill="black", font=('Helvetica 10 '))
@@ -4396,25 +5982,102 @@ def mainpage():
     canvas.create_text(165, 320, text="PROD-0001", fill="black", font=('Helvetica 10'))
     canvas.create_text(400, 320, text="Example product - Description text...", fill="black", font=('Helvetica 10'))
     canvas.create_text(740, 320, text="1", fill="black", font=('Helvetica 10'))
-    canvas.create_text(884, 320, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
-    canvas.create_text(1084, 320, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(884, 320, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(884, 320, text="200"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(884, 320, text=""+comcursign.get()+" 200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(884, 320, text="200"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+    #canvas.create_text(884, 320, text="$200.00", fill="black", font=('Helvetica 10'))
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(1080, 320, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(1080, 320, text="200"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(1080, 320, text=""+comcursign.get()+" 200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(1080, 320, text="200"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+    #canvas.create_text(1080, 320, text="$200.00", fill="black", font=('Helvetica 10'))
 
     canvas.create_text(820, 345, text="Subtotal", fill="black", font=('Helvetica 10'))
-    canvas.create_text(1084, 345, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(1080, 345, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(1080, 345, text="200"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(1080, 345, text=""+comcursign.get()+" 200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(1080, 345, text="200"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+    #canvas.create_text(1080, 345, text="$200.00", fill="black", font=('Helvetica 10'))
 
     canvas.create_text(820, 370, text="TAX1", fill="black", font=('Helvetica 10'))
-    canvas.create_text(1089, 370, text=""+comcursign.get()+"18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(1085, 370, text=""+comcursign.get()+"18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(1085, 370, text="18"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(1085, 370, text=""+comcursign.get()+" 18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(1085, 370, text="18"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+    #canvas.create_text(1085, 370, text="$18.00", fill="black", font=('Helvetica 10'))
 
     canvas.create_text(820, 395, text="Shipping and handling", fill="black", font=('Helvetica 10'))
-    canvas.create_text(1089, 395, text=""+comcursign.get()+"20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
-
-    canvas.create_text(1084, 420, text=""+comcursign.get()+"238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10 bold'))
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(1085, 395, text=""+comcursign.get()+"20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(1085, 395, text="20"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(1085, 395, text=""+comcursign.get()+" 20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(1085, 395, text="20"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+    #canvas.create_text(1085, 395, text="$20.00", fill="black", font=('Helvetica 10'))
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(1080, 420, text=""+comcursign.get()+"238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(1080, 420, text="238"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(1080, 420, text=""+comcursign.get()+" 238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(1080, 420, text="238"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+    #canvas.create_text(1080, 420, text="$238.00", fill="black", font=('Helvetica 10 bold'))
     canvas.create_text(820, 420, text="Invoice total", fill="black", font=('Helvetica 10 bold'))
-
-    canvas.create_text(1084, 445, text=""+comcursign.get()+"100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(1080, 445, text=""+comcursign.get()+"100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(1080, 445, text="100"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(1080, 445, text=""+comcursign.get()+" 100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(1080, 445, text="100"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+    #canvas.create_text(1080, 445, text="$100.00", fill="black", font=('Helvetica 10'))
     canvas.create_text(820, 445, text="Total Paid", fill="black", font=('Helvetica 10'))
-
-    canvas.create_text(1084, 465, text=""+comcursign.get()+"138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(1080, 465, text=""+comcursign.get()+"138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(1080, 465, text="138"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(1080, 465, text=""+comcursign.get()+" 138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(1080, 465, text="138"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+    #canvas.create_text(1080, 465, text="$138.00", fill="black", font=('Helvetica 10'))
     canvas.create_text(820, 465, text="Balance", fill="black", font=('Helvetica 10'))
 
 
@@ -4428,8 +6091,8 @@ def mainpage():
     canvas.create_text(620, 620, text="Invoices are payable on receipt unless other terms, negotiated and noted on the invoice. By accepting delivery of goods, Buyer agrees to pay the invoiced cost for those goods,\nand agrees to be bound to thses contract terms. No acceptance may vary these terms unless specifically agreed in writing by Seller ", fill="black", font=('Helvetica 10'))
     canvas.create_text(196, 650, text="Page footer text goes here...", fill="black", font=('Helvetica 10'))
     canvas.create_text(1090, 650, text="Page 1 of 1", fill="black", font=('Helvetica 10'))
-  elif estdata[32] == 'Professional 1 (logo on left side)':
-    adv_winstyle8.insert(0, estdata[40])
+  elif advdata[32] == 'Professional 1 (logo on left side)':
+    adv_winstyle8.insert(0, advdata[40])
     frame = Frame(seventhtab, width=1200, height=155)
     frame.pack(expand=True, fill=BOTH)
     frame.place(x=2,y=309)
@@ -4444,29 +6107,44 @@ def mainpage():
     canvas.pack(expand=True,side=LEFT,fill=BOTH)
     canvas.create_rectangle(10, 10, 1190, 690 , outline='yellow',fill='white')
 
-    canvas.create_text(600, 45, text="Title text goes here...", fill="black", font=('Helvetica 10'))
+    canvas.create_text(600, 25, text="Title text goes here...", fill="black", font=('Helvetica 10'))
 
-    canvas.create_text(250, 70, text="Your Company Logo", fill="black", font=('Helvetica 18 bold'))
+    try:
+      adv_image = Image.open("images/"+advdata[13])
+      adv_resize_image = adv_image.resize((200,75))
+      adv_image = ImageTk.PhotoImage(adv_resize_image)
 
-    canvas.create_text(130, 110, text="Invoice#", fill="black", font=('Helvetica 11'))
-    canvas.create_text(141, 130, text="Invoice date", fill="black", font=('Helvetica 11'))
-    canvas.create_text(130, 150, text="Due date", fill="black", font=('Helvetica 11'))
-    canvas.create_text(120, 170, text="Terms", fill="black", font=('Helvetica 11'))
-    canvas.create_text(134, 190, text="Order ref.#", fill="black", font=('Helvetica 11'))
-    canvas.create_text(347, 110, text="INV1/2022", fill="black", font=('Helvetica 11'))
-    canvas.create_text(350, 130, text="03-05-2022", fill="black", font=('Helvetica 11'))
-    canvas.create_text(350, 150, text="18-05-2022", fill="black", font=('Helvetica 11'))
-    canvas.create_text(340, 170, text="NET 15", fill="black", font=('Helvetica 11'))
+      adv_btlogo = Label(canvas,width=200,height=75,image = adv_image) 
+      adv_window_image = canvas.create_window(150, 30, anchor="nw", window=adv_btlogo)
+      adv_btlogo.photo = adv_image
+    except:
+      pass  
+
+    canvas.create_text(130, 120, text="Invoice#", fill="black", font=('Helvetica 11'))
+    canvas.create_text(141, 140, text="Invoice date", fill="black", font=('Helvetica 11'))
+    canvas.create_text(130, 160, text="Due date", fill="black", font=('Helvetica 11'))
+    canvas.create_text(120, 180, text="Terms", fill="black", font=('Helvetica 11'))
+    canvas.create_text(134, 200, text="Order ref.#", fill="black", font=('Helvetica 11'))
+    canvas.create_text(347, 120, text="INV1/2022", fill="black", font=('Helvetica 11'))
+    canvas.create_text(350, 140, text="03-05-2022", fill="black", font=('Helvetica 11'))
+    canvas.create_text(350, 160, text="18-05-2022", fill="black", font=('Helvetica 11'))
+    canvas.create_text(340, 180, text="NET 15", fill="black", font=('Helvetica 11'))
 
     canvas.create_text(1050, 65, text=" "+comname.get(), fill="black", font=('Helvetica 12 '))
-    canvas.create_text(1085, 95, text="Address line 1", fill="black", font=('Helvetica 10'))
-    canvas.create_text(1085, 110, text="Address line 2", fill="black", font=('Helvetica 10'))
-    canvas.create_text(1085, 125, text="Address line 3", fill="black", font=('Helvetica 10'))
-    canvas.create_text(1085, 140, text="Address line 4", fill="black", font=('Helvetica 10'))
-    canvas.create_text(1080, 155, text="Phone: 555-5555", fill="black", font=('Helvetica 10'))
-    canvas.create_text(1080, 170, text="Sales tax reg No.", fill="black", font=('Helvetica 10'))
-    canvas.create_text(1094, 190, text="Invoice", fill="black", font=('Helvetica 14 bold'))
-    canvas.create_text(1080, 210, text="TAX EXEMPTED", fill="black", font=('Helvetica 10'))
+    # canvas.create_text(1080, 200, text=""+caddent.get('1.0','end-1c'), fill="black", font=('Helvetica 10'))
+    T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0)
+    T_address.tag_configure('tag_name',justify='right')
+    T_address.insert('1.0', advdata[2])
+    T_address.tag_add('tag_name','1.0', 'end')
+    T_address_window = canvas.create_window(850, 80, anchor="nw", window=T_address)
+        
+    canvas.create_text(1050, 170, text=""+comsalestax.get(), fill="black", font=('Helvetica 10'))
+    # canvas.create_text(1085, 125, text="Address line 3", fill="black", font=('Helvetica 10'))
+    # canvas.create_text(1085, 140, text="Address line 4", fill="black", font=('Helvetica 10'))
+    # canvas.create_text(1080, 155, text="Phone: 555-5555", fill="black", font=('Helvetica 10'))
+    # canvas.create_text(1080, 170, text="Sales tax reg No.", fill="black", font=('Helvetica 10'))
+    canvas.create_text(1050, 190, text="Invoice", fill="black", font=('Helvetica 14 bold'))
+    canvas.create_text(1050, 210, text="TAX EXEMPTED", fill="black", font=('Helvetica 10'))
 
     canvas.create_text(140, 215, text="Bill to", fill="black", font=('Helvetica 10 underline'))
     canvas.create_text(149, 230, text="John Doe", fill="black", font=('Helvetica 10 '))
@@ -4517,25 +6195,102 @@ def mainpage():
     canvas.create_text(165, 320, text="PROD-0001", fill="black", font=('Helvetica 10'))
     canvas.create_text(400, 320, text="Example product - Description text...", fill="black", font=('Helvetica 10'))
     canvas.create_text(740, 320, text="1", fill="black", font=('Helvetica 10'))
-    canvas.create_text(884, 320, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
-    canvas.create_text(1084, 320, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(884, 320, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(884, 320, text="200"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(884, 320, text=""+comcursign.get()+" 200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(884, 320, text="200"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+    #canvas.create_text(884, 320, text="$200.00", fill="black", font=('Helvetica 10'))
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(1080, 320, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(1080, 320, text="200"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(1080, 320, text=""+comcursign.get()+" 200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(1080, 320, text="200"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+    #canvas.create_text(1080, 320, text="$200.00", fill="black", font=('Helvetica 10'))
 
     canvas.create_text(820, 345, text="Subtotal", fill="black", font=('Helvetica 10'))
-    canvas.create_text(1084, 345, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(1080, 345, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(1080, 345, text="200"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(1080, 345, text=""+comcursign.get()+" 200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(1080, 345, text="200"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+    #canvas.create_text(1080, 345, text="$200.00", fill="black", font=('Helvetica 10'))
 
     canvas.create_text(820, 370, text="TAX1", fill="black", font=('Helvetica 10'))
-    canvas.create_text(1089, 370, text=""+comcursign.get()+"18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(1085, 370, text=""+comcursign.get()+"18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(1085, 370, text="18"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(1085, 370, text=""+comcursign.get()+" 18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(1085, 370, text="18"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+    #canvas.create_text(1085, 370, text="$18.00", fill="black", font=('Helvetica 10'))
 
     canvas.create_text(820, 395, text="Shipping and handling", fill="black", font=('Helvetica 10'))
-    canvas.create_text(1089, 395, text=""+comcursign.get()+"20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
-
-    canvas.create_text(1084, 420, text=""+comcursign.get()+"238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10 bold'))
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(1085, 395, text=""+comcursign.get()+"20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(1085, 395, text="20"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(1085, 395, text=""+comcursign.get()+" 20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(1085, 395, text="20"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+    #canvas.create_text(1085, 395, text="$20.00", fill="black", font=('Helvetica 10'))
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(1080, 420, text=""+comcursign.get()+"238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(1080, 420, text="238"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(1080, 420, text=""+comcursign.get()+" 238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(1080, 420, text="238"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+    #canvas.create_text(1080, 420, text="$238.00", fill="black", font=('Helvetica 10 bold'))
     canvas.create_text(820, 420, text="Invoice total", fill="black", font=('Helvetica 10 bold'))
-
-    canvas.create_text(1084, 445, text=""+comcursign.get()+"100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(1080, 445, text=""+comcursign.get()+"100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(1080, 445, text="100"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(1080, 445, text=""+comcursign.get()+" 100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(1080, 445, text="100"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+    #canvas.create_text(1080, 445, text="$100.00", fill="black", font=('Helvetica 10'))
     canvas.create_text(820, 445, text="Total Paid", fill="black", font=('Helvetica 10'))
-
-    canvas.create_text(1084, 465, text=""+comcursign.get()+"138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(1080, 465, text=""+comcursign.get()+"138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(1080, 465, text="138"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(1080, 465, text=""+comcursign.get()+" 138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(1080, 465, text="138"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+    #canvas.create_text(1080, 465, text="$138.00", fill="black", font=('Helvetica 10'))
     canvas.create_text(820, 465, text="Balance", fill="black", font=('Helvetica 10'))
 
 
@@ -4549,8 +6304,8 @@ def mainpage():
     canvas.create_text(620, 620, text="Invoices are payable on receipt unless other terms, negotiated and noted on the invoice. By accepting delivery of goods, Buyer agrees to pay the invoiced cost for those goods,\nand agrees to be bound to thses contract terms. No acceptance may vary these terms unless specifically agreed in writing by Seller ", fill="black", font=('Helvetica 10'))
     canvas.create_text(196, 650, text="Page footer text goes here...", fill="black", font=('Helvetica 10'))
     canvas.create_text(1090, 650, text="Page 1 of 1", fill="black", font=('Helvetica 10'))
-  elif estdata[32] == 'Professional 2 (logo on right side':
-    adv_winstyle8.insert(0, estdata[40])
+  elif advdata[32] == 'Professional 2 (logo on right side)':
+    adv_winstyle8.insert(0, advdata[40])
     frame = Frame(seventhtab, width=1200, height=155)
     frame.pack(expand=True, fill=BOTH)
     frame.place(x=2,y=309)
@@ -4564,9 +6319,18 @@ def mainpage():
     canvas.config(yscrollcommand=vertibar.set)
     canvas.pack(expand=True,side=LEFT,fill=BOTH)
     canvas.create_rectangle(10, 10, 1190, 690 , outline='yellow',fill='white')
-    canvas.create_text(600, 45, text="Title text goes here...", fill="black", font=('Helvetica 10'))
+    canvas.create_text(600, 25, text="Title text goes here...", fill="black", font=('Helvetica 10'))
+    try:
+      adv_image = Image.open("images/"+advdata[13])
+      adv_resize_image = adv_image.resize((200,75))
+      adv_image = ImageTk.PhotoImage(adv_resize_image)
 
-    canvas.create_text(1000, 70, text="Your Company Logo", fill="black", font=('Helvetica 18 bold'))
+      adv_btlogo = Label(canvas,width=200,height=75,image = adv_image) 
+      adv_window_image = canvas.create_window(850, 25, anchor="nw", window=adv_btlogo)
+      adv_btlogo.photo = adv_image
+    except:
+      pass  
+    #canvas.create_text(1000, 70, text="Your Company Logo", fill="black", font=('Helvetica 18 bold'))
 
     canvas.create_text(829, 110, text="Invoice#", fill="black", font=('Helvetica 11'))
     canvas.create_text(841, 130, text="Invoice date", fill="black", font=('Helvetica 11'))
@@ -4578,13 +6342,18 @@ def mainpage():
     canvas.create_text(1050, 150, text="21-05-2022", fill="black", font=('Helvetica 11'))
     canvas.create_text(1040, 170, text="NET 15", fill="black", font=('Helvetica 11'))
 
-    canvas.create_text(170, 65, text=" "+comname.get(), fill="black", font=('Helvetica 12 '))
-    canvas.create_text(130, 95, text="Address line 1", fill="black", font=('Helvetica 10'))
-    canvas.create_text(130, 110, text="Address line 2", fill="black", font=('Helvetica 10'))
-    canvas.create_text(130, 125, text="Address line 3", fill="black", font=('Helvetica 10'))
-    canvas.create_text(130, 140, text="Address line 4", fill="black", font=('Helvetica 10'))
-    canvas.create_text(136, 155, text="Phone: 555-5555", fill="black", font=('Helvetica 10'))
-    canvas.create_text(136, 170, text="Sales tax reg No.", fill="black", font=('Helvetica 10'))
+    canvas.create_text(170, 65, text=""+comname.get(), fill="black", font=('Helvetica 12 '))
+    # canvas.create_text(130, 200, text=""+caddent.get('1.0','end-1c'), fill="black", font=('Helvetica 10'))
+    T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0)
+    T_address.tag_configure('tag_name',justify='right')
+    T_address.insert('1.0', advdata[2])
+    T_address.tag_add('tag_name','1.0', 'end')
+    T_address_window = canvas.create_window(10, 80, anchor="nw", window=T_address)
+    canvas.create_text(125, 170, text=""+comsalestax.get(), fill="black", font=('Helvetica 10'))
+    # canvas.create_text(130, 125, text="Address line 3", fill="black", font=('Helvetica 10'))
+    # canvas.create_text(130, 140, text="Address line 4", fill="black", font=('Helvetica 10'))
+    # canvas.create_text(136, 155, text="Phone: 555-5555", fill="black", font=('Helvetica 10'))
+    # canvas.create_text(136, 170, text="Sales tax reg No.", fill="black", font=('Helvetica 10'))
     canvas.create_text(124, 190, text="Invoice", fill="black", font=('Helvetica 14 bold'))
 
     canvas.create_text(140, 215, text="Bill to", fill="black", font=('Helvetica 10 underline'))
@@ -4597,7 +6366,7 @@ def mainpage():
     canvas.create_text(598, 245, text="381 South Bedford Road", fill="black", font=('Helvetica 10'))
     canvas.create_text(608, 260, text="Bedford Corners, NY 10549", fill="black", font=('Helvetica 10'))
     canvas.create_text(568, 275, text="United States", fill="black", font=('Helvetica 10'))
-
+    
     s = ttk.Style()
     s.configure('mystyle_2.Treeview.Heading', background='orange',State='DISABLE')
 
@@ -4636,25 +6405,102 @@ def mainpage():
     canvas.create_text(165, 320, text="PROD-0001", fill="black", font=('Helvetica 10'))
     canvas.create_text(400, 320, text="Example product - Description text...", fill="black", font=('Helvetica 10'))
     canvas.create_text(740, 320, text="1", fill="black", font=('Helvetica 10'))
-    canvas.create_text(884, 320, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
-    canvas.create_text(1084, 320, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(884, 320, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(884, 320, text="200"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(884, 320, text=""+comcursign.get()+" 200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(884, 320, text="200"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+    #canvas.create_text(1080, 320, text="$200.00", fill="black", font=('Helvetica 10'))
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(1080, 320, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(1080, 320, text="200"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(1080, 320, text=""+comcursign.get()+" 200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(1080, 320, text="200"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+    #canvas.create_text(1084, 320, text="$200.00", fill="black", font=('Helvetica 10'))
 
     canvas.create_text(820, 345, text="Subtotal", fill="black", font=('Helvetica 10'))
-    canvas.create_text(1084, 345, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(1080, 345, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(1080, 345, text="200"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(1080, 345, text=""+comcursign.get()+" 200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(1080, 345, text="200"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+    #canvas.create_text(1084, 345, text="$200.00", fill="black", font=('Helvetica 10'))
 
     canvas.create_text(820, 370, text="TAX1", fill="black", font=('Helvetica 10'))
-    canvas.create_text(1089, 370, text=""+comcursign.get()+"18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(1085, 370, text=""+comcursign.get()+"18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(1085, 370, text="18"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(1085, 370, text=""+comcursign.get()+" 18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(1085, 370, text="18"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+    #canvas.create_text(1089, 370, text="$18.00", fill="black", font=('Helvetica 10'))
 
     canvas.create_text(820, 395, text="Shipping and handling", fill="black", font=('Helvetica 10'))
-    canvas.create_text(1089, 395, text=""+comcursign.get()+"20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
-
-    canvas.create_text(1084, 420, text=""+comcursign.get()+"238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10 bold'))
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(1085, 395, text=""+comcursign.get()+"20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(1085, 395, text="20"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(1085, 395, text=""+comcursign.get()+" 20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(1085, 395, text="20"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+    #canvas.create_text(1089, 395, text="$20.00", fill="black", font=('Helvetica 10'))
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(1080, 420, text=""+comcursign.get()+"238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(1080, 420, text="238"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(1080, 420, text=""+comcursign.get()+" 238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(1080, 420, text="238"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+    #canvas.create_text(1084, 420, text="$238.00", fill="black", font=('Helvetica 10 bold'))
     canvas.create_text(820, 420, text="Invoice total", fill="black", font=('Helvetica 10 bold'))
-
-    canvas.create_text(1084, 445, text=""+comcursign.get()+"100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(1080, 445, text=""+comcursign.get()+"100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(1080, 445, text="100"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(1080, 445, text=""+comcursign.get()+" 100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(1080, 445, text="100"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+    #canvas.create_text(1084, 445, text="$100.00", fill="black", font=('Helvetica 10'))
     canvas.create_text(820, 445, text="Total Paid", fill="black", font=('Helvetica 10'))
-
-    canvas.create_text(1084, 445, text=""+comcursign.get()+"138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(1080, 465, text=""+comcursign.get()+"138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(1080, 465, text="138"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(1080, 465, text=""+comcursign.get()+" 138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(1080, 465, text="138"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+    #canvas.create_text(1084, 465, text="$138.00", fill="black", font=('Helvetica 10'))
     canvas.create_text(820, 465, text="Balance", fill="black", font=('Helvetica 10'))
 
     canvas.create_text(200, 500, text="Multiline comment text goes here..", fill="black", font=('Helvetica 10'))
@@ -4667,8 +6513,10 @@ def mainpage():
     canvas.create_text(620, 620, text="Invoices are payable on receipt unless other terms, negotiated and noted on the invoice. By accepting delivery of goods, Buyer agrees to pay the invoiced cost for those goods,\nand agrees to be bound to thses contract terms. No acceptance may vary these terms unless specifically agreed in writing by Seller ", fill="black", font=('Helvetica 10'))
     canvas.create_text(196, 650, text="Page footer text goes here...", fill="black", font=('Helvetica 10'))
     canvas.create_text(1090, 650, text="Page 1 of 1", fill="black", font=('Helvetica 10'))
-  elif estdata[32] == 'Simplified 1 (logo on left side)':
-    adv_winstyle8.insert(0, estdata[40])
+
+
+  elif advdata[32] == 'Simplified 1 (logo on left side)':
+    adv_winstyle8.insert(0, advdata[40])
     frame = Frame(seventhtab, width=1200, height=155)
     frame.pack(expand=True, fill=BOTH)
     frame.place(x=2,y=309)
@@ -4682,28 +6530,42 @@ def mainpage():
     canvas.config(yscrollcommand=vertibar.set)
     canvas.pack(expand=True,side=LEFT,fill=BOTH)
     canvas.create_rectangle(10, 10, 1190, 690 , outline='yellow',fill='white')
-    canvas.create_text(600, 45, text="Title text goes here...", fill="black", font=('Helvetica 10'))
-        
-    canvas.create_text(250, 70, text="Your Company Logo", fill="black", font=('Helvetica 18 bold'))
+    canvas.create_text(600, 25, text="Title text goes here...", fill="black", font=('Helvetica 10'))
+    try:
+      adv_image = Image.open("images/"+advdata[13])
+      adv_resize_image = adv_image.resize((200,75))
+      adv_image = ImageTk.PhotoImage(adv_resize_image)
 
-    canvas.create_text(130, 110, text="Invoice#", fill="black", font=('Helvetica 11'))
-    canvas.create_text(141, 130, text="Invoice date", fill="black", font=('Helvetica 11'))
-    canvas.create_text(130, 150, text="Due date", fill="black", font=('Helvetica 11'))
-    canvas.create_text(120, 170, text="Terms", fill="black", font=('Helvetica 11'))
-    canvas.create_text(134, 190, text="Order ref.#", fill="black", font=('Helvetica 11'))
-    canvas.create_text(347, 110, text="INV1/2022", fill="black", font=('Helvetica 11'))
-    canvas.create_text(350, 130, text="06-05-2022", fill="black", font=('Helvetica 11'))
-    canvas.create_text(350, 150, text="21-05-2022", fill="black", font=('Helvetica 11'))
-    canvas.create_text(340, 170, text="NET 15", fill="black", font=('Helvetica 11'))
+      adv_btlogo = Label(canvas,width=200,height=75,image = adv_image) 
+      adv_window_image = canvas.create_window(150, 25, anchor="nw", window=adv_btlogo)
+      adv_btlogo.photo = adv_image
+    except:
+      pass  
+    #canvas.create_text(250, 70, text="Your Company Logo", fill="black", font=('Helvetica 18 bold'))
+
+    canvas.create_text(130, 120, text="Invoice#", fill="black", font=('Helvetica 11'))
+    canvas.create_text(141, 140, text="Invoice date", fill="black", font=('Helvetica 11'))
+    canvas.create_text(130, 160, text="Due date", fill="black", font=('Helvetica 11'))
+    canvas.create_text(120, 180, text="Terms", fill="black", font=('Helvetica 11'))
+    canvas.create_text(134, 200, text="Order ref.#", fill="black", font=('Helvetica 11'))
+    canvas.create_text(347, 120, text="INV1/2022", fill="black", font=('Helvetica 11'))
+    canvas.create_text(350, 140, text="06-05-2022", fill="black", font=('Helvetica 11'))
+    canvas.create_text(350, 160, text="21-05-2022", fill="black", font=('Helvetica 11'))
+    canvas.create_text(340, 180, text="NET 15", fill="black", font=('Helvetica 11'))
 
     canvas.create_text(1050, 65, text=" "+comname.get(), fill="black", font=('Helvetica 12 '))
-    canvas.create_text(1085, 95, text="Address line 1", fill="black", font=('Helvetica 10'))
-    canvas.create_text(1085, 110, text="Address line 2", fill="black", font=('Helvetica 10'))
-    canvas.create_text(1085, 125, text="Address line 3", fill="black", font=('Helvetica 10'))
-    canvas.create_text(1085, 140, text="Address line 4", fill="black", font=('Helvetica 10'))
-    canvas.create_text(1080, 155, text="Phone: 555-5555", fill="black", font=('Helvetica 10'))
-    canvas.create_text(1080, 170, text="Sales tax reg No.", fill="black", font=('Helvetica 10'))
-    canvas.create_text(1094, 190, text="Invoice", fill="black", font=('Helvetica 14 bold'))
+    # canvas.create_text(1080, 200, text=""+caddent.get('1.0','end-1c'), fill="black", font=('Helvetica 10'))
+    T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0)
+    T_address.tag_configure('tag_name',justify='right')
+    T_address.insert('1.0', advdata[2])
+    T_address.tag_add('tag_name','1.0', 'end')
+    T_address_window = canvas.create_window(850, 80, anchor="nw", window=T_address)
+    canvas.create_text(1050, 170, text=""+comsalestax.get(), fill="black", font=('Helvetica 10'))
+    # canvas.create_text(1085, 125, text="Address line 3", fill="black", font=('Helvetica 10'))
+    # canvas.create_text(1085, 140, text="Address line 4", fill="black", font=('Helvetica 10'))
+    # canvas.create_text(1080, 155, text="Phone: 555-5555", fill="black", font=('Helvetica 10'))
+    # canvas.create_text(1080, 170, text="Sales tax reg No.", fill="black", font=('Helvetica 10'))
+    canvas.create_text(1050, 190, text="Invoice", fill="black", font=('Helvetica 14 bold'))
 
     canvas.create_text(140, 215, text="Bill to", fill="black", font=('Helvetica 10 underline'))
     canvas.create_text(149, 230, text="John Doe", fill="black", font=('Helvetica 10 '))
@@ -4747,24 +6609,91 @@ def mainpage():
 
     canvas.create_text(250, 320, text="Example product - Description text...", fill="black", font=('Helvetica 10'))
     canvas.create_text(900, 320, text="1", fill="black", font=('Helvetica 10'))
-    canvas.create_text(1084, 320, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(1080, 320, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(1080, 320, text="200"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(1080, 320, text=""+comcursign.get()+" 200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(1080, 320, text="200"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+    #canvas.create_text(1084, 320, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
 
     canvas.create_text(820, 345, text="Subtotal", fill="black", font=('Helvetica 10'))
-    canvas.create_text(1084, 345, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(1080, 345, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(1080, 345, text="200"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(1080, 345, text=""+comcursign.get()+" 200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(1080, 345, text="200"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+    #canvas.create_text(1084, 345, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
 
     canvas.create_text(820, 370, text="TAX1", fill="black", font=('Helvetica 10'))
-    canvas.create_text(1089, 370, text=""+comcursign.get()+"18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(1085, 370, text=""+comcursign.get()+"18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(1085, 370, text="18"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(1085, 370, text=""+comcursign.get()+" 18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(1085, 370, text="18"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+    #canvas.create_text(1089, 370, text=""+comcursign.get()+"18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
 
     canvas.create_text(820, 395, text="Shipping and handling", fill="black", font=('Helvetica 10'))
-    canvas.create_text(1089, 395, text=""+comcursign.get()+"20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
-
-    canvas.create_text(1084, 420, text=""+comcursign.get()+"238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10 bold'))
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(1085, 395, text=""+comcursign.get()+"20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(1085, 395, text="20"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(1085, 395, text=""+comcursign.get()+" 20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(1085, 395, text="20"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+    #canvas.create_text(1089, 395, text=""+comcursign.get()+"20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(1080, 420, text=""+comcursign.get()+"238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(1080, 420, text="238"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(1080, 420, text=""+comcursign.get()+" 238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(1080, 420, text="238"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+    #canvas.create_text(1084, 420, text=""+comcursign.get()+"238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10 bold'))
     canvas.create_text(820, 420, text="Invoice total", fill="black", font=('Helvetica 10 bold'))
-
-    canvas.create_text(1084, 445, text=""+comcursign.get()+"100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(1080, 445, text=""+comcursign.get()+"100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(1080, 445, text="100"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(1080, 445, text=""+comcursign.get()+" 100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(1080, 445, text="100"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+    #canvas.create_text(1084, 445, text=""+comcursign.get()+"100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
     canvas.create_text(820, 445, text="Total Paid", fill="black", font=('Helvetica 10'))
-
-    canvas.create_text(1084, 465, text=""+comcursign.get()+"138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(1080, 465, text=""+comcursign.get()+"138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(1080, 465, text="138"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(1080, 465, text=""+comcursign.get()+" 138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(1080, 465, text="138"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+    #canvas.create_text(1084, 465, text=""+comcursign.get()+"138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
     canvas.create_text(820, 465, text="Balance", fill="black", font=('Helvetica 10'))
 
     canvas.create_text(200, 500, text="Multiline comment text goes here..", fill="black", font=('Helvetica 10'))
@@ -4777,8 +6706,8 @@ def mainpage():
     canvas.create_text(620, 620, text="Invoices are payable on receipt unless other terms, negotiated and noted on the invoice. By accepting delivery of goods, Buyer agrees to pay the invoiced cost for those goods,\nand agrees to be bound to thses contract terms. No acceptance may vary these terms unless specifically agreed in writing by Seller ", fill="black", font=('Helvetica 10'))
     canvas.create_text(196, 650, text="Page footer text goes here...", fill="black", font=('Helvetica 10'))
     canvas.create_text(1090, 650, text="Page 1 of 1", fill="black", font=('Helvetica 10'))
-  elif estdata[32] == 'Simplified 2 (logo on right side)':
-    adv_winstyle8.insert(0, estdata[40])
+  elif advdata[32] == 'Simplified 2 (logo on right side)':
+    adv_winstyle8.insert(0, advdata[40])
     frame = Frame(seventhtab, width=1200, height=155)
     frame.pack(expand=True, fill=BOTH)
     frame.place(x=2,y=309)
@@ -4792,27 +6721,42 @@ def mainpage():
     canvas.config(yscrollcommand=vertibar.set)
     canvas.pack(expand=True,side=LEFT,fill=BOTH)
     canvas.create_rectangle(10, 10, 1190, 690 , outline='yellow',fill='white')
-    canvas.create_text(600, 45, text="Title text goes here...", fill="black", font=('Helvetica 10'))
+    canvas.create_text(600, 25, text="Title text goes here...", fill="black", font=('Helvetica 10'))
+    try:
+      adv_image = Image.open("images/"+advdata[13])
+      adv_resize_image = adv_image.resize((200,75))
+      adv_image = ImageTk.PhotoImage(adv_resize_image)
 
-    canvas.create_text(1000, 70, text="Your Company Logo", fill="black", font=('Helvetica 18 bold'))
+      adv_btlogo = Label(canvas,width=200,height=75,image = adv_image) 
+      adv_window_image = canvas.create_window(850, 25, anchor="nw", window=adv_btlogo)
+      adv_btlogo.photo = adv_image
+    except:
+      pass  
 
-    canvas.create_text(829, 110, text="Invoice#", fill="black", font=('Helvetica 11'))
-    canvas.create_text(841, 130, text="Invoice date", fill="black", font=('Helvetica 11'))
-    canvas.create_text(830, 150, text="Due date", fill="black", font=('Helvetica 11'))
-    canvas.create_text(820, 170, text="Terms", fill="black", font=('Helvetica 11'))
-    canvas.create_text(834, 190, text="Order ref.#", fill="black", font=('Helvetica 11'))
-    canvas.create_text(1047, 110, text="INV1/2022", fill="black", font=('Helvetica 11'))
-    canvas.create_text(1050, 130, text="06-05-2022", fill="black", font=('Helvetica 11'))
-    canvas.create_text(1050, 150, text="21-05-2022", fill="black", font=('Helvetica 11'))
-    canvas.create_text(1040, 170, text="NET 15", fill="black", font=('Helvetica 11'))
+    # canvas.create_text(1000, 70, text="Your Company Logo", fill="black", font=('Helvetica 18 bold'))
 
-    canvas.create_text(170, 65, text=" "+comname.get(), fill="black", font=('Helvetica 12 '))
-    canvas.create_text(130, 95, text="Address line 1", fill="black", font=('Helvetica 10'))
-    canvas.create_text(130, 110, text="Address line 2", fill="black", font=('Helvetica 10'))
-    canvas.create_text(130, 125, text="Address line 3", fill="black", font=('Helvetica 10'))
-    canvas.create_text(130, 140, text="Address line 4", fill="black", font=('Helvetica 10'))
-    canvas.create_text(136, 155, text="Phone: 555-5555", fill="black", font=('Helvetica 10'))
-    canvas.create_text(136, 170, text="Sales tax reg No.", fill="black", font=('Helvetica 10'))
+    canvas.create_text(829, 120, text="Invoice#", fill="black", font=('Helvetica 11'))
+    canvas.create_text(841, 140, text="Invoice date", fill="black", font=('Helvetica 11'))
+    canvas.create_text(830, 160, text="Due date", fill="black", font=('Helvetica 11'))
+    canvas.create_text(820, 180, text="Terms", fill="black", font=('Helvetica 11'))
+    canvas.create_text(834, 200, text="Order ref.#", fill="black", font=('Helvetica 11'))
+    canvas.create_text(1047, 120, text="INV1/2022", fill="black", font=('Helvetica 11'))
+    canvas.create_text(1050, 140, text="06-05-2022", fill="black", font=('Helvetica 11'))
+    canvas.create_text(1050, 160, text="21-05-2022", fill="black", font=('Helvetica 11'))
+    canvas.create_text(1040, 180, text="NET 15", fill="black", font=('Helvetica 11'))
+
+    canvas.create_text(170, 55, text=" "+comname.get(), fill="black", font=('Helvetica 12 '))
+    # canvas.create_text(135, 200, text=""+caddent.get('1.0','end-1c'), fill="black", font=('Helvetica 10'))
+    T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0)
+    T_address.tag_configure('tag_name',justify='right')
+    T_address.insert('1.0', advdata[2])
+    T_address.tag_add('tag_name','1.0', 'end')
+    T_address_window = canvas.create_window(10, 80, anchor="nw", window=T_address)
+    canvas.create_text(130, 170, text=""+comsalestax.get(), fill="black", font=('Helvetica 10'))
+    # canvas.create_text(130, 125, text="Address line 3", fill="black", font=('Helvetica 10'))
+    # canvas.create_text(130, 140, text="Address line 4", fill="black", font=('Helvetica 10'))
+    # canvas.create_text(136, 155, text="Phone: 555-5555", fill="black", font=('Helvetica 10'))
+    # canvas.create_text(136, 170, text="Sales tax reg No.", fill="black", font=('Helvetica 10'))
     canvas.create_text(124, 190, text="Invoice", fill="black", font=('Helvetica 14 bold'))
 
     canvas.create_text(140, 215, text="Bill to", fill="black", font=('Helvetica 10 underline'))
@@ -4857,24 +6801,91 @@ def mainpage():
 
     canvas.create_text(250, 320, text="Example product - Description text...", fill="black", font=('Helvetica 10'))
     canvas.create_text(900, 320, text="1", fill="black", font=('Helvetica 10'))
-    canvas.create_text(1084, 320, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(1080, 320, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(1080, 320, text="200"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(1080, 320, text=""+comcursign.get()+" 200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(1080, 320, text="200"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+    #canvas.create_text(1084, 320, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
 
     canvas.create_text(820, 345, text="Subtotal", fill="black", font=('Helvetica 10'))
-    canvas.create_text(1084, 345, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(1080, 345, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(1080, 345, text="200"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(1080, 345, text=""+comcursign.get()+" 200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(1080, 345, text="200"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+    #canvas.create_text(1084, 345, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
 
     canvas.create_text(820, 370, text="TAX1", fill="black", font=('Helvetica 10'))
-    canvas.create_text(1089, 370, text=""+comcursign.get()+"18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(1085, 370, text=""+comcursign.get()+"18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(1085, 370, text="18"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(1085, 370, text=""+comcursign.get()+" 18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(1085, 370, text="18"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+    #canvas.create_text(1089, 370, text=""+comcursign.get()+"18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
 
     canvas.create_text(820, 395, text="Shipping and handling", fill="black", font=('Helvetica 10'))
-    canvas.create_text(1089, 395, text=""+comcursign.get()+"20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
-
-    canvas.create_text(1084, 420, text=""+comcursign.get()+"238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10 bold'))
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(1085, 395, text=""+comcursign.get()+"20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(1085, 395, text="20"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(1085, 395, text=""+comcursign.get()+" 20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(1085, 395, text="20"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+    #canvas.create_text(1089, 395, text=""+comcursign.get()+"20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(1080, 420, text=""+comcursign.get()+"238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(1080, 420, text="238"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(1080, 420, text=""+comcursign.get()+" 238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(1080, 420, text="238"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+    #canvas.create_text(1084, 420, text=""+comcursign.get()+"238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10 bold'))
     canvas.create_text(820, 420, text="Invoice total", fill="black", font=('Helvetica 10 bold'))
-
-    canvas.create_text(1084, 445, text=""+comcursign.get()+"100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(1080, 445, text=""+comcursign.get()+"100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(1080, 445, text="100"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(1080, 445, text=""+comcursign.get()+" 100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(1080, 445, text="100"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+    #canvas.create_text(1084, 445, text=""+comcursign.get()+"100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
     canvas.create_text(820, 445, text="Total Paid", fill="black", font=('Helvetica 10'))
-
-    canvas.create_text(1084, 465, text=""+comcursign.get()+"138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(1080, 465, text=""+comcursign.get()+"138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(1080, 465, text="138"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(1080, 465, text=""+comcursign.get()+" 138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(1080, 465, text="138"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+    #canvas.create_text(1084, 465, text=""+comcursign.get()+"138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
     canvas.create_text(820, 465, text="Balance", fill="black", font=('Helvetica 10'))
 
     canvas.create_text(200, 500, text="Multiline comment text goes here..", fill="black", font=('Helvetica 10'))
@@ -4887,8 +6898,8 @@ def mainpage():
     canvas.create_text(620, 620, text="Invoices are payable on receipt unless other terms, negotiated and noted on the invoice. By accepting delivery of goods, Buyer agrees to pay the invoiced cost for those goods,\nand agrees to be bound to thses contract terms. No acceptance may vary these terms unless specifically agreed in writing by Seller ", fill="black", font=('Helvetica 10'))
     canvas.create_text(196, 650, text="Page footer text goes here...", fill="black", font=('Helvetica 10'))
     canvas.create_text(1090, 650, text="Page 1 of 1", fill="black", font=('Helvetica 10'))
-  elif estdata[32] == 'Business Classic':
-    adv_winstyle8.insert(0, estdata[40])
+  elif advdata[32] == 'Business Classic':
+    adv_winstyle8.insert(0, advdata[40])
     frame = Frame(seventhtab, width=1200, height=155)
     frame.pack(expand=True, fill=BOTH)
     frame.place(x=2,y=309)
@@ -4906,15 +6917,34 @@ def mainpage():
     canvas.create_line(100, 60, 1120, 60, fill="orange")
     #canvas.create_line(1000, 60, 600, 60, fill="grey")
 
-    canvas.create_text(250, 155, text="Your Company Logo", fill="black", font=('Helvetica 18 bold'))
+    try:
+      adv_image = Image.open("images/"+advdata[13])
+      adv_resize_image = adv_image.resize((200,100))
+      adv_image = ImageTk.PhotoImage(adv_resize_image)
 
-    canvas.create_text(560, 95, text=" "+comname.get(), fill="black", font=('Helvetica 12 '))
-    canvas.create_text(530, 110, text="Address line 1", fill="black", font=('Helvetica 10'))
-    canvas.create_text(530, 125, text="Address line 2", fill="black", font=('Helvetica 10'))
-    canvas.create_text(530, 140, text="Address line 3", fill="black", font=('Helvetica 10'))
-    canvas.create_text(530, 155, text="Address line 4", fill="black", font=('Helvetica 10'))
-    canvas.create_text(536, 170, text="Phone: 555-5555", fill="black", font=('Helvetica 10'))
-    canvas.create_text(536, 190, text="Sales tax reg No.", fill="black", font=('Helvetica 10'))
+      adv_btlogo = Label(canvas,width=200,height=100,image = adv_image) 
+      adv_window_image = canvas.create_window(140, 100, anchor="nw", window=adv_btlogo)
+      adv_btlogo.photo = adv_image
+    except:
+      pass  
+
+
+    # canvas.create_text(250, 155, text="Your Company Logo", fill="black", font=('Helvetica 18 bold'))
+
+    canvas.create_text(560, 85, text=" "+comname.get(), fill="black", font=('Helvetica 12 '))
+    # canvas.create_text(535, 200, text=""+caddent.get('1.0', 'end-1c'), fill="black", font=('Helvetica 10'))
+    T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0)
+    T_address.tag_configure('tag_name',justify='right')
+    T_address.insert('1.0', advdata[2])
+    T_address.tag_add('tag_name','1.0', 'end')
+    T_address_window = canvas.create_window(350, 100, anchor="nw", window=T_address)
+    # adv_btlabel = Label(canvas,width=20,height=10,text=""+caddent.get('1.0', 'end-1c')) 
+    # adv_window_label = canvas.create_window(530, 110, anchor="nw", window=adv_btlabel)
+    canvas.create_text(530, 190, text=""+comsalestax.get(), fill="black", font=('Helvetica 10'))
+    # canvas.create_text(530, 140, text="Address line 3", fill="black", font=('Helvetica 10'))
+    # canvas.create_text(530, 155, text="Address line 4", fill="black", font=('Helvetica 10'))
+    # canvas.create_text(536, 170, text="Phone: 555-5555", fill="black", font=('Helvetica 10'))
+    # canvas.create_text(536, 190, text="Sales tax reg No.", fill="black", font=('Helvetica 10'))
     canvas.create_text(524, 210, text="Invoice", fill="black", font=('Helvetica 14 bold'))
 
     canvas.create_text(749, 95, text="John Doe", fill="black", font=('Helvetica 10 '))
@@ -4929,9 +6959,8 @@ def mainpage():
     canvas.create_text(947, 160, text="INV1/2022", fill="black", font=('Helvetica 11'))
     canvas.create_text(950, 180, text="06-05-2022", fill="black", font=('Helvetica 11'))
     canvas.create_text(950, 200, text="21-05-2022", fill="black", font=('Helvetica 11'))
-
-    # s = ttk.Style()
-    # s.configure('mystyle_02.Treeview.Heading', background='orange',State='DISABLE')
+    s = ttk.Style()
+    s.configure('mystyle_2.Treeview.Heading', background='orange',State='DISABLE')
 
     tree=ttk.Treeview(canvas, column=("c1", "c2","c3", "c4", "c5"), show='headings',height= 0, style='mystyle_2.Treeview')
         
@@ -4965,26 +6994,103 @@ def mainpage():
 
     canvas.create_text(165, 260, text="PROD-0001", fill="black", font=('Helvetica 10'))
     canvas.create_text(400, 260, text="Example product - Description text...", fill="black", font=('Helvetica 10'))
-    canvas.create_text(734, 260, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(734, 260, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(734, 260, text="200"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(734, 260, text=""+comcursign.get()+" 200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(734, 260, text="200"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+    #canvas.create_text(734, 260, text="$200.00", fill="black", font=('Helvetica 10'))
     canvas.create_text(890, 260, text="1", fill="black", font=('Helvetica 10'))
-    canvas.create_text(1084, 260, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(1080, 260, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(1080, 260, text="200"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(1080, 260, text=""+comcursign.get()+" 200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(1080, 260, text="200"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+    # canvas.create_text(1080, 260, text="$200.00", fill="black", font=('Helvetica 10'))
 
     canvas.create_text(697, 285, text="Subtotal", fill="black", font=('Helvetica 10'))
-    canvas.create_text(1084, 285, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(1080, 285, text=""+comcursign.get()+"200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(1080, 285, text="200"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(1080, 285, text=""+comcursign.get()+" 200"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(1080, 285, text="200"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+    #canvas.create_text(1080, 285, text="$200.00", fill="black", font=('Helvetica 10'))
 
     canvas.create_text(692, 310, text="TAX1", fill="black", font=('Helvetica 10'))
-    canvas.create_text(1089, 310, text=""+comcursign.get()+"18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(1085, 310, text=""+comcursign.get()+"18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(1085, 310, text="18"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(1085, 310, text=""+comcursign.get()+" 18"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(1085, 310, text="18"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+    #canvas.create_text(1085, 310, text="$18.00", fill="black", font=('Helvetica 10'))
 
     canvas.create_text(737, 335, text="Shipping and handling", fill="black", font=('Helvetica 10'))
-    canvas.create_text(1089, 335, text=""+comcursign.get()+"20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
-
-    canvas.create_text(1084, 360, text=""+comcursign.get()+"238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10 bold'))
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(1085, 335, text=""+comcursign.get()+"20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(1085, 335, text="20"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(1085, 335, text=""+comcursign.get()+" 20"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(1085, 335, text="20"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+    #canvas.create_text(1085, 335, text="$20.00", fill="black", font=('Helvetica 10'))
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(1080, 360, text=""+comcursign.get()+"238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(1080, 360, text="238"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(1080, 360, text=""+comcursign.get()+" 238"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(1080, 360, text="238"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+    #canvas.create_text(1080, 360, text="$238.00", fill="black", font=('Helvetica 10 bold'))
     canvas.create_text(715, 360, text="Invoice total", fill="black", font=('Helvetica 10 bold'))
-
-    canvas.create_text(1084, 385, text=""+comcursign.get()+"100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(1080, 385, text=""+comcursign.get()+"100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(1080, 385, text="100"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(1080, 385, text=""+comcursign.get()+" 100"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(1080, 385, text="100"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+    #canvas.create_text(1080, 385, text="100.00", fill="black", font=('Helvetica 10'))
     canvas.create_text(705, 385, text="Total Paid", fill="black", font=('Helvetica 10'))
-
-    canvas.create_text(1084, 410, text=""+comcursign.get()+"138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    if comcursignpla.get() == "before amount":
+      canvas.create_text(1080, 410, text=""+comcursign.get()+"138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount":
+      canvas.create_text(1080, 410, text="138"+""+comdecsep.get()+"00"+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "before amount with space":
+      canvas.create_text(1080, 410, text=""+comcursign.get()+" 138"+""+comdecsep.get()+"00", fill="black", font=('Helvetica 10'))
+    elif comcursignpla.get() == "after amount with space":
+     canvas.create_text(1080, 410, text="138"+""+comdecsep.get()+"00 "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+    else:
+      pass
+    #canvas.create_text(1080, 410, text="$138.00", fill="black", font=('Helvetica 10'))
     canvas.create_text(700, 410, text="Balance", fill="black", font=('Helvetica 10'))
 
     canvas.create_line(100, 480, 1120, 480, fill="orange")
