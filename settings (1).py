@@ -12,7 +12,7 @@ from tkinter import messagebox
 from tkinter import ttk
 from tkinter.font import BOLD
 from urllib.parse import parse_qs
-from xml.dom.minidom import Entity
+from xml.dom.minidom import Comment, Entity
 from PIL import ImageTk, Image, ImageFile
 from matplotlib.font_manager import json_dump
 from numpy import choose, empty, place
@@ -206,49 +206,1944 @@ def mainpage():
   
   
 
+  ######################Estimate Section#####################
   
-  # def log():
-  #   global user_name1
-  #   user_name1=username1.get()
-  #   passwd1=password1.get()
-  #   if user_name1=="" or passwd1=="":
-  #       Label(screen2,text='Plz enter both username and password',fg='red').place(x=85,y=260)
-  #   else:
-  #       sql='SELECT * FROM users WHERE username=%s AND password=%s'
-  #       val=(user_name1,passwd1,)
-  #       fbcursor.execute(sql,val)
-  #       if fbcursor.fetchone()is not None:
-  #           root(user_name1)
-  #       else:
-  #           messagebox.showinfo('Acess denied','Acess denied')
+  # global filename
+  # filename = ""
+  # def save_estimate():
+
+
+  # #create new order
+
+  def estimate_create():
+    estimate_pop=Toplevel(estimate_midFrame)
+    estimate_pop.title("Estimate")
+    estimate_pop.geometry("950x690+150+0")
+
+    def add_new_estimate():
+      estimate_number = estimate_number_entry.get()
+      estdate = estimate_date_entry.get()
+      duedate = estimate_duedate_entry.get()
+
+      estimate_sql='INSERT INTO estimate (estimate_number,estdate,duedate) VALUES(%s,%s,%s)' #adding values into db
+      estimate_val=(estimate_number,estdate,duedate)
+      fbcursor.execute(estimate_sql,estimate_val)
+      fbilldb.commit()
+      messagebox.showinfo("F-Billing Revolution","Estimate saved")
+
+
+    #select customer
+    def estimate_custom():
+      estimate_cuselection=Toplevel()
+      estimate_cuselection.title("Select Customer")
+      estimate_cuselection.geometry("930x650+240+10")
+      estimate_cuselection.resizable(False, False)
+
+
+      #add new customer
+      def estimate_create1():
+        estimate_ven=Toplevel(estimate_midFrame)
+        estimate_ven.title("Add new vendor")
+        estimate_ven.geometry("930x650+240+10")
+        estimate_checkvar1=IntVar()
+        estimate_checkvar2=IntVar()
+        estimate_radio=IntVar()
+        estimate_createFrame=Frame(estimate_ven, bg="#f5f3f2", height=650)
+        estimate_createFrame.pack(side="top", fill="both")
+        estimate_labelframe1 = LabelFrame(estimate_createFrame,text="Customer",bg="#f5f3f2",font=("arial",15))
+        estimate_labelframe1.place(x=10,y=5,width=910,height=600)
+        estimate_text1=Label(estimate_labelframe1, text="Customer ID:",bg="#f5f3f2",fg="blue").place(x=5 ,y=10)
+        estimate_e1=Entry(estimate_labelframe1,width=25).place(x=150,y=10)
+        estimate_text2=Label(estimate_labelframe1, text="Category:",bg="#f5f3f2").place(x=390 ,y=10)
+        estimate_e2=ttk.Combobox(estimate_labelframe1,width=25,value="Default").place(x=460 ,y=10)
+        estimate_text3=Label(estimate_labelframe1, text="Status:",bg="#f5f3f2").place(x=710 ,y=10)
+        estimate_checkbtn1=Checkbutton(estimate_labelframe1,text="Active",variable=estimate_checkvar1,onvalue=1,offvalue=0,bg="#f5f3f2").place(x=760 ,y=10)
+        
+        estimate_labelframe2 = LabelFrame(estimate_labelframe1,text="Invoice to (appears on invoices)",bg="#f5f3f2")
+        estimate_labelframe2.place(x=5,y=40,width=420,height=150)
+        estimate_name = Label(estimate_labelframe2, text="Ship to name:",bg="#f5f3f2",fg="blue").place(x=5,y=5)
+        estimate_e1 = Entry(estimate_labelframe2,width=28).place(x=130,y=5)
+        estimate_addr = Label(estimate_labelframe2, text="Address:",bg="#f5f3f2",fg="blue").place(x=5,y=40)
+        estimate_e2 = Entry(estimate_labelframe2,width=28).place(x=130,y=40,height=80)
+        
+        estimate_btn1=Button(estimate_labelframe1,width=3,height=2,compound = LEFT,text=">>").place(x=440, y=90)
+
+        estimate_labelframe3 = LabelFrame(estimate_labelframe1,text="Ship to (appears on invoices)",bg="#f5f3f2")
+        estimate_labelframe3.place(x=480,y=40,width=420,height=150)
+        estimate_name1 = Label(estimate_labelframe3, text="Business name:",bg="#f5f3f2").place(x=5,y=5)
+        estimate_e01 = Entry(estimate_labelframe3,width=28).place(x=130,y=5)
+        estimate_addr01 = Label(estimate_labelframe3, text="Address:",bg="#f5f3f2").place(x=5,y=40)
+        estimate_e02 = Entry(estimate_labelframe3,width=28).place(x=130,y=40,height=80)
+        
+        estimate_labelframe4 = LabelFrame(estimate_labelframe1,text="Contact",bg="#f5f3f2")
+        estimate_labelframe4.place(x=5,y=195,width=420,height=150)
+        estimate_name11 = Label(estimate_labelframe4, text="Contact person:",bg="#f5f3f2").place(x=5,y=5)
+        estimate_e11 = Entry(estimate_labelframe4,width=28).place(x=130,y=5)
+        estimate_email1 = Label(estimate_labelframe4, text="E-mail address:",bg="#f5f3f2",fg="blue").place(x=5,y=35)
+        estimate_e21 = Entry(estimate_labelframe4,width=28).place(x=130,y=35)
+        estimate_tel1 = Label(estimate_labelframe4, text="Tel.number:",bg="#f5f3f2").place(x=5,y=65)
+        estimate_e31 = Entry(estimate_labelframe4,width=11).place(x=130,y=65)
+        estimate_fax1 = Label(estimate_labelframe4, text="Fax:",bg="#f5f3f2").place(x=240,y=65)
+        estimate_e41 = Entry(estimate_labelframe4,width=11).place(x=280,y=65)
+        estimate_sms1 = Label(estimate_labelframe4, text="Mobile number for SMS notifications:",bg="#f5f3f2").place(x=5,y=95)
+        estimate_e51 = Entry(estimate_labelframe4,width=15).place(x=248,y=95)      
+
+        estimate_btn11=Button(estimate_labelframe1,width=3,height=2,compound = LEFT,text=">>").place(x=440, y=250)
+
+        
+        estimate_labelframe5 = LabelFrame(estimate_labelframe1,text="Ship to contact",bg="#f5f3f2")
+        estimate_labelframe5.place(x=480,y=195,width=420,height=125)
+        estimate_name2 = Label(estimate_labelframe5, text="Contact person:",bg="#f5f3f2").place(x=5,y=5)
+        estimate_e21 = Entry(estimate_labelframe5,width=28).place(x=130,y=5)
+        estimate_email2 = Label(estimate_labelframe5, text="E-mail address:",bg="#f5f3f2").place(x=5,y=35)
+        estimate_e22 = Entry(estimate_labelframe5,width=28).place(x=130,y=35)
+        estimate_tel2 = Label(estimate_labelframe5, text="Tel.number:",bg="#f5f3f2").place(x=5,y=65)
+        estimate_e32 = Entry(estimate_labelframe5,width=11).place(x=130,y=65)
+        estimate_fax2 = Label(estimate_labelframe5, text="Fax:",bg="#f5f3f2").place(x=240,y=65)
+        estimate_e42 = Entry(estimate_labelframe5,width=11).place(x=280,y=65)
+
+        estimate_labelframe6 = LabelFrame(estimate_labelframe1,text="Contact",bg="#f5f3f2")
+        estimate_labelframe6.place(x=5,y=350,width=420,height=100)
+        estimate_checkbtn2=Checkbutton(estimate_labelframe6,text="Tax Exempt",variable=estimate_checkvar2,onvalue=1,offvalue=0,bg="#f5f3f2").place(x=5 ,y=5)
+        estimate_tax3 = Label(estimate_labelframe6, text="Specific Tax1 %:",bg="#f5f3f2").place(x=180,y=5)
+        estimate_e31 = Entry(estimate_labelframe6,width=10).place(x=290,y=5)
+        estimate_discount = Label(estimate_labelframe6, text="Discount%:",bg="#f5f3f2").place(x=5,y=35)
+        estimate_e32 = Entry(estimate_labelframe6,width=10).place(x=100,y=35)
+
+        estimate_labelframe7 = LabelFrame(estimate_labelframe1,text="Contact",bg="#f5f3f2")
+        estimate_labelframe7.place(x=480,y=330,width=420,height=100)
+        estimate_country4 = Label(estimate_labelframe7, text="country:",bg="#f5f3f2").place(x=5,y=5)
+        estimate_e41 = Entry(estimate_labelframe7,width=28).place(x=130,y=5)
+        estimate_city4 = Label(estimate_labelframe7, text="City:",bg="#f5f3f2").place(x=5,y=35)
+        estimate_e24 = Entry(estimate_labelframe7,width=28).place(x=130,y=35)
+
+        estimate_labelframe8 = LabelFrame(estimate_labelframe1,text="Customer Type",bg="#f5f3f2")
+        estimate_labelframe8.place(x=5,y=460,width=420,height=100)
+        estimate_R1=Radiobutton(estimate_labelframe8,text=" Client ",variable=estimate_radio,value=1,bg="#f5f3f2").place(x=5,y=15)
+        estimate_R2=Radiobutton(estimate_labelframe8,text=" Vendor ",variable=estimate_radio,value=2,bg="#f5f3f2").place(x=150,y=15)
+        estimate_R3=Radiobutton(estimate_labelframe8,text=" Both(client/vendor)",variable=estimate_radio,value=3,bg="#f5f3f2").place(x=250,y=15)
+        
+
+        estimate_labelframe9 = LabelFrame(estimate_labelframe1,text="Notes",bg="#f5f3f2")
+        estimate_labelframe9.place(x=480,y=430,width=420,height=150)
+        estimate_e51 = Entry(estimate_labelframe9).place(x=10,y=10,height=100,width=390)
+
+        estimate_btn51=Button(estimate_ven,width=60,height=10,bg="#f5f3f2",compound = LEFT,image=tick ,text="OK").place(x=20, y=615)
+        estimate_btn52=Button(estimate_ven,width=60,height=10,bg="#f5f3f2",compound = LEFT,image=cancel,text="Cancel").place(x=800, y=615)
+          
+                
+
+      estimate_enter=Label(estimate_cuselection, text="Enter filter text").place(x=5, y=10)
+      estimate_e61=Entry(estimate_cuselection, width=20).place(x=110, y=10)
+      estimate_text6=Label(estimate_cuselection, text="Filtered column").place(x=340, y=10)
+      estimate_e26=Entry(estimate_cuselection, width=20).place(x=450, y=10)
+
+      estimate_cusventtree=ttk.Treeview(estimate_cuselection, height=27)
+      estimate_cusventtree["columns"]=["1","2","3", "4"]
+      estimate_cusventtree.column("#0", width=35)
+      estimate_cusventtree.column("1", width=160)
+      estimate_cusventtree.column("2", width=160)
+      estimate_cusventtree.column("3", width=140)
+      estimate_cusventtree.column("4", width=140)
+      estimate_cusventtree.heading("#0",text="")
+      estimate_cusventtree.heading("1",text="Customer/Ventor ID")
+      estimate_cusventtree.heading("2",text="Customer/Ventor Name")
+      estimate_cusventtree.heading("3",text="Tel.")
+      estimate_cusventtree.heading("4",text="Contact Person")
+      estimate_cusventtree.place(x=5, y=45)
+
+
+      estimate_ctegorytree=ttk.Treeview(estimate_cuselection, height=27)
+      estimate_ctegorytree["columns"]=["1"]
+      estimate_ctegorytree.column("#0", width=35, minwidth=20)
+      estimate_ctegorytree.column("1", width=205, minwidth=25, anchor=CENTER)    
+      estimate_ctegorytree.heading("#0",text="", anchor=W)
+      estimate_ctegorytree.heading("1",text="View filter by category", anchor=CENTER)
+      estimate_ctegorytree.place(x=660, y=45)
+
+      estimate_scrollbar = Scrollbar(estimate_cuselection)
+      estimate_scrollbar.place(x=640, y=45, height=560)
+      estimate_scrollbar.config( command=tree.yview )
+
+      estimate_btn71=Button(estimate_cuselection,compound = LEFT,image=tick ,text="ok", width=60).place(x=15, y=610)
+      estimate_btn72=Button(estimate_cuselection,compound = LEFT,image=tick,text="Edit selected customer", width=150,command=estimate_create1).place(x=250, y=610)
+      estimate_btn73=Button(estimate_cuselection,compound = LEFT,image=tick, text="Add new customer", width=150,command=estimate_create1).place(x=435, y=610)
+      estimate_btn74=Button(estimate_cuselection,compound = LEFT,image=cancel ,text="Cancel", width=60).place(x=740, y=610)   
+
+
+
+      
+
+    #add new line item
+    def estimate_newline():
+      estimate_newselection=Toplevel()
+      estimate_newselection.title("Select Customer")
+      estimate_newselection.geometry("930x650+240+10")
+      estimate_newselection.resizable(False, False)
+
+
+      #add new product
+      def estimate_product():  
+        estimate_top = Toplevel()  
+        estimate_top.title("Add a new Product/Service")
+        estimate_p2 = PhotoImage(file = 'images/fbicon.png')
+        estimate_top.iconphoto(False, estimate_p2)
+      
+        estimate_top.geometry("700x550+390+15")
+        estimate_tabControl = ttk.Notebook(estimate_top)
+        estimate_s = ttk.Style()
+        estimate_s.theme_use('default')
+        estimate_s.configure('TNotebook.Tab', background="#999999",padding=10,bd=0)
+
+
+        estimate_tab1 = ttk.Frame(estimate_tabControl)
+        estimate_tab2 = ttk.Frame(estimate_tabControl)
+      
+        estimate_tabControl.add(estimate_tab1,compound = LEFT, text ='Product/Service')
+        estimate_tabControl.add(estimate_tab2,compound = LEFT, text ='Product Image')
+      
+        estimate_tabControl.pack(expand = 1, fill ="both")
+      
+        estimate_innerFrame = Frame(estimate_tab1,bg="#f5f3f2", relief=GROOVE)
+        estimate_innerFrame.pack(side="top",fill=BOTH)
+
+        estimate_Customerlabelframe = LabelFrame(estimate_innerFrame,text="Product/Service",width=580,height=485)
+        estimate_Customerlabelframe.pack(side="top",fill=BOTH,padx=10)
+
+        estimate_code1=Label(estimate_Customerlabelframe,text="Code or SKU:",fg="blue",pady=10,padx=10)
+        estimate_code1.place(x=20,y=0)
+        estimate_codeentry = Entry(estimate_Customerlabelframe,width=35)
+        estimate_codeentry.place(x=120,y=8)
+
+        estimate_checkvarStatus=IntVar()
+        estimate_status1=Label(estimate_Customerlabelframe,text="Status:")
+        estimate_status1.place(x=500,y=8)
+        estimate_Button1 = Checkbutton(estimate_Customerlabelframe,
+                          variable = estimate_checkvarStatus,text="Active",compound="right",
+                          onvalue =0 ,
+                          offvalue = 1,
+                        
+                          width = 10)
+
+        estimate_Button1.place(x=550,y=5)
+
+        estimate_category1=Label(estimate_Customerlabelframe,text="Category:",pady=5,padx=10)
+        estimate_category1.place(x=20,y=40)
+        estimate_n = StringVar()
+        estimate_country0 = ttk.Combobox(estimate_Customerlabelframe, width = 40, textvariable = estimate_n )
+        
+        estimate_country0['values'] = ('Default',' India',' China',' Australia',' Nigeria',' Malaysia',' Italy',' Turkey',)
+        
+        estimate_country0.place(x=120,y=45)
+        estimate_country0.current(0)
+
+
+        estimate_name81=Label(estimate_Customerlabelframe,text="Name :",fg="blue",pady=5,padx=10)
+        estimate_name81.place(x=20,y=70)
+        estimate_nameentry = Entry(estimate_Customerlabelframe,width=60)
+        estimate_nameentry.place(x=120,y=75)
+
+        estimate_des1=Label(estimate_Customerlabelframe,text="Description :",pady=5,padx=10)
+        estimate_des1.place(x=20,y=100)
+        estimate_desentry = Entry(estimate_Customerlabelframe,width=60)
+        estimate_desentry.place(x=120,y=105)
+
+        estimate_uval = IntVar(estimate_Customerlabelframe, value='$0.00')
+        estimate_unit1=Label(estimate_Customerlabelframe,text="Unit Price:",fg="blue",pady=5,padx=10)
+        estimate_unit1.place(x=20,y=130)
+        estimate_unitentry = Entry(estimate_Customerlabelframe,width=20,textvariable=estimate_uval)
+        estimate_unitentry.place(x=120,y=135)
+
+        estimate_pcsval = IntVar(estimate_Customerlabelframe, value='$0.00')
+        estimate_pcs1=Label(estimate_Customerlabelframe,text="Pcs/Weight:",fg="blue",pady=5,padx=10)
+        estimate_pcs1.place(x=320,y=140)
+        estimate_pcsentry = Entry(estimate_Customerlabelframe,width=20,textvariable=estimate_pcsval)
+        estimate_pcsentry.place(x=410,y=140)
+
+        estimate_costval = IntVar(estimate_Customerlabelframe, value='$0.00')
+        estimate_cost1=Label(estimate_Customerlabelframe,text="Cost:",pady=5,padx=10)
+        estimate_cost1.place(x=20,y=160)
+        estimate_costentry = Entry(estimate_Customerlabelframe,width=20,textvariable=estimate_costval)
+        estimate_costentry.place(x=120,y=165)
+
+        estimate_priceval = IntVar(estimate_Customerlabelframe, value='$0.00')
+        estimate_price1=Label(estimate_Customerlabelframe,text="(Price Cost):",pady=5,padx=10)
+        estimate_price1.place(x=20,y=190)
+        estimate_priceentry = Entry(estimate_Customerlabelframe,width=20,textvariable=estimate_priceval)
+        estimate_priceentry.place(x=120,y=195)
+
+        estimate_checkvarStatus2=IntVar()
+      
+        estimate_Button92 = Checkbutton(estimate_Customerlabelframe,variable = estimate_checkvarStatus2,
+                          text="Taxable Tax1rate",compound="right",
+                          onvalue =0 ,
+                          offvalue = 1,
+                          height=2,
+                          width = 12)
+
+        estimate_Button92.place(x=415,y=170)
+
+
+        estimate_checkvarStatus3=IntVar()
+      
+        estimate_Button93 = Checkbutton(estimate_Customerlabelframe,variable = estimate_checkvarStatus3,
+                          text="No stock Control",
+                          onvalue =1 ,
+                          offvalue = 0,
+                          height=3,
+                          width = 15)
+
+        estimate_Button93.place(x=40,y=220)
+
+
+        estimate_stockval = IntVar(estimate_Customerlabelframe, value='0')
+        estimate_stock1=Label(estimate_Customerlabelframe,text="Stock:",pady=5,padx=10)
+        estimate_stock1.place(x=90,y=260)
+        estimate_stockentry = Entry(estimate_Customerlabelframe,width=15,textvariable=estimate_stockval)
+        estimate_stockentry.place(x=150,y=265)
+
+        estimate_lowval = IntVar(estimate_Customerlabelframe, value='0')
+        estimate_low1=Label(estimate_Customerlabelframe,text="Low Stock Warning Limit:",pady=5,padx=10)
+        estimate_low1.place(x=300,y=260)
+        estimate_lowentry = Entry(estimate_Customerlabelframe,width=10,textvariable=estimate_lowval)
+        estimate_lowentry.place(x=495,y=265)
+
+      
+        estimate_ware1=Label(estimate_Customerlabelframe,text="Warehouse:",pady=5,padx=10)
+        estimate_ware1.place(x=60,y=290)
+        estimate_wareentry = Entry(estimate_Customerlabelframe,width=50)
+        estimate_wareentry.place(x=150,y=295)
+
+        estimate_text10=Label(estimate_Customerlabelframe,text="Private notes(not appears on invoice):",pady=5,padx=10)
+        estimate_text10.place(x=20,y=330)
+
+        estimate_txt = scrolledtext.ScrolledText(estimate_Customerlabelframe, undo=True,width=62,height=4)
+        estimate_txt.place(x=32,y=358)
+
+
+
+
+        estimate_okButton = Button(estimate_innerFrame,compound = LEFT,image=tick , text ="Ok",width=60)
+        estimate_okButton.pack(side=LEFT)
+
+        estimate_cancelButton = Button(estimate_innerFrame,compound = LEFT,image=cancel ,text="Cancel",width=60)
+        estimate_cancelButton.pack(side=RIGHT)
+
+        estimate_imageFrame = Frame(estimate_tab2, relief=GROOVE,height=580)
+        estimate_imageFrame.pack(side="top",fill=BOTH)
+
+        estimate_browseimg=Label(estimate_imageFrame,text=" Browse for product image file(recommended image type:JPG,size 480x320 pixels) ",bg='#f5f3f2')
+        estimate_browseimg.place(x=15,y=35)
+
+        estimate_browsebutton=Button(estimate_imageFrame,text = 'Browse')
+        estimate_browsebutton.place(x=580,y=30,height=30,width=50)
+        
+        estimate_removeButton = Button(estimate_imageFrame,compound = LEFT,image=cancel, text ="Remove Product Image",width=150)
+        estimate_removeButton.place(x=400,y=450)
+
+
+
+      
+                      
+      estimate_enter10=Label(estimate_newselection, text="Enter filter text").place(x=5, y=10)
+      estimate_e10=Entry(estimate_newselection, width=20).place(x=110, y=10)
+      estimate_text10=Label(estimate_newselection, text="Filtered column").place(x=340, y=10)
+      estimate_e20=Entry(estimate_newselection, width=20).place(x=450, y=10)
+
+      estimate_cusventtree1=ttk.Treeview(estimate_newselection, height=27)
+      estimate_cusventtree1["columns"]=["1","2","3", "4","5"]
+      estimate_cusventtree1.column("#0", width=35)
+      estimate_cusventtree1.column("1", width=160)
+      estimate_cusventtree1.column("2", width=160)
+      estimate_cusventtree1.column("3", width=140)
+      estimate_cusventtree1.column("4", width=70)
+      estimate_cusventtree1.column("5", width=70)
+      estimate_cusventtree1.heading("#0",text="")
+      estimate_cusventtree1.heading("1",text="ID/SKU")
+      estimate_cusventtree1.heading("2",text="Product/Service Name")
+      estimate_cusventtree1.heading("3",text="Unit price")
+      estimate_cusventtree1.heading("4",text="Service")
+      estimate_cusventtree1.heading("5",text="Stock")
+      estimate_cusventtree1.place(x=5, y=45)
+
+
+      estimate_ctegorytree1=ttk.Treeview(estimate_newselection, height=27)
+      estimate_ctegorytree1["columns"]=["1"]
+      estimate_ctegorytree1.column("#0", width=35, minwidth=20)
+      estimate_ctegorytree1.column("1", width=205, minwidth=25, anchor=CENTER)    
+      estimate_ctegorytree1.heading("#0",text="", anchor=W)
+      estimate_ctegorytree1.heading("1",text="View filter by category", anchor=CENTER)
+      estimate_ctegorytree1.place(x=660, y=45)
+
+      estimate_scrollbar10 = Scrollbar(estimate_newselection)
+      estimate_scrollbar10.place(x=640, y=45, height=560)
+      estimate_scrollbar10.config( command=tree.yview )
+    
+
+      estimate_btn11=Button(estimate_newselection,compound = LEFT,image=tick ,text="ok", width=60).place(x=15, y=610)
+      estimate_btn11=Button(estimate_newselection,compound = LEFT,image=tick , text="Edit product/Service", width=150,command=product).place(x=250, y=610)
+      estimate_btn11=Button(estimate_newselection,compound = LEFT,image=tick , text="Add product/Service", width=150,command=product).place(x=435, y=610)
+      estimate_btn11=Button(estimate_newselection,compound = LEFT,image=cancel ,text="Cancel", width=60).place(x=740, y=610)
+
+
+
+    #preview new line
+    def estimate_previewline():
+      messagebox.showerror("F-Billing Revolution","line is required,please select customer for this order before printing.")
+
+
+    
+    #sms notification
+    def estimate_sms1():
+      estimate_send_SMS=Toplevel()
+      estimate_send_SMS.geometry("700x480+240+150")
+      estimate_send_SMS.title("Send SMS notification")
+
+      estimate_style = ttk.Style()
+      estimate_style.theme_use('default')
+      estimate_style.configure('TNotebook.Tab', background="#999999", padding=5)
+      estimate_sms_Notebook = ttk.Notebook(estimate_send_SMS)
+      estimate_SMS_Notification = Frame(estimate_sms_Notebook, height=470, width=700)
+      estimate_SMS_Service_Account = Frame(estimate_sms_Notebook, height=470, width=700)
+      estimate_sms_Notebook.add(estimate_SMS_Notification, text="SMS Notification")
+      estimate_sms_Notebook.add(estimate_SMS_Service_Account, text="SMS Service Account")
+      estimate_sms_Notebook.place(x=0, y=0)
+
+      estimate_numlbel=Label(estimate_SMS_Notification, text="SMS number or comma seperated SMS number list(Please start each SMS number with the country code)")
+      estimate_numlbel.place(x=10, y=10)
+      estimate_numentry=Entry(estimate_SMS_Notification, width=92).place(x=10, y=30)
+      estimate_stexbel=Label(estimate_SMS_Notification, text="SMS Text").place(x=10, y=60)
+      estimate_stex=Entry(estimate_SMS_Notification, width=40).place(x=10, y=85,height=120)
+      
+      estimate_dclbel=Label(estimate_SMS_Notification, text="Double click to insert into text")
+      estimate_dclbel.place(x=410, y=60)
+      estimate_dcl=Entry(estimate_SMS_Notification, width=30)
+      estimate_dcl.place(x=400, y=85,height=200)
+      
+      estimate_smstype=LabelFrame(estimate_SMS_Notification, text="SMS message type", width=377, height=60)
+      estimate_smstype.place(x=10, y=223)
+      estimate_snuvar=IntVar()
+      estimate_normal_rbtn=Radiobutton(estimate_smstype, text="Normal SMS(160 chars)", variable=estimate_snuvar, value=1)
+      estimate_normal_rbtn.place(x=5, y=5)
+      estimate_unicode_rbtn=Radiobutton(estimate_smstype, text="Unicode SMS(70 chars)", variable=estimate_snuvar, value=2)
+      estimate_unicode_rbtn.place(x=190, y=5)
+      estimate_tiplbf=LabelFrame(estimate_SMS_Notification, text="Tips", width=680, height=120)
+      estimate_tiplbf.place(x=10, y=290)
+      estimate_tiplabl=Label(estimate_tiplbf,justify=LEFT,fg="red",  text="Always start the SMS nymber with the country code. Do not use the + sign at the beginning(example\nUS number:8455807546). Do not use any special characters in your normal SMS text. Please use the\nstndard SMS characters or the English alphabet and numbers only. Otherwise the SMS will be\nunreadable or undeliverable. If you need to enter international characters, accents,email address, or\nspecial characters to the SMS text field then choose the Unicode SMS format.")
+      estimate_tiplabl.place(x=5, y=5)
+
+      estimate_btnn1=Button(estimate_SMS_Notification, width=20, text="Send SMS notification").place(x=10, y=420)
+      estimate_btnn2=Button(estimate_SMS_Notification, width=25, text="Confirm SMS cost before sending").place(x=280, y=420)
+      estimate_btnn3=Button(estimate_SMS_Notification, width=15, text="Cancel").place(x=550, y=420)
+      
+
+      estimate_smstypee=LabelFrame(estimate_SMS_Service_Account, text="Select the notification service provider", width=670, height=65)
+      estimate_smstypee.place(x=10, y=5)
+      estimate_snumvarr=IntVar()
+      estimate_normal_rbtn=Radiobutton(estimate_smstypee,text="BULKSMS(www.bulksms.com)",variable=estimate_snumvarr,value=1,)
+      estimate_normal_rbtn.place(x=5, y=5)
+      estimate_unicode_rbtn=Radiobutton(estimate_smstypee, text="Unicode SMS(70 chars)-Recommended", variable=estimate_snumvarr, value=2)
+      estimate_unicode_rbtn.place(x=290, y=5)
+
+      estimate_sms1type=LabelFrame(estimate_SMS_Service_Account, text="Your BULKSMS.COM Account", width=670, height=100)
+      estimate_sms1type.place(x=10, y=80)
+      estimate_namee=Label(estimate_sms1type, text="Username").place(x=10, y=5)
+      estimate_na=Entry(estimate_sms1type, width=20).place(x=100, y=5)
+      estimate_password=Label(estimate_sms1type, text="Password").place(x=10, y=45)
+      estimate_pas=Entry(estimate_sms1type, width=20).place(x=100, y=45)
+      estimate_combo=Label(estimate_sms1type, text="Route").place(x=400, y=5)
+      estimate_nn = StringVar()
+      estimate_combo1 = ttk.Combobox(estimate_sms1type, width = 20, textvariable = estimate_nn ).place(x=450,y=5)
+      estimate_btnnn1=Button(estimate_sms1type, width=10, text="Save settings").place(x=550, y=45)
+
+      
+      estimate_tiplbf=LabelFrame(estimate_SMS_Service_Account, text="Terms of service", width=680, height=250)
+      estimate_tiplbf.place(x=10, y=190)
+      estimate_tiplabl=Label(estimate_tiplbf,justify=LEFT,fg="red",  text="The SMS notification service is not free.This service costs you creadit.You must have your own account\nat BULKSMS.COM and you need to have sufficient creadit and an active internet connection to use\nthis feature.Please review all fields in this form for accuracy")
+      estimate_tiplabl.place(x=0, y=5)
+      estimate_tiplabl1=Label(estimate_tiplbf,justify=LEFT,fg="black",  text="visit www.bulksms.com website to create your own account.please make sure the BULKSMS .COM\n service works well in your country before you busy creadit")
+      estimate_tiplabl1.place(x=0, y=60)
+      estimate_tiplabl2=Label(estimate_tiplbf,justify=LEFT,fg="black",  text="Our SMS notification tool comes without any warranty.our software only forwards your SMS message\nthe BULKSMS API server .The BULKSMS API server will try to sent SMS message your recipient")
+      estimate_tiplabl2.place(x=0, y=100)
+      estimate_tiplabl3=Label(estimate_tiplbf,justify=LEFT,fg="red",  text="Please note that you access and use the SMS notification tool your own risk.F-Billing software is not\nresponsible for any type of loss or damage or undelivered SMS massage which you may as a result\nof accessing and using the SMS notification service.")
+      estimate_tiplabl3.place(x=0, y=140)
+      estimate_checkvarr1=IntVar()
+      estimate_chkbtnn1=Checkbutton(estimate_tiplbf,text="I have read and agree to the terms of service above",variable=estimate_checkvarr1,onvalue=1,offvalue=0).place(x=70, y=200) 
+
+
+
+    
+    #delete line item  
+    def estimate_delete1():
+      messagebox.showerror("F-Billing Revolution","Customer is required,please select customer before deleting line item .")
+      
+      
+
+    estimate_firFrame=Frame(estimate_pop, bg="#f5f3f2", height=60)
+    estimate_firFrame.pack(side="top", fill=X)
+
+    estimate_w = Canvas(estimate_firFrame, width=1, height=65, bg="#b3b3b3", bd=0)
+    estimate_w.pack(side="left", padx=5)
+
+    estimate_create = Button(estimate_firFrame,compound="top", text="Select\nCustomer",relief=RAISED, image=customer,bg="#f5f3f2", fg="black", height=55, bd=1, width=55,command=estimate_custom)
+    estimate_create.pack(side="left", pady=3, ipadx=4)
+
+
+    estimate_w1 = Canvas(estimate_firFrame, width=1, height=65, bg="#b3b3b3", bd=0)
+    estimate_w1.pack(side="left", padx=5)
+
+    estimate_addd= Button(estimate_firFrame,compound="top", text="Add new\nline item",relief=RAISED, image=photo,bg="#f5f3f2", fg="black", height=55, bd=1, width=55,command=estimate_newline)
+    estimate_addd.pack(side="left", pady=3, ipadx=4)
+
+    estimate_dele= Button(estimate_firFrame,compound="top", text="Delete line\nitem",relief=RAISED, image=photo2,bg="#f5f3f2", fg="black", height=55, bd=1, width=55,command=estimate_delete1)
+    estimate_dele.pack(side="left", pady=3, ipadx=4)
+
+    estimate_w2 = Canvas(estimate_firFrame, width=1, height=65, bg="#b3b3b3", bd=0)
+    estimate_w2.pack(side="left", padx=5)
+
+    estimate_prev= Button(estimate_firFrame,compound="top", text="Preview\nEstimate",relief=RAISED, image=photo4,bg="#f5f3f2", fg="black", height=55, bd=1, width=55,command=estimate_previewline)
+    estimate_prev.pack(side="left", pady=3, ipadx=4)
+
+    estimate_prin= Button(estimate_firFrame,compound="top", text="Print \nEstimate",relief=RAISED, image=photo5,bg="#f5f3f2", fg="black", height=55, bd=1, width=55,command=estimate_printsele)
+    estimate_prin.pack(side="left", pady=3, ipadx=4)
+
+    estimate_w3 = Canvas(estimate_firFrame, width=1, height=65, bg="#b3b3b3", bd=0)
+    estimate_w3.pack(side="left", padx=5)
+
+    estimate_mail= Button(estimate_firFrame,compound="top", text="Email\nEstimate",relief=RAISED, image=photo6,bg="#f5f3f2", fg="black", height=55, bd=1, width=55,command=estimate_emailord)
+    estimate_mail.pack(side="left", pady=3, ipadx=4)
+
+    estimate_smss1= Button(estimate_firFrame,compound="top", text="Send SMS\nnotification",relief=RAISED, image=photo10,bg="#f5f3f2", fg="black", height=55, bd=1, width=55,command=estimate_sms1)
+    estimate_smss1.pack(side="left", pady=3, ipadx=4)
+
+    estimate_w4 = Canvas(estimate_firFrame, width=1, height=65, bg="#b3b3b3", bd=0)
+    estimate_w4.pack(side="left", padx=5)
+
+    estimate_smss1= Button(estimate_firFrame,compound="top", text="Set Status\nto Accepted",relief=RAISED, image=mark1,bg="#f5f3f2", fg="black", height=55, bd=1, width=55)
+    estimate_smss1.pack(side="left", pady=3, ipadx=4)
+
+    estimate_smss1= Button(estimate_firFrame,compound="top", text="Set Status\nto Declined",relief=RAISED, image=mark1,bg="#f5f3f2", fg="black", height=55, bd=1, width=55)
+    estimate_smss1.pack(side="left", pady=3, ipadx=4)
+
+    def estimate_calcu():
+      subprocess.Popen('C:\\Windows\\System32\\calc.exe')
+
+    estimate_calc= Button(estimate_firFrame,compound="top", text="Open\nCalculator",relief=RAISED, image=photo9,bg="#f5f3f2", fg="black", height=55, bd=1, width=55, command=estimate_calcu)
+    estimate_calc.pack(side="left", pady=3, ipadx=4)
+
+    estimate_save= Button(estimate_firFrame,compound="top", text="Save",relief=RAISED, image=tick,bg="#f5f3f2", fg="black", height=55, bd=1, width=55, command=add_new_estimate)
+    estimate_save.pack(side="right", pady=3, ipadx=4)
+
+
+    estimate_fir1Frame=Frame(estimate_pop, height=180,bg="#f5f3f2")
+    estimate_fir1Frame.pack(side="top", fill=X)
+
+    estimate_labelframee1 = LabelFrame(estimate_fir1Frame,text="Customers",font=("arial",15))
+    estimate_labelframee1.place(x=10,y=5,width=640,height=160)
+    estimate_orderr1 = Label(estimate_labelframee1, text="Estimate to").place(x=10,y=5)
+    estimate_ee1 = ttk.Combobox(estimate_labelframee1, value="Hello",width=28).place(x=80,y=5)
+    estimate_addresss=Label(estimate_labelframee1,text="Address").place(x=10,y=30)
+    estimate_ee2=Text(estimate_labelframee1,width=23).place(x=80,y=30,height=70)
+    estimate_shipp=Label(estimate_labelframee1,text="Ship to").place(x=342,y=5)
+    estimate_ee3=Entry(estimate_labelframee1,width=30).place(x=402,y=3)
+    estimate_addresss1=Label(estimate_labelframee1,text="Address").place(x=340,y=30)
+    estimate_ee4=Text(estimate_labelframee1,width=23).place(x=402,y=30,height=70)
+
+    estimate_bttn1=Button(estimate_labelframee1,width=3,height=2,compound = LEFT,text=">>").place(x=280, y=50)
+    
+    estimate_labelframee2 = LabelFrame(estimate_fir1Frame,text="")
+    estimate_labelframee2.place(x=10,y=130,width=640,height=42)
+    estimate_emaill=Label(estimate_labelframee2,text="Email").place(x=10,y=5)
+    estimate_ee5=Entry(estimate_labelframee2,width=30).place(x=80,y=5)
+    estimate_smms=Label(estimate_labelframee2,text="SMS Number").place(x=328,y=5)
+    estimate_ee6=Entry(estimate_labelframee2,width=30).place(x=402,y=5)
+      
+    estimate_labelframe = LabelFrame(estimate_fir1Frame,text="Estimate",font=("arial",15))
+    estimate_labelframe.place(x=652,y=5,width=290,height=170)
+    estimate_order0=Label(estimate_labelframe,text="Estimate#").place(x=5,y=5)
+    estimate_number_entry=Entry(estimate_labelframe,width=25)
+    estimate_number_entry.place(x=100,y=5,)
+
+    estimate_orderdate=Label(estimate_labelframe,text="Estimate date").place(x=5,y=33)
+    estimate_date_entry=DateEntry(estimate_labelframe,width=20)
+    estimate_date_entry.place(x=150,y=33)
+    estimate_checkvarStatus5=IntVar()
+    estimate_duedate=Checkbutton(estimate_labelframe,variable = estimate_checkvarStatus5,text="Due date",onvalue =0 ,offvalue = 1).place(x=5,y=62)
+    estimate_duedate_entry=DateEntry(estimate_labelframe,width=20)
+    estimate_duedate_entry.place(x=150,y=62)
+    estimate_termss=Label(estimate_labelframe,text="Terms").place(x=5,y=92)
+    estimate_ee04=ttk.Combobox(estimate_labelframe, value="",width=25).place(x=100,y=92)
+    estimate_reff=Label(estimate_labelframe,text="Order ref#").place(x=5,y=118)
+    estimate_ee11=Entry(estimate_labelframe,width=27).place(x=100,y=118)
+
+    estimate_fir2Frame=Frame(estimate_pop, height=150,width=100,bg="#f5f3f2")
+    estimate_fir2Frame.pack(side="top", fill=X)
+    estimate_listFrame = Frame(estimate_fir2Frame, bg="white", height=140,borderwidth=5,  relief=RIDGE)
+    
+    estimate_tree=ttk.Treeview(estimate_listFrame)
+    estimate_tree["columns"]=["1","2","3","4","5","6","7","8"]
+
+    estimate_tree.column("#0", width=40)
+    estimate_tree.column("1", width=80)
+    estimate_tree.column("2", width=190)
+    estimate_tree.column("3", width=190)
+    estimate_tree.column("4", width=80)
+    estimate_tree.column("5", width=60)
+    estimate_tree.column("6", width=60)
+    estimate_tree.column("7", width=60)
+    estimate_tree.column("8", width=80)
+    
+    estimate_tree.heading("#0")
+    estimate_tree.heading("1",text="ID/SKU")
+    estimate_tree.heading("2",text="Product/Service")
+    estimate_tree.heading("3",text="Description")
+    estimate_tree.heading("4",text="Unit Price")
+    estimate_tree.heading("5",text="Quality")
+    estimate_tree.heading("6",text="Pcs/Weight")
+    estimate_tree.heading("7",text="Tax1")
+    estimate_tree.heading("8",text="Price")
+    
+    estimate_tree.pack(fill="both", expand=1)
+    estimate_listFrame.pack(side="top", fill="both", padx=5, pady=3, expand=1)
+
+    estimate_fir3Frame=Frame(estimate_pop,height=200,width=700,bg="#f5f3f2")
+    estimate_fir3Frame.place(x=0,y=490)
+
+    estimate_tabStyle = ttk.Style()
+    estimate_tabStyle.theme_use('default')
+    estimate_tabStyle.configure('TNotebook.Tab', background="#999999", width=12, padding=5)
+    estimate_myNotebookk=ttk.Notebook(estimate_fir3Frame)
+    estimate_orderFrame = Frame(estimate_myNotebookk, height=200, width=800)
+    estimate_headerFrame = Frame(estimate_myNotebookk, height=200, width=800)
+    estimate_commentFrame = Frame(estimate_myNotebookk, height=200, width=800)
+    estimate_termsFrame = Frame(estimate_myNotebookk, height=200, width=800)
+    estimate_noteFrame = Frame(estimate_myNotebookk, height=200, width=800)
+    estimate_documentFrame = Frame(estimate_myNotebookk, height=200, width=800)
+    
+    estimate_myNotebookk.add(estimate_orderFrame,compound="left", text="Estimate")
+    estimate_myNotebookk.add(estimate_headerFrame,compound="left",  text="Header/Footer")
+    estimate_myNotebookk.add(estimate_commentFrame,compound="left",  text="Comments")
+    estimate_myNotebookk.add(estimate_termsFrame,compound="left", text="Terms")
+    estimate_myNotebookk.add(estimate_noteFrame,compound="left",  text="Private notes")
+    estimate_myNotebookk.add(estimate_documentFrame,compound="left",  text="Documents")
+    estimate_myNotebookk.pack(expand = 1, fill ="both")  
+
+    estimate_labelfram1 = LabelFrame(estimate_orderFrame,text="",font=("arial",15))
+    estimate_labelfram1.place(x=1,y=1,width=800,height=170)
+
+    estimates_cost1=Label(estimate_labelfram1,text="Extra cost name").place(x=2,y=5)
+    estimates_e1=ttk.Combobox(estimate_labelfram1, value="",width=20).place(x=115,y=5)
+
+    estimates_rate=Label(estimate_labelfram1,text="Discount rate").place(x=370,y=5)
+    estimates_e2=Entry(estimate_labelfram1,width=6).place(x=460,y=5)
+
+    estimates_cost2=Label(estimate_labelfram1,text="Extra cost").place(x=35,y=35)
+    estimates_e3=Entry(estimate_labelfram1,width=10).place(x=115,y=35)
+    estimates_tax=Label(estimate_labelfram1,text="Tax1").place(x=420,y=35)
+    estimates_e4=Entry(estimate_labelfram1,width=7).place(x=460,y=35)
+    estimates_template=Label(estimate_labelfram1,text="Template").place(x=37,y=70)
+    estimates_e5=ttk.Combobox(estimate_labelfram1, value="",width=25).place(x=115,y=70)
+    estimates_sales=Label(estimate_labelfram1,text="Sales Person").place(x=25,y=100)
+    estimates_e6=Entry(estimate_labelfram1,width=18).place(x=115,y=100)
+    estimates_category=Label(estimate_labelfram1,text="Category").place(x=300,y=100)
+    estimates_e7=Entry(estimate_labelfram1,width=22).place(x=370,y=100)
+    
+    estimate_statusfrme = LabelFrame(estimate_labelfram1,text="Status",font=("arial",15))
+    estimate_statusfrme.place(x=540,y=0,width=160,height=160)
+    estimates_draft=Label(estimate_statusfrme, text="Draft",font=("arial", 15, "bold"), fg="grey").place(x=50, y=3)
+    estimates_on1=Label(estimate_statusfrme, text="Emailed on:").place( y=50)
+    estimates_nev1=Label(estimate_statusfrme, text="Never").place(x=100,y=50)
+    estimates_on2=Label(estimate_statusfrme, text="Printed on:").place( y=90)
+    estimates_nev2=Label(estimate_statusfrme, text="Never").place(x=100,y=90)
+
+    estimates_text01=Label(estimate_headerFrame,text="Title text").place(x=50,y=5)
+    estimates_e01=ttk.Combobox(estimate_headerFrame, value="",width=60).place(x=125,y=5)
+    estimates_text02=Label(estimate_headerFrame,text="Page header text").place(x=2,y=45)
+    estimates_e11=ttk.Combobox(estimate_headerFrame, value="",width=60).place(x=125,y=45)
+    estimates_text03=Label(estimate_headerFrame,text="Footer text").place(x=35,y=85)
+    estimates_e21=ttk.Combobox(estimate_headerFrame, value="",width=60).place(x=125,y=85)
+
+    estimates_texttt=Label(estimate_noteFrame,text="Private notes(not shown on invoice/order/estemates)").place(x=10,y=10)
+    estimates_e41=Text(estimate_noteFrame,width=100,height=7).place(x=10,y=32)
+
+    estimates_e51=Text(estimate_termsFrame,width=100,height=9).place(x=10,y=10)
+
+    estimates_e61=Text(estimate_commentFrame,width=100,height=9).place(x=10,y=10)
+
+    estimates_btn1=Button(estimate_documentFrame,height=2,width=3,text="+").place(x=5,y=10)
+    estimates_btn2=Button(estimate_documentFrame,height=2,width=3,text="-").place(x=5,y=50)
+    estimates_texttt1=Label(estimate_documentFrame,text="Attached documents or image files.If you attach large email then email taken long time to send").place(x=50,y=10)
+    estimates_cusventtree=ttk.Treeview(estimate_documentFrame, height=5)
+    estimates_cusventtree["columns"]=["1","2","3"]
+    estimates_cusventtree.column("#0", width=20)
+    estimates_cusventtree.column("1", width=250)
+    estimates_cusventtree.column("2", width=250)
+    estimates_cusventtree.column("2", width=200)
+    estimates_cusventtree.heading("#0",text="", anchor=W)
+    estimates_cusventtree.heading("1",text="Attach to Email")
+    estimates_cusventtree.heading("2",text="Filename")
+    estimates_cusventtree.heading("3",text="Filesize")  
+    estimates_cusventtree.place(x=50, y=45)
+    
+
+    estimate_fir4Frame1=Frame(estimate_pop,height=190,width=210,bg="#f5f3f2")
+    estimate_fir4Frame1.place(x=740,y=520)
+    estimate_summaryfrme = LabelFrame(estimate_fir4Frame1,text="Summary",font=("arial",15))
+    estimate_summaryfrme.place(x=0,y=0,width=200,height=170)
+    estimate_discounttt=Label(estimate_summaryfrme, text="Discount").place(x=0 ,y=0)
+    estimate_discounttt1=Label(estimate_summaryfrme, text="$0.00").place(x=130 ,y=0)
+    estimate_subbb=Label(estimate_summaryfrme, text="Subtotal").place(x=0 ,y=21)
+    estimate_subbb1=Label(estimate_summaryfrme, text="$0.00").place(x=130 ,y=21)
+    estimate_ttaax=Label(estimate_summaryfrme, text="Tax1").place(x=0 ,y=42)
+    estimate_ttax1=Label(estimate_summaryfrme, text="$0.00").place(x=130 ,y=42)
+    estimate_costt=Label(estimate_summaryfrme, text="Extra cost").place(x=0 ,y=63)
+    estimate_costtt=Label(estimate_summaryfrme, text="$0.00").place(x=130 ,y=63)
+    estimate_orderrr=Label(estimate_summaryfrme, text="Order total").place(x=0 ,y=84)
+    estimate_orderrr1=Label(estimate_summaryfrme, text="$0.00").place(x=130 ,y=84)
+    estimate_totalll=Label(estimate_summaryfrme, text="Total paid").place(x=0 ,y=105)
+    estimate_totalll1=Label(estimate_summaryfrme, text="$0.00").place(x=130 ,y=105)
+    estimate_balancee=Label(estimate_summaryfrme, text="Balance").place(x=0 ,y=126)
+    estimate_balancee1=Label(estimate_summaryfrme, text="$0.00").place(x=130 ,y=126)
+
+    estimate_fir5Frame1=Frame(estimate_pop,height=38,width=210)
+    estimate_fir5Frame1.place(x=735,y=485)
+    estimate_btndown=Button(estimate_fir5Frame1, compound="left", text="Line Down").place(x=75, y=0)
+    estimate_btnup=Button(estimate_fir5Frame1, compound="left", text="Line Up").place(x=150, y=0)
+  ############################ End create new estimate #########################
+  def edit_estimates_create():
+    edit_estimate_pop=Toplevel(estimate_midFrame)
+    edit_estimate_pop.title("Estimate")
+    edit_estimate_pop.geometry("950x690+150+0")
+
+    #select customer
+    def edit_estimate_custom():
+      edit_estimate_cuselection=Toplevel()
+      edit_estimate_cuselection.title("Select Customer")
+      edit_estimate_cuselection.geometry("930x650+240+10")
+      edit_estimate_cuselection.resizable(False, False)
+
+
+      #add new customer
+      def edit_estimate_create1():
+        edit_estimate_ven=Toplevel(estimate_midFrame)
+        edit_estimate_ven.title("Add new vendor")
+        edit_estimate_ven.geometry("930x650+240+10")
+        edit_estimate_checkvar1=IntVar()
+        edit_estimate_checkvar2=IntVar()
+        edit_estimate_radio=IntVar()
+        edit_estimate_createFrame=Frame(edit_estimate_ven, bg="#f5f3f2", height=650)
+        edit_estimate_createFrame.pack(side="top", fill="both")
+        edit_estimate_labelframe1 = LabelFrame(edit_estimate_createFrame,text="Customer",bg="#f5f3f2",font=("arial",15))
+        edit_estimate_labelframe1.place(x=10,y=5,width=910,height=600)
+        edit_estimate_text1=Label(edit_estimate_labelframe1, text="Customer ID:",bg="#f5f3f2",fg="blue").place(x=5 ,y=10)
+        edit_estimate_e1=Entry(edit_estimate_labelframe1,width=25).place(x=150,y=10)
+        edit_estimate_text2=Label(edit_estimate_labelframe1, text="Category:",bg="#f5f3f2").place(x=390 ,y=10)
+        edit_estimate_e2=ttk.Combobox(edit_estimate_labelframe1,width=25,value="Default").place(x=460 ,y=10)
+        edit_estimate_text3=Label(edit_estimate_labelframe1, text="Status:",bg="#f5f3f2").place(x=710 ,y=10)
+        edit_estimate_checkbtn1=Checkbutton(edit_estimate_labelframe1,text="Active",variable=edit_estimate_checkvar1,onvalue=1,offvalue=0,bg="#f5f3f2").place(x=760 ,y=10)
+        
+        edit_estimate_labelframe2 = LabelFrame(edit_estimate_labelframe1,text="Invoice to (appears on invoices)",bg="#f5f3f2")
+        edit_estimate_labelframe2.place(x=5,y=40,width=420,height=150)
+        edit_estimate_name = Label(edit_estimate_labelframe2, text="Ship to name:",bg="#f5f3f2",fg="blue").place(x=5,y=5)
+        edit_estimate_e1 = Entry(edit_estimate_labelframe2,width=28).place(x=130,y=5)
+        edit_estimate_addr = Label(edit_estimate_labelframe2, text="Address:",bg="#f5f3f2",fg="blue").place(x=5,y=40)
+        edit_estimate_e2 = Entry(edit_estimate_labelframe2,width=28).place(x=130,y=40,height=80)
+        
+        edit_estimate_btn1=Button(edit_estimate_labelframe1,width=3,height=2,compound = LEFT,text=">>").place(x=440, y=90)
+
+        edit_estimate_labelframe3 = LabelFrame(edit_estimate_labelframe1,text="Ship to (appears on invoices)",bg="#f5f3f2")
+        edit_estimate_labelframe3.place(x=480,y=40,width=420,height=150)
+        edit_estimate_name1 = Label(edit_estimate_labelframe3, text="Business name:",bg="#f5f3f2").place(x=5,y=5)
+        edit_estimate_e01 = Entry(edit_estimate_labelframe3,width=28).place(x=130,y=5)
+        edit_estimate_addr01 = Label(edit_estimate_labelframe3, text="Address:",bg="#f5f3f2").place(x=5,y=40)
+        edit_estimate_e02 = Entry(edit_estimate_labelframe3,width=28).place(x=130,y=40,height=80)
+        
+        edit_estimate_labelframe4 = LabelFrame(edit_estimate_labelframe1,text="Contact",bg="#f5f3f2")
+        edit_estimate_labelframe4.place(x=5,y=195,width=420,height=150)
+        edit_estimate_name11 = Label(edit_estimate_labelframe4, text="Contact person:",bg="#f5f3f2").place(x=5,y=5)
+        edit_estimate_e11 = Entry(edit_estimate_labelframe4,width=28).place(x=130,y=5)
+        edit_estimate_email1 = Label(edit_estimate_labelframe4, text="E-mail address:",bg="#f5f3f2",fg="blue").place(x=5,y=35)
+        edit_estimate_e21 = Entry(edit_estimate_labelframe4,width=28).place(x=130,y=35)
+        edit_estimate_tel1 = Label(edit_estimate_labelframe4, text="Tel.number:",bg="#f5f3f2").place(x=5,y=65)
+        edit_estimate_e31 = Entry(edit_estimate_labelframe4,width=11).place(x=130,y=65)
+        edit_estimate_fax1 = Label(edit_estimate_labelframe4, text="Fax:",bg="#f5f3f2").place(x=240,y=65)
+        edit_estimate_e41 = Entry(edit_estimate_labelframe4,width=11).place(x=280,y=65)
+        edit_estimate_sms1 = Label(edit_estimate_labelframe4, text="Mobile number for SMS notifications:",bg="#f5f3f2").place(x=5,y=95)
+        edit_estimate_e51 = Entry(edit_estimate_labelframe4,width=15).place(x=248,y=95)      
+
+        edit_estimate_btn11=Button(edit_estimate_labelframe1,width=3,height=2,compound = LEFT,text=">>").place(x=440, y=250)
+
+        
+        edit_estimate_labelframe5 = LabelFrame(edit_estimate_labelframe1,text="Ship to contact",bg="#f5f3f2")
+        edit_estimate_labelframe5.place(x=480,y=195,width=420,height=125)
+        edit_estimate_name2 = Label(edit_estimate_labelframe5, text="Contact person:",bg="#f5f3f2").place(x=5,y=5)
+        edit_estimate_e21 = Entry(edit_estimate_labelframe5,width=28).place(x=130,y=5)
+        edit_estimate_email2 = Label(edit_estimate_labelframe5, text="E-mail address:",bg="#f5f3f2").place(x=5,y=35)
+        edit_estimate_e22 = Entry(edit_estimate_labelframe5,width=28).place(x=130,y=35)
+        edit_estimate_tel2 = Label(edit_estimate_labelframe5, text="Tel.number:",bg="#f5f3f2").place(x=5,y=65)
+        edit_estimate_e32 = Entry(edit_estimate_labelframe5,width=11).place(x=130,y=65)
+        edit_estimate_fax2 = Label(edit_estimate_labelframe5, text="Fax:",bg="#f5f3f2").place(x=240,y=65)
+        edit_estimate_e42 = Entry(edit_estimate_labelframe5,width=11).place(x=280,y=65)
+
+        edit_estimate_labelframe6 = LabelFrame(edit_estimate_labelframe1,text="Contact",bg="#f5f3f2")
+        edit_estimate_labelframe6.place(x=5,y=350,width=420,height=100)
+        edit_estimate_checkbtn2=Checkbutton(edit_estimate_labelframe6,text="Tax Exempt",variable=edit_estimate_checkvar2,onvalue=1,offvalue=0,bg="#f5f3f2").place(x=5 ,y=5)
+        edit_estimate_tax3 = Label(edit_estimate_labelframe6, text="Specific Tax1 %:",bg="#f5f3f2").place(x=180,y=5)
+        edit_estimate_e31 = Entry(edit_estimate_labelframe6,width=10).place(x=290,y=5)
+        edit_estimate_discount = Label(edit_estimate_labelframe6, text="Discount%:",bg="#f5f3f2").place(x=5,y=35)
+        edit_estimate_e32 = Entry(edit_estimate_labelframe6,width=10).place(x=100,y=35)
+
+        edit_estimate_labelframe7 = LabelFrame(edit_estimate_labelframe1,text="Contact",bg="#f5f3f2")
+        edit_estimate_labelframe7.place(x=480,y=330,width=420,height=100)
+        edit_estimate_country4 = Label(edit_estimate_labelframe7, text="country:",bg="#f5f3f2").place(x=5,y=5)
+        edit_estimate_e41 = Entry(edit_estimate_labelframe7,width=28).place(x=130,y=5)
+        edit_estimate_city4 = Label(edit_estimate_labelframe7, text="City:",bg="#f5f3f2").place(x=5,y=35)
+        edit_estimate_e24 = Entry(edit_estimate_labelframe7,width=28).place(x=130,y=35)
+
+        edit_estimate_labelframe8 = LabelFrame(edit_estimate_labelframe1,text="Customer Type",bg="#f5f3f2")
+        edit_estimate_labelframe8.place(x=5,y=460,width=420,height=100)
+        edit_estimate_R1=Radiobutton(edit_estimate_labelframe8,text=" Client ",variable=edit_estimate_radio,value=1,bg="#f5f3f2").place(x=5,y=15)
+        edit_estimate_R2=Radiobutton(edit_estimate_labelframe8,text=" Vendor ",variable=edit_estimate_radio,value=2,bg="#f5f3f2").place(x=150,y=15)
+        edit_estimate_R3=Radiobutton(edit_estimate_labelframe8,text=" Both(client/vendor)",variable=edit_estimate_radio,value=3,bg="#f5f3f2").place(x=250,y=15)
+        
+
+        edit_estimate_labelframe9 = LabelFrame(edit_estimate_labelframe1,text="Notes",bg="#f5f3f2")
+        edit_estimate_labelframe9.place(x=480,y=430,width=420,height=150)
+        edit_estimate_e51 = Entry(edit_estimate_labelframe9).place(x=10,y=10,height=100,width=390)
+
+        edit_estimate_btn51=Button(edit_estimate_ven,width=60,height=10,bg="#f5f3f2",compound = LEFT,image=tick ,text="OK").place(x=20, y=615)
+        edit_estimate_btn52=Button(edit_estimate_ven,width=60,height=10,bg="#f5f3f2",compound = LEFT,image=cancel,text="Cancel").place(x=800, y=615)
+          
+                
+
+      edit_estimate_enter=Label(edit_estimate_cuselection, text="Enter filter text").place(x=5, y=10)
+      edit_estimate_e61=Entry(edit_estimate_cuselection, width=20).place(x=110, y=10)
+      edit_estimate_text6=Label(edit_estimate_cuselection, text="Filtered column").place(x=340, y=10)
+      edit_estimate_e26=Entry(edit_estimate_cuselection, width=20).place(x=450, y=10)
+
+      edit_estimate_cusventtree=ttk.Treeview(edit_estimate_cuselection, height=27)
+      edit_estimate_cusventtree["columns"]=["1","2","3", "4"]
+      edit_estimate_cusventtree.column("#0", width=35)
+      edit_estimate_cusventtree.column("1", width=160)
+      edit_estimate_cusventtree.column("2", width=160)
+      edit_estimate_cusventtree.column("3", width=140)
+      edit_estimate_cusventtree.column("4", width=140)
+      edit_estimate_cusventtree.heading("#0",text="")
+      edit_estimate_cusventtree.heading("1",text="Customer/Ventor ID")
+      edit_estimate_cusventtree.heading("2",text="Customer/Ventor Name")
+      edit_estimate_cusventtree.heading("3",text="Tel.")
+      edit_estimate_cusventtree.heading("4",text="Contact Person")
+      edit_estimate_cusventtree.place(x=5, y=45)
+
+
+      edit_estimate_ctegorytree=ttk.Treeview(edit_estimate_cuselection, height=27)
+      edit_estimate_ctegorytree["columns"]=["1"]
+      edit_estimate_ctegorytree.column("#0", width=35, minwidth=20)
+      edit_estimate_ctegorytree.column("1", width=205, minwidth=25, anchor=CENTER)    
+      edit_estimate_ctegorytree.heading("#0",text="", anchor=W)
+      edit_estimate_ctegorytree.heading("1",text="View filter by category", anchor=CENTER)
+      edit_estimate_ctegorytree.place(x=660, y=45)
+
+      edit_estimate_scrollbar = Scrollbar(edit_estimate_cuselection)
+      edit_estimate_scrollbar.place(x=640, y=45, height=560)
+      edit_estimate_scrollbar.config( command=tree.yview )
+
+      edit_estimate_btn71=Button(edit_estimate_cuselection,compound = LEFT,image=tick ,text="ok", width=60).place(x=15, y=610)
+      edit_estimate_btn72=Button(edit_estimate_cuselection,compound = LEFT,image=tick,text="Edit selected customer", width=150,command=edit_estimate_create1).place(x=250, y=610)
+      edit_estimate_btn73=Button(edit_estimate_cuselection,compound = LEFT,image=tick, text="Add new customer", width=150,command=edit_estimate_create1).place(x=435, y=610)
+      edit_estimate_btn74=Button(edit_estimate_cuselection,compound = LEFT,image=cancel ,text="Cancel", width=60).place(x=740, y=610)   
+
+
+    #add new line item
+    def edit_estimate_newline():
+      edit_estimate_newselection=Toplevel()
+      edit_estimate_newselection.title("Select Customer")
+      edit_estimate_newselection.geometry("930x650+240+10")
+      edit_estimate_newselection.resizable(False, False)
+
+
+      #add new product
+      def edit_estimate_product():  
+        edit_estimate_top = Toplevel()  
+        edit_estimate_top.title("Add a new Product/Service")
+        edit_estimate_p2 = PhotoImage(file = 'images/fbicon.png')
+        edit_estimate_top.iconphoto(False, edit_estimate_p2)
+      
+        edit_estimate_top.geometry("700x550+390+15")
+        edit_estimate_tabControl = ttk.Notebook(edit_estimate_top)
+        edit_estimate_s = ttk.Style()
+        edit_estimate_s.theme_use('default')
+        edit_estimate_s.configure('TNotebook.Tab', background="#999999",padding=10,bd=0)
+
+
+        edit_estimate_tab1 = ttk.Frame(edit_estimate_tabControl)
+        edit_estimate_tab2 = ttk.Frame(edit_estimate_tabControl)
+      
+        edit_estimate_tabControl.add(edit_estimate_tab1,compound = LEFT, text ='Product/Service')
+        edit_estimate_tabControl.add(edit_estimate_tab2,compound = LEFT, text ='Product Image')
+      
+        edit_estimate_tabControl.pack(expand = 1, fill ="both")
+      
+        edit_estimate_innerFrame = Frame(edit_estimate_tab1,bg="#f5f3f2", relief=GROOVE)
+        edit_estimate_innerFrame.pack(side="top",fill=BOTH)
+
+        edit_estimate_Customerlabelframe = LabelFrame(edit_estimate_innerFrame,text="Product/Service",width=580,height=485)
+        edit_estimate_Customerlabelframe.pack(side="top",fill=BOTH,padx=10)
+
+        edit_estimate_code1=Label(edit_estimate_Customerlabelframe,text="Code or SKU:",fg="blue",pady=10,padx=10)
+        edit_estimate_code1.place(x=20,y=0)
+        edit_estimate_codeentry = Entry(edit_estimate_Customerlabelframe,width=35)
+        edit_estimate_codeentry.place(x=120,y=8)
+
+        edit_estimate_checkvarStatus=IntVar()
+        edit_estimate_status1=Label(edit_estimate_Customerlabelframe,text="Status:")
+        edit_estimate_status1.place(x=500,y=8)
+        edit_estimate_Button1 = Checkbutton(edit_estimate_Customerlabelframe,
+                          variable = edit_estimate_checkvarStatus,text="Active",compound="right",
+                          onvalue =0 ,
+                          offvalue = 1,
+                        
+                          width = 10)
+
+        edit_estimate_Button1.place(x=550,y=5)
+
+        edit_estimate_category1=Label(edit_estimate_Customerlabelframe,text="Category:",pady=5,padx=10)
+        edit_estimate_category1.place(x=20,y=40)
+        edit_estimate_n = StringVar()
+        edit_estimate_country0 = ttk.Combobox(edit_estimate_Customerlabelframe, width = 40, textvariable = edit_estimate_n )
+        
+        edit_estimate_country0['values'] = ('Default',' India',' China',' Australia',' Nigeria',' Malaysia',' Italy',' Turkey',)
+        
+        edit_estimate_country0.place(x=120,y=45)
+        edit_estimate_country0.current(0)
+
+
+        edit_estimate_name81=Label(edit_estimate_Customerlabelframe,text="Name :",fg="blue",pady=5,padx=10)
+        edit_estimate_name81.place(x=20,y=70)
+        edit_estimate_nameentry = Entry(edit_estimate_Customerlabelframe,width=60)
+        edit_estimate_nameentry.place(x=120,y=75)
+
+        edit_estimate_des1=Label(edit_estimate_Customerlabelframe,text="Description :",pady=5,padx=10)
+        edit_estimate_des1.place(x=20,y=100)
+        edit_estimate_desentry = Entry(edit_estimate_Customerlabelframe,width=60)
+        edit_estimate_desentry.place(x=120,y=105)
+
+        edit_estimate_uval = IntVar(edit_estimate_Customerlabelframe, value='$0.00')
+        edit_estimate_unit1=Label(edit_estimate_Customerlabelframe,text="Unit Price:",fg="blue",pady=5,padx=10)
+        edit_estimate_unit1.place(x=20,y=130)
+        edit_estimate_unitentry = Entry(edit_estimate_Customerlabelframe,width=20,textvariable=edit_estimate_uval)
+        edit_estimate_unitentry.place(x=120,y=135)
+
+        edit_estimate_pcsval = IntVar(edit_estimate_Customerlabelframe, value='$0.00')
+        edit_estimate_pcs1=Label(edit_estimate_Customerlabelframe,text="Pcs/Weight:",fg="blue",pady=5,padx=10)
+        edit_estimate_pcs1.place(x=320,y=140)
+        edit_estimate_pcsentry = Entry(edit_estimate_Customerlabelframe,width=20,textvariable=edit_estimate_pcsval)
+        edit_estimate_pcsentry.place(x=410,y=140)
+
+        edit_estimate_costval = IntVar(edit_estimate_Customerlabelframe, value='$0.00')
+        edit_estimate_cost1=Label(edit_estimate_Customerlabelframe,text="Cost:",pady=5,padx=10)
+        edit_estimate_cost1.place(x=20,y=160)
+        edit_estimate_costentry = Entry(edit_estimate_Customerlabelframe,width=20,textvariable=edit_estimate_costval)
+        edit_estimate_costentry.place(x=120,y=165)
+
+        edit_estimate_priceval = IntVar(edit_estimate_Customerlabelframe, value='$0.00')
+        edit_estimate_price1=Label(edit_estimate_Customerlabelframe,text="(Price Cost):",pady=5,padx=10)
+        edit_estimate_price1.place(x=20,y=190)
+        edit_estimate_priceentry = Entry(edit_estimate_Customerlabelframe,width=20,textvariable=edit_estimate_priceval)
+        edit_estimate_priceentry.place(x=120,y=195)
+
+        edit_estimate_checkvarStatus2=IntVar()
+      
+        edit_estimate_Button92 = Checkbutton(edit_estimate_Customerlabelframe,variable = edit_estimate_checkvarStatus2,
+                          text="Taxable Tax1rate",compound="right",
+                          onvalue =0 ,
+                          offvalue = 1,
+                          height=2,
+                          width = 12)
+
+        edit_estimate_Button92.place(x=415,y=170)
+
+
+        edit_estimate_checkvarStatus3=IntVar()
+      
+        edit_estimate_Button93 = Checkbutton(edit_estimate_Customerlabelframe,variable = edit_estimate_checkvarStatus3,
+                          text="No stock Control",
+                          onvalue =1 ,
+                          offvalue = 0,
+                          height=3,
+                          width = 15)
+
+        edit_estimate_Button93.place(x=40,y=220)
+
+
+        edit_estimate_stockval = IntVar(edit_estimate_Customerlabelframe, value='0')
+        edit_estimate_stock1=Label(edit_estimate_Customerlabelframe,text="Stock:",pady=5,padx=10)
+        edit_estimate_stock1.place(x=90,y=260)
+        edit_estimate_stockentry = Entry(edit_estimate_Customerlabelframe,width=15,textvariable=edit_estimate_stockval)
+        edit_estimate_stockentry.place(x=150,y=265)
+
+        edit_estimate_lowval = IntVar(edit_estimate_Customerlabelframe, value='0')
+        edit_estimate_low1=Label(edit_estimate_Customerlabelframe,text="Low Stock Warning Limit:",pady=5,padx=10)
+        edit_estimate_low1.place(x=300,y=260)
+        edit_estimate_lowentry = Entry(edit_estimate_Customerlabelframe,width=10,textvariable=edit_estimate_lowval)
+        edit_estimate_lowentry.place(x=495,y=265)
+
+      
+        edit_estimate_ware1=Label(edit_estimate_Customerlabelframe,text="Warehouse:",pady=5,padx=10)
+        edit_estimate_ware1.place(x=60,y=290)
+        edit_estimate_wareentry = Entry(edit_estimate_Customerlabelframe,width=50)
+        edit_estimate_wareentry.place(x=150,y=295)
+
+        edit_estimate_text10=Label(edit_estimate_Customerlabelframe,text="Private notes(not appears on invoice):",pady=5,padx=10)
+        edit_estimate_text10.place(x=20,y=330)
+
+        edit_estimate_txt = scrolledtext.ScrolledText(edit_estimate_Customerlabelframe, undo=True,width=62,height=4)
+        edit_estimate_txt.place(x=32,y=358)
+
+
+        edit_estimate_okButton = Button(edit_estimate_innerFrame,compound = LEFT,image=tick , text ="Ok",width=60)
+        edit_estimate_okButton.pack(side=LEFT)
+
+        edit_estimate_cancelButton = Button(edit_estimate_innerFrame,compound = LEFT,image=cancel ,text="Cancel",width=60)
+        edit_estimate_cancelButton.pack(side=RIGHT)
+
+        edit_estimate_imageFrame = Frame(edit_estimate_tab2, relief=GROOVE,height=580)
+        edit_estimate_imageFrame.pack(side="top",fill=BOTH)
+
+        edit_estimate_browseimg=Label(edit_estimate_imageFrame,text=" Browse for product image file(recommended image type:JPG,size 480x320 pixels) ",bg='#f5f3f2')
+        edit_estimate_browseimg.place(x=15,y=35)
+
+        edit_estimate_browsebutton=Button(edit_estimate_imageFrame,text = 'Browse')
+        edit_estimate_browsebutton.place(x=580,y=30,height=30,width=50)
+        
+        edit_estimate_removeButton = Button(edit_estimate_imageFrame,compound = LEFT,image=cancel, text ="Remove Product Image",width=150)
+        edit_estimate_removeButton.place(x=400,y=450)
+
+                      
+      edit_estimate_enter10=Label(edit_estimate_newselection, text="Enter filter text").place(x=5, y=10)
+      edit_estimate_e10=Entry(edit_estimate_newselection, width=20).place(x=110, y=10)
+      edit_estimate_text10=Label(edit_estimate_newselection, text="Filtered column").place(x=340, y=10)
+      edit_estimate_e20=Entry(edit_estimate_newselection, width=20).place(x=450, y=10)
+
+      edit_estimate_cusventtree1=ttk.Treeview(edit_estimate_newselection, height=27)
+      edit_estimate_cusventtree1["columns"]=["1","2","3", "4","5"]
+      edit_estimate_cusventtree1.column("#0", width=35)
+      edit_estimate_cusventtree1.column("1", width=160)
+      edit_estimate_cusventtree1.column("2", width=160)
+      edit_estimate_cusventtree1.column("3", width=140)
+      edit_estimate_cusventtree1.column("4", width=70)
+      edit_estimate_cusventtree1.column("5", width=70)
+      edit_estimate_cusventtree1.heading("#0",text="")
+      edit_estimate_cusventtree1.heading("1",text="ID/SKU")
+      edit_estimate_cusventtree1.heading("2",text="Product/Service Name")
+      edit_estimate_cusventtree1.heading("3",text="Unit price")
+      edit_estimate_cusventtree1.heading("4",text="Service")
+      edit_estimate_cusventtree1.heading("5",text="Stock")
+      edit_estimate_cusventtree1.place(x=5, y=45)
+
+
+      edit_estimate_ctegorytree1=ttk.Treeview(edit_estimate_newselection, height=27)
+      edit_estimate_ctegorytree1["columns"]=["1"]
+      edit_estimate_ctegorytree1.column("#0", width=35, minwidth=20)
+      edit_estimate_ctegorytree1.column("1", width=205, minwidth=25, anchor=CENTER)    
+      edit_estimate_ctegorytree1.heading("#0",text="", anchor=W)
+      edit_estimate_ctegorytree1.heading("1",text="View filter by category", anchor=CENTER)
+      edit_estimate_ctegorytree1.place(x=660, y=45)
+
+      edit_estimate_scrollbar10 = Scrollbar(edit_estimate_newselection)
+      edit_estimate_scrollbar10.place(x=640, y=45, height=560)
+      edit_estimate_scrollbar10.config( command=tree.yview )
+    
+
+      edit_estimate_btn11=Button(edit_estimate_newselection,compound = LEFT,image=tick ,text="ok", width=60).place(x=15, y=610)
+      edit_estimate_btn11=Button(edit_estimate_newselection,compound = LEFT,image=tick , text="Edit product/Service", width=150,command=product).place(x=250, y=610)
+      edit_estimate_btn11=Button(edit_estimate_newselection,compound = LEFT,image=tick , text="Add product/Service", width=150,command=product).place(x=435, y=610)
+      edit_estimate_btn11=Button(edit_estimate_newselection,compound = LEFT,image=cancel ,text="Cancel", width=60).place(x=740, y=610)
+
+
+
+    #preview new line
+    def edit_estimate_previewline():
+      messagebox.showerror("F-Billing Revolution","line is required,please select customer for this order before printing.")
+
+
+    
+    #sms notification
+    def edit_estimate_sms1():
+      edit_estimate_send_SMS=Toplevel()
+      edit_estimate_send_SMS.geometry("700x480+240+150")
+      edit_estimate_send_SMS.title("Send SMS notification")
+
+      edit_estimate_style = ttk.Style()
+      edit_estimate_style.theme_use('default')
+      edit_estimate_style.configure('TNotebook.Tab', background="#999999", padding=5)
+      edit_estimate_sms_Notebook = ttk.Notebook(edit_estimate_send_SMS)
+      edit_estimate_SMS_Notification = Frame(edit_estimate_sms_Notebook, height=470, width=700)
+      edit_estimate_SMS_Service_Account = Frame(edit_estimate_sms_Notebook, height=470, width=700)
+      edit_estimate_sms_Notebook.add(edit_estimate_SMS_Notification, text="SMS Notification")
+      edit_estimate_sms_Notebook.add(edit_estimate_SMS_Service_Account, text="SMS Service Account")
+      edit_estimate_sms_Notebook.place(x=0, y=0)
+
+      edit_estimate_numlbel=Label(edit_estimate_SMS_Notification, text="SMS number or comma seperated SMS number list(Please start each SMS number with the country code)")
+      edit_estimate_numlbel.place(x=10, y=10)
+      edit_estimate_numentry=Entry(edit_estimate_SMS_Notification, width=92).place(x=10, y=30)
+      edit_estimate_stexbel=Label(edit_estimate_SMS_Notification, text="SMS Text").place(x=10, y=60)
+      edit_estimate_stex=Entry(edit_estimate_SMS_Notification, width=40).place(x=10, y=85,height=120)
+      
+      edit_estimate_dclbel=Label(edit_estimate_SMS_Notification, text="Double click to insert into text")
+      edit_estimate_dclbel.place(x=410, y=60)
+      edit_estimate_dcl=Entry(edit_estimate_SMS_Notification, width=30)
+      edit_estimate_dcl.place(x=400, y=85,height=200)
+      
+      edit_estimate_smstype=LabelFrame(edit_estimate_SMS_Notification, text="SMS message type", width=377, height=60)
+      edit_estimate_smstype.place(x=10, y=223)
+      edit_estimate_snuvar=IntVar()
+      edit_estimate_normal_rbtn=Radiobutton(edit_estimate_smstype, text="Normal SMS(160 chars)", variable=edit_estimate_snuvar, value=1)
+      edit_estimate_normal_rbtn.place(x=5, y=5)
+      edit_estimate_unicode_rbtn=Radiobutton(edit_estimate_smstype, text="Unicode SMS(70 chars)", variable=edit_estimate_snuvar, value=2)
+      edit_estimate_unicode_rbtn.place(x=190, y=5)
+      edit_estimate_tiplbf=LabelFrame(edit_estimate_SMS_Notification, text="Tips", width=680, height=120)
+      edit_estimate_tiplbf.place(x=10, y=290)
+      edit_estimate_tiplabl=Label(edit_estimate_tiplbf,justify=LEFT,fg="red",  text="Always start the SMS nymber with the country code. Do not use the + sign at the beginning(example\nUS number:8455807546). Do not use any special characters in your normal SMS text. Please use the\nstndard SMS characters or the English alphabet and numbers only. Otherwise the SMS will be\nunreadable or undeliverable. If you need to enter international characters, accents,email address, or\nspecial characters to the SMS text field then choose the Unicode SMS format.")
+      edit_estimate_tiplabl.place(x=5, y=5)
+
+      edit_estimate_btnn1=Button(edit_estimate_SMS_Notification, width=20, text="Send SMS notification").place(x=10, y=420)
+      edit_estimate_btnn2=Button(edit_estimate_SMS_Notification, width=25, text="Confirm SMS cost before sending").place(x=280, y=420)
+      edit_estimate_btnn3=Button(edit_estimate_SMS_Notification, width=15, text="Cancel").place(x=550, y=420)
+      
+
+      edit_estimate_smstypee=LabelFrame(edit_estimate_SMS_Service_Account, text="Select the notification service provider", width=670, height=65)
+      edit_estimate_smstypee.place(x=10, y=5)
+      edit_estimate_snumvarr=IntVar()
+      edit_estimate_normal_rbtn=Radiobutton(edit_estimate_smstypee,text="BULKSMS(www.bulksms.com)",variable=edit_estimate_snumvarr,value=1,)
+      edit_estimate_normal_rbtn.place(x=5, y=5)
+      edit_estimate_unicode_rbtn=Radiobutton(edit_estimate_smstypee, text="Unicode SMS(70 chars)-Recommended", variable=edit_estimate_snumvarr, value=2)
+      edit_estimate_unicode_rbtn.place(x=290, y=5)
+
+      edit_estimate_sms1type=LabelFrame(edit_estimate_SMS_Service_Account, text="Your BULKSMS.COM Account", width=670, height=100)
+      edit_estimate_sms1type.place(x=10, y=80)
+      edit_estimate_namee=Label(edit_estimate_sms1type, text="Username").place(x=10, y=5)
+      edit_estimate_na=Entry(edit_estimate_sms1type, width=20).place(x=100, y=5)
+      edit_estimate_password=Label(edit_estimate_sms1type, text="Password").place(x=10, y=45)
+      edit_estimate_pas=Entry(edit_estimate_sms1type, width=20).place(x=100, y=45)
+      edit_estimate_combo=Label(edit_estimate_sms1type, text="Route").place(x=400, y=5)
+      edit_estimate_nn = StringVar()
+      edit_estimate_combo1 = ttk.Combobox(edit_estimate_sms1type, width = 20, textvariable = edit_estimate_nn ).place(x=450,y=5)
+      edit_estimate_btnnn1=Button(edit_estimate_sms1type, width=10, text="Save settings").place(x=550, y=45)
+
+      
+      edit_estimate_tiplbf=LabelFrame(edit_estimate_SMS_Service_Account, text="Terms of service", width=680, height=250)
+      edit_estimate_tiplbf.place(x=10, y=190)
+      edit_estimate_tiplabl=Label(edit_estimate_tiplbf,justify=LEFT,fg="red",  text="The SMS notification service is not free.This service costs you creadit.You must have your own account\nat BULKSMS.COM and you need to have sufficient creadit and an active internet connection to use\nthis feature.Please review all fields in this form for accuracy")
+      edit_estimate_tiplabl.place(x=0, y=5)
+      edit_estimate_tiplabl1=Label(edit_estimate_tiplbf,justify=LEFT,fg="black",  text="visit www.bulksms.com website to create your own account.please make sure the BULKSMS .COM\n service works well in your country before you busy creadit")
+      edit_estimate_tiplabl1.place(x=0, y=60)
+      edit_estimate_tiplabl2=Label(edit_estimate_tiplbf,justify=LEFT,fg="black",  text="Our SMS notification tool comes without any warranty.our software only forwards your SMS message\nthe BULKSMS API server .The BULKSMS API server will try to sent SMS message your recipient")
+      edit_estimate_tiplabl2.place(x=0, y=100)
+      edit_estimate_tiplabl3=Label(edit_estimate_tiplbf,justify=LEFT,fg="red",  text="Please note that you access and use the SMS notification tool your own risk.F-Billing software is not\nresponsible for any type of loss or damage or undelivered SMS massage which you may as a result\nof accessing and using the SMS notification service.")
+      edit_estimate_tiplabl3.place(x=0, y=140)
+      edit_estimate_checkvarr1=IntVar()
+      edit_estimate_chkbtnn1=Checkbutton(edit_estimate_tiplbf,text="I have read and agree to the terms of service above",variable=estimate_checkvarr1,onvalue=1,offvalue=0).place(x=70, y=200) 
+
+    
+    #delete line item  
+    def edit_estimate_delete1():
+      messagebox.showerror("F-Billing Revolution","Customer is required,please select customer before deleting line item .")
+      
+      
+
+    edit_estimate_firFrame=Frame(edit_estimate_pop, bg="#f5f3f2", height=60)
+    edit_estimate_firFrame.pack(side="top", fill=X)
+
+    edit_estimate_w = Canvas(edit_estimate_firFrame, width=1, height=65, bg="#b3b3b3", bd=0)
+    edit_estimate_w.pack(side="left", padx=5)
+
+    edit_estimate_create = Button(edit_estimate_firFrame,compound="top", text="Select\nCustomer",relief=RAISED, image=customer,bg="#f5f3f2", fg="black", height=55, bd=1, width=55,command=edit_estimate_custom)
+    edit_estimate_create.pack(side="left", pady=3, ipadx=4)
+
+
+    edit_estimate_w1 = Canvas(edit_estimate_firFrame, width=1, height=65, bg="#b3b3b3", bd=0)
+    edit_estimate_w1.pack(side="left", padx=5)
+
+    edit_estimate_addd= Button(edit_estimate_firFrame,compound="top", text="Add new\nline item",relief=RAISED, image=photo,bg="#f5f3f2", fg="black", height=55, bd=1, width=55,command=edit_estimate_newline)
+    edit_estimate_addd.pack(side="left", pady=3, ipadx=4)
+
+    edit_estimate_dele= Button(edit_estimate_firFrame,compound="top", text="Delete line\nitem",relief=RAISED, image=photo2,bg="#f5f3f2", fg="black", height=55, bd=1, width=55,command=edit_estimate_delete1)
+    edit_estimate_dele.pack(side="left", pady=3, ipadx=4)
+
+    edit_estimate_w2 = Canvas(edit_estimate_firFrame, width=1, height=65, bg="#b3b3b3", bd=0)
+    edit_estimate_w2.pack(side="left", padx=5)
+
+    edit_estimate_prev= Button(edit_estimate_firFrame,compound="top", text="Preview\nEstimate",relief=RAISED, image=photo4,bg="#f5f3f2", fg="black", height=55, bd=1, width=55,command=edit_estimate_previewline)
+    edit_estimate_prev.pack(side="left", pady=3, ipadx=4)
+
+    edit_estimate_prin= Button(edit_estimate_firFrame,compound="top", text="Print \nEstimate",relief=RAISED, image=photo5,bg="#f5f3f2", fg="black", height=55, bd=1, width=55,command=estimate_printsele)
+    edit_estimate_prin.pack(side="left", pady=3, ipadx=4)
+
+    edit_estimate_w3 = Canvas(edit_estimate_firFrame, width=1, height=65, bg="#b3b3b3", bd=0)
+    edit_estimate_w3.pack(side="left", padx=5)
+
+    edit_estimate_mail= Button(edit_estimate_firFrame,compound="top", text="Email\nEstimate",relief=RAISED, image=photo6,bg="#f5f3f2", fg="black", height=55, bd=1, width=55,command=estimate_emailord)
+    edit_estimate_mail.pack(side="left", pady=3, ipadx=4)
+
+    edit_estimate_smss1= Button(edit_estimate_firFrame,compound="top", text="Send SMS\nnotification",relief=RAISED, image=photo10,bg="#f5f3f2", fg="black", height=55, bd=1, width=55,command=edit_estimate_sms1)
+    edit_estimate_smss1.pack(side="left", pady=3, ipadx=4)
+
+    edit_estimate_w4 = Canvas(edit_estimate_firFrame, width=1, height=65, bg="#b3b3b3", bd=0)
+    edit_estimate_w4.pack(side="left", padx=5)
+
+    edit_estimate_smss1= Button(edit_estimate_firFrame,compound="top", text="Set Status\nto Accepted",relief=RAISED, image=mark1,bg="#f5f3f2", fg="black", height=55, bd=1, width=55)
+    edit_estimate_smss1.pack(side="left", pady=3, ipadx=4)
+
+    edit_estimate_smss1= Button(edit_estimate_firFrame,compound="top", text="Set Status\nto Declined",relief=RAISED, image=mark1,bg="#f5f3f2", fg="black", height=55, bd=1, width=55)
+    edit_estimate_smss1.pack(side="left", pady=3, ipadx=4)
+
+    def edit_calcu():
+      subprocess.Popen('C:\\Windows\\System32\\calc.exe')
+
+    edit_estimate_calc= Button(edit_estimate_firFrame,compound="top", text="Open\nCalculator",relief=RAISED, image=photo9,bg="#f5f3f2", fg="black", height=55, bd=1, width=55, command=edit_calcu)
+    edit_estimate_calc.pack(side="left", pady=3, ipadx=4)
+
+    edit_estimate_save= Button(edit_estimate_firFrame,compound="top", text="Save",relief=RAISED, image=tick,bg="#f5f3f2", fg="black", height=55, bd=1, width=55)
+    edit_estimate_save.pack(side="right", pady=3, ipadx=4)
+
+
+    edit_estimate_fir1Frame=Frame(edit_estimate_pop, height=180,bg="#f5f3f2")
+    edit_estimate_fir1Frame.pack(side="top", fill=X)
+
+    edit_estimate_labelframee1 = LabelFrame(edit_estimate_fir1Frame,text="Customers",font=("arial",15))
+    edit_estimate_labelframee1.place(x=10,y=5,width=640,height=160)
+    edit_estimate_orderr1 = Label(edit_estimate_labelframee1, text="Estimate to").place(x=10,y=5)
+    edit_estimate_ee1 = ttk.Combobox(edit_estimate_labelframee1, value="Hello",width=28).place(x=80,y=5)
+    edit_estimate_addresss=Label(edit_estimate_labelframee1,text="Address").place(x=10,y=30)
+    edit_estimate_ee2=Text(edit_estimate_labelframee1,width=23).place(x=80,y=30,height=70)
+    edit_estimate_shipp=Label(edit_estimate_labelframee1,text="Ship to").place(x=342,y=5)
+    edit_estimate_ee3=Entry(edit_estimate_labelframee1,width=30).place(x=402,y=3)
+    edit_estimate_addresss1=Label(edit_estimate_labelframee1,text="Address").place(x=340,y=30)
+    edit_estimate_ee4=Text(edit_estimate_labelframee1,width=23).place(x=402,y=30,height=70)
+
+    edit_estimate_bttn1=Button(edit_estimate_labelframee1,width=3,height=2,compound = LEFT,text=">>").place(x=280, y=50)
+    
+    edit_estimate_labelframee2 = LabelFrame(edit_estimate_fir1Frame,text="")
+    edit_estimate_labelframee2.place(x=10,y=130,width=640,height=42)
+    edit_estimate_emaill=Label(edit_estimate_labelframee2,text="Email").place(x=10,y=5)
+    edit_estimate_ee5=Entry(edit_estimate_labelframee2,width=30).place(x=80,y=5)
+    edit_estimate_smms=Label(edit_estimate_labelframee2,text="SMS Number").place(x=328,y=5)
+    edit_estimate_ee6=Entry(edit_estimate_labelframee2,width=30).place(x=402,y=5)
+      
+    edit_estimate_labelframe = LabelFrame(edit_estimate_fir1Frame,text="Estimate",font=("arial",15))
+    edit_estimate_labelframe.place(x=652,y=5,width=290,height=170)
+    edit_estimate_order0=Label(edit_estimate_labelframe,text="Estimate#").place(x=5,y=5)
+
+    edit_estimate_ee01=Entry(edit_estimate_labelframe,width=25).place(x=100,y=5,)
+
+    edit_estimate_orderdate=Label(edit_estimate_labelframe,text="Estimate date").place(x=5,y=33)
+    edit_estimate_ee02=Entry(edit_estimate_labelframe,width=20).place(x=150,y=33)
+    edit_estimate_checkvarStatus5=IntVar()
+    edit_estimate_duedate=Checkbutton(edit_estimate_labelframe,variable = edit_estimate_checkvarStatus5,text="Due date",onvalue =0 ,offvalue = 1).place(x=5,y=62)
+    edit_estimate_ee03=Entry(edit_estimate_labelframe,width=20).place(x=150,y=62)
+    edit_estimate_termss=Label(edit_estimate_labelframe,text="Terms").place(x=5,y=92)
+    edit_estimate_ee04=ttk.Combobox(edit_estimate_labelframe, value="",width=25).place(x=100,y=92)
+    edit_estimate_reff=Label(edit_estimate_labelframe,text="Order ref#").place(x=5,y=118)
+    edit_estimate_ee11=Entry(edit_estimate_labelframe,width=27).place(x=100,y=118)
+
+    edit_estimate_fir2Frame=Frame(edit_estimate_pop, height=150,width=100,bg="#f5f3f2")
+    edit_estimate_fir2Frame.pack(side="top", fill=X)
+    edit_estimate_listFrame = Frame(edit_estimate_fir2Frame, bg="white", height=140,borderwidth=5,  relief=RIDGE)
+    
+    edit_estimate_tree=ttk.Treeview(edit_estimate_listFrame)
+    edit_estimate_tree["columns"]=["1","2","3","4","5","6","7","8"]
+
+    edit_estimate_tree.column("#0", width=40)
+    edit_estimate_tree.column("1", width=80)
+    edit_estimate_tree.column("2", width=190)
+    edit_estimate_tree.column("3", width=190)
+    edit_estimate_tree.column("4", width=80)
+    edit_estimate_tree.column("5", width=60)
+    edit_estimate_tree.column("6", width=60)
+    edit_estimate_tree.column("7", width=60)
+    edit_estimate_tree.column("8", width=80)
+    
+    edit_estimate_tree.heading("#0")
+    edit_estimate_tree.heading("1",text="ID/SKU")
+    edit_estimate_tree.heading("2",text="Product/Service")
+    edit_estimate_tree.heading("3",text="Description")
+    edit_estimate_tree.heading("4",text="Unit Price")
+    edit_estimate_tree.heading("5",text="Quality")
+    edit_estimate_tree.heading("6",text="Pcs/Weight")
+    edit_estimate_tree.heading("7",text="Tax1")
+    edit_estimate_tree.heading("8",text="Price")
+    
+    edit_estimate_tree.pack(fill="both", expand=1)
+    edit_estimate_listFrame.pack(side="top", fill="both", padx=5, pady=3, expand=1)
+
+    edit_estimate_fir3Frame=Frame(edit_estimate_pop,height=200,width=700,bg="#f5f3f2")
+    edit_estimate_fir3Frame.place(x=0,y=490)
+
+    edit_estimate_tabStyle = ttk.Style()
+    edit_estimate_tabStyle.theme_use('default')
+    edit_estimate_tabStyle.configure('TNotebook.Tab', background="#999999", width=12, padding=5)
+    edit_estimate_myNotebookk=ttk.Notebook(edit_estimate_fir3Frame)
+    edit_estimate_orderFrame = Frame(edit_estimate_myNotebookk, height=200, width=800)
+    edit_estimate_headerFrame = Frame(edit_estimate_myNotebookk, height=200, width=800)
+    edit_estimate_commentFrame = Frame(edit_estimate_myNotebookk, height=200, width=800)
+    edit_estimate_termsFrame = Frame(edit_estimate_myNotebookk, height=200, width=800)
+    edit_estimate_noteFrame = Frame(edit_estimate_myNotebookk, height=200, width=800)
+    edit_estimate_documentFrame = Frame(edit_estimate_myNotebookk, height=200, width=800)
+    
+    edit_estimate_myNotebookk.add(edit_estimate_orderFrame,compound="left", text="Estimate")
+    edit_estimate_myNotebookk.add(edit_estimate_headerFrame,compound="left",  text="Header/Footer")
+    edit_estimate_myNotebookk.add(edit_estimate_commentFrame,compound="left",  text="Comments")
+    edit_estimate_myNotebookk.add(edit_estimate_termsFrame,compound="left", text="Terms")
+    edit_estimate_myNotebookk.add(edit_estimate_noteFrame,compound="left",  text="Private notes")
+    edit_estimate_myNotebookk.add(edit_estimate_documentFrame,compound="left",  text="Documents")
+    edit_estimate_myNotebookk.pack(expand = 1, fill ="both")  
+
+    edit_estimate_labelfram1 = LabelFrame(edit_estimate_orderFrame,text="",font=("arial",15))
+    edit_estimate_labelfram1.place(x=1,y=1,width=800,height=170)
+
+    edit_estimates_cost1=Label(edit_estimate_labelfram1,text="Extra cost name").place(x=2,y=5)
+    edit_estimates_e1=ttk.Combobox(edit_estimate_labelfram1, value="",width=20).place(x=115,y=5)
+
+    edit_estimates_rate=Label(edit_estimate_labelfram1,text="Discount rate").place(x=370,y=5)
+    edit_estimates_e2=Entry(edit_estimate_labelfram1,width=6).place(x=460,y=5)
+
+    edit_estimates_cost2=Label(edit_estimate_labelfram1,text="Extra cost").place(x=35,y=35)
+    edit_estimates_e3=Entry(edit_estimate_labelfram1,width=10).place(x=115,y=35)
+    edit_estimates_tax=Label(edit_estimate_labelfram1,text="Tax1").place(x=420,y=35)
+    edit_estimates_e4=Entry(edit_estimate_labelfram1,width=7).place(x=460,y=35)
+    edit_estimates_template=Label(edit_estimate_labelfram1,text="Template").place(x=37,y=70)
+    edit_estimates_e5=ttk.Combobox(edit_estimate_labelfram1, value="",width=25).place(x=115,y=70)
+    edit_estimates_sales=Label(edit_estimate_labelfram1,text="Sales Person").place(x=25,y=100)
+    edit_estimates_e6=Entry(edit_estimate_labelfram1,width=18).place(x=115,y=100)
+    edit_estimates_category=Label(edit_estimate_labelfram1,text="Category").place(x=300,y=100)
+    edit_estimates_e7=Entry(edit_estimate_labelfram1,width=22).place(x=370,y=100)
+    
+    edit_estimate_statusfrme = LabelFrame(edit_estimate_labelfram1,text="Status",font=("arial",15))
+    edit_estimate_statusfrme.place(x=540,y=0,width=160,height=160)
+    edit_estimates_draft=Label(edit_estimate_statusfrme, text="Draft",font=("arial", 15, "bold"), fg="grey").place(x=50, y=3)
+    edit_estimates_on1=Label(edit_estimate_statusfrme, text="Emailed on:").place( y=50)
+    edit_estimates_nev1=Label(edit_estimate_statusfrme, text="Never").place(x=100,y=50)
+    edit_estimates_on2=Label(edit_estimate_statusfrme, text="Printed on:").place( y=90)
+    edit_estimates_nev2=Label(edit_estimate_statusfrme, text="Never").place(x=100,y=90)
+
+    edit_estimates_text01=Label(edit_estimate_headerFrame,text="Title text").place(x=50,y=5)
+    edit_estimates_e01=ttk.Combobox(edit_estimate_headerFrame, value="",width=60).place(x=125,y=5)
+    edit_estimates_text02=Label(edit_estimate_headerFrame,text="Page header text").place(x=2,y=45)
+    edit_estimates_e11=ttk.Combobox(edit_estimate_headerFrame, value="",width=60).place(x=125,y=45)
+    edit_estimates_text03=Label(edit_estimate_headerFrame,text="Footer text").place(x=35,y=85)
+    edit_estimates_e21=ttk.Combobox(edit_estimate_headerFrame, value="",width=60).place(x=125,y=85)
+
+    edit_estimates_texttt=Label(edit_estimate_noteFrame,text="Private notes(not shown on invoice/order/estemates)").place(x=10,y=10)
+    edit_estimates_e41=Text(edit_estimate_noteFrame,width=100,height=7).place(x=10,y=32)
+
+    edit_estimates_e51=Text(edit_estimate_termsFrame,width=100,height=9).place(x=10,y=10)
+
+    edit_estimates_e61=Text(edit_estimate_commentFrame,width=100,height=9).place(x=10,y=10)
+
+    edit_estimates_btn1=Button(edit_estimate_documentFrame,height=2,width=3,text="+").place(x=5,y=10)
+    edit_estimates_btn2=Button(edit_estimate_documentFrame,height=2,width=3,text="-").place(x=5,y=50)
+    edit_estimates_texttt1=Label(edit_estimate_documentFrame,text="Attached documents or image files.If you attach large email then email taken long time to send").place(x=50,y=10)
+    edit_estimates_cusventtree=ttk.Treeview(edit_estimate_documentFrame, height=5)
+    edit_estimates_cusventtree["columns"]=["1","2","3"]
+    edit_estimates_cusventtree.column("#0", width=20)
+    edit_estimates_cusventtree.column("1", width=250)
+    edit_estimates_cusventtree.column("2", width=250)
+    edit_estimates_cusventtree.column("2", width=200)
+    edit_estimates_cusventtree.heading("#0",text="", anchor=W)
+    edit_estimates_cusventtree.heading("1",text="Attach to Email")
+    edit_estimates_cusventtree.heading("2",text="Filename")
+    edit_estimates_cusventtree.heading("3",text="Filesize")  
+    edit_estimates_cusventtree.place(x=50, y=45)
+    
+
+    edit_estimate_fir4Frame1=Frame(edit_estimate_pop,height=190,width=210,bg="#f5f3f2")
+    edit_estimate_fir4Frame1.place(x=740,y=520)
+    edit_estimate_summaryfrme = LabelFrame(edit_estimate_fir4Frame1,text="Summary",font=("arial",15))
+    edit_estimate_summaryfrme.place(x=0,y=0,width=200,height=170)
+    edit_estimate_discounttt=Label(edit_estimate_summaryfrme, text="Discount").place(x=0 ,y=0)
+    edit_estimate_discounttt1=Label(edit_estimate_summaryfrme, text="$0.00").place(x=130 ,y=0)
+    edit_estimate_subbb=Label(edit_estimate_summaryfrme, text="Subtotal").place(x=0 ,y=21)
+    edit_estimate_subbb1=Label(edit_estimate_summaryfrme, text="$0.00").place(x=130 ,y=21)
+    edit_estimate_ttaax=Label(edit_estimate_summaryfrme, text="Tax1").place(x=0 ,y=42)
+    edit_estimate_ttax1=Label(edit_estimate_summaryfrme, text="$0.00").place(x=130 ,y=42)
+    edit_estimate_costt=Label(edit_estimate_summaryfrme, text="Extra cost").place(x=0 ,y=63)
+    edit_estimate_costtt=Label(edit_estimate_summaryfrme, text="$0.00").place(x=130 ,y=63)
+    edit_estimate_orderrr=Label(edit_estimate_summaryfrme, text="Order total").place(x=0 ,y=84)
+    edit_estimate_orderrr1=Label(edit_estimate_summaryfrme, text="$0.00").place(x=130 ,y=84)
+    edit_estimate_totalll=Label(edit_estimate_summaryfrme, text="Total paid").place(x=0 ,y=105)
+    edit_estimate_totalll1=Label(edit_estimate_summaryfrme, text="$0.00").place(x=130 ,y=105)
+    edit_estimate_balancee=Label(edit_estimate_summaryfrme, text="Balance").place(x=0 ,y=126)
+    edit_estimate_balancee1=Label(edit_estimate_summaryfrme, text="$0.00").place(x=130 ,y=126)
+
+    edit_estimate_fir5Frame1=Frame(edit_estimate_pop,height=38,width=210)
+    edit_estimate_fir5Frame1.place(x=735,y=485)
+    edit_estimate_btndown=Button(edit_estimate_fir5Frame1, compound="left", text="Line Down").place(x=75, y=0)
+    edit_estimate_btnup=Button(edit_estimate_fir5Frame1, compound="left", text="Line Up").place(x=150, y=0)
+
+  ############################ End view/edit estimate ###########################
+  #printselected order
+    
+  def estimate_printsele():
+
+    def estimate_property1():
+      estimate_propert=Toplevel()
+      estimate_propert.title("Microsoft Print To PDF Advanced Document Settings")
+      estimate_propert.geometry("670x500+240+150")
+
+      def estimate_property2():
+        estimate_propert1=Toplevel()
+        estimate_propert1.title("Microsoft Print To PDF Advanced Document Settings")
+        estimate_propert1.geometry("670x500+240+150")
+
+        estimate_ename=Label(estimate_propert1, text="Microsoft Print To PDF Advanced Document Settings").place(x=10, y=5)
+        estimate_epaper=Label(estimate_propert1, text="Paper/Output").place(x=30, y=35)
+        estimate_esize=Label(estimate_propert1, text="Paper size").place(x=55, y=65)
+        estimate_en = StringVar()
+        estimate_search = ttk.Combobox(estimate_propert1, width = 15, textvariable = estimate_en )
+        estimate_search['values'] = ('letter')
+        estimate_search.place(x=150,y=65)
+        estimate_search.current(0)
+        estimate_copy=Label(estimate_propert1, text="Copy count:").place(x=55, y=95)
+
+        estimate_okbtn=Button(estimate_propert1,compound = LEFT,image=tick , text="Ok", width=60).place(x=460, y=450)
+        estimate_canbtn=Button(estimate_propert1,compound = LEFT,image=cancel, text="Cancel", width=60).place(x=570, y=450)
+        
+        
+
+
+      estimate_estyle = ttk.Style()
+      estimate_estyle.theme_use('default')
+      estimate_estyle.configure('TNotebook.Tab', background="#999999", padding=5)
+      estimate_property_Notebook = ttk.Notebook(estimate_propert)
+      estimate_property_Frame = Frame(estimate_property_Notebook, height=500, width=670)
+      estimate_property_Notebook.add(estimate_property_Frame, text="Layout")
+      estimate_property_Notebook.place(x=0, y=0)
+
+      estimate_nname=Label(estimate_property_Frame, text="Orientation:").place(x=10, y=5)
+      estimate_en1 = StringVar()
+      estimate_esearch = ttk.Combobox(estimate_property_Frame, width = 23, textvariable = estimate_en1 )
+      estimate_esearch['values'] = ('Portrait')
+      estimate_esearch.place(x=10,y=25)
+      estimate_esearch.current(0)
+
+      estimate_etext1=Text(estimate_property_Frame,width=50).place(x=250, y=5,height=350)
+
+      estimate_ebtn=Button(estimate_property_Frame, text="Advanced",command=estimate_property2).place(x=550, y=380)
+      estimate_ebtn1=Button(estimate_property_Frame,compound = LEFT,image=tick  ,text="OK", width=60,).place(x=430, y=420)
+      estimate_ebtn2=Button(estimate_property_Frame,compound = LEFT,image=cancel , text="Cancel", width=60,).place(x=550, y=420)     
+
+
+      
+    if(False):
+        messagebox.showwarning("FBilling Revelution 2020", "Customer is required, Please select customer for this invoice\nbefore printing")
+    elif(False):
+        messagebox.showinfo("FBilling Revelution 2020", "Print job has been completed.")
+    else:
+        estimate_print1=Toplevel()
+        estimate_print1.title("Print")
+        estimate_print1.geometry("670x400+240+150")
+        
+        estimate_printerframe=LabelFrame(estimate_print1, text="Printer", height=80, width=650)
+        estimate_printerframe.place(x=7, y=5)      
+        estimate_pname=Label(estimate_printerframe, text="Name:").place(x=10, y=5)
+        estimate_pe1= ttk.Combobox(estimate_printerframe, width=40).place(x=70, y=5)
+        estimate_where=Label(estimate_printerframe, text="Where:").place(x=10, y=30)
+        estimate_printocheckvar=IntVar()
+        estimate_printochkbtn=Checkbutton(estimate_printerframe,text="Print to file",variable=estimate_printocheckvar,onvalue=1,offvalue=0,height=1,width=10)
+        estimate_printochkbtn.place(x=450, y=30)
+        estimate_pbtn=Button(estimate_printerframe, text="Properties", width=10,command=estimate_property1).place(x=540, y=5)
+
+        estimate_pageslblframe=LabelFrame(estimate_print1, text="Pages", height=140, width=320)
+        estimate_pageslblframe.place(x=10, y=90)
+        estimate_radvar=IntVar()
+        estimate_radioall=Radiobutton(estimate_pageslblframe, text="All", variable=estimate_radvar, value="1").place(x=10, y=5)
+        estimate_radiocpage=Radiobutton(estimate_pageslblframe, text="Current Page", variable=estimate_radvar, value="2").place(x=10, y=25)
+        estimate_radiopages=Radiobutton(estimate_pageslblframe, text="Pages: ", variable=estimate_radvar, value="3").place(x=10, y=45)
+        estimate_pagecountentry = Entry(estimate_pageslblframe, width=23).place(x=80, y=47)
+        estimate_pageinfolabl=Label(estimate_pageslblframe, text="Enter page numbers and/or page ranges\nseperated by commas. For example:1,3,5-12")
+        estimate_pageinfolabl.place(x=5, y=75)
+
+        estimate_copylblframe=LabelFrame(estimate_print1, text="Copies", height=140, width=320)
+        estimate_copylblframe.place(x=335, y=90)
+        estimate_nolabl=Label(estimate_copylblframe, text="Number of copies").place(x=5, y=5)      
+        estimate_noentry = Entry(estimate_copylblframe, width=18).place(x=130, y=5)      
+        estimate_one=Frame(estimate_copylblframe, width=30, height=40, bg="black").place(x=20, y=40)     
+        estimate_two=Frame(estimate_copylblframe, width=30, height=40, bg="grey").place(x=15, y=45)     
+        estimate_three=Frame(estimate_copylblframe, width=30, height=40, bg="white").place(x=10, y=50)      
+        estimate_four=Frame(estimate_copylblframe, width=30, height=40, bg="black").place(x=80, y=40)      
+        estimate_fiv=Frame(estimate_copylblframe, width=30, height=40, bg="grey").place(x=75, y=45)      
+        estimate_six=Frame(estimate_copylblframe, width=30, height=40, bg="white").place(x=70, y=50)      
+        estimate_collatecheckvar=IntVar()
+        estimate_collatechkbtn=Checkbutton(estimate_copylblframe,text="Collate",variable=estimate_collatecheckvar,onvalue=1,offvalue=0,height=1,width=10)
+        estimate_collatechkbtn.place(x=130, y=70)
+
+        estimate_othrlblframe=LabelFrame(estimate_print1, text="Other", height=120, width=320)
+        estimate_othrlblframe.place(x=10, y=235)
+        estimate_printlb=Label(estimate_othrlblframe, text="Print").place(x=5, y=0)
+        estimate_dropprint = ttk.Combobox(estimate_othrlblframe, width=23).place(x=80, y=0)
+        estimate_orderlb=Label(estimate_othrlblframe, text="Order").place(x=5, y=25)
+        estimate_dropord = ttk.Combobox(estimate_othrlblframe, width=23).place(x=80, y=25)
+        estimate_duplexlb=Label(estimate_othrlblframe, text="Duplex").place(x=5, y=50)
+        estimate_droplex = ttk.Combobox(estimate_othrlblframe, width=23).place(x=80, y=50)
+
+        estimate_prmodelblframe=LabelFrame(estimate_print1, text="Print mode", height=120, width=320)
+        estimate_prmodelblframe.place(x=335, y=235)
+        estimate_dropscal = ttk.Combobox(estimate_prmodelblframe, width=30).place(x=5, y=5)
+        estimate_poslb=Label(estimate_prmodelblframe, text="Print on sheet").place(x=5, y=35)
+        estimate_droppos = ttk.Combobox(estimate_prmodelblframe, width=10).place(x=155, y=35)
+
+        estimate_eokbtn=Button(estimate_print1,compound = LEFT,image=tick , text="Ok", width=60).place(x=460, y=370)
+        estimate_ecanbtn=Button(estimate_print1,compound = LEFT,image=cancel, text="Cancel", width=60).place(x=570, y=370)
+        
+
+
+  #email
+        
+  def estimate_emailord():
+    estimate_mailDetail=Toplevel()
+    estimate_mailDetail.title("Orders E-Mail")
+    estimate_ep2 = PhotoImage(file = "images/fbicon.png")
+    estimate_mailDetail.iconphoto(False, estimate_ep2)
+    estimate_mailDetail.geometry("1030x550+150+120")
   
-  # sql = "select * from users"
-  # fbcursor.execute(sql)
-  # user_log = fbcursor.fetchall()
-  # if not user_log:
-  #   pass
-  # else:
-  #     screen2=Toplevel()
-  #     screen2.title('LOGIN')
-  #     screen2.geometry('400x300')
-  
-  #     username1=StringVar()
-  #     password1=StringVar()
-  
-  #     Label(screen2,text='Login Here').pack()
-  #     uss1=Label(screen2,text='Username').place(x=50,y=70)
-  #     ee1 = Entry(screen2,textvariable=username1).place(x=140,y=70)
-  
-  #     pss1=Label(screen2,text='Password').place(x=50,y=110)
-  #     ee2=Entry(screen2,textvariable=password1).place(x=140,y=110)
-  
-  #     submitbtn1=Button(screen2,text='Login', width=20,height=2,command=log).place(x=70,y=200)
-  
-  # def check_empty() :
-  #      if entry.get():
-  #         pass     #your function where you want to jump
-  #      else:
-  #         messagebox.showinfo("Information", "Required entry")
+    def estimate_my_SMTP():
+        if True:
+            estimate_em_ser_conbtn.destroy()
+            estimate_mysmtpservercon=LabelFrame(estimate_account_Frame,text="SMTP server connection(ask your ISP for your SMTP settings)", height=165, width=380)
+            estimate_mysmtpservercon.place(x=610, y=110)
+            estimate_lbl_hostn=Label(estimate_mysmtpservercon, text="Hostname").place(x=5, y=10)
+            estimate_hostnent=Entry(estimate_mysmtpservercon, width=30).place(x=80, y=10)
+            estimate_lbl_portn=Label(estimate_mysmtpservercon, text="Port").place(x=5, y=35)
+            estimate_portent=Entry(estimate_mysmtpservercon, width=30).place(x=80, y=35)
+            estimate_elbl_usn=Label(estimate_mysmtpservercon, text="Username").place(x=5, y=60)
+            estimate_unament=Entry(estimate_mysmtpservercon, width=30).place(x=80, y=60)
+            estimate_eelbl_pasn=Label(estimate_mysmtpservercon, text="Password").place(x=5, y=85)
+            estimate_pwdent=Entry(estimate_mysmtpservercon, width=30).place(x=80, y=85)
+            estimate_ssl_chkvar=IntVar()
+            estimate_ssl_chkbtn=Checkbutton(estimate_mysmtpservercon, variable=estimate_ssl_chkvar, text="This server requires a secure connection(SSL)", onvalue=1, offvalue=0)
+            estimate_ssl_chkbtn.place(x=50, y=110)
+            estimate_em_ser_conbtn1=Button(estimate_account_Frame, text="Test E-mail Server Connection").place(x=610, y=285)
+        else:
+            pass
+      
+    estimate_mystyle = ttk.Style()
+    estimate_mystyle.theme_use('default')
+    estimate_mystyle.configure('TNotebook.Tab', background="#999999", padding=5)
+    estimate_email_Notebook = ttk.Notebook(estimate_mailDetail)
+    estimate_email_Frame = Frame(estimate_email_Notebook, height=500, width=1080)
+    estimate_account_Frame = Frame(estimate_email_Notebook, height=550, width=1080)
+    estimate_email_Notebook.add(estimate_email_Frame, text="E-mail")
+    estimate_email_Notebook.add(estimate_account_Frame, text="Account")
+    estimate_email_Notebook.place(x=0, y=0)
+    estimate_messagelbframe=LabelFrame(estimate_email_Frame,text="Message", height=495, width=730)
+    estimate_messagelbframe.place(x=5, y=5)
+    estimate_mylbl_emailtoaddr=Label(estimate_messagelbframe, text="Email to address").place(x=5, y=5)
+    estimate_emailtoent=Entry(estimate_messagelbframe, width=50).place(x=120, y=5)
+    estimate_sendemail_btn=Button(estimate_messagelbframe, text="Send Email", width=10, height=1).place(x=600, y=10)
+    estimate_lbl_carcopyto=Label(messagelbframe, text="Carbon copy to").place(x=5, y=32)
+    estimate_carcopyent=Entry(messagelbframe, width=50).place(x=120, y=32)
+    estimate_stopemail_btn=Button(messagelbframe, text="Stop sending", width=10, height=1).place(x=600, y=40)
+    estimate_lbl_subject=Label(messagelbframe, text="Subject").place(x=5, y=59)
+    estimate_subent=Entry(messagelbframe, width=50).place(x=120, y=59)
+
+    estimate_nstyle = ttk.Style()
+    estimate_nstyle.theme_use('default')
+    estimate_nstyle.configure('TNotebook.Tab', background="#999999", width=20, padding=5)
+    estimate_mess_Notebook = ttk.Notebook(estimate_messagelbframe)
+    estimate_emailmessage_Frame = Frame(estimate_mess_Notebook, height=350, width=710)
+    estimate_htmlsourse_Frame = Frame(estimate_mess_Notebook, height=350, width=710)
+    estimate_mess_Notebook.add(estimate_emailmessage_Frame, text="E-mail message")
+    estimate_mess_Notebook.add(estimate_htmlsourse_Frame, text="Html sourse code")
+    estimate_mess_Notebook.place(x=5, y=90)
+
+    estimate_mybtn1=Button(estimate_emailmessage_Frame,width=31,height=23,compound = LEFT,image=selectall).place(x=0, y=1)  
+    estimate_mybtn2=Button(estimate_emailmessage_Frame,width=31,height=23,compound = LEFT,image=cut).place(x=36, y=1)
+    estimate_mybtn3=Button(estimate_emailmessage_Frame,width=31,height=23,compound = LEFT,image=copy).place(x=73, y=1)
+    estimate_mybtn4=Button(estimate_emailmessage_Frame,width=31,height=23,compound = LEFT,image=paste).place(x=105, y=1)
+    estimate_mybtn5=Button(estimate_emailmessage_Frame,width=31,height=23,compound = LEFT,image=undo).place(x=140, y=1)
+    estimate_mybtn6=Button(estimate_emailmessage_Frame,width=31,height=23,compound = LEFT,image=redo).place(x=175, y=1)
+    estimate_mybtn7=Button(estimate_emailmessage_Frame,width=31,height=23,compound = LEFT,image=bold).place(x=210, y=1)
+    estimate_mybtn8=Button(estimate_emailmessage_Frame,width=31,height=23,compound = LEFT,image=italics).place(x=245, y=1)
+    estimate_mybtn9=Button(estimate_emailmessage_Frame,width=31,height=23,compound = LEFT,image=underline).place(x=280, y=1)
+    estimate_mybtn10=Button(estimate_emailmessage_Frame,width=31,height=23,compound = LEFT,image=left).place(x=315, y=1)
+    estimate_mybtn11=Button(estimate_emailmessage_Frame,width=31,height=23,compound = LEFT,image=right).place(x=350, y=1)
+    estimate_mybtn12=Button(estimate_emailmessage_Frame,width=31,height=23,compound = LEFT,image=center).place(x=385, y=1)
+    estimate_mybtn13=Button(estimate_emailmessage_Frame,width=31,height=23,compound = LEFT,image=hyperlink).place(x=420, y=1)
+    estimate_mybtn14=Button(estimate_emailmessage_Frame,width=31,height=23,compound = LEFT,image=remove).place(x=455, y=1)
+
+    estimate_dropcomp = ttk.Combobox(estimate_emailmessage_Frame, width=12, height=3).place(x=500, y=5)
+    estimate_mydropcompo = ttk.Combobox(estimate_emailmessage_Frame, width=6, height=3).place(x=600, y=5)
+    estimate_mframe=Frame(estimate_emailmessage_Frame, height=350, width=710, bg="white")
+    estimate_mframe.place(x=0, y=28)
+    estimate_e_btn1=Button(estimate_htmlsourse_Frame,width=31,height=23,compound = LEFT,image=selectall).place(x=0, y=1)
+    estimate_e_btn2=Button(estimate_htmlsourse_Frame,width=31,height=23,compound = LEFT,image=cut).place(x=36, y=1)
+    estimate_e_btn3=Button(estimate_htmlsourse_Frame,width=31,height=23,compound = LEFT,image=copy).place(x=73, y=1)
+    estimate_e_btn4=Button(estimate_htmlsourse_Frame,width=31,height=23,compound = LEFT,image=paste).place(x=105, y=1)
+    estimate_e_mframe=Frame(estimate_htmlsourse_Frame, height=350, width=710, bg="white")
+    estimate_e_mframe.place(x=0, y=28)
+    estimate_attachlbframe=LabelFrame(estimate_email_Frame,text="Attachment(s)", height=350, width=280)
+    estimate_attachlbframe.place(x=740, y=5)
+    estimate_htcodeframe=Frame(estimate_attachlbframe, height=220, width=265, bg="white").place(x=5, y=5)
+    estimate_lbl_btn_info=Label(estimate_attachlbframe, text="Double click on attachment to view").place(x=30, y=230)
+    estimate_e_btn17=Button(estimate_attachlbframe, width=20, text="Add attacment file...").place(x=60, y=260)
+    estimate_e_btn18=Button(estimate_attachlbframe, width=20, text="Remove attacment").place(x=60, y=295)
+    estimate_lbl_tt_info=Label(estimate_email_Frame, text="You can create predefined invoice, order, estimate\nand payment receipt email templates under Main\nmenu/Settings/E-Mail templates tab")
+    estimate_lbl_tt_info.place(x=740, y=370)
+
+    estimate_ready_frame=Frame(estimate_mailDetail, height=20, width=1080, bg="#b3b3b3").place(x=0,y=530)
+    
+    estimate_sendatalbframe=LabelFrame(estimate_account_Frame,text="E-Mail(Sender data)",height=270, width=600)
+    estimate_sendatalbframe.place(x=5, y=5)
+    estimate_lbl_sendermail=Label(estimate_sendatalbframe, text="Your company email address").place(x=5, y=30)
+    estimate_sentent=Entry(estimate_sendatalbframe, width=40).place(x=195, y=30)
+    estimate_lbl_orcompanyname=Label(estimate_sendatalbframe, text="Your name or company name").place(x=5, y=60)
+    estimate_nament=Entry(estimate_sendatalbframe, width=40).place(x=195, y=60)
+    estimate_lbl_reply=Label(estimate_sendatalbframe, text="Reply to email address").place(x=5, y=90)
+    estimate_replyent=Entry(estimate_sendatalbframe, width=40).place(x=195, y=90)
+    estimate_lbl_sign=Label(estimate_sendatalbframe, text="Signature").place(x=5, y=120)
+    estimate_signent=Entry(estimate_sendatalbframe,width=50).place(x=100, y=120,height=75)
+    estimate_confirm_chkvar=IntVar()
+    estimate_confirm_chkbtn=Checkbutton(estimate_sendatalbframe, variable=estimate_confirm_chkvar, text="Confirmation reading", onvalue=1, offvalue=0)
+    estimate_confirm_chkbtn.place(x=200, y=215)
+    estimate_e_mybtn18=Button(estimate_account_Frame, width=15, text="Save settings").place(x=25, y=285)
+
+    estimate_esendatalbframe=LabelFrame(estimate_account_Frame,text="SMTP Server",height=100, width=380)
+    estimate_esendatalbframe.place(x=610, y=5)
+    estimate_servar=IntVar()
+    estimate_SMTP_rbtn=Radiobutton(estimate_sendatalbframe, text="Use the Built-In SMTP Server Settings", variable=estimate_servar, value=1)
+    estimate_SMTP_rbtn.place(x=10, y=10)
+    estimate_MySMTP_rbtn=Radiobutton(estimate_sendatalbframe, text="Use My Own SMTP Server Settings(Recommended)", variable=estimate_servar, value=2, command=estimate_my_SMTP)
+    estimate_MySMTP_rbtn.place(x=10, y=40)
+    estimate_em_ser_conbtn=Button(estimate_account_Frame, text="Test E-mail Server Connection")
+    estimate_em_ser_conbtn.place(x=710, y=110)
+
+
+
+  #sms notification order
+    
+  def estimate_sms():
+    estimate_send_SMS=Toplevel()
+    estimate_send_SMS.geometry("700x480+240+150")
+    estimate_send_SMS.title("Send SMS notification")
+
+    estimate_sms_style = ttk.Style()
+    estimate_sms_style.theme_use('default')
+    estimate_sms_style.configure('TNotebook.Tab', background="#999999", padding=5)
+    estimate_sms_Notebook = ttk.Notebook(estimate_send_SMS)
+    estimate_SMS_Notification = Frame(estimate_sms_Notebook, height=470, width=700)
+    estimate_SMS_Service_Account = Frame(estimate_sms_Notebook, height=470, width=700)
+    estimate_sms_Notebook.add(estimate_SMS_Notification, text="SMS Notification")
+    estimate_sms_Notebook.add(estimate_SMS_Service_Account, text="SMS Service Account")
+    estimate_sms_Notebook.place(x=0, y=0)
+
+    estimate_numlbel=Label(estimate_SMS_Notification, text="SMS number or comma seperated SMS number list(Please start each SMS number with the country code)")
+    estimate_numlbel.place(x=10, y=10)
+    estimate_numentry=Entry(estimate_SMS_Notification, width=92).place(x=10, y=30)
+    estimate_stexbel=Label(estimate_SMS_Notification, text="SMS Text").place(x=10, y=60)
+    estimate_stex=Entry(estimate_SMS_Notification, width=40).place(x=10, y=85,height=120)
+    
+    estimate_dclbel=Label(estimate_SMS_Notification, text="Double click to insert into text")
+    estimate_dclbel.place(x=410, y=60)
+    estimate_dcl=Entry(estimate_SMS_Notification, width=30)
+    estimate_dcl.place(x=400, y=85,height=200)
+    
+    estimate_mysmstype=LabelFrame(estimate_SMS_Notification, text="SMS message type", width=377, height=60)
+    estimate_mysmstype.place(x=10, y=223)
+    estimate_Mysnuvar=IntVar()
+    estimate_normal_rbtn=Radiobutton(estimate_mysmstype, text="Normal SMS(160 chars)", variable=estimate_Mysnuvar, value=1)
+    estimate_normal_rbtn.place(x=5, y=5)
+    estimate_unicode_rbtn=Radiobutton(estimate_mysmstype, text="Unicode SMS(70 chars)", variable=estimate_Mysnuvar, value=2)
+    estimate_unicode_rbtn.place(x=190, y=5)
+    estimate_tiplbf=LabelFrame(estimate_SMS_Notification, text="Tips", width=680, height=120)
+    estimate_tiplbf.place(x=10, y=290)
+    estimate_Mytiplabl=Label(estimate_tiplbf,justify=LEFT,fg="red",  text="Always start the SMS nymber with the country code. Do not use the + sign at the beginning(example\nUS number:8455807546). Do not use any special characters in your normal SMS text. Please use the\nstndard SMS characters or the English alphabet and numbers only. Otherwise the SMS will be\nunreadable or undeliverable. If you need to enter international characters, accents,email address, or\nspecial characters to the SMS text field then choose the Unicode SMS format.")
+    estimate_Mytiplabl.place(x=5, y=5)
+
+    estimate_Mybtn1=Button(estimate_SMS_Notification, width=20, text="Send SMS notification").place(x=10, y=420)
+    estimate_Mybtn2=Button(estimate_SMS_Notification, width=25, text="Confirm SMS cost before sending").place(x=280, y=420)
+    estimate_Mybtn3=Button(estimate_SMS_Notification, width=15, text="Cancel").place(x=550, y=420)
+    
+
+    estimate_e_smstype=LabelFrame(estimate_SMS_Service_Account, text="Select the notification service provider", width=670, height=65)
+    estimate_e_smstype.place(x=10, y=5)
+    estimate_e_snumvar=IntVar()
+    estimate_normal_rbtn=Radiobutton(estimate_e_smstype,text="BULKSMS(www.bulksms.com)",variable=estimate_e_snumvar,value=1,)
+    estimate_normal_rbtn.place(x=5, y=5)
+    estimate_unicode_rbtn=Radiobutton(estimate_e_smstype, text="Unicode SMS(70 chars)-Recommended", variable=estimate_e_snumvar, value=2)
+    estimate_unicode_rbtn.place(x=290, y=5)
+
+    estimate_sms1type=LabelFrame(estimate_SMS_Service_Account, text="Your BULKSMS.COM Account", width=670, height=100)
+    estimate_sms1type.place(x=10, y=80)
+    estimate_Myname=Label(estimate_sms1type, text="Username").place(x=10, y=5)
+    estimate_na=Entry(estimate_sms1type, width=20).place(x=100, y=5)
+    estimate_Mypassword=Label(estimate_sms1type, text="Password").place(x=10, y=45)
+    estimate_Mypas=Entry(estimate_sms1type, width=20).place(x=100, y=45)
+    estimate_combo=Label(estimate_sms1type, text="Route").place(x=400, y=5)
+    estimate_My_n = StringVar()
+    estimate_combo1 = ttk.Combobox(estimate_sms1type, width = 20, textvariable = estimate_My_n ).place(x=450,y=5)
+    estimate_My_btn1=Button(estimate_sms1type, width=10, text="Save settings").place(x=550, y=45)
+
+    
+    estimate_Mytiplbf=LabelFrame(estimate_SMS_Service_Account, text="Terms of service", width=680, height=250)
+    estimate_Mytiplbf.place(x=10, y=190)
+    estimate_mytiplabl=Label(estimate_Mytiplbf,justify=LEFT,fg="red",  text="The SMS notification service is not free.This service costs you creadit.You must have your own account\nat BULKSMS.COM and you need to have sufficient creadit and an active internet connection to use\nthis feature.Please review all fields in this form for accuracy")
+    estimate_mytiplabl.place(x=0, y=5)
+    estimate_my_tiplabl1=Label(estimate_Mytiplbf,justify=LEFT,fg="black",  text="visit www.bulksms.com website to create your own account.please make sure the BULKSMS .COM\n service works well in your country before you busy creadit")
+    estimate_my_tiplabl1.place(x=0, y=60)
+    estimate_My_tiplabl2=Label(estimate_Mytiplbf,justify=LEFT,fg="black",  text="Our SMS notification tool comes without any warranty.our software only forwards your SMS message\nthe BULKSMS API server .The BULKSMS API server will try to sent SMS message your recipient")
+    estimate_My_tiplabl2.place(x=0, y=100)
+    estimate_eMy_tiplabl3=Label(estimate_Mytiplbf,justify=LEFT,fg="red",  text="Please note that you access and use the SMS notification tool your own risk.F-Billing software is not\nresponsible for any type of loss or damage or undelivered SMS massage which you may as a result\nof accessing and using the SMS notification service.")
+    estimate_eMy_tiplabl3.place(x=0, y=140)
+    estimate_My_checkvar1=IntVar()
+    estimate_Mychkbtn1=Checkbutton(estimate_Mytiplbf,text="I have read and agree to the terms of service above",variable=estimate_My_checkvar1,onvalue=1,offvalue=0).place(x=70, y=200)  
+
+
+
+  #print preview order
+  def estimate_Myprintpreview():
+    messagebox.showerror("F-Billing Revolution","Customer is required,please select customer for this order before printing.")
+
+
+
+  #convert to invoice
+  def estimate_convert():
+    if messagebox.askyesno("Make invoice from Orders", "Are you sure to make invoice from this Orders ") == True:
+          messagebox.askyesno("Make invoice from Estimate", "Invoice Creation was Successfull.\n New Invoice is \n Would you like to open this invoice ")
+    else:
+          messagebox.destroy()
+    
+
+  #delete orders  
+  def estimate_dele():  
+    messagebox.askyesno("Delete order", "Are you sure to delete this order? All products will be placed back into stock")
+
+
+
+
+  #search in orders  
+  def estimate_search():  
+      estimate_etop = Toplevel()     
+      estimate_etop.title("Find Text")   
+      estimate_etop.geometry("600x250+390+250")
+      estimate_findwhat1=Label(estimate_etop,text="Find What:",pady=5,padx=10).place(x=5,y=20)
+      estimate_e_n = StringVar()
+      estimate_findwhat = ttk.Combobox(estimate_etop, width = 40, textvariable = estimate_e_n ).place(x=90,y=25)
+    
+      estimate_findin1=Label(estimate_etop,text="Find in:",pady=5,padx=10).place(x=5,y=47)
+      estimate_my_n1 = StringVar()
+      estimate_findIN = ttk.Combobox(estimate_etop, width = 30, textvariable = estimate_my_n1 )
+      estimate_findIN['values'] = ('Product/Service id', ' Category', ' Active',' name',' stock',' location', ' image',' <<All>>')                       
+      estimate_findIN.place(x=90,y=54)
+      estimate_findIN.current(0)
+
+      estimate_findButton = Button(estimate_etop, text ="Find next",width=10).place(x=480,y=22)
+      estimate_closeButton = Button(estimate_etop,text ="Close",width=10).place(x=480,y=52)
+      
+      estimate_match1=Label(estimate_etop,text="Match:",pady=5,padx=10).place(x=5,y=74)
+      estimate_my_n2 = StringVar()
+      estimate_match = ttk.Combobox(estimate_etop, width = 23, textvariable = estimate_my_n2 )   
+      estimate_match['values'] = ('From Any part',' Whole Field',' From the beginning of the field')                                   
+      estimate_match.place(x=90,y=83)
+      estimate_match.current(0)
+
+      estimate_my_search1=Label(estimate_etop,text="Search:",pady=5,padx=10).place(x=5,y=102)
+      estimate_my_n3 = StringVar()
+      estimate_my_search = ttk.Combobox(estimate_etop, width = 23, textvariable = estimate_my_n3 )
+      estimate_my_search['values'] = ('All', 'up',' Down')
+      estimate_my_search.place(x=90,y=112)
+      estimate_my_search.current(0)
+      estimate_checkvarStatus4=IntVar()  
+      estimate_my_Button4 = Checkbutton(estimate_etop,variable = estimate_checkvarStatus4,text="Match Case",onvalue =0 ,offvalue = 1,height=3,width = 15)
+      estimate_my_Button4.place(x=90,y=141)
+      estimate_checkvarStatus5=IntVar()   
+      estimate_my_Button5 = Checkbutton(estimate_etop,variable = estimate_checkvarStatus5,text="Match Format",onvalue =0 ,offvalue = 1,height=3,width = 15)
+      estimate_my_Button5.place(x=300,y=141)
+
+
+
+
+
+  estimate_mainFrame=Frame(tab3, relief=GROOVE, bg="#f8f8f2")
+  estimate_mainFrame.pack(side="top", fill=BOTH)
+
+  estimate_midFrame=Frame(estimate_mainFrame, bg="#f5f3f2", height=60)
+  estimate_midFrame.pack(side="top", fill=X)
+
+  estimate_w = Canvas(estimate_midFrame, width=1, height=65, bg="#b3b3b3", bd=0)
+  estimate_w.pack(side="left", padx=(5, 2))
+  estimate_w1 = Canvas(estimate_midFrame, width=1, height=65, bg="#b3b3b3", bd=0)
+  estimate_w1.pack(side="left", padx=(0, 5))
+
+  estimate_invoiceLabel = Button(estimate_midFrame,compound="top", text="Create new\nEstimate",relief=RAISED, image=photo,bg="#f5f3f2", fg="black", height=55, bd=1, width=55,command=estimate_create)
+  estimate_invoiceLabel.pack(side="left", pady=3, ipadx=4)
+
+  estimate_orderLabel = Button(estimate_midFrame,compound="top", text="View/Edit\nEstimate",relief=RAISED, image=photo1,bg="#f8f8f2", fg="black", height=55, bd=1, width=55,command=edit_estimates_create)
+  estimate_orderLabel.pack(side="left")
+
+  estimate_estimateLabel = Button(estimate_midFrame,compound="top", text="Delete\nSelected",relief=RAISED, image=photo2,bg="#f8f8f2", fg="black", height=55, bd=1, width=55,command=estimate_dele)
+  estimate_estimateLabel.pack(side="left")
+
+  estimate_w3 = Canvas(estimate_midFrame, width=1, height=65, bg="#b3b3b3", bd=0)
+  estimate_w3.pack(side="left", padx=5)
+
+  estimate_recurLabel = Button(estimate_midFrame,compound="top", text="Convert to\nInvoice",relief=RAISED, image=photo3,bg="#f8f8f2", fg="black", height=55, bd=1, width=55,command=estimate_convert)
+  estimate_recurLabel.pack(side="left")
+
+  estimate_w4 = Canvas(estimate_midFrame, width=1, height=65, bg="#b3b3b3", bd=0)
+  estimate_w4.pack(side="left", padx=5)
+
+  estimate_previewLabel = Button(estimate_midFrame,compound="top", text="Print\nPreview",relief=RAISED, image=photo4,bg="#f8f8f2", fg="black", height=55, bd=1, width=55, activebackground="red",command=estimate_Myprintpreview)
+  estimate_previewLabel.pack(side="left")
+
+  estimate_purchaseLabel = Button(estimate_midFrame,compound="top", text="Print\nSelected",relief=RAISED, image=photo5,bg="#f8f8f2", fg="black", height=55, bd=1, width=55,command=estimate_printsele)
+  estimate_purchaseLabel.pack(side="left")
+
+  estimate_w5 = Canvas(estimate_midFrame, width=1, height=55, bg="#b3b3b3", bd=0)
+  estimate_w5.pack(side="left", padx=5)
+
+  estimate_expenseLabel = Button(estimate_midFrame,compound="top", text=" E-mail \nEstimate",relief=RAISED, image=photo6,bg="#f8f8f2", fg="black", height=55, bd=1, width=55,command=estimate_emailord)
+  estimate_expenseLabel.pack(side="left")
+
+  estimate_smsLabel = Button(estimate_midFrame,compound="top", text="Send SMS\nnotification",relief=RAISED, image=photo10,bg="#f8f8f2", fg="black", height=55, bd=1, width=55,command=estimate_sms)
+  estimate_smsLabel.pack(side="left")
+
+  estimate_w6 = Canvas(estimate_midFrame, width=1, height=55, bg="#b3b3b3", bd=0)
+  estimate_w6.pack(side="left", padx=5)
+
+  estimate_productLabel = Button(estimate_midFrame,compound="top", text="Search\nEstimate",relief=RAISED, image=photo7,bg="#f8f8f2", fg="black", height=55, bd=1, width=55,command=estimate_search)
+  estimate_productLabel.pack(side="left")
+
+  estimate_lbframe = LabelFrame(estimate_midFrame, height=60, width=200, bg="#f8f8f2")
+  estimate_lbframe.pack(side="left", padx=10, pady=0)
+  estimate_lbl_invdt = Label(estimate_lbframe, text="Estimate date from : ", bg="#f8f8f2")
+  estimate_lbl_invdt.grid(row=0, column=0, pady=5, padx=(5, 0))
+  estimate_lbl_invdtt = Label(estimate_lbframe, text="Estimate date to  :  ", bg="#f8f8f2")
+  estimate_lbl_invdtt.grid(row=1, column=0, pady=5, padx=(5, 0))
+  estimate_invdt = Entry(estimate_lbframe, width=15)
+  estimate_invdt.grid(row=0, column=1)
+  estimate_invdtt = Entry(estimate_lbframe, width=15)
+  estimate_invdtt.grid(row=1, column=1)
+  estimate_checkvarr1 = IntVar()
+  estimate_chkbtnn1 = Checkbutton(estimate_lbframe, text = "Apply filter", variable = estimate_checkvarr1, onvalue = 1, offvalue = 0, height = 2, width = 8, bg="#f8f8f2")
+  estimate_chkbtnn1.grid(row=0, column=2, rowspan=2, padx=(5,5))
+
+  estimate_productLabel = Button(estimate_midFrame,compound="top", text="Refresh\nOrders list",relief=RAISED, image=photo8,fg="black", height=55, bd=1, width=55)
+  estimate_productLabel.pack(side="left")
+
+  estimate_w7 = Canvas(estimate_midFrame, width=1, height=55, bg="#b3b3b3", bd=0)
+  estimate_w7.pack(side="left", padx=5)
+
+  estimate_productLabell = Button(estimate_midFrame,compound="top", text="Hide totals\nSum",relief=RAISED, image=photo9,bg="#f8f8f2", fg="black", height=55, bd=1, width=55)
+  estimate_productLabell.pack(side="left")
+
+  estimate_invoilabell = Label(estimate_mainFrame, text="Estimate(All)", font=("arial", 18), bg="#f8f8f2")
+  estimate_invoilabell.pack(side="left", padx=(20,0))
+  estimate_drop = ttk.Combobox(estimate_mainFrame, value="Hello")
+  estimate_drop.pack(side="right", padx=(0,10))
+  estimate_invoilabell1 = Label(estimate_mainFrame, text="Category filter", font=("arial", 15), bg="#f8f8f2")
+  estimate_invoilabell1.pack(side="right", padx=(0,10))
+
+  class MyApp:
+    def __init__(self, parent):
+      
+      self.myParent = parent 
+
+      self.myContainer1 = Frame(parent) 
+      self.myContainer1.pack()
+      
+      self.top_frame = Frame(self.myContainer1) 
+      self.top_frame.pack(side=TOP,
+        fill=BOTH, 
+        expand=YES,
+        )  
+
+      self.left_frame = Frame(self.top_frame, background="white",
+        borderwidth=5,  relief=RIDGE,
+        height=250, 
+        width=2000, 
+        )
+      self.left_frame.pack(side=LEFT,
+        fill=BOTH, 
+        expand=YES,
+        )
+
+      
+      tree = ttk.Treeview(self.left_frame, columns = (1,2,3,4,5,6,7,8,9,10), height = 15, show = "headings")
+      tree.pack(side = 'top')
+      tree.heading(1)
+      tree.heading(2, text="Estimate#")
+      tree.heading(3, text="Estimate date")
+      tree.heading(4, text="Due date")
+      tree.heading(5, text="Customer Name")
+      tree.heading(6, text="Status")
+      tree.heading(7, text="Emailed on")
+      tree.heading(8, text="Printed on")
+      tree.heading(9, text="SMS on")
+      tree.heading(10, text="Order Total")   
+      tree.column(1, width = 30)
+      tree.column(2, width = 150)
+      tree.column(3, width = 140)
+      tree.column(4, width = 130)
+      tree.column(5, width = 200)
+      tree.column(6, width = 130)
+      tree.column(7, width = 150)
+      tree.column(8, width = 130)
+      tree.column(9, width = 130)
+      tree.column(10, width = 160)
+
+      scrollbar = Scrollbar(self.left_frame)
+      scrollbar.place(x=990+330+15, y=0, height=300+20)
+      scrollbar.config( command=tree.yview )
+
+      tabControl = ttk.Notebook(self.left_frame,width=1)
+      tab1 = ttk.Frame(tabControl)
+      tab2 = ttk.Frame(tabControl)
+      tab3=  ttk.Frame(tabControl)
+      tab4 = ttk.Frame(tabControl)
+      tabControl.add(tab1,image=invoices,compound = LEFT, text ='Estimate Items',)
+      tabControl.add(tab2,image=photo11,compound = LEFT, text ='Private Notes')
+      tabControl.add(tab3,image=smslog,compound = LEFT, text ='SMS Log')
+      tabControl.add(tab4,image=photo11,compound = LEFT, text ='Documents')
+      tabControl.pack(expand = 1, fill ="both")
+      
+      tree = ttk.Treeview(tab1, columns = (1,2,3,4,5,6,7,8,), height = 15, show = "headings")
+      tree.pack(side = 'top')
+      tree.heading(1)
+      tree.heading(2, text="Product/Service ID",)
+      tree.heading(3, text="Name")
+      tree.heading(4, text="Description")
+      tree.heading(5, text="Price")
+      tree.heading(6, text="QTY")
+      tree.heading(7, text="Tax1")
+      tree.heading(8, text="Line Total")   
+      tree.column(1, width = 50)
+      tree.column(2, width = 270)
+      tree.column(3, width = 250)
+      tree.column(4, width = 300)
+      tree.column(5, width = 130)
+      tree.column(6, width = 100)
+      tree.column(7, width = 100)
+      tree.column(8, width = 150)
+
+      note1=Text(tab2, width=170,height=10).place(x=10, y=10)
+
+      note1=Text(tab3, width=170,height=10).place(x=10, y=10)
+
+      tree = ttk.Treeview(tab4, columns = (1,2,3), height = 15, show = "headings")
+      tree.pack(side = 'top')
+      tree.heading(1)
+      tree.heading(2, text="Attach to Email",)
+      tree.heading(3, text="Filename")
+      tree.column(1, width = 70)
+      tree.column(2, width = 270)
+      tree.column(3, width = 1000)
+
+      scrollbar = Scrollbar(self.left_frame)
+      scrollbar.place(x=990+330+15, y=360, height=190)
+      scrollbar.config( command=tree.yview )
+        
+  myapp = MyApp(tab3)
   
   
   ######################## FRONT PAGE OF CUSTOMER SECTION   #######################################################################
@@ -7110,1248 +9005,7 @@ def mainpage():
   adv_winstyle8.place(x=2 ,y=270, width=220)
   #adv_winstyle8.current(0)
 
-  ######################Estimate Section#####################
   
-  # global filename
-  # filename = ""
-  # def save_estimate():
-
-
-  # #create new order
-
-  def estimate_create():
-    estimate_pop=Toplevel(estimate_midFrame)
-    estimate_pop.title("Estimate")
-    estimate_pop.geometry("950x690+150+0")
-
-    #select customer
-    def estimate_custom():
-      estimate_cuselection=Toplevel()
-      estimate_cuselection.title("Select Customer")
-      estimate_cuselection.geometry("930x650+240+10")
-      estimate_cuselection.resizable(False, False)
-
-
-      #add new customer
-      def estimate_create1():
-        estimate_ven=Toplevel(estimate_midFrame)
-        estimate_ven.title("Add new vendor")
-        estimate_ven.geometry("930x650+240+10")
-        estimate_checkvar1=IntVar()
-        estimate_checkvar2=IntVar()
-        estimate_radio=IntVar()
-        estimate_createFrame=Frame(estimate_ven, bg="#f5f3f2", height=650)
-        estimate_createFrame.pack(side="top", fill="both")
-        estimate_labelframe1 = LabelFrame(estimate_createFrame,text="Customer",bg="#f5f3f2",font=("arial",15))
-        estimate_labelframe1.place(x=10,y=5,width=910,height=600)
-        estimate_text1=Label(estimate_labelframe1, text="Customer ID:",bg="#f5f3f2",fg="blue").place(x=5 ,y=10)
-        estimate_e1=Entry(estimate_labelframe1,width=25).place(x=150,y=10)
-        estimate_text2=Label(estimate_labelframe1, text="Category:",bg="#f5f3f2").place(x=390 ,y=10)
-        estimate_e2=ttk.Combobox(estimate_labelframe1,width=25,value="Default").place(x=460 ,y=10)
-        estimate_text3=Label(estimate_labelframe1, text="Status:",bg="#f5f3f2").place(x=710 ,y=10)
-        estimate_checkbtn1=Checkbutton(estimate_labelframe1,text="Active",variable=estimate_checkvar1,onvalue=1,offvalue=0,bg="#f5f3f2").place(x=760 ,y=10)
-        
-        estimate_labelframe2 = LabelFrame(estimate_labelframe1,text="Invoice to (appears on invoices)",bg="#f5f3f2")
-        estimate_labelframe2.place(x=5,y=40,width=420,height=150)
-        estimate_name = Label(estimate_labelframe2, text="Ship to name:",bg="#f5f3f2",fg="blue").place(x=5,y=5)
-        estimate_e1 = Entry(estimate_labelframe2,width=28).place(x=130,y=5)
-        estimate_addr = Label(estimate_labelframe2, text="Address:",bg="#f5f3f2",fg="blue").place(x=5,y=40)
-        estimate_e2 = Entry(estimate_labelframe2,width=28).place(x=130,y=40,height=80)
-        
-        estimate_btn1=Button(estimate_labelframe1,width=3,height=2,compound = LEFT,text=">>").place(x=440, y=90)
-
-        estimate_labelframe3 = LabelFrame(estimate_labelframe1,text="Ship to (appears on invoices)",bg="#f5f3f2")
-        estimate_labelframe3.place(x=480,y=40,width=420,height=150)
-        estimate_name1 = Label(estimate_labelframe3, text="Business name:",bg="#f5f3f2").place(x=5,y=5)
-        estimate_e01 = Entry(estimate_labelframe3,width=28).place(x=130,y=5)
-        estimate_addr01 = Label(estimate_labelframe3, text="Address:",bg="#f5f3f2").place(x=5,y=40)
-        estimate_e02 = Entry(estimate_labelframe3,width=28).place(x=130,y=40,height=80)
-        
-        estimate_labelframe4 = LabelFrame(estimate_labelframe1,text="Contact",bg="#f5f3f2")
-        estimate_labelframe4.place(x=5,y=195,width=420,height=150)
-        estimate_name11 = Label(estimate_labelframe4, text="Contact person:",bg="#f5f3f2").place(x=5,y=5)
-        estimate_e11 = Entry(estimate_labelframe4,width=28).place(x=130,y=5)
-        estimate_email1 = Label(estimate_labelframe4, text="E-mail address:",bg="#f5f3f2",fg="blue").place(x=5,y=35)
-        estimate_e21 = Entry(estimate_labelframe4,width=28).place(x=130,y=35)
-        estimate_tel1 = Label(estimate_labelframe4, text="Tel.number:",bg="#f5f3f2").place(x=5,y=65)
-        estimate_e31 = Entry(estimate_labelframe4,width=11).place(x=130,y=65)
-        estimate_fax1 = Label(estimate_labelframe4, text="Fax:",bg="#f5f3f2").place(x=240,y=65)
-        estimate_e41 = Entry(estimate_labelframe4,width=11).place(x=280,y=65)
-        estimate_sms1 = Label(estimate_labelframe4, text="Mobile number for SMS notifications:",bg="#f5f3f2").place(x=5,y=95)
-        estimate_e51 = Entry(estimate_labelframe4,width=15).place(x=248,y=95)      
-
-        estimate_btn11=Button(estimate_labelframe1,width=3,height=2,compound = LEFT,text=">>").place(x=440, y=250)
-
-        
-        estimate_labelframe5 = LabelFrame(estimate_labelframe1,text="Ship to contact",bg="#f5f3f2")
-        estimate_labelframe5.place(x=480,y=195,width=420,height=125)
-        estimate_name2 = Label(estimate_labelframe5, text="Contact person:",bg="#f5f3f2").place(x=5,y=5)
-        estimate_e21 = Entry(estimate_labelframe5,width=28).place(x=130,y=5)
-        estimate_email2 = Label(estimate_labelframe5, text="E-mail address:",bg="#f5f3f2").place(x=5,y=35)
-        estimate_e22 = Entry(estimate_labelframe5,width=28).place(x=130,y=35)
-        estimate_tel2 = Label(estimate_labelframe5, text="Tel.number:",bg="#f5f3f2").place(x=5,y=65)
-        estimate_e32 = Entry(estimate_labelframe5,width=11).place(x=130,y=65)
-        estimate_fax2 = Label(estimate_labelframe5, text="Fax:",bg="#f5f3f2").place(x=240,y=65)
-        estimate_e42 = Entry(estimate_labelframe5,width=11).place(x=280,y=65)
-
-        estimate_labelframe6 = LabelFrame(estimate_labelframe1,text="Contact",bg="#f5f3f2")
-        estimate_labelframe6.place(x=5,y=350,width=420,height=100)
-        estimate_checkbtn2=Checkbutton(estimate_labelframe6,text="Tax Exempt",variable=estimate_checkvar2,onvalue=1,offvalue=0,bg="#f5f3f2").place(x=5 ,y=5)
-        estimate_tax3 = Label(estimate_labelframe6, text="Specific Tax1 %:",bg="#f5f3f2").place(x=180,y=5)
-        estimate_e31 = Entry(estimate_labelframe6,width=10).place(x=290,y=5)
-        estimate_discount = Label(estimate_labelframe6, text="Discount%:",bg="#f5f3f2").place(x=5,y=35)
-        estimate_e32 = Entry(estimate_labelframe6,width=10).place(x=100,y=35)
-
-        estimate_labelframe7 = LabelFrame(estimate_labelframe1,text="Contact",bg="#f5f3f2")
-        estimate_labelframe7.place(x=480,y=330,width=420,height=100)
-        estimate_country4 = Label(estimate_labelframe7, text="country:",bg="#f5f3f2").place(x=5,y=5)
-        estimate_e41 = Entry(estimate_labelframe7,width=28).place(x=130,y=5)
-        estimate_city4 = Label(estimate_labelframe7, text="City:",bg="#f5f3f2").place(x=5,y=35)
-        estimate_e24 = Entry(estimate_labelframe7,width=28).place(x=130,y=35)
-
-        estimate_labelframe8 = LabelFrame(estimate_labelframe1,text="Customer Type",bg="#f5f3f2")
-        estimate_labelframe8.place(x=5,y=460,width=420,height=100)
-        estimate_R1=Radiobutton(estimate_labelframe8,text=" Client ",variable=estimate_radio,value=1,bg="#f5f3f2").place(x=5,y=15)
-        estimate_R2=Radiobutton(estimate_labelframe8,text=" Vendor ",variable=estimate_radio,value=2,bg="#f5f3f2").place(x=150,y=15)
-        estimate_R3=Radiobutton(estimate_labelframe8,text=" Both(client/vendor)",variable=estimate_radio,value=3,bg="#f5f3f2").place(x=250,y=15)
-        
-
-        estimate_labelframe9 = LabelFrame(estimate_labelframe1,text="Notes",bg="#f5f3f2")
-        estimate_labelframe9.place(x=480,y=430,width=420,height=150)
-        estimate_e51 = Entry(estimate_labelframe9).place(x=10,y=10,height=100,width=390)
-
-        estimate_btn51=Button(estimate_ven,width=60,height=10,bg="#f5f3f2",compound = LEFT,image=tick ,text="OK").place(x=20, y=615)
-        estimate_btn52=Button(estimate_ven,width=60,height=10,bg="#f5f3f2",compound = LEFT,image=cancel,text="Cancel").place(x=800, y=615)
-          
-                
-
-      estimate_enter=Label(estimate_cuselection, text="Enter filter text").place(x=5, y=10)
-      estimate_e61=Entry(estimate_cuselection, width=20).place(x=110, y=10)
-      estimate_text6=Label(estimate_cuselection, text="Filtered column").place(x=340, y=10)
-      estimate_e26=Entry(estimate_cuselection, width=20).place(x=450, y=10)
-
-      estimate_cusventtree=ttk.Treeview(estimate_cuselection, height=27)
-      estimate_cusventtree["columns"]=["1","2","3", "4"]
-      estimate_cusventtree.column("#0", width=35)
-      estimate_cusventtree.column("1", width=160)
-      estimate_cusventtree.column("2", width=160)
-      estimate_cusventtree.column("3", width=140)
-      estimate_cusventtree.column("4", width=140)
-      estimate_cusventtree.heading("#0",text="")
-      estimate_cusventtree.heading("1",text="Customer/Ventor ID")
-      estimate_cusventtree.heading("2",text="Customer/Ventor Name")
-      estimate_cusventtree.heading("3",text="Tel.")
-      estimate_cusventtree.heading("4",text="Contact Person")
-      estimate_cusventtree.place(x=5, y=45)
-
-
-      estimate_ctegorytree=ttk.Treeview(estimate_cuselection, height=27)
-      estimate_ctegorytree["columns"]=["1"]
-      estimate_ctegorytree.column("#0", width=35, minwidth=20)
-      estimate_ctegorytree.column("1", width=205, minwidth=25, anchor=CENTER)    
-      estimate_ctegorytree.heading("#0",text="", anchor=W)
-      estimate_ctegorytree.heading("1",text="View filter by category", anchor=CENTER)
-      estimate_ctegorytree.place(x=660, y=45)
-
-      estimate_scrollbar = Scrollbar(estimate_cuselection)
-      estimate_scrollbar.place(x=640, y=45, height=560)
-      estimate_scrollbar.config( command=tree.yview )
-
-      estimate_btn71=Button(estimate_cuselection,compound = LEFT,image=tick ,text="ok", width=60).place(x=15, y=610)
-      estimate_btn72=Button(estimate_cuselection,compound = LEFT,image=tick,text="Edit selected customer", width=150,command=estimate_create1).place(x=250, y=610)
-      estimate_btn73=Button(estimate_cuselection,compound = LEFT,image=tick, text="Add new customer", width=150,command=estimate_create1).place(x=435, y=610)
-      estimate_btn74=Button(estimate_cuselection,compound = LEFT,image=cancel ,text="Cancel", width=60).place(x=740, y=610)   
-
-
-
-      
-
-    #add new line item
-    def estimate_newline():
-      estimate_newselection=Toplevel()
-      estimate_newselection.title("Select Customer")
-      estimate_newselection.geometry("930x650+240+10")
-      estimate_newselection.resizable(False, False)
-
-
-      #add new product
-      def estimate_product():  
-        estimate_top = Toplevel()  
-        estimate_top.title("Add a new Product/Service")
-        estimate_p2 = PhotoImage(file = 'images/fbicon.png')
-        estimate_top.iconphoto(False, estimate_p2)
-      
-        estimate_top.geometry("700x550+390+15")
-        estimate_tabControl = ttk.Notebook(estimate_top)
-        estimate_s = ttk.Style()
-        estimate_s.theme_use('default')
-        estimate_s.configure('TNotebook.Tab', background="#999999",padding=10,bd=0)
-
-
-        estimate_tab1 = ttk.Frame(estimate_tabControl)
-        estimate_tab2 = ttk.Frame(estimate_tabControl)
-      
-        estimate_tabControl.add(estimate_tab1,compound = LEFT, text ='Product/Service')
-        estimate_tabControl.add(estimate_tab2,compound = LEFT, text ='Product Image')
-      
-        estimate_tabControl.pack(expand = 1, fill ="both")
-      
-        estimate_innerFrame = Frame(estimate_tab1,bg="#f5f3f2", relief=GROOVE)
-        estimate_innerFrame.pack(side="top",fill=BOTH)
-
-        estimate_Customerlabelframe = LabelFrame(estimate_innerFrame,text="Product/Service",width=580,height=485)
-        estimate_Customerlabelframe.pack(side="top",fill=BOTH,padx=10)
-
-        estimate_code1=Label(estimate_Customerlabelframe,text="Code or SKU:",fg="blue",pady=10,padx=10)
-        estimate_code1.place(x=20,y=0)
-        estimate_codeentry = Entry(estimate_Customerlabelframe,width=35)
-        estimate_codeentry.place(x=120,y=8)
-
-        estimate_checkvarStatus=IntVar()
-        estimate_status1=Label(estimate_Customerlabelframe,text="Status:")
-        estimate_status1.place(x=500,y=8)
-        estimate_Button1 = Checkbutton(estimate_Customerlabelframe,
-                          variable = estimate_checkvarStatus,text="Active",compound="right",
-                          onvalue =0 ,
-                          offvalue = 1,
-                        
-                          width = 10)
-
-        estimate_Button1.place(x=550,y=5)
-
-        estimate_category1=Label(estimate_Customerlabelframe,text="Category:",pady=5,padx=10)
-        estimate_category1.place(x=20,y=40)
-        estimate_n = StringVar()
-        estimate_country0 = ttk.Combobox(estimate_Customerlabelframe, width = 40, textvariable = estimate_n )
-        
-        estimate_country0['values'] = ('Default',' India',' China',' Australia',' Nigeria',' Malaysia',' Italy',' Turkey',)
-        
-        estimate_country0.place(x=120,y=45)
-        estimate_country0.current(0)
-
-
-        estimate_name81=Label(estimate_Customerlabelframe,text="Name :",fg="blue",pady=5,padx=10)
-        estimate_name81.place(x=20,y=70)
-        estimate_nameentry = Entry(estimate_Customerlabelframe,width=60)
-        estimate_nameentry.place(x=120,y=75)
-
-        estimate_des1=Label(estimate_Customerlabelframe,text="Description :",pady=5,padx=10)
-        estimate_des1.place(x=20,y=100)
-        estimate_desentry = Entry(estimate_Customerlabelframe,width=60)
-        estimate_desentry.place(x=120,y=105)
-
-        estimate_uval = IntVar(estimate_Customerlabelframe, value='$0.00')
-        estimate_unit1=Label(estimate_Customerlabelframe,text="Unit Price:",fg="blue",pady=5,padx=10)
-        estimate_unit1.place(x=20,y=130)
-        estimate_unitentry = Entry(estimate_Customerlabelframe,width=20,textvariable=estimate_uval)
-        estimate_unitentry.place(x=120,y=135)
-
-        estimate_pcsval = IntVar(estimate_Customerlabelframe, value='$0.00')
-        estimate_pcs1=Label(estimate_Customerlabelframe,text="Pcs/Weight:",fg="blue",pady=5,padx=10)
-        estimate_pcs1.place(x=320,y=140)
-        estimate_pcsentry = Entry(estimate_Customerlabelframe,width=20,textvariable=estimate_pcsval)
-        estimate_pcsentry.place(x=410,y=140)
-
-        estimate_costval = IntVar(estimate_Customerlabelframe, value='$0.00')
-        estimate_cost1=Label(estimate_Customerlabelframe,text="Cost:",pady=5,padx=10)
-        estimate_cost1.place(x=20,y=160)
-        estimate_costentry = Entry(estimate_Customerlabelframe,width=20,textvariable=estimate_costval)
-        estimate_costentry.place(x=120,y=165)
-
-        estimate_priceval = IntVar(estimate_Customerlabelframe, value='$0.00')
-        estimate_price1=Label(estimate_Customerlabelframe,text="(Price Cost):",pady=5,padx=10)
-        estimate_price1.place(x=20,y=190)
-        estimate_priceentry = Entry(estimate_Customerlabelframe,width=20,textvariable=estimate_priceval)
-        estimate_priceentry.place(x=120,y=195)
-
-        estimate_checkvarStatus2=IntVar()
-      
-        estimate_Button92 = Checkbutton(estimate_Customerlabelframe,variable = estimate_checkvarStatus2,
-                          text="Taxable Tax1rate",compound="right",
-                          onvalue =0 ,
-                          offvalue = 1,
-                          height=2,
-                          width = 12)
-
-        estimate_Button92.place(x=415,y=170)
-
-
-        estimate_checkvarStatus3=IntVar()
-      
-        estimate_Button93 = Checkbutton(estimate_Customerlabelframe,variable = estimate_checkvarStatus3,
-                          text="No stock Control",
-                          onvalue =1 ,
-                          offvalue = 0,
-                          height=3,
-                          width = 15)
-
-        estimate_Button93.place(x=40,y=220)
-
-
-        estimate_stockval = IntVar(estimate_Customerlabelframe, value='0')
-        estimate_stock1=Label(estimate_Customerlabelframe,text="Stock:",pady=5,padx=10)
-        estimate_stock1.place(x=90,y=260)
-        estimate_stockentry = Entry(estimate_Customerlabelframe,width=15,textvariable=estimate_stockval)
-        estimate_stockentry.place(x=150,y=265)
-
-        estimate_lowval = IntVar(estimate_Customerlabelframe, value='0')
-        estimate_low1=Label(estimate_Customerlabelframe,text="Low Stock Warning Limit:",pady=5,padx=10)
-        estimate_low1.place(x=300,y=260)
-        estimate_lowentry = Entry(estimate_Customerlabelframe,width=10,textvariable=estimate_lowval)
-        estimate_lowentry.place(x=495,y=265)
-
-      
-        estimate_ware1=Label(estimate_Customerlabelframe,text="Warehouse:",pady=5,padx=10)
-        estimate_ware1.place(x=60,y=290)
-        estimate_wareentry = Entry(estimate_Customerlabelframe,width=50)
-        estimate_wareentry.place(x=150,y=295)
-
-        estimate_text10=Label(estimate_Customerlabelframe,text="Private notes(not appears on invoice):",pady=5,padx=10)
-        estimate_text10.place(x=20,y=330)
-
-        estimate_txt = scrolledtext.ScrolledText(estimate_Customerlabelframe, undo=True,width=62,height=4)
-        estimate_txt.place(x=32,y=358)
-
-
-
-
-        estimate_okButton = Button(estimate_innerFrame,compound = LEFT,image=tick , text ="Ok",width=60)
-        estimate_okButton.pack(side=LEFT)
-
-        estimate_cancelButton = Button(estimate_innerFrame,compound = LEFT,image=cancel ,text="Cancel",width=60)
-        estimate_cancelButton.pack(side=RIGHT)
-
-        estimate_imageFrame = Frame(estimate_tab2, relief=GROOVE,height=580)
-        estimate_imageFrame.pack(side="top",fill=BOTH)
-
-        estimate_browseimg=Label(estimate_imageFrame,text=" Browse for product image file(recommended image type:JPG,size 480x320 pixels) ",bg='#f5f3f2')
-        estimate_browseimg.place(x=15,y=35)
-
-        estimate_browsebutton=Button(estimate_imageFrame,text = 'Browse')
-        estimate_browsebutton.place(x=580,y=30,height=30,width=50)
-        
-        estimate_removeButton = Button(estimate_imageFrame,compound = LEFT,image=cancel, text ="Remove Product Image",width=150)
-        estimate_removeButton.place(x=400,y=450)
-
-
-
-      
-                      
-      estimate_enter10=Label(estimate_newselection, text="Enter filter text").place(x=5, y=10)
-      estimate_e10=Entry(estimate_newselection, width=20).place(x=110, y=10)
-      estimate_text10=Label(estimate_newselection, text="Filtered column").place(x=340, y=10)
-      estimate_e20=Entry(estimate_newselection, width=20).place(x=450, y=10)
-
-      estimate_cusventtree1=ttk.Treeview(estimate_newselection, height=27)
-      estimate_cusventtree1["columns"]=["1","2","3", "4","5"]
-      estimate_cusventtree1.column("#0", width=35)
-      estimate_cusventtree1.column("1", width=160)
-      estimate_cusventtree1.column("2", width=160)
-      estimate_cusventtree1.column("3", width=140)
-      estimate_cusventtree1.column("4", width=70)
-      estimate_cusventtree1.column("5", width=70)
-      estimate_cusventtree1.heading("#0",text="")
-      estimate_cusventtree1.heading("1",text="ID/SKU")
-      estimate_cusventtree1.heading("2",text="Product/Service Name")
-      estimate_cusventtree1.heading("3",text="Unit price")
-      estimate_cusventtree1.heading("4",text="Service")
-      estimate_cusventtree1.heading("5",text="Stock")
-      estimate_cusventtree1.place(x=5, y=45)
-
-
-      estimate_ctegorytree1=ttk.Treeview(estimate_newselection, height=27)
-      estimate_ctegorytree1["columns"]=["1"]
-      estimate_ctegorytree1.column("#0", width=35, minwidth=20)
-      estimate_ctegorytree1.column("1", width=205, minwidth=25, anchor=CENTER)    
-      estimate_ctegorytree1.heading("#0",text="", anchor=W)
-      estimate_ctegorytree1.heading("1",text="View filter by category", anchor=CENTER)
-      estimate_ctegorytree1.place(x=660, y=45)
-
-      estimate_scrollbar10 = Scrollbar(estimate_newselection)
-      estimate_scrollbar10.place(x=640, y=45, height=560)
-      estimate_scrollbar10.config( command=tree.yview )
-    
-
-      estimate_btn11=Button(estimate_newselection,compound = LEFT,image=tick ,text="ok", width=60).place(x=15, y=610)
-      estimate_btn11=Button(estimate_newselection,compound = LEFT,image=tick , text="Edit product/Service", width=150,command=product).place(x=250, y=610)
-      estimate_btn11=Button(estimate_newselection,compound = LEFT,image=tick , text="Add product/Service", width=150,command=product).place(x=435, y=610)
-      estimate_btn11=Button(estimate_newselection,compound = LEFT,image=cancel ,text="Cancel", width=60).place(x=740, y=610)
-
-
-
-    #preview new line
-    def estimate_previewline():
-      messagebox.showerror("F-Billing Revolution","line is required,please select customer for this order before printing.")
-
-
-    
-    #sms notification
-    def estimate_sms1():
-      estimate_send_SMS=Toplevel()
-      estimate_send_SMS.geometry("700x480+240+150")
-      estimate_send_SMS.title("Send SMS notification")
-
-      estimate_style = ttk.Style()
-      estimate_style.theme_use('default')
-      estimate_style.configure('TNotebook.Tab', background="#999999", padding=5)
-      estimate_sms_Notebook = ttk.Notebook(estimate_send_SMS)
-      estimate_SMS_Notification = Frame(estimate_sms_Notebook, height=470, width=700)
-      estimate_SMS_Service_Account = Frame(estimate_sms_Notebook, height=470, width=700)
-      estimate_sms_Notebook.add(estimate_SMS_Notification, text="SMS Notification")
-      estimate_sms_Notebook.add(estimate_SMS_Service_Account, text="SMS Service Account")
-      estimate_sms_Notebook.place(x=0, y=0)
-
-      estimate_numlbel=Label(estimate_SMS_Notification, text="SMS number or comma seperated SMS number list(Please start each SMS number with the country code)")
-      estimate_numlbel.place(x=10, y=10)
-      estimate_numentry=Entry(estimate_SMS_Notification, width=92).place(x=10, y=30)
-      estimate_stexbel=Label(estimate_SMS_Notification, text="SMS Text").place(x=10, y=60)
-      estimate_stex=Entry(estimate_SMS_Notification, width=40).place(x=10, y=85,height=120)
-      
-      estimate_dclbel=Label(estimate_SMS_Notification, text="Double click to insert into text")
-      estimate_dclbel.place(x=410, y=60)
-      estimate_dcl=Entry(estimate_SMS_Notification, width=30)
-      estimate_dcl.place(x=400, y=85,height=200)
-      
-      estimate_smstype=LabelFrame(estimate_SMS_Notification, text="SMS message type", width=377, height=60)
-      estimate_smstype.place(x=10, y=223)
-      estimate_snuvar=IntVar()
-      estimate_normal_rbtn=Radiobutton(estimate_smstype, text="Normal SMS(160 chars)", variable=estimate_snuvar, value=1)
-      estimate_normal_rbtn.place(x=5, y=5)
-      estimate_unicode_rbtn=Radiobutton(estimate_smstype, text="Unicode SMS(70 chars)", variable=estimate_snuvar, value=2)
-      estimate_unicode_rbtn.place(x=190, y=5)
-      estimate_tiplbf=LabelFrame(estimate_SMS_Notification, text="Tips", width=680, height=120)
-      estimate_tiplbf.place(x=10, y=290)
-      estimate_tiplabl=Label(estimate_tiplbf,justify=LEFT,fg="red",  text="Always start the SMS nymber with the country code. Do not use the + sign at the beginning(example\nUS number:8455807546). Do not use any special characters in your normal SMS text. Please use the\nstndard SMS characters or the English alphabet and numbers only. Otherwise the SMS will be\nunreadable or undeliverable. If you need to enter international characters, accents,email address, or\nspecial characters to the SMS text field then choose the Unicode SMS format.")
-      estimate_tiplabl.place(x=5, y=5)
-
-      estimate_btnn1=Button(estimate_SMS_Notification, width=20, text="Send SMS notification").place(x=10, y=420)
-      estimate_btnn2=Button(estimate_SMS_Notification, width=25, text="Confirm SMS cost before sending").place(x=280, y=420)
-      estimate_btnn3=Button(estimate_SMS_Notification, width=15, text="Cancel").place(x=550, y=420)
-      
-
-      estimate_smstypee=LabelFrame(estimate_SMS_Service_Account, text="Select the notification service provider", width=670, height=65)
-      estimate_smstypee.place(x=10, y=5)
-      estimate_snumvarr=IntVar()
-      estimate_normal_rbtn=Radiobutton(estimate_smstypee,text="BULKSMS(www.bulksms.com)",variable=estimate_snumvarr,value=1,)
-      estimate_normal_rbtn.place(x=5, y=5)
-      estimate_unicode_rbtn=Radiobutton(estimate_smstypee, text="Unicode SMS(70 chars)-Recommended", variable=estimate_snumvarr, value=2)
-      estimate_unicode_rbtn.place(x=290, y=5)
-
-      estimate_sms1type=LabelFrame(estimate_SMS_Service_Account, text="Your BULKSMS.COM Account", width=670, height=100)
-      estimate_sms1type.place(x=10, y=80)
-      estimate_namee=Label(estimate_sms1type, text="Username").place(x=10, y=5)
-      estimate_na=Entry(estimate_sms1type, width=20).place(x=100, y=5)
-      estimate_password=Label(estimate_sms1type, text="Password").place(x=10, y=45)
-      estimate_pas=Entry(estimate_sms1type, width=20).place(x=100, y=45)
-      estimate_combo=Label(estimate_sms1type, text="Route").place(x=400, y=5)
-      estimate_nn = StringVar()
-      estimate_combo1 = ttk.Combobox(estimate_sms1type, width = 20, textvariable = estimate_nn ).place(x=450,y=5)
-      estimate_btnnn1=Button(estimate_sms1type, width=10, text="Save settings").place(x=550, y=45)
-
-      
-      estimate_tiplbf=LabelFrame(estimate_SMS_Service_Account, text="Terms of service", width=680, height=250)
-      estimate_tiplbf.place(x=10, y=190)
-      estimate_tiplabl=Label(estimate_tiplbf,justify=LEFT,fg="red",  text="The SMS notification service is not free.This service costs you creadit.You must have your own account\nat BULKSMS.COM and you need to have sufficient creadit and an active internet connection to use\nthis feature.Please review all fields in this form for accuracy")
-      estimate_tiplabl.place(x=0, y=5)
-      estimate_tiplabl1=Label(estimate_tiplbf,justify=LEFT,fg="black",  text="visit www.bulksms.com website to create your own account.please make sure the BULKSMS .COM\n service works well in your country before you busy creadit")
-      estimate_tiplabl1.place(x=0, y=60)
-      estimate_tiplabl2=Label(estimate_tiplbf,justify=LEFT,fg="black",  text="Our SMS notification tool comes without any warranty.our software only forwards your SMS message\nthe BULKSMS API server .The BULKSMS API server will try to sent SMS message your recipient")
-      estimate_tiplabl2.place(x=0, y=100)
-      estimate_tiplabl3=Label(estimate_tiplbf,justify=LEFT,fg="red",  text="Please note that you access and use the SMS notification tool your own risk.F-Billing software is not\nresponsible for any type of loss or damage or undelivered SMS massage which you may as a result\nof accessing and using the SMS notification service.")
-      estimate_tiplabl3.place(x=0, y=140)
-      estimate_checkvarr1=IntVar()
-      estimate_chkbtnn1=Checkbutton(estimate_tiplbf,text="I have read and agree to the terms of service above",variable=estimate_checkvarr1,onvalue=1,offvalue=0).place(x=70, y=200) 
-
-
-
-    
-    #delete line item  
-    def estimate_delete1():
-      messagebox.showerror("F-Billing Revolution","Customer is required,please select customer before deleting line item .")
-      
-      
-
-    estimate_firFrame=Frame(estimate_pop, bg="#f5f3f2", height=60)
-    estimate_firFrame.pack(side="top", fill=X)
-
-    estimate_w = Canvas(estimate_firFrame, width=1, height=65, bg="#b3b3b3", bd=0)
-    estimate_w.pack(side="left", padx=5)
-
-    estimate_create = Button(estimate_firFrame,compound="top", text="Select\nCustomer",relief=RAISED, image=customer,bg="#f5f3f2", fg="black", height=55, bd=1, width=55,command=estimate_custom)
-    estimate_create.pack(side="left", pady=3, ipadx=4)
-
-
-    estimate_w1 = Canvas(estimate_firFrame, width=1, height=65, bg="#b3b3b3", bd=0)
-    estimate_w1.pack(side="left", padx=5)
-
-    estimate_addd= Button(estimate_firFrame,compound="top", text="Add new\nline item",relief=RAISED, image=photo,bg="#f5f3f2", fg="black", height=55, bd=1, width=55,command=estimate_newline)
-    estimate_addd.pack(side="left", pady=3, ipadx=4)
-
-    estimate_dele= Button(estimate_firFrame,compound="top", text="Delete line\nitem",relief=RAISED, image=photo2,bg="#f5f3f2", fg="black", height=55, bd=1, width=55,command=estimate_delete1)
-    estimate_dele.pack(side="left", pady=3, ipadx=4)
-
-    estimate_w2 = Canvas(estimate_firFrame, width=1, height=65, bg="#b3b3b3", bd=0)
-    estimate_w2.pack(side="left", padx=5)
-
-    estimate_prev= Button(estimate_firFrame,compound="top", text="Preview\nEstimate",relief=RAISED, image=photo4,bg="#f5f3f2", fg="black", height=55, bd=1, width=55,command=estimate_previewline)
-    estimate_prev.pack(side="left", pady=3, ipadx=4)
-
-    estimate_prin= Button(estimate_firFrame,compound="top", text="Print \nEstimate",relief=RAISED, image=photo5,bg="#f5f3f2", fg="black", height=55, bd=1, width=55,command=estimate_printsele)
-    estimate_prin.pack(side="left", pady=3, ipadx=4)
-
-    estimate_w3 = Canvas(estimate_firFrame, width=1, height=65, bg="#b3b3b3", bd=0)
-    estimate_w3.pack(side="left", padx=5)
-
-    estimate_mail= Button(estimate_firFrame,compound="top", text="Email\nEstimate",relief=RAISED, image=photo6,bg="#f5f3f2", fg="black", height=55, bd=1, width=55,command=estimate_emailord)
-    estimate_mail.pack(side="left", pady=3, ipadx=4)
-
-    estimate_smss1= Button(estimate_firFrame,compound="top", text="Send SMS\nnotification",relief=RAISED, image=photo10,bg="#f5f3f2", fg="black", height=55, bd=1, width=55,command=estimate_sms1)
-    estimate_smss1.pack(side="left", pady=3, ipadx=4)
-
-    estimate_w4 = Canvas(estimate_firFrame, width=1, height=65, bg="#b3b3b3", bd=0)
-    estimate_w4.pack(side="left", padx=5)
-
-    estimate_calc= Button(estimate_firFrame,compound="top", text="Open\nCalculator",relief=RAISED, image=photo9,bg="#f5f3f2", fg="black", height=55, bd=1, width=55)
-    estimate_calc.pack(side="left", pady=3, ipadx=4)
-
-    estimate_fir1Frame=Frame(estimate_pop, height=180,bg="#f5f3f2")
-    estimate_fir1Frame.pack(side="top", fill=X)
-
-    estimate_labelframee1 = LabelFrame(estimate_fir1Frame,text="Customers",font=("arial",15))
-    estimate_labelframee1.place(x=10,y=5,width=640,height=160)
-    estimate_orderr1 = Label(estimate_labelframee1, text="Estimate to").place(x=10,y=5)
-    estimate_ee1 = ttk.Combobox(estimate_labelframee1, value="Hello",width=28).place(x=80,y=5)
-    estimate_addresss=Label(estimate_labelframee1,text="Address").place(x=10,y=30)
-    estimate_ee2=Text(estimate_labelframee1,width=23).place(x=80,y=30,height=70)
-    estimate_shipp=Label(estimate_labelframee1,text="Ship to").place(x=342,y=5)
-    estimate_ee3=Entry(estimate_labelframee1,width=30).place(x=402,y=3)
-    estimate_addresss1=Label(estimate_labelframee1,text="Address").place(x=340,y=30)
-    estimate_ee4=Text(estimate_labelframee1,width=23).place(x=402,y=30,height=70)
-
-    estimate_bttn1=Button(estimate_labelframee1,width=3,height=2,compound = LEFT,text=">>").place(x=280, y=50)
-    
-    estimate_labelframee2 = LabelFrame(estimate_fir1Frame,text="")
-    estimate_labelframee2.place(x=10,y=130,width=640,height=42)
-    estimate_emaill=Label(estimate_labelframee2,text="Email").place(x=10,y=5)
-    estimate_ee5=Entry(estimate_labelframee2,width=30).place(x=80,y=5)
-    estimate_smms=Label(estimate_labelframee2,text="SMS Number").place(x=328,y=5)
-    estimate_ee6=Entry(estimate_labelframee2,width=30).place(x=402,y=5)
-      
-    estimate_labelframe = LabelFrame(estimate_fir1Frame,text="Estimate",font=("arial",15))
-    estimate_labelframe.place(x=652,y=5,width=290,height=170)
-    estimate_order0=Label(estimate_labelframe,text="Estimate#").place(x=5,y=5)
-
-    estimate_ee01=Entry(estimate_labelframe,width=25).place(x=100,y=5,)
-    
-    estimate_orderdate=Label(estimate_labelframe,text="Estimate date").place(x=5,y=33)
-    estimate_ee02=Entry(estimate_labelframe,width=20).place(x=150,y=33)
-    estimate_checkvarStatus5=IntVar()
-    estimate_duedate=Checkbutton(estimate_labelframe,variable = estimate_checkvarStatus5,text="Due date",onvalue =0 ,offvalue = 1).place(x=5,y=62)
-    estimate_ee03=Entry(estimate_labelframe,width=20).place(x=150,y=62)
-    estimate_termss=Label(estimate_labelframe,text="Terms").place(x=5,y=92)
-    estimate_ee04=ttk.Combobox(estimate_labelframe, value="",width=25).place(x=100,y=92)
-    estimate_reff=Label(estimate_labelframe,text="Order ref#").place(x=5,y=118)
-    estimate_ee11=Entry(estimate_labelframe,width=27).place(x=100,y=118)
-
-    estimate_fir2Frame=Frame(estimate_pop, height=150,width=100,bg="#f5f3f2")
-    estimate_fir2Frame.pack(side="top", fill=X)
-    estimate_listFrame = Frame(estimate_fir2Frame, bg="white", height=140,borderwidth=5,  relief=RIDGE)
-    
-    estimate_tree=ttk.Treeview(estimate_listFrame)
-    estimate_tree["columns"]=["1","2","3","4","5","6","7","8"]
-
-    estimate_tree.column("#0", width=40)
-    estimate_tree.column("1", width=80)
-    estimate_tree.column("2", width=190)
-    estimate_tree.column("3", width=190)
-    estimate_tree.column("4", width=80)
-    estimate_tree.column("5", width=60)
-    estimate_tree.column("6", width=60)
-    estimate_tree.column("7", width=60)
-    estimate_tree.column("8", width=80)
-    
-    estimate_tree.heading("#0")
-    estimate_tree.heading("1",text="ID/SKU")
-    estimate_tree.heading("2",text="Product/Service")
-    estimate_tree.heading("3",text="Description")
-    estimate_tree.heading("4",text="Unit Price")
-    estimate_tree.heading("5",text="Quality")
-    estimate_tree.heading("6",text="Pcs/Weight")
-    estimate_tree.heading("7",text="Tax1")
-    estimate_tree.heading("8",text="Price")
-    
-    estimate_tree.pack(fill="both", expand=1)
-    estimate_listFrame.pack(side="top", fill="both", padx=5, pady=3, expand=1)
-
-    estimate_fir3Frame=Frame(estimate_pop,height=200,width=700,bg="#f5f3f2")
-    estimate_fir3Frame.place(x=0,y=490)
-
-    estimate_tabStyle = ttk.Style()
-    estimate_tabStyle.theme_use('default')
-    estimate_tabStyle.configure('TNotebook.Tab', background="#999999", width=12, padding=5)
-    estimate_myNotebookk=ttk.Notebook(estimate_fir3Frame)
-    estimate_orderFrame = Frame(estimate_myNotebookk, height=200, width=800)
-    estimate_headerFrame = Frame(estimate_myNotebookk, height=200, width=800)
-    estimate_commentFrame = Frame(estimate_myNotebookk, height=200, width=800)
-    estimate_termsFrame = Frame(estimate_myNotebookk, height=200, width=800)
-    estimate_noteFrame = Frame(estimate_myNotebookk, height=200, width=800)
-    estimate_documentFrame = Frame(estimate_myNotebookk, height=200, width=800)
-    
-    estimate_myNotebookk.add(estimate_orderFrame,compound="left", text="Estimate")
-    estimate_myNotebookk.add(estimate_headerFrame,compound="left",  text="Header/Footer")
-    estimate_myNotebookk.add(estimate_commentFrame,compound="left",  text="Comments")
-    estimate_myNotebookk.add(estimate_termsFrame,compound="left", text="Terms")
-    estimate_myNotebookk.add(estimate_noteFrame,compound="left",  text="Private notes")
-    estimate_myNotebookk.add(estimate_documentFrame,compound="left",  text="Documents")
-    estimate_myNotebookk.pack(expand = 1, fill ="both")  
-
-    estimate_labelfram1 = LabelFrame(estimate_orderFrame,text="",font=("arial",15))
-    estimate_labelfram1.place(x=1,y=1,width=800,height=170)
-
-    estimates_cost1=Label(estimate_labelfram1,text="Extra cost name").place(x=2,y=5)
-    estimates_e1=ttk.Combobox(estimate_labelfram1, value="",width=20).place(x=115,y=5)
-
-    estimates_rate=Label(estimate_labelfram1,text="Discount rate").place(x=370,y=5)
-    estimates_e2=Entry(estimate_labelfram1,width=6).place(x=460,y=5)
-
-    estimates_cost2=Label(estimate_labelfram1,text="Extra cost").place(x=35,y=35)
-    estimates_e3=Entry(estimate_labelfram1,width=10).place(x=115,y=35)
-    estimates_tax=Label(estimate_labelfram1,text="Tax1").place(x=420,y=35)
-    estimates_e4=Entry(estimate_labelfram1,width=7).place(x=460,y=35)
-    estimates_template=Label(estimate_labelfram1,text="Template").place(x=37,y=70)
-    estimates_e5=ttk.Combobox(estimate_labelfram1, value="",width=25).place(x=115,y=70)
-    estimates_sales=Label(estimate_labelfram1,text="Sales Person").place(x=25,y=100)
-    estimates_e6=Entry(estimate_labelfram1,width=18).place(x=115,y=100)
-    estimates_category=Label(estimate_labelfram1,text="Category").place(x=300,y=100)
-    estimates_e7=Entry(estimate_labelfram1,width=22).place(x=370,y=100)
-    
-    estimate_statusfrme = LabelFrame(estimate_labelfram1,text="Status",font=("arial",15))
-    estimate_statusfrme.place(x=540,y=0,width=160,height=160)
-    estimates_draft=Label(estimate_statusfrme, text="Draft",font=("arial", 15, "bold"), fg="grey").place(x=50, y=3)
-    estimates_on1=Label(estimate_statusfrme, text="Emailed on:").place( y=50)
-    estimates_nev1=Label(estimate_statusfrme, text="Never").place(x=100,y=50)
-    estimates_on2=Label(estimate_statusfrme, text="Printed on:").place( y=90)
-    estimates_nev2=Label(estimate_statusfrme, text="Never").place(x=100,y=90)
-
-    estimates_text01=Label(estimate_headerFrame,text="Title text").place(x=50,y=5)
-    estimates_e01=ttk.Combobox(estimate_headerFrame, value="",width=60).place(x=125,y=5)
-    estimates_text02=Label(estimate_headerFrame,text="Page header text").place(x=2,y=45)
-    estimates_e11=ttk.Combobox(estimate_headerFrame, value="",width=60).place(x=125,y=45)
-    estimates_text03=Label(estimate_headerFrame,text="Footer text").place(x=35,y=85)
-    estimates_e21=ttk.Combobox(estimate_headerFrame, value="",width=60).place(x=125,y=85)
-
-    estimates_texttt=Label(estimate_noteFrame,text="Private notes(not shown on invoice/order/estemates)").place(x=10,y=10)
-    estimates_e41=Text(estimate_noteFrame,width=100,height=7).place(x=10,y=32)
-
-    estimates_e51=Text(estimate_termsFrame,width=100,height=9).place(x=10,y=10)
-
-    estimates_e61=Text(estimate_commentFrame,width=100,height=9).place(x=10,y=10)
-
-    estimates_btn1=Button(estimate_documentFrame,height=2,width=3,text="+").place(x=5,y=10)
-    estimates_btn2=Button(estimate_documentFrame,height=2,width=3,text="-").place(x=5,y=50)
-    estimates_texttt1=Label(estimate_documentFrame,text="Attached documents or image files.If you attach large email then email taken long time to send").place(x=50,y=10)
-    estimates_cusventtree=ttk.Treeview(estimate_documentFrame, height=5)
-    estimates_cusventtree["columns"]=["1","2","3"]
-    estimates_cusventtree.column("#0", width=20)
-    estimates_cusventtree.column("1", width=250)
-    estimates_cusventtree.column("2", width=250)
-    estimates_cusventtree.column("2", width=200)
-    estimates_cusventtree.heading("#0",text="", anchor=W)
-    estimates_cusventtree.heading("1",text="Attach to Email")
-    estimates_cusventtree.heading("2",text="Filename")
-    estimates_cusventtree.heading("3",text="Filesize")  
-    estimates_cusventtree.place(x=50, y=45)
-    
-
-    estimate_fir4Frame1=Frame(estimate_pop,height=190,width=210,bg="#f5f3f2")
-    estimate_fir4Frame1.place(x=740,y=520)
-    estimate_summaryfrme = LabelFrame(estimate_fir4Frame1,text="Summary",font=("arial",15))
-    estimate_summaryfrme.place(x=0,y=0,width=200,height=170)
-    estimate_discounttt=Label(estimate_summaryfrme, text="Discount").place(x=0 ,y=0)
-    estimate_discounttt1=Label(estimate_summaryfrme, text="$0.00").place(x=130 ,y=0)
-    estimate_subbb=Label(estimate_summaryfrme, text="Subtotal").place(x=0 ,y=21)
-    estimate_subbb1=Label(estimate_summaryfrme, text="$0.00").place(x=130 ,y=21)
-    estimate_ttaax=Label(estimate_summaryfrme, text="Tax1").place(x=0 ,y=42)
-    estimate_ttax1=Label(estimate_summaryfrme, text="$0.00").place(x=130 ,y=42)
-    estimate_costt=Label(estimate_summaryfrme, text="Extra cost").place(x=0 ,y=63)
-    estimate_costtt=Label(estimate_summaryfrme, text="$0.00").place(x=130 ,y=63)
-    estimate_orderrr=Label(estimate_summaryfrme, text="Order total").place(x=0 ,y=84)
-    estimate_orderrr1=Label(estimate_summaryfrme, text="$0.00").place(x=130 ,y=84)
-    estimate_totalll=Label(estimate_summaryfrme, text="Total paid").place(x=0 ,y=105)
-    estimate_totalll1=Label(estimate_summaryfrme, text="$0.00").place(x=130 ,y=105)
-    estimate_balancee=Label(estimate_summaryfrme, text="Balance").place(x=0 ,y=126)
-    estimate_balancee1=Label(estimate_summaryfrme, text="$0.00").place(x=130 ,y=126)
-
-    estimate_fir5Frame1=Frame(estimate_pop,height=38,width=210)
-    estimate_fir5Frame1.place(x=735,y=485)
-    estimate_btndown=Button(estimate_fir5Frame1, compound="left", text="Line Down").place(x=75, y=0)
-    estimate_btnup=Button(estimate_fir5Frame1, compound="left", text="Line Up").place(x=150, y=0)
-
-
-
-
-  #printselected order
-    
-  def estimate_printsele():
-
-    def estimate_property1():
-      estimate_propert=Toplevel()
-      estimate_propert.title("Microsoft Print To PDF Advanced Document Settings")
-      estimate_propert.geometry("670x500+240+150")
-
-      def estimate_property2():
-        estimate_propert1=Toplevel()
-        estimate_propert1.title("Microsoft Print To PDF Advanced Document Settings")
-        estimate_propert1.geometry("670x500+240+150")
-
-        estimate_ename=Label(estimate_propert1, text="Microsoft Print To PDF Advanced Document Settings").place(x=10, y=5)
-        estimate_epaper=Label(estimate_propert1, text="Paper/Output").place(x=30, y=35)
-        estimate_esize=Label(estimate_propert1, text="Paper size").place(x=55, y=65)
-        estimate_en = StringVar()
-        estimate_search = ttk.Combobox(estimate_propert1, width = 15, textvariable = estimate_en )
-        estimate_search['values'] = ('letter')
-        estimate_search.place(x=150,y=65)
-        estimate_search.current(0)
-        estimate_copy=Label(estimate_propert1, text="Copy count:").place(x=55, y=95)
-
-        estimate_okbtn=Button(estimate_propert1,compound = LEFT,image=tick , text="Ok", width=60).place(x=460, y=450)
-        estimate_canbtn=Button(estimate_propert1,compound = LEFT,image=cancel, text="Cancel", width=60).place(x=570, y=450)
-        
-        
-
-
-      estimate_estyle = ttk.Style()
-      estimate_estyle.theme_use('default')
-      estimate_estyle.configure('TNotebook.Tab', background="#999999", padding=5)
-      estimate_property_Notebook = ttk.Notebook(estimate_propert)
-      estimate_property_Frame = Frame(estimate_property_Notebook, height=500, width=670)
-      estimate_property_Notebook.add(estimate_property_Frame, text="Layout")
-      estimate_property_Notebook.place(x=0, y=0)
-
-      estimate_nname=Label(estimate_property_Frame, text="Orientation:").place(x=10, y=5)
-      estimate_en1 = StringVar()
-      estimate_esearch = ttk.Combobox(estimate_property_Frame, width = 23, textvariable = estimate_en1 )
-      estimate_esearch['values'] = ('Portrait')
-      estimate_esearch.place(x=10,y=25)
-      estimate_esearch.current(0)
-
-      estimate_etext1=Text(estimate_property_Frame,width=50).place(x=250, y=5,height=350)
-
-      estimate_ebtn=Button(estimate_property_Frame, text="Advanced",command=estimate_property2).place(x=550, y=380)
-      estimate_ebtn1=Button(estimate_property_Frame,compound = LEFT,image=tick  ,text="OK", width=60,).place(x=430, y=420)
-      estimate_ebtn2=Button(estimate_property_Frame,compound = LEFT,image=cancel , text="Cancel", width=60,).place(x=550, y=420)     
-
-
-      
-    if(False):
-        messagebox.showwarning("FBilling Revelution 2020", "Customer is required, Please select customer for this invoice\nbefore printing")
-    elif(False):
-        messagebox.showinfo("FBilling Revelution 2020", "Print job has been completed.")
-    else:
-        estimate_print1=Toplevel()
-        estimate_print1.title("Print")
-        estimate_print1.geometry("670x400+240+150")
-        
-        estimate_printerframe=LabelFrame(estimate_print1, text="Printer", height=80, width=650)
-        estimate_printerframe.place(x=7, y=5)      
-        estimate_pname=Label(estimate_printerframe, text="Name:").place(x=10, y=5)
-        estimate_pe1= ttk.Combobox(estimate_printerframe, width=40).place(x=70, y=5)
-        estimate_where=Label(estimate_printerframe, text="Where:").place(x=10, y=30)
-        estimate_printocheckvar=IntVar()
-        estimate_printochkbtn=Checkbutton(estimate_printerframe,text="Print to file",variable=estimate_printocheckvar,onvalue=1,offvalue=0,height=1,width=10)
-        estimate_printochkbtn.place(x=450, y=30)
-        estimate_pbtn=Button(estimate_printerframe, text="Properties", width=10,command=estimate_property1).place(x=540, y=5)
-
-        estimate_pageslblframe=LabelFrame(estimate_print1, text="Pages", height=140, width=320)
-        estimate_pageslblframe.place(x=10, y=90)
-        estimate_radvar=IntVar()
-        estimate_radioall=Radiobutton(estimate_pageslblframe, text="All", variable=estimate_radvar, value="1").place(x=10, y=5)
-        estimate_radiocpage=Radiobutton(estimate_pageslblframe, text="Current Page", variable=estimate_radvar, value="2").place(x=10, y=25)
-        estimate_radiopages=Radiobutton(estimate_pageslblframe, text="Pages: ", variable=estimate_radvar, value="3").place(x=10, y=45)
-        estimate_pagecountentry = Entry(estimate_pageslblframe, width=23).place(x=80, y=47)
-        estimate_pageinfolabl=Label(estimate_pageslblframe, text="Enter page numbers and/or page ranges\nseperated by commas. For example:1,3,5-12")
-        estimate_pageinfolabl.place(x=5, y=75)
-
-        estimate_copylblframe=LabelFrame(estimate_print1, text="Copies", height=140, width=320)
-        estimate_copylblframe.place(x=335, y=90)
-        estimate_nolabl=Label(estimate_copylblframe, text="Number of copies").place(x=5, y=5)      
-        estimate_noentry = Entry(estimate_copylblframe, width=18).place(x=130, y=5)      
-        estimate_one=Frame(estimate_copylblframe, width=30, height=40, bg="black").place(x=20, y=40)     
-        estimate_two=Frame(estimate_copylblframe, width=30, height=40, bg="grey").place(x=15, y=45)     
-        estimate_three=Frame(estimate_copylblframe, width=30, height=40, bg="white").place(x=10, y=50)      
-        estimate_four=Frame(estimate_copylblframe, width=30, height=40, bg="black").place(x=80, y=40)      
-        estimate_fiv=Frame(estimate_copylblframe, width=30, height=40, bg="grey").place(x=75, y=45)      
-        estimate_six=Frame(estimate_copylblframe, width=30, height=40, bg="white").place(x=70, y=50)      
-        estimate_collatecheckvar=IntVar()
-        estimate_collatechkbtn=Checkbutton(estimate_copylblframe,text="Collate",variable=estimate_collatecheckvar,onvalue=1,offvalue=0,height=1,width=10)
-        estimate_collatechkbtn.place(x=130, y=70)
-
-        estimate_othrlblframe=LabelFrame(estimate_print1, text="Other", height=120, width=320)
-        estimate_othrlblframe.place(x=10, y=235)
-        estimate_printlb=Label(estimate_othrlblframe, text="Print").place(x=5, y=0)
-        estimate_dropprint = ttk.Combobox(estimate_othrlblframe, width=23).place(x=80, y=0)
-        estimate_orderlb=Label(estimate_othrlblframe, text="Order").place(x=5, y=25)
-        estimate_dropord = ttk.Combobox(estimate_othrlblframe, width=23).place(x=80, y=25)
-        estimate_duplexlb=Label(estimate_othrlblframe, text="Duplex").place(x=5, y=50)
-        estimate_droplex = ttk.Combobox(estimate_othrlblframe, width=23).place(x=80, y=50)
-
-        estimate_prmodelblframe=LabelFrame(estimate_print1, text="Print mode", height=120, width=320)
-        estimate_prmodelblframe.place(x=335, y=235)
-        estimate_dropscal = ttk.Combobox(estimate_prmodelblframe, width=30).place(x=5, y=5)
-        estimate_poslb=Label(estimate_prmodelblframe, text="Print on sheet").place(x=5, y=35)
-        estimate_droppos = ttk.Combobox(estimate_prmodelblframe, width=10).place(x=155, y=35)
-
-        estimate_eokbtn=Button(estimate_print1,compound = LEFT,image=tick , text="Ok", width=60).place(x=460, y=370)
-        estimate_ecanbtn=Button(estimate_print1,compound = LEFT,image=cancel, text="Cancel", width=60).place(x=570, y=370)
-        
-
-
-  #email
-        
-  def estimate_emailord():
-    estimate_mailDetail=Toplevel()
-    estimate_mailDetail.title("Orders E-Mail")
-    estimate_ep2 = PhotoImage(file = "images/fbicon.png")
-    estimate_mailDetail.iconphoto(False, estimate_ep2)
-    estimate_mailDetail.geometry("1030x550+150+120")
-  
-    def estimate_my_SMTP():
-        if True:
-            estimate_em_ser_conbtn.destroy()
-            estimate_mysmtpservercon=LabelFrame(estimate_account_Frame,text="SMTP server connection(ask your ISP for your SMTP settings)", height=165, width=380)
-            estimate_mysmtpservercon.place(x=610, y=110)
-            estimate_lbl_hostn=Label(estimate_mysmtpservercon, text="Hostname").place(x=5, y=10)
-            estimate_hostnent=Entry(estimate_mysmtpservercon, width=30).place(x=80, y=10)
-            estimate_lbl_portn=Label(estimate_mysmtpservercon, text="Port").place(x=5, y=35)
-            estimate_portent=Entry(estimate_mysmtpservercon, width=30).place(x=80, y=35)
-            estimate_elbl_usn=Label(estimate_mysmtpservercon, text="Username").place(x=5, y=60)
-            estimate_unament=Entry(estimate_mysmtpservercon, width=30).place(x=80, y=60)
-            estimate_eelbl_pasn=Label(estimate_mysmtpservercon, text="Password").place(x=5, y=85)
-            estimate_pwdent=Entry(estimate_mysmtpservercon, width=30).place(x=80, y=85)
-            estimate_ssl_chkvar=IntVar()
-            estimate_ssl_chkbtn=Checkbutton(estimate_mysmtpservercon, variable=estimate_ssl_chkvar, text="This server requires a secure connection(SSL)", onvalue=1, offvalue=0)
-            estimate_ssl_chkbtn.place(x=50, y=110)
-            estimate_em_ser_conbtn1=Button(estimate_account_Frame, text="Test E-mail Server Connection").place(x=610, y=285)
-        else:
-            pass
-      
-    estimate_mystyle = ttk.Style()
-    estimate_mystyle.theme_use('default')
-    estimate_mystyle.configure('TNotebook.Tab', background="#999999", padding=5)
-    estimate_email_Notebook = ttk.Notebook(estimate_mailDetail)
-    estimate_email_Frame = Frame(estimate_email_Notebook, height=500, width=1080)
-    estimate_account_Frame = Frame(estimate_email_Notebook, height=550, width=1080)
-    estimate_email_Notebook.add(estimate_email_Frame, text="E-mail")
-    estimate_email_Notebook.add(estimate_account_Frame, text="Account")
-    estimate_email_Notebook.place(x=0, y=0)
-    estimate_messagelbframe=LabelFrame(estimate_email_Frame,text="Message", height=495, width=730)
-    estimate_messagelbframe.place(x=5, y=5)
-    estimate_mylbl_emailtoaddr=Label(estimate_messagelbframe, text="Email to address").place(x=5, y=5)
-    estimate_emailtoent=Entry(estimate_messagelbframe, width=50).place(x=120, y=5)
-    estimate_sendemail_btn=Button(estimate_messagelbframe, text="Send Email", width=10, height=1).place(x=600, y=10)
-    estimate_lbl_carcopyto=Label(messagelbframe, text="Carbon copy to").place(x=5, y=32)
-    estimate_carcopyent=Entry(messagelbframe, width=50).place(x=120, y=32)
-    estimate_stopemail_btn=Button(messagelbframe, text="Stop sending", width=10, height=1).place(x=600, y=40)
-    estimate_lbl_subject=Label(messagelbframe, text="Subject").place(x=5, y=59)
-    estimate_subent=Entry(messagelbframe, width=50).place(x=120, y=59)
-
-    estimate_nstyle = ttk.Style()
-    estimate_nstyle.theme_use('default')
-    estimate_nstyle.configure('TNotebook.Tab', background="#999999", width=20, padding=5)
-    estimate_mess_Notebook = ttk.Notebook(estimate_messagelbframe)
-    estimate_emailmessage_Frame = Frame(estimate_mess_Notebook, height=350, width=710)
-    estimate_htmlsourse_Frame = Frame(estimate_mess_Notebook, height=350, width=710)
-    estimate_mess_Notebook.add(estimate_emailmessage_Frame, text="E-mail message")
-    estimate_mess_Notebook.add(estimate_htmlsourse_Frame, text="Html sourse code")
-    estimate_mess_Notebook.place(x=5, y=90)
-
-    estimate_mybtn1=Button(estimate_emailmessage_Frame,width=31,height=23,compound = LEFT,image=selectall).place(x=0, y=1)  
-    estimate_mybtn2=Button(estimate_emailmessage_Frame,width=31,height=23,compound = LEFT,image=cut).place(x=36, y=1)
-    estimate_mybtn3=Button(estimate_emailmessage_Frame,width=31,height=23,compound = LEFT,image=copy).place(x=73, y=1)
-    estimate_mybtn4=Button(estimate_emailmessage_Frame,width=31,height=23,compound = LEFT,image=paste).place(x=105, y=1)
-    estimate_mybtn5=Button(estimate_emailmessage_Frame,width=31,height=23,compound = LEFT,image=undo).place(x=140, y=1)
-    estimate_mybtn6=Button(estimate_emailmessage_Frame,width=31,height=23,compound = LEFT,image=redo).place(x=175, y=1)
-    estimate_mybtn7=Button(estimate_emailmessage_Frame,width=31,height=23,compound = LEFT,image=bold).place(x=210, y=1)
-    estimate_mybtn8=Button(estimate_emailmessage_Frame,width=31,height=23,compound = LEFT,image=italics).place(x=245, y=1)
-    estimate_mybtn9=Button(estimate_emailmessage_Frame,width=31,height=23,compound = LEFT,image=underline).place(x=280, y=1)
-    estimate_mybtn10=Button(estimate_emailmessage_Frame,width=31,height=23,compound = LEFT,image=left).place(x=315, y=1)
-    estimate_mybtn11=Button(estimate_emailmessage_Frame,width=31,height=23,compound = LEFT,image=right).place(x=350, y=1)
-    estimate_mybtn12=Button(estimate_emailmessage_Frame,width=31,height=23,compound = LEFT,image=center).place(x=385, y=1)
-    estimate_mybtn13=Button(estimate_emailmessage_Frame,width=31,height=23,compound = LEFT,image=hyperlink).place(x=420, y=1)
-    estimate_mybtn14=Button(estimate_emailmessage_Frame,width=31,height=23,compound = LEFT,image=remove).place(x=455, y=1)
-
-    estimate_dropcomp = ttk.Combobox(estimate_emailmessage_Frame, width=12, height=3).place(x=500, y=5)
-    estimate_mydropcompo = ttk.Combobox(estimate_emailmessage_Frame, width=6, height=3).place(x=600, y=5)
-    estimate_mframe=Frame(estimate_emailmessage_Frame, height=350, width=710, bg="white")
-    estimate_mframe.place(x=0, y=28)
-    estimate_e_btn1=Button(estimate_htmlsourse_Frame,width=31,height=23,compound = LEFT,image=selectall).place(x=0, y=1)
-    estimate_e_btn2=Button(estimate_htmlsourse_Frame,width=31,height=23,compound = LEFT,image=cut).place(x=36, y=1)
-    estimate_e_btn3=Button(estimate_htmlsourse_Frame,width=31,height=23,compound = LEFT,image=copy).place(x=73, y=1)
-    estimate_e_btn4=Button(estimate_htmlsourse_Frame,width=31,height=23,compound = LEFT,image=paste).place(x=105, y=1)
-    estimate_e_mframe=Frame(estimate_htmlsourse_Frame, height=350, width=710, bg="white")
-    estimate_e_mframe.place(x=0, y=28)
-    estimate_attachlbframe=LabelFrame(estimate_email_Frame,text="Attachment(s)", height=350, width=280)
-    estimate_attachlbframe.place(x=740, y=5)
-    estimate_htcodeframe=Frame(estimate_attachlbframe, height=220, width=265, bg="white").place(x=5, y=5)
-    estimate_lbl_btn_info=Label(estimate_attachlbframe, text="Double click on attachment to view").place(x=30, y=230)
-    estimate_e_btn17=Button(estimate_attachlbframe, width=20, text="Add attacment file...").place(x=60, y=260)
-    estimate_e_btn18=Button(estimate_attachlbframe, width=20, text="Remove attacment").place(x=60, y=295)
-    estimate_lbl_tt_info=Label(estimate_email_Frame, text="You can create predefined invoice, order, estimate\nand payment receipt email templates under Main\nmenu/Settings/E-Mail templates tab")
-    estimate_lbl_tt_info.place(x=740, y=370)
-
-    estimate_ready_frame=Frame(estimate_mailDetail, height=20, width=1080, bg="#b3b3b3").place(x=0,y=530)
-    
-    estimate_sendatalbframe=LabelFrame(estimate_account_Frame,text="E-Mail(Sender data)",height=270, width=600)
-    estimate_sendatalbframe.place(x=5, y=5)
-    estimate_lbl_sendermail=Label(estimate_sendatalbframe, text="Your company email address").place(x=5, y=30)
-    estimate_sentent=Entry(estimate_sendatalbframe, width=40).place(x=195, y=30)
-    estimate_lbl_orcompanyname=Label(estimate_sendatalbframe, text="Your name or company name").place(x=5, y=60)
-    estimate_nament=Entry(estimate_sendatalbframe, width=40).place(x=195, y=60)
-    estimate_lbl_reply=Label(estimate_sendatalbframe, text="Reply to email address").place(x=5, y=90)
-    estimate_replyent=Entry(estimate_sendatalbframe, width=40).place(x=195, y=90)
-    estimate_lbl_sign=Label(estimate_sendatalbframe, text="Signature").place(x=5, y=120)
-    estimate_signent=Entry(estimate_sendatalbframe,width=50).place(x=100, y=120,height=75)
-    estimate_confirm_chkvar=IntVar()
-    estimate_confirm_chkbtn=Checkbutton(estimate_sendatalbframe, variable=estimate_confirm_chkvar, text="Confirmation reading", onvalue=1, offvalue=0)
-    estimate_confirm_chkbtn.place(x=200, y=215)
-    estimate_e_mybtn18=Button(estimate_account_Frame, width=15, text="Save settings").place(x=25, y=285)
-
-    estimate_esendatalbframe=LabelFrame(estimate_account_Frame,text="SMTP Server",height=100, width=380)
-    estimate_esendatalbframe.place(x=610, y=5)
-    estimate_servar=IntVar()
-    estimate_SMTP_rbtn=Radiobutton(estimate_sendatalbframe, text="Use the Built-In SMTP Server Settings", variable=estimate_servar, value=1)
-    estimate_SMTP_rbtn.place(x=10, y=10)
-    estimate_MySMTP_rbtn=Radiobutton(estimate_sendatalbframe, text="Use My Own SMTP Server Settings(Recommended)", variable=estimate_servar, value=2, command=estimate_my_SMTP)
-    estimate_MySMTP_rbtn.place(x=10, y=40)
-    estimate_em_ser_conbtn=Button(estimate_account_Frame, text="Test E-mail Server Connection")
-    estimate_em_ser_conbtn.place(x=710, y=110)
-
-
-
-  #sms notification order
-    
-  def estimate_sms():
-    estimate_send_SMS=Toplevel()
-    estimate_send_SMS.geometry("700x480+240+150")
-    estimate_send_SMS.title("Send SMS notification")
-
-    estimate_sms_style = ttk.Style()
-    estimate_sms_style.theme_use('default')
-    estimate_sms_style.configure('TNotebook.Tab', background="#999999", padding=5)
-    estimate_sms_Notebook = ttk.Notebook(estimate_send_SMS)
-    estimate_SMS_Notification = Frame(estimate_sms_Notebook, height=470, width=700)
-    estimate_SMS_Service_Account = Frame(estimate_sms_Notebook, height=470, width=700)
-    estimate_sms_Notebook.add(estimate_SMS_Notification, text="SMS Notification")
-    estimate_sms_Notebook.add(estimate_SMS_Service_Account, text="SMS Service Account")
-    estimate_sms_Notebook.place(x=0, y=0)
-
-    estimate_numlbel=Label(estimate_SMS_Notification, text="SMS number or comma seperated SMS number list(Please start each SMS number with the country code)")
-    estimate_numlbel.place(x=10, y=10)
-    estimate_numentry=Entry(estimate_SMS_Notification, width=92).place(x=10, y=30)
-    estimate_stexbel=Label(estimate_SMS_Notification, text="SMS Text").place(x=10, y=60)
-    estimate_stex=Entry(estimate_SMS_Notification, width=40).place(x=10, y=85,height=120)
-    
-    estimate_dclbel=Label(estimate_SMS_Notification, text="Double click to insert into text")
-    estimate_dclbel.place(x=410, y=60)
-    estimate_dcl=Entry(estimate_SMS_Notification, width=30)
-    estimate_dcl.place(x=400, y=85,height=200)
-    
-    estimate_mysmstype=LabelFrame(estimate_SMS_Notification, text="SMS message type", width=377, height=60)
-    estimate_mysmstype.place(x=10, y=223)
-    estimate_Mysnuvar=IntVar()
-    estimate_normal_rbtn=Radiobutton(estimate_mysmstype, text="Normal SMS(160 chars)", variable=estimate_Mysnuvar, value=1)
-    estimate_normal_rbtn.place(x=5, y=5)
-    estimate_unicode_rbtn=Radiobutton(estimate_mysmstype, text="Unicode SMS(70 chars)", variable=estimate_Mysnuvar, value=2)
-    estimate_unicode_rbtn.place(x=190, y=5)
-    estimate_tiplbf=LabelFrame(estimate_SMS_Notification, text="Tips", width=680, height=120)
-    estimate_tiplbf.place(x=10, y=290)
-    estimate_Mytiplabl=Label(estimate_tiplbf,justify=LEFT,fg="red",  text="Always start the SMS nymber with the country code. Do not use the + sign at the beginning(example\nUS number:8455807546). Do not use any special characters in your normal SMS text. Please use the\nstndard SMS characters or the English alphabet and numbers only. Otherwise the SMS will be\nunreadable or undeliverable. If you need to enter international characters, accents,email address, or\nspecial characters to the SMS text field then choose the Unicode SMS format.")
-    estimate_Mytiplabl.place(x=5, y=5)
-
-    estimate_Mybtn1=Button(estimate_SMS_Notification, width=20, text="Send SMS notification").place(x=10, y=420)
-    estimate_Mybtn2=Button(estimate_SMS_Notification, width=25, text="Confirm SMS cost before sending").place(x=280, y=420)
-    estimate_Mybtn3=Button(estimate_SMS_Notification, width=15, text="Cancel").place(x=550, y=420)
-    
-
-    estimate_e_smstype=LabelFrame(estimate_SMS_Service_Account, text="Select the notification service provider", width=670, height=65)
-    estimate_e_smstype.place(x=10, y=5)
-    estimate_e_snumvar=IntVar()
-    estimate_normal_rbtn=Radiobutton(estimate_e_smstype,text="BULKSMS(www.bulksms.com)",variable=estimate_e_snumvar,value=1,)
-    estimate_normal_rbtn.place(x=5, y=5)
-    estimate_unicode_rbtn=Radiobutton(estimate_e_smstype, text="Unicode SMS(70 chars)-Recommended", variable=estimate_e_snumvar, value=2)
-    estimate_unicode_rbtn.place(x=290, y=5)
-
-    estimate_sms1type=LabelFrame(estimate_SMS_Service_Account, text="Your BULKSMS.COM Account", width=670, height=100)
-    estimate_sms1type.place(x=10, y=80)
-    estimate_Myname=Label(estimate_sms1type, text="Username").place(x=10, y=5)
-    estimate_na=Entry(estimate_sms1type, width=20).place(x=100, y=5)
-    estimate_Mypassword=Label(estimate_sms1type, text="Password").place(x=10, y=45)
-    estimate_Mypas=Entry(estimate_sms1type, width=20).place(x=100, y=45)
-    estimate_combo=Label(estimate_sms1type, text="Route").place(x=400, y=5)
-    estimate_My_n = StringVar()
-    estimate_combo1 = ttk.Combobox(estimate_sms1type, width = 20, textvariable = estimate_My_n ).place(x=450,y=5)
-    estimate_My_btn1=Button(estimate_sms1type, width=10, text="Save settings").place(x=550, y=45)
-
-    
-    estimate_Mytiplbf=LabelFrame(estimate_SMS_Service_Account, text="Terms of service", width=680, height=250)
-    estimate_Mytiplbf.place(x=10, y=190)
-    estimate_mytiplabl=Label(estimate_Mytiplbf,justify=LEFT,fg="red",  text="The SMS notification service is not free.This service costs you creadit.You must have your own account\nat BULKSMS.COM and you need to have sufficient creadit and an active internet connection to use\nthis feature.Please review all fields in this form for accuracy")
-    estimate_mytiplabl.place(x=0, y=5)
-    estimate_my_tiplabl1=Label(estimate_Mytiplbf,justify=LEFT,fg="black",  text="visit www.bulksms.com website to create your own account.please make sure the BULKSMS .COM\n service works well in your country before you busy creadit")
-    estimate_my_tiplabl1.place(x=0, y=60)
-    estimate_My_tiplabl2=Label(estimate_Mytiplbf,justify=LEFT,fg="black",  text="Our SMS notification tool comes without any warranty.our software only forwards your SMS message\nthe BULKSMS API server .The BULKSMS API server will try to sent SMS message your recipient")
-    estimate_My_tiplabl2.place(x=0, y=100)
-    estimate_eMy_tiplabl3=Label(estimate_Mytiplbf,justify=LEFT,fg="red",  text="Please note that you access and use the SMS notification tool your own risk.F-Billing software is not\nresponsible for any type of loss or damage or undelivered SMS massage which you may as a result\nof accessing and using the SMS notification service.")
-    estimate_eMy_tiplabl3.place(x=0, y=140)
-    estimate_My_checkvar1=IntVar()
-    estimate_Mychkbtn1=Checkbutton(estimate_Mytiplbf,text="I have read and agree to the terms of service above",variable=estimate_My_checkvar1,onvalue=1,offvalue=0).place(x=70, y=200)  
-
-
-
-  #print preview order
-  def estimate_Myprintpreview():
-    messagebox.showerror("F-Billing Revolution","Customer is required,please select customer for this order before printing.")
-
-
-
-  #convert to invoice
-  def estimate_convert():
-    if messagebox.askyesno("Make invoice from Orders", "Are you sure to make invoice from this Orders ") == True:
-          messagebox.askyesno("Make invoice from Estimate", "Invoice Creation was Successfull.\n New Invoice is \n Would you like to open this invoice ")
-    else:
-          messagebox.destroy()
-    
-
-  #delete orders  
-  def estimate_dele():  
-    messagebox.askyesno("Delete order", "Are you sure to delete this order? All products will be placed back into stock")
-
-
-
-
-  #search in orders  
-  def estimate_search():  
-      estimate_etop = Toplevel()     
-      estimate_etop.title("Find Text")   
-      estimate_etop.geometry("600x250+390+250")
-      estimate_findwhat1=Label(estimate_etop,text="Find What:",pady=5,padx=10).place(x=5,y=20)
-      estimate_e_n = StringVar()
-      estimate_findwhat = ttk.Combobox(estimate_etop, width = 40, textvariable = estimate_e_n ).place(x=90,y=25)
-    
-      estimate_findin1=Label(estimate_etop,text="Find in:",pady=5,padx=10).place(x=5,y=47)
-      estimate_my_n1 = StringVar()
-      estimate_findIN = ttk.Combobox(estimate_etop, width = 30, textvariable = estimate_my_n1 )
-      estimate_findIN['values'] = ('Product/Service id', ' Category', ' Active',' name',' stock',' location', ' image',' <<All>>')                       
-      estimate_findIN.place(x=90,y=54)
-      estimate_findIN.current(0)
-
-      estimate_findButton = Button(estimate_etop, text ="Find next",width=10).place(x=480,y=22)
-      estimate_closeButton = Button(estimate_etop,text ="Close",width=10).place(x=480,y=52)
-      
-      estimate_match1=Label(estimate_etop,text="Match:",pady=5,padx=10).place(x=5,y=74)
-      estimate_my_n2 = StringVar()
-      estimate_match = ttk.Combobox(estimate_etop, width = 23, textvariable = estimate_my_n2 )   
-      estimate_match['values'] = ('From Any part',' Whole Field',' From the beginning of the field')                                   
-      estimate_match.place(x=90,y=83)
-      estimate_match.current(0)
-
-      estimate_my_search1=Label(estimate_etop,text="Search:",pady=5,padx=10).place(x=5,y=102)
-      estimate_my_n3 = StringVar()
-      estimate_my_search = ttk.Combobox(estimate_etop, width = 23, textvariable = estimate_my_n3 )
-      estimate_my_search['values'] = ('All', 'up',' Down')
-      estimate_my_search.place(x=90,y=112)
-      estimate_my_search.current(0)
-      estimate_checkvarStatus4=IntVar()  
-      estimate_my_Button4 = Checkbutton(estimate_etop,variable = estimate_checkvarStatus4,text="Match Case",onvalue =0 ,offvalue = 1,height=3,width = 15)
-      estimate_my_Button4.place(x=90,y=141)
-      estimate_checkvarStatus5=IntVar()   
-      estimate_my_Button5 = Checkbutton(estimate_etop,variable = estimate_checkvarStatus5,text="Match Format",onvalue =0 ,offvalue = 1,height=3,width = 15)
-      estimate_my_Button5.place(x=300,y=141)
-
-
-
-
-
-  estimate_mainFrame=Frame(tab3, relief=GROOVE, bg="#f8f8f2")
-  estimate_mainFrame.pack(side="top", fill=BOTH)
-
-  estimate_midFrame=Frame(estimate_mainFrame, bg="#f5f3f2", height=60)
-  estimate_midFrame.pack(side="top", fill=X)
-
-  estimate_w = Canvas(estimate_midFrame, width=1, height=65, bg="#b3b3b3", bd=0)
-  estimate_w.pack(side="left", padx=(5, 2))
-  estimate_w1 = Canvas(estimate_midFrame, width=1, height=65, bg="#b3b3b3", bd=0)
-  estimate_w1.pack(side="left", padx=(0, 5))
-
-  estimate_invoiceLabel = Button(estimate_midFrame,compound="top", text="Create new\nEstimate",relief=RAISED, image=photo,bg="#f5f3f2", fg="black", height=55, bd=1, width=55,command=estimate_create)
-  estimate_invoiceLabel.pack(side="left", pady=3, ipadx=4)
-
-  estimate_orderLabel = Button(estimate_midFrame,compound="top", text="View/Edit\nEstimate",relief=RAISED, image=photo1,bg="#f8f8f2", fg="black", height=55, bd=1, width=55,command=estimate_create)
-  estimate_orderLabel.pack(side="left")
-
-  estimate_estimateLabel = Button(estimate_midFrame,compound="top", text="Delete\nSelected",relief=RAISED, image=photo2,bg="#f8f8f2", fg="black", height=55, bd=1, width=55,command=estimate_dele)
-  estimate_estimateLabel.pack(side="left")
-
-  estimate_w3 = Canvas(estimate_midFrame, width=1, height=65, bg="#b3b3b3", bd=0)
-  estimate_w3.pack(side="left", padx=5)
-
-  estimate_recurLabel = Button(estimate_midFrame,compound="top", text="Convert to\nInvoice",relief=RAISED, image=photo3,bg="#f8f8f2", fg="black", height=55, bd=1, width=55,command=estimate_convert)
-  estimate_recurLabel.pack(side="left")
-
-  estimate_w4 = Canvas(estimate_midFrame, width=1, height=65, bg="#b3b3b3", bd=0)
-  estimate_w4.pack(side="left", padx=5)
-
-  estimate_previewLabel = Button(estimate_midFrame,compound="top", text="Print\nPreview",relief=RAISED, image=photo4,bg="#f8f8f2", fg="black", height=55, bd=1, width=55, activebackground="red",command=estimate_Myprintpreview)
-  estimate_previewLabel.pack(side="left")
-
-  estimate_purchaseLabel = Button(estimate_midFrame,compound="top", text="Print\nSelected",relief=RAISED, image=photo5,bg="#f8f8f2", fg="black", height=55, bd=1, width=55,command=estimate_printsele)
-  estimate_purchaseLabel.pack(side="left")
-
-  estimate_w5 = Canvas(estimate_midFrame, width=1, height=55, bg="#b3b3b3", bd=0)
-  estimate_w5.pack(side="left", padx=5)
-
-  estimate_expenseLabel = Button(estimate_midFrame,compound="top", text=" E-mail \nEstimate",relief=RAISED, image=photo6,bg="#f8f8f2", fg="black", height=55, bd=1, width=55,command=estimate_emailord)
-  estimate_expenseLabel.pack(side="left")
-
-  estimate_smsLabel = Button(estimate_midFrame,compound="top", text="Send SMS\nnotification",relief=RAISED, image=photo10,bg="#f8f8f2", fg="black", height=55, bd=1, width=55,command=estimate_sms)
-  estimate_smsLabel.pack(side="left")
-
-  estimate_w6 = Canvas(estimate_midFrame, width=1, height=55, bg="#b3b3b3", bd=0)
-  estimate_w6.pack(side="left", padx=5)
-
-  estimate_productLabel = Button(estimate_midFrame,compound="top", text="Search\nEstimate",relief=RAISED, image=photo7,bg="#f8f8f2", fg="black", height=55, bd=1, width=55,command=estimate_search)
-  estimate_productLabel.pack(side="left")
-
-  estimate_lbframe = LabelFrame(estimate_midFrame, height=60, width=200, bg="#f8f8f2")
-  estimate_lbframe.pack(side="left", padx=10, pady=0)
-  estimate_lbl_invdt = Label(estimate_lbframe, text="Estimate date from : ", bg="#f8f8f2")
-  estimate_lbl_invdt.grid(row=0, column=0, pady=5, padx=(5, 0))
-  estimate_lbl_invdtt = Label(estimate_lbframe, text="Estimate date to  :  ", bg="#f8f8f2")
-  estimate_lbl_invdtt.grid(row=1, column=0, pady=5, padx=(5, 0))
-  estimate_invdt = Entry(estimate_lbframe, width=15)
-  estimate_invdt.grid(row=0, column=1)
-  estimate_invdtt = Entry(estimate_lbframe, width=15)
-  estimate_invdtt.grid(row=1, column=1)
-  estimate_checkvarr1 = IntVar()
-  estimate_chkbtnn1 = Checkbutton(estimate_lbframe, text = "Apply filter", variable = estimate_checkvarr1, onvalue = 1, offvalue = 0, height = 2, width = 8, bg="#f8f8f2")
-  estimate_chkbtnn1.grid(row=0, column=2, rowspan=2, padx=(5,5))
-
-  estimate_productLabel = Button(estimate_midFrame,compound="top", text="Refresh\nOrders list",relief=RAISED, image=photo8,fg="black", height=55, bd=1, width=55)
-  estimate_productLabel.pack(side="left")
-
-  estimate_w7 = Canvas(estimate_midFrame, width=1, height=55, bg="#b3b3b3", bd=0)
-  estimate_w7.pack(side="left", padx=5)
-
-  estimate_productLabell = Button(estimate_midFrame,compound="top", text="Hide totals\nSum",relief=RAISED, image=photo9,bg="#f8f8f2", fg="black", height=55, bd=1, width=55)
-  estimate_productLabell.pack(side="left")
-
-  estimate_invoilabell = Label(estimate_mainFrame, text="Estimate(All)", font=("arial", 18), bg="#f8f8f2")
-  estimate_invoilabell.pack(side="left", padx=(20,0))
-  estimate_drop = ttk.Combobox(estimate_mainFrame, value="Hello")
-  estimate_drop.pack(side="right", padx=(0,10))
-  estimate_invoilabell1 = Label(estimate_mainFrame, text="Category filter", font=("arial", 15), bg="#f8f8f2")
-  estimate_invoilabell1.pack(side="right", padx=(0,10))
-
-  class MyApp:
-    def __init__(self, parent):
-      
-      self.myParent = parent 
-
-      self.myContainer1 = Frame(parent) 
-      self.myContainer1.pack()
-      
-      self.top_frame = Frame(self.myContainer1) 
-      self.top_frame.pack(side=TOP,
-        fill=BOTH, 
-        expand=YES,
-        )  
-
-      self.left_frame = Frame(self.top_frame, background="white",
-        borderwidth=5,  relief=RIDGE,
-        height=250, 
-        width=2000, 
-        )
-      self.left_frame.pack(side=LEFT,
-        fill=BOTH, 
-        expand=YES,
-        )
-
-      
-      tree = ttk.Treeview(self.left_frame, columns = (1,2,3,4,5,6,7,8,9,10), height = 15, show = "headings")
-      tree.pack(side = 'top')
-      tree.heading(1)
-      tree.heading(2, text="Estimate#")
-      tree.heading(3, text="Estimate date")
-      tree.heading(4, text="Due date")
-      tree.heading(5, text="Customer Name")
-      tree.heading(6, text="Status")
-      tree.heading(7, text="Emailed on")
-      tree.heading(8, text="Printed on")
-      tree.heading(9, text="SMS on")
-      tree.heading(10, text="Order Total")   
-      tree.column(1, width = 30)
-      tree.column(2, width = 150)
-      tree.column(3, width = 140)
-      tree.column(4, width = 130)
-      tree.column(5, width = 200)
-      tree.column(6, width = 130)
-      tree.column(7, width = 150)
-      tree.column(8, width = 130)
-      tree.column(9, width = 130)
-      tree.column(10, width = 160)
-
-      scrollbar = Scrollbar(self.left_frame)
-      scrollbar.place(x=990+330+15, y=0, height=300+20)
-      scrollbar.config( command=tree.yview )
-
-      tabControl = ttk.Notebook(self.left_frame,width=1)
-      tab1 = ttk.Frame(tabControl)
-      tab2 = ttk.Frame(tabControl)
-      tab3=  ttk.Frame(tabControl)
-      tab4 = ttk.Frame(tabControl)
-      tabControl.add(tab1,image=invoices,compound = LEFT, text ='Estimate Items',)
-      tabControl.add(tab2,image=photo11,compound = LEFT, text ='Private Notes')
-      tabControl.add(tab3,image=smslog,compound = LEFT, text ='SMS Log')
-      tabControl.add(tab4,image=photo11,compound = LEFT, text ='Documents')
-      tabControl.pack(expand = 1, fill ="both")
-      
-      tree = ttk.Treeview(tab1, columns = (1,2,3,4,5,6,7,8,), height = 15, show = "headings")
-      tree.pack(side = 'top')
-      tree.heading(1)
-      tree.heading(2, text="Product/Service ID",)
-      tree.heading(3, text="Name")
-      tree.heading(4, text="Description")
-      tree.heading(5, text="Price")
-      tree.heading(6, text="QTY")
-      tree.heading(7, text="Tax1")
-      tree.heading(8, text="Line Total")   
-      tree.column(1, width = 50)
-      tree.column(2, width = 270)
-      tree.column(3, width = 250)
-      tree.column(4, width = 300)
-      tree.column(5, width = 130)
-      tree.column(6, width = 100)
-      tree.column(7, width = 100)
-      tree.column(8, width = 150)
-
-      note1=Text(tab2, width=170,height=10).place(x=10, y=10)
-
-      note1=Text(tab3, width=170,height=10).place(x=10, y=10)
-
-      tree = ttk.Treeview(tab4, columns = (1,2,3), height = 15, show = "headings")
-      tree.pack(side = 'top')
-      tree.heading(1)
-      tree.heading(2, text="Attach to Email",)
-      tree.heading(3, text="Filename")
-      tree.column(1, width = 70)
-      tree.column(2, width = 270)
-      tree.column(3, width = 1000)
-
-      scrollbar = Scrollbar(self.left_frame)
-      scrollbar.place(x=990+330+15, y=360, height=190)
-      scrollbar.config( command=tree.yview )
-        
-  myapp = MyApp(tab3)
 
 
 root.mainloop()
