@@ -78,14 +78,14 @@ if not user_log:
   def lo():
     mainpage()
   root=Tk()
-  root.geometry("1360x768")
+  root.geometry("500x250")
   root.resizable(False, False)
   root.eval('tk::PlaceWindow . center')
   Label(text='Wellocome to F-Billing Revolution 2022',font='arial 13 bold').place(x=100,y=40)
   submitbtn1=Button(text='OPEN NOW', width=20,height=2,command=lo,activeforeground="white",activebackground="black",font='arial 8 bold').place(x=165,y=100)             
 else:
     root=Tk()
-    root.geometry("500x200")
+    root.geometry("1360x768")
     root.resizable(False, False)
     root.eval('tk::PlaceWindow . center')
     root.title("F-Billing Revolution 2022")
@@ -242,7 +242,9 @@ def mainpage():
       title_text = estimates_etitletext.get()
       header_text = estimates_eheader_text.get()
       footer_text = estimates_efooter_text.get()
+      #comments = estimates_ecomments.get("1.0",END)
       term_of_payment = estimate_eterms.get()
+      terms = estimates_eterm_text.get("1.0",END)
       # private_notes = estimates_pvt_notes.get("1.0",END)
 
       # private_sql = "INSERT INTO invoice_private_notes(private_notes) VALUES(%s)"
@@ -259,8 +261,10 @@ def mainpage():
       #   pass
       # privatenoteid += p
 
-      estimate_sql="INSERT INTO estimate (estimate_number,estdate,duedate,status,emailon,printon,esttot,totpaid,balance,extracostname,extracost,template, salesper,discourate,tax1, category,businessname,businessaddress,shipname, shipaddress,cpemail,cpmobileforsms,title_text, header_text,footer_text,term_of_payment) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)" #adding values into db
-      estimate_val=(estimate_number,estdate,duedate,status,emailon,printon,esttot,totpaid,balance,extracostname,extracost,template, salesper,discourate,tax1, category,businessname,businessaddress,shipname, shipaddress,cpemail,cpmobileforsms,title_text, header_text, footer_text,term_of_payment,)
+      
+
+      estimate_sql="INSERT INTO estimate (estimate_number,estdate,duedate,status,emailon,printon,esttot,totpaid,balance,extracostname,extracost,template, salesper,discourate,tax1, category,businessname,businessaddress,shipname, shipaddress,cpemail,cpmobileforsms,title_text, header_text,footer_text,term_of_payment,terms) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)" #adding values into db
+      estimate_val=(estimate_number,estdate,duedate,status,emailon,printon,esttot,totpaid,balance,extracostname,extracost,template, salesper,discourate,tax1, category,businessname,businessaddress,shipname, shipaddress,cpemail,cpmobileforsms,title_text, header_text, footer_text,term_of_payment,terms,)
       fbcursor.execute(estimate_sql,estimate_val)
       fbilldb.commit()
       messagebox.showinfo("F-Billing Revolution","Estimate saved")
@@ -407,6 +411,16 @@ def mainpage():
       estimate_ctegorytree.heading("#0",text="", anchor=W)
       estimate_ctegorytree.heading("1",text="View filter by category", anchor=CENTER)
       estimate_ctegorytree.place(x=660, y=45)
+
+      est_cust_fil_cat_list = Listbox(estimate_cuselection,height=34,width=40,bg="white",activestyle="dotbox",fg="black",highlightbackground="white")
+      est_cust_fil_cat_list.insert(0,"               View all records")
+      est_cust_fil_cat_list.insert(1,"               View only Client/Vendor")
+      est_cust_fil_cat_list.insert(2,"               View only Client type")
+      est_cust_fil_cat_list.insert(3,"               View only Vendor type")
+      est_cust_fil_cat_list.insert(4,"               Default")
+      est_cust_fil_cat_list.place(x=660,y=63)
+      est_cust_fil_cat_list.bind('<<ListboxSelect>>')
+
 
       estimate_scrollbar = Scrollbar(estimate_cuselection)
       estimate_scrollbar.place(x=640, y=45, height=560)
@@ -634,6 +648,15 @@ def mainpage():
       estimate_ctegorytree1.heading("1",text="View filter by category", anchor=CENTER)
       estimate_ctegorytree1.place(x=660, y=45)
 
+      est_fil_cat_list = Listbox(estimate_newselection,height=34,width=40,bg="white",activestyle="dotbox",fg="black",highlightbackground="white")
+      est_fil_cat_list.insert(0,"               View all Products/Services")
+      est_fil_cat_list.insert(1,"               View all Products")
+      est_fil_cat_list.insert(2,"               View all Services")
+      est_fil_cat_list.insert(3,"               Default")
+      est_fil_cat_list.place(x=660,y=63)
+      est_fil_cat_list.bind('<<ListboxSelect>>')
+
+
       estimate_scrollbar10 = Scrollbar(estimate_newselection)
       estimate_scrollbar10.place(x=640, y=45, height=560)
       estimate_scrollbar10.config( command=tree.yview )
@@ -799,20 +822,56 @@ def mainpage():
 
     estimate_labelframee1 = LabelFrame(estimate_fir1Frame,text="Customers",font=("arial",15))
     estimate_labelframee1.place(x=10,y=5,width=640,height=160)
+
+    def est_to_combo(event):
+      global est_sel_combo
+      est_to_str = est_to.get()
+      sql = "SELECT * FROM Customer WHERE businessname=%s"
+      val = (est_to_str,)
+      fbcursor.execute(sql,val)
+      est_sel_combo = fbcursor.fetchone()
+      estimate_addresstext2.delete('1.0',END)
+      estimate_addresstext2.insert('1.0',est_sel_combo[5])
+      estimate_shipto3.delete(0, END)
+      estimate_shipto3.insert(0, est_sel_combo[6])
+      estimate_ship_address4.delete('1.0',END)
+      estimate_ship_address4.insert('1.0',est_sel_combo[7])
+      estimate_email5.delete(0,END)
+      estimate_email5.insert(0,est_sel_combo[9])
+      estimate_sms6.delete(0,END)
+      estimate_sms6.insert(0,est_sel_combo[12])
+
+    def est_copy_cust_details():
+        estimate_shipto3.delete(0, END)
+        estimate_shipto3.insert(0, est_sel_combo[4])
+        estimate_ship_address4.delete('1.0',END)
+        estimate_ship_address4.insert('1.0',est_sel_combo[5])
+
+
+    est_sql2 = "select businessname from Customer"
+    fbcursor.execute(est_sql2,)
+    estodata = fbcursor.fetchall()
+
     estimate_orderr1 = Label(estimate_labelframee1, text="Estimate to").place(x=10,y=5)
-    estimate_combo_name1 = ttk.Combobox(estimate_labelframee1, value="Hello",width=28)
+    est_to = StringVar()
+    estimate_combo_name1 = ttk.Combobox(estimate_labelframee1, width=28,textvariable=est_to)
     estimate_combo_name1.place(x=80,y=5)
+    estimate_combo_name1['values'] = estodata
+    estimate_combo_name1.bind("<<ComboboxSelected>>", est_to_combo)
+
     estimate_addresss=Label(estimate_labelframee1,text="Address").place(x=10,y=30)
     estimate_addresstext2=Text(estimate_labelframee1,width=23)
     estimate_addresstext2.place(x=80,y=30,height=70)
-    estimate_shipp=Label(estimate_labelframee1,text="Ship to").place(x=342,y=5)
+    estimate_shipp=Label(estimate_labelframee1,text="Ship to")
+    estimate_shipp.place(x=342,y=5)
     estimate_shipto3=Entry(estimate_labelframee1,width=30)
     estimate_shipto3.place(x=402,y=3)
     estimate_addresss1=Label(estimate_labelframee1,text="Address").place(x=340,y=30)
     estimate_ship_address4=Text(estimate_labelframee1,width=23)
     estimate_ship_address4.place(x=402,y=30,height=70)
 
-    estimate_bttn1=Button(estimate_labelframee1,width=3,height=2,compound = LEFT,text=">>").place(x=280, y=50)
+    estimate_bttn1=Button(estimate_labelframee1,width=3,height=2,compound = LEFT,text=">>",command=est_copy_cust_details)
+    estimate_bttn1.place(x=280, y=50)
     
     estimate_labelframee2 = LabelFrame(estimate_fir1Frame,text="")
     estimate_labelframee2.place(x=10,y=130,width=640,height=42)
@@ -831,6 +890,35 @@ def mainpage():
     estimate_order0=Label(estimate_labelframe,text="Estimate#").place(x=5,y=5)
     estimate_number_entry=Entry(estimate_labelframe,width=25)
     estimate_number_entry.place(x=100,y=5,)
+    estimate_number_entry.delete(0,'end')
+
+    def est_num_increment(inum):
+      result = ""
+      numberStr = ""
+      i = len(inum) - 1
+      while i > 0:
+        c = inum[i]
+        if not c.isdigit():
+          break
+        numberStr = c + numberStr
+        i -= 1
+      number = int(numberStr)
+      number += 1
+      result += inum[0 : i + 1]
+      result += "0" if number < 10 else ""
+      result += str(number)
+      return result
+    
+    fbcursor.execute("SELECT * FROM estimate ORDER BY estimateid DESC LIMIT 1")
+    est_number_data = fbcursor.fetchone()
+    
+    if not est_number_data == None:
+      a = est_number_data[1]
+      est_no = est_num_increment(a)
+    else:
+      est_no = 1
+    estimate_number_entry.insert(0,est_no)
+
     
     est_term_sql = "SELECT terms_of_payment FROM terms_of_payment"
     fbcursor.execute(est_term_sql,)
@@ -910,12 +998,19 @@ def mainpage():
     estimate_labelfram1 = LabelFrame(estimate_orderFrame,text="",font=("arial",15))
     estimate_labelfram1.place(x=1,y=1,width=800,height=170)
 
+    est_extracost_sql = "SELECT extra_cost_name	FROM extra_cost_name"
+    fbcursor.execute(est_extracost_sql,)
+    est_extracost_data = fbcursor.fetchall()
+    exdata = []
+    for i in est_extracost_data:
+      exdata.append(i[0])
+
     estimates_cost1=Label(estimate_labelfram1,text="Extra cost name").place(x=2,y=5)
-    estimates_costname1=ttk.Combobox(estimate_labelfram1, value="",width=20)
+    estimates_costname1=ttk.Combobox(estimate_labelfram1, value=exdata,width=20)
     estimates_costname1.place(x=115,y=5)
 
     estimates_rate=Label(estimate_labelfram1,text="Discount rate").place(x=370,y=5)
-    estimates_discount2=Entry(estimate_labelfram1,width=6)
+    estimates_discount2=Spinbox(estimate_labelfram1,width=6,from_=0,to=10,justify=RIGHT)
     estimates_discount2.place(x=460,y=5)
 
     estimates_cost2=Label(estimate_labelfram1,text="Extra cost").place(x=35,y=35)
@@ -925,9 +1020,16 @@ def mainpage():
     estimates_tax4=Entry(estimate_labelfram1,width=7)
     estimates_tax4.place(x=460,y=35)
     estimates_template=Label(estimate_labelfram1,text="Template").place(x=37,y=70)
+
+    est_temp_sql1 = "SELECT Defaultestimatetemplate FROM company "
+    fbcursor.execute(est_temp_sql1,)
+    est_temp_data1 = fbcursor.fetchall()
+    tempdata = []
+    for i in est_temp_data1:
+      tempdata.append(i[0])
     
 
-    estimates_etemplate=ttk.Combobox(estimate_labelfram1, value="",width=25)
+    estimates_etemplate=ttk.Combobox(estimate_labelfram1, value=tempdata,width=25)
     estimates_etemplate.place(x=115,y=70)
     estimates_sales=Label(estimate_labelfram1,text="Sales Person").place(x=25,y=100)
     estimates_sales6=Entry(estimate_labelfram1,width=18)
@@ -947,35 +1049,44 @@ def mainpage():
     estimates_nev2=Label(estimate_statusfrme, text="Never")
     estimates_nev2.place(x=100,y=90)
 
-    # est_header_sql = "SELECT headerandfooter FROM header_and_footer"
-    # fbcursor.execute(est_header_sql,)
-    # est_header_data = fbcursor.fetchall()
-    # hdata = []
-    # for i in est_header_data:
-    #   hdata.append(i[0])
+    est_header_sql = "SELECT headerandfooter FROM header_and_footer"
+    fbcursor.execute(est_header_sql,)
+    est_header_data = fbcursor.fetchall()
+    hfdata = []
+    for i in est_header_data:
+      hfdata.append(i[0])
 
     estimates_text01=Label(estimate_headerFrame,text="Title text").place(x=50,y=5)
-    estimates_etitletext=ttk.Combobox(estimate_headerFrame, value="",width=60)
+    estimates_etitletext=ttk.Combobox(estimate_headerFrame, value=hfdata,width=60)
     estimates_etitletext.place(x=125,y=5)
     estimates_etitletext.bind("<<ComboboxSelected>>")
 
     estimates_text02=Label(estimate_headerFrame,text="Page header text").place(x=2,y=45)
-    estimates_eheader_text=ttk.Combobox(estimate_headerFrame, value="",width=60)
+    estimates_eheader_text=ttk.Combobox(estimate_headerFrame, value=hfdata,width=60)
     estimates_eheader_text.place(x=125,y=45)
     estimates_eheader_text.bind("<<ComboboxSelected>>")
 
     estimates_text03=Label(estimate_headerFrame,text="Footer text").place(x=35,y=85)
-    estimates_efooter_text=ttk.Combobox(estimate_headerFrame, value="",width=60)
+    estimates_efooter_text=ttk.Combobox(estimate_headerFrame, value=hfdata,width=60)
     estimates_efooter_text.place(x=125,y=85)
     estimates_efooter_text.bind("<<ComboboxSelected>>")
 
     estimates_texttt=Label(estimate_noteFrame,text="Private notes(not shown on invoice/order/estemates)").place(x=10,y=10)
-    estimates_pvt_notes=Text(estimate_noteFrame,width=100,height=7)
+    estimates_pvt_notes=Text(estimate_noteFrame,width=85,height=7)
     estimates_pvt_notes.place(x=10,y=32)
 
-    estimates_e51=Text(estimate_termsFrame,width=100,height=9).place(x=10,y=10)
+    # est_term_sql = "SELECT Predefinedtextforestimates FROM company"
+    # fbcursor.execute(est_term_sql,)
+    # est_term_data = fbcursor.fetchall()
+    # trdata = []
+    # for i in est_term_data:
+    #   trdata.append(i[0])
+ 
+    estimates_eterm_text=scrolledtext.ScrolledText(estimate_termsFrame, undo=True,width=85,height=7)
+    estimates_eterm_text.place(x=10,y=10)
 
-    estimates_e61=Text(estimate_commentFrame,width=100,height=9).place(x=10,y=10)
+    estimates_ecomments=Text(estimate_commentFrame,width=85,height=7)
+    estimates_ecomments.place(x=10,y=10)
 
     estimates_btn1=Button(estimate_documentFrame,height=2,width=3,text="+").place(x=5,y=10)
     estimates_btn2=Button(estimate_documentFrame,height=2,width=3,text="-").place(x=5,y=50)
@@ -1616,7 +1727,8 @@ def mainpage():
     edit_estimates_e1=ttk.Combobox(edit_estimate_labelfram1, value="",width=20).place(x=115,y=5)
 
     edit_estimates_rate=Label(edit_estimate_labelfram1,text="Discount rate").place(x=370,y=5)
-    edit_estimates_e2=Entry(edit_estimate_labelfram1,width=6).place(x=460,y=5)
+    edit_estimates_e2=Spinbox(edit_estimate_labelfram1,width=6,from_=0,to=10,justify=RIGHT)
+    edit_estimates_e2.place(x=460,y=5)
 
     edit_estimates_cost2=Label(edit_estimate_labelfram1,text="Extra cost").place(x=35,y=35)
     edit_estimates_e3=Entry(edit_estimate_labelfram1,width=10).place(x=115,y=35)
