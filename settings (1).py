@@ -290,81 +290,146 @@ def mainpage():
         estimate_createFrame.pack(side="top", fill="both")
         estimate_labelframe1 = LabelFrame(estimate_createFrame,text="Customer",bg="#f5f3f2",font=("arial",15))
         estimate_labelframe1.place(x=10,y=5,width=910,height=600)
+
+        fbcursor.execute("SELECT * FROM Customer ORDER BY customerid DESC LIMIT 1")
+        est_qury = fbcursor.fetchone()
+
         estimate_text1=Label(estimate_labelframe1, text="Customer ID:",bg="#f5f3f2",fg="blue").place(x=5 ,y=10)
-        estimate_e1=Entry(estimate_labelframe1,width=25).place(x=150,y=10)
+        estimate_eid=Entry(estimate_labelframe1,width=25)
+        estimate_eid.place(x=150,y=10)
+        if not est_qury== None:
+          id00=est_qury[0]+1
+        else:
+          id00=1
+        estimate_eid.insert(0, id00)
+
         estimate_text2=Label(estimate_labelframe1, text="Category:",bg="#f5f3f2").place(x=390 ,y=10)
-        estimate_e2=ttk.Combobox(estimate_labelframe1,width=25,value="Default").place(x=460 ,y=10)
+        estimate_e2=ttk.Combobox(estimate_labelframe1,width=25,value="Default")
+        estimate_e2.place(x=460 ,y=10)
         estimate_text3=Label(estimate_labelframe1, text="Status:",bg="#f5f3f2").place(x=710 ,y=10)
-        estimate_checkbtn1=Checkbutton(estimate_labelframe1,text="Active",variable=estimate_checkvar1,onvalue=1,offvalue=0,bg="#f5f3f2").place(x=760 ,y=10)
+        estimate_checkbtn1=Checkbutton(estimate_labelframe1,text="Active",variable=estimate_checkvar1,onvalue=1,offvalue=0,bg="#f5f3f2")
+        estimate_checkbtn1.place(x=760 ,y=10)
         
         estimate_labelframe2 = LabelFrame(estimate_labelframe1,text="Invoice to (appears on invoices)",bg="#f5f3f2")
         estimate_labelframe2.place(x=5,y=40,width=420,height=150)
         estimate_name = Label(estimate_labelframe2, text="Ship to name:",bg="#f5f3f2",fg="blue").place(x=5,y=5)
-        estimate_e1 = Entry(estimate_labelframe2,width=28).place(x=130,y=5)
-        estimate_addr = Label(estimate_labelframe2, text="Address:",bg="#f5f3f2",fg="blue").place(x=5,y=40)
-        estimate_e2 = Entry(estimate_labelframe2,width=28).place(x=130,y=40,height=80)
+        estimate_eshipto = Entry(estimate_labelframe2,width=28)
+        estimate_eshipto.place(x=130,y=5)
+
+        estimate_addr = Label(estimate_labelframe2, text="Address:",bg="#f5f3f2",fg="blue")
+        estimate_addr.place(x=5,y=40)
+
+        estimate_eshipaddr = Entry(estimate_labelframe2,width=28)
+        estimate_eshipaddr.place(x=130,y=40,height=80)
+
+        def est_btn5cpy():
+          tosp=estimate_eshipto.get()
+          saddres=estimate_eshipaddr.get()
+          estimate_businessname1.delete(0, 'end')
+          estimate_businessname1.insert(0, tosp)
+          estimate_businessaddress1.delete(0,'end')
+          estimate_businessaddress1.insert(0, saddres)
+      
         
-        estimate_btn1=Button(estimate_labelframe1,width=3,height=2,compound = LEFT,text=">>").place(x=440, y=90)
+        estimate_btn1=Button(estimate_labelframe1,width=3,height=2,compound = LEFT,text=">>", command=est_btn5cpy)
+        estimate_btn1.place(x=440, y=90)
 
         estimate_labelframe3 = LabelFrame(estimate_labelframe1,text="Ship to (appears on invoices)",bg="#f5f3f2")
         estimate_labelframe3.place(x=480,y=40,width=420,height=150)
         estimate_name1 = Label(estimate_labelframe3, text="Business name:",bg="#f5f3f2").place(x=5,y=5)
-        estimate_businessname1 = Entry(estimate_labelframe3,width=28).place(x=130,y=5)
+        estimate_businessname1 = Entry(estimate_labelframe3,width=28)
+        estimate_businessname1.place(x=130,y=5)
         estimate_addr01 = Label(estimate_labelframe3, text="Address:",bg="#f5f3f2").place(x=5,y=40)
-        estimate_businessaddress1 = Entry(estimate_labelframe3,width=28).place(x=130,y=40,height=80)
+        estimate_businessaddress1 = Entry(estimate_labelframe3,width=28)
+        estimate_businessaddress1.place(x=130,y=40,height=80)
         
         estimate_labelframe4 = LabelFrame(estimate_labelframe1,text="Contact",bg="#f5f3f2")
         estimate_labelframe4.place(x=5,y=195,width=420,height=150)
         estimate_name11 = Label(estimate_labelframe4, text="Contact person:",bg="#f5f3f2").place(x=5,y=5)
-        estimate_e11 = Entry(estimate_labelframe4,width=28).place(x=130,y=5)
+        estimate_ecp = Entry(estimate_labelframe4,width=28)
+        estimate_ecp.place(x=130,y=5)
         estimate_email1 = Label(estimate_labelframe4, text="E-mail address:",bg="#f5f3f2",fg="blue").place(x=5,y=35)
-        estimate_e21 = Entry(estimate_labelframe4,width=28).place(x=130,y=35)
+        estimate_eemail = Entry(estimate_labelframe4,width=28)
+        estimate_eemail.place(x=130,y=35)
         estimate_tel1 = Label(estimate_labelframe4, text="Tel.number:",bg="#f5f3f2").place(x=5,y=65)
-        estimate_e31 = Entry(estimate_labelframe4,width=11).place(x=130,y=65)
+        estimate_etel = Entry(estimate_labelframe4,width=11)
+        estimate_etel.place(x=130,y=65)
         estimate_fax1 = Label(estimate_labelframe4, text="Fax:",bg="#f5f3f2").place(x=240,y=65)
-        estimate_e41 = Entry(estimate_labelframe4,width=11).place(x=280,y=65)
+        estimate_efax = Entry(estimate_labelframe4,width=11)
+        estimate_efax.place(x=280,y=65)
         estimate_sms1 = Label(estimate_labelframe4, text="Mobile number for SMS notifications:",bg="#f5f3f2").place(x=5,y=95)
-        estimate_e51 = Entry(estimate_labelframe4,width=15).place(x=248,y=95)      
+        estimate_esms = Entry(estimate_labelframe4,width=15)
+        estimate_esms.place(x=248,y=95)
 
-        estimate_btn11=Button(estimate_labelframe1,width=3,height=2,compound = LEFT,text=">>").place(x=440, y=250)
+        def est_btncpy1():
+          ecprsn1=estimate_ecp.get()
+          ecemail1=estimate_eemail.get()
+          eno=estimate_etel.get()
+          efx=estimate_efax.get()
+          estimate_ecp2.insert(0, ecprsn1)
+          estimate_eemail2.insert(0, ecemail1)
+          estimate_etel2.insert(0, eno)
+          estimate_efax2.insert(0, efx)      
+
+        estimate_btn11=Button(estimate_labelframe1,width=3,height=2,compound = LEFT,text=">>", command=est_btncpy1)
+        estimate_btn11.place(x=440, y=250)
 
         
         estimate_labelframe5 = LabelFrame(estimate_labelframe1,text="Ship to contact",bg="#f5f3f2")
         estimate_labelframe5.place(x=480,y=195,width=420,height=125)
         estimate_name2 = Label(estimate_labelframe5, text="Contact person:",bg="#f5f3f2").place(x=5,y=5)
-        estimate_e21 = Entry(estimate_labelframe5,width=28).place(x=130,y=5)
+        estimate_ecp2 = Entry(estimate_labelframe5,width=28)
+        estimate_ecp2.place(x=130,y=5)
+
         estimate_email2 = Label(estimate_labelframe5, text="E-mail address:",bg="#f5f3f2").place(x=5,y=35)
-        estimate_e22 = Entry(estimate_labelframe5,width=28).place(x=130,y=35)
+        estimate_eemail2 = Entry(estimate_labelframe5,width=28)
+        estimate_eemail2.place(x=130,y=35)
+
         estimate_tel2 = Label(estimate_labelframe5, text="Tel.number:",bg="#f5f3f2").place(x=5,y=65)
-        estimate_e32 = Entry(estimate_labelframe5,width=11).place(x=130,y=65)
+        estimate_etel2 = Entry(estimate_labelframe5,width=11)
+        estimate_etel2.place(x=130,y=65)
+
         estimate_fax2 = Label(estimate_labelframe5, text="Fax:",bg="#f5f3f2").place(x=240,y=65)
-        estimate_e42 = Entry(estimate_labelframe5,width=11).place(x=280,y=65)
+        estimate_efax2 = Entry(estimate_labelframe5,width=11)
+        estimate_efax2.place(x=280,y=65)
 
         estimate_labelframe6 = LabelFrame(estimate_labelframe1,text="Contact",bg="#f5f3f2")
         estimate_labelframe6.place(x=5,y=350,width=420,height=100)
-        estimate_checkbtn2=Checkbutton(estimate_labelframe6,text="Tax Exempt",variable=estimate_checkvar2,onvalue=1,offvalue=0,bg="#f5f3f2").place(x=5 ,y=5)
+        estimate_checkbtn2=Checkbutton(estimate_labelframe6,text="Tax Exempt",variable=estimate_checkvar2,onvalue=1,offvalue=0,bg="#f5f3f2")
+        estimate_checkbtn2.place(x=5 ,y=5)
+
         estimate_tax3 = Label(estimate_labelframe6, text="Specific Tax1 %:",bg="#f5f3f2").place(x=180,y=5)
-        estimate_e31 = Entry(estimate_labelframe6,width=10).place(x=290,y=5)
+        estimate_estax = Entry(estimate_labelframe6,width=10)
+        estimate_estax.place(x=290,y=5)
+
         estimate_discount = Label(estimate_labelframe6, text="Discount%:",bg="#f5f3f2").place(x=5,y=35)
-        estimate_e32 = Entry(estimate_labelframe6,width=10).place(x=100,y=35)
+        estimate_edis = Entry(estimate_labelframe6,width=10)
+        estimate_edis.place(x=100,y=35)
 
         estimate_labelframe7 = LabelFrame(estimate_labelframe1,text="Contact",bg="#f5f3f2")
         estimate_labelframe7.place(x=480,y=330,width=420,height=100)
         estimate_country4 = Label(estimate_labelframe7, text="country:",bg="#f5f3f2").place(x=5,y=5)
-        estimate_e41 = Entry(estimate_labelframe7,width=28).place(x=130,y=5)
+        estimate_ecou2 = Entry(estimate_labelframe7,width=28)
+        estimate_ecou2.place(x=130,y=5)
+
         estimate_city4 = Label(estimate_labelframe7, text="City:",bg="#f5f3f2").place(x=5,y=35)
-        estimate_e24 = Entry(estimate_labelframe7,width=28).place(x=130,y=35)
+        estimate_ecity2 = Entry(estimate_labelframe7,width=28)
+        estimate_ecity2.place(x=130,y=35)
 
         estimate_labelframe8 = LabelFrame(estimate_labelframe1,text="Customer Type",bg="#f5f3f2")
         estimate_labelframe8.place(x=5,y=460,width=420,height=100)
-        estimate_R1=Radiobutton(estimate_labelframe8,text=" Client ",variable=estimate_radio,value=1,bg="#f5f3f2").place(x=5,y=15)
-        estimate_R2=Radiobutton(estimate_labelframe8,text=" Vendor ",variable=estimate_radio,value=2,bg="#f5f3f2").place(x=150,y=15)
-        estimate_R3=Radiobutton(estimate_labelframe8,text=" Both(client/vendor)",variable=estimate_radio,value=3,bg="#f5f3f2").place(x=250,y=15)
+        estimate_R1=Radiobutton(estimate_labelframe8,text=" Client ",variable=estimate_radio,value=1,bg="#f5f3f2")
+        estimate_R1.place(x=5,y=15)
+        estimate_R2=Radiobutton(estimate_labelframe8,text=" Vendor ",variable=estimate_radio,value=2,bg="#f5f3f2")
+        estimate_R2.place(x=150,y=15)
+        estimate_R3=Radiobutton(estimate_labelframe8,text=" Both(client/vendor)",variable=estimate_radio,value=3,bg="#f5f3f2")
+        estimate_R3.place(x=250,y=15)
         
 
         estimate_labelframe9 = LabelFrame(estimate_labelframe1,text="Notes",bg="#f5f3f2")
         estimate_labelframe9.place(x=480,y=430,width=420,height=150)
-        estimate_e51 = Entry(estimate_labelframe9).place(x=10,y=10,height=100,width=390)
+        estimate_enotes = scrolledtext.ScrolledText(estimate_labelframe9, undo=True,width=47,height=7)
+        estimate_enotes.place(x=10,y=10)
 
         estimate_btn51=Button(estimate_ven,width=60,height=10,bg="#f5f3f2",compound = LEFT,image=tick ,text="OK").place(x=20, y=615)
         estimate_btn52=Button(estimate_ven,width=60,height=10,bg="#f5f3f2",compound = LEFT,image=cancel,text="Cancel").place(x=800, y=615)
@@ -1027,13 +1092,28 @@ def mainpage():
     tempdata = []
     for i in est_temp_data1:
       tempdata.append(i[0])
+
+    # sql = "select * from estimate"
+    # fbcursor.execute(sql)
+    # est_sdata = fbcursor.fetchone()
     
 
     estimates_etemplate=ttk.Combobox(estimate_labelfram1, value=tempdata,width=25)
     estimates_etemplate.place(x=115,y=70)
+    # if not est_sdata:
+    #   pass
+    # else:
+    #   estimates_etemplate.insert(0, est_sdata[13])
+
+
     estimates_sales=Label(estimate_labelfram1,text="Sales Person").place(x=25,y=100)
     estimates_sales6=Entry(estimate_labelfram1,width=18)
     estimates_sales6.place(x=115,y=100)
+    # if not est_sdata:
+    #   pass
+    # else:
+    #   estimates_sales6.insert(0, est_sdata[14])
+
     estimates_category=Label(estimate_labelfram1,text="Category").place(x=300,y=100)
     estimates_category7=Entry(estimate_labelfram1,width=22)
     estimates_category7.place(x=370,y=100)
@@ -1135,6 +1215,13 @@ def mainpage():
     edit_estimate_pop=Toplevel(estimate_midFrame)
     edit_estimate_pop.title("Estimate")
     edit_estimate_pop.geometry("950x690+150+0")
+    # edit_est_fetch = tree.item(tree.focus())["values"][1]
+    sql_edit = "SELECT * FROM estimate WHERE estimate_number"
+    # val_edit = (edit_est_fetch,)
+    fbcursor.execute(sql_edit)
+    global edit_est_data
+    edit_est_data = fbcursor.fetchone()
+    
 
     #select customer
     def edit_estimate_custom():
@@ -1256,6 +1343,41 @@ def mainpage():
       edit_estimate_cusventtree.heading("4",text="Contact Person")
       edit_estimate_cusventtree.place(x=5, y=45)
 
+      sql = "SELECT * FROM Customer"
+      fbcursor.execute(sql)
+      edit_customer_details = fbcursor.fetchall()
+
+      count=0
+      for i in edit_customer_details:
+        if True:
+          edit_estimate_cusventtree.insert(parent='',index='end',iid=i,text='',values=(i[0],i[4],i[10],i[8]))
+        else:
+          pass
+      count += 1
+
+      def edit_cust_tree_fetch_1():
+        edit_cust_tree_item_1 = edit_estimate_cusventtree.item(edit_estimate_cusventtree.focus())["values"][0]
+        sql = "SELECT * FROM Customer WHERE customerid=%s"
+        val = (edit_cust_tree_item_1,)
+        fbcursor.execute(sql,val)
+        edit_sel_cust_str_1 = fbcursor.fetchone()
+        edit_estimate_ee1.delete(0, END)
+        edit_estimate_ee1.insert(0,edit_sel_cust_str_1[4])
+        edit_estimate_ee2.delete('1.0',END)
+        edit_estimate_ee2.insert('1.0',edit_sel_cust_str_1[5])
+        edit_estimate_ee3.delete(0, END)
+        edit_estimate_ee3.insert(0, edit_sel_cust_str_1[6])
+        edit_estimate_ee4.delete('1.0',END)
+        edit_estimate_ee4.insert('1.0',edit_sel_cust_str_1[7])
+        edit_estimate_ee5.delete(0,END)
+        edit_estimate_ee5.insert(0,edit_sel_cust_str_1[9])
+        edit_estimate_ee6.delete(0,END)
+        edit_estimate_ee6.insert(0,edit_sel_cust_str_1[12])
+
+        edit_estimate_cuselection.destroy()
+
+
+
 
       edit_estimate_ctegorytree=ttk.Treeview(edit_estimate_cuselection, height=27)
       edit_estimate_ctegorytree["columns"]=["1"]
@@ -1265,11 +1387,21 @@ def mainpage():
       edit_estimate_ctegorytree.heading("1",text="View filter by category", anchor=CENTER)
       edit_estimate_ctegorytree.place(x=660, y=45)
 
+      edit_fil_cat_list_1 = Listbox(edit_estimate_cuselection,height=34,width=40,bg="white",activestyle="dotbox",fg="black",highlightbackground="white")
+      edit_fil_cat_list_1.insert(0,"               View all records")
+      edit_fil_cat_list_1.insert(1,"               View only Client/Vendor")
+      edit_fil_cat_list_1.insert(2,"               View only Client type")
+      edit_fil_cat_list_1.insert(3,"               View only Vendor type")
+      edit_fil_cat_list_1.insert(4,"               Default")
+      edit_fil_cat_list_1.place(x=660,y=63)
+      edit_fil_cat_list_1.bind('<<ListboxSelect>>')
+
       edit_estimate_scrollbar = Scrollbar(edit_estimate_cuselection)
       edit_estimate_scrollbar.place(x=640, y=45, height=560)
       edit_estimate_scrollbar.config( command=tree.yview )
 
-      edit_estimate_btn71=Button(edit_estimate_cuselection,compound = LEFT,image=tick ,text="ok", width=60).place(x=15, y=610)
+      edit_estimate_btn71=Button(edit_estimate_cuselection,compound = LEFT,image=tick ,text="ok", width=60, command=edit_cust_tree_fetch_1)
+      edit_estimate_btn71.place(x=15, y=610)
       edit_estimate_btn72=Button(edit_estimate_cuselection,compound = LEFT,image=tick,text="Edit selected customer", width=150,command=edit_estimate_create1).place(x=250, y=610)
       edit_estimate_btn73=Button(edit_estimate_cuselection,compound = LEFT,image=tick, text="Add new customer", width=150,command=edit_estimate_create1).place(x=435, y=610)
       edit_estimate_btn74=Button(edit_estimate_cuselection,compound = LEFT,image=cancel ,text="Cancel", width=60).place(x=740, y=610)   
@@ -1462,6 +1594,19 @@ def mainpage():
       edit_estimate_cusventtree1.heading("5",text="Stock")
       edit_estimate_cusventtree1.place(x=5, y=45)
 
+      sql = "SELECT * FROM Productservice"
+      fbcursor.execute(sql)
+      edit_product_detail = fbcursor.fetchall()
+
+      count = 0
+      for p in edit_product_detail:
+        if True:
+          edit_estimate_cusventtree1.insert(parent='',index='end',iid=p,text='',values=(p[0],p[4],p[7],p[12],p[13]))
+        else:
+          pass
+      count += 1
+
+
 
       edit_estimate_ctegorytree1=ttk.Treeview(edit_estimate_newselection, height=27)
       edit_estimate_ctegorytree1["columns"]=["1"]
@@ -1470,6 +1615,15 @@ def mainpage():
       edit_estimate_ctegorytree1.heading("#0",text="", anchor=W)
       edit_estimate_ctegorytree1.heading("1",text="View filter by category", anchor=CENTER)
       edit_estimate_ctegorytree1.place(x=660, y=45)
+
+      edit_cust_fil_cat_list_1 = Listbox(edit_estimate_newselection,height=34,width=40,bg="white",activestyle="dotbox",fg="black",highlightbackground="white")
+      edit_cust_fil_cat_list_1.insert(0,"               View all records")
+      edit_cust_fil_cat_list_1.insert(1,"               View only Client/Vendor")
+      edit_cust_fil_cat_list_1.insert(2,"               View only Client type")
+      edit_cust_fil_cat_list_1.insert(3,"               View only Vendor type")
+      edit_cust_fil_cat_list_1.insert(4,"               Default")
+      edit_cust_fil_cat_list_1.place(x=660,y=63)
+      edit_cust_fil_cat_list_1.bind('<<ListboxSelect>>')
 
       edit_estimate_scrollbar10 = Scrollbar(edit_estimate_newselection)
       edit_estimate_scrollbar10.place(x=640, y=45, height=560)
@@ -1634,39 +1788,116 @@ def mainpage():
 
     edit_estimate_labelframee1 = LabelFrame(edit_estimate_fir1Frame,text="Customers",font=("arial",15))
     edit_estimate_labelframee1.place(x=10,y=5,width=640,height=160)
-    edit_estimate_orderr1 = Label(edit_estimate_labelframee1, text="Estimate to").place(x=10,y=5)
-    edit_estimate_ee1 = ttk.Combobox(edit_estimate_labelframee1, value="Hello",width=28).place(x=80,y=5)
-    edit_estimate_addresss=Label(edit_estimate_labelframee1,text="Address").place(x=10,y=30)
-    edit_estimate_ee2=Text(edit_estimate_labelframee1,width=23).place(x=80,y=30,height=70)
-    edit_estimate_shipp=Label(edit_estimate_labelframee1,text="Ship to").place(x=342,y=5)
-    edit_estimate_ee3=Entry(edit_estimate_labelframee1,width=30).place(x=402,y=3)
-    edit_estimate_addresss1=Label(edit_estimate_labelframee1,text="Address").place(x=340,y=30)
-    edit_estimate_ee4=Text(edit_estimate_labelframee1,width=23).place(x=402,y=30,height=70)
 
-    edit_estimate_bttn1=Button(edit_estimate_labelframee1,width=3,height=2,compound = LEFT,text=">>").place(x=280, y=50)
+    def est_to_combo_1(event):
+      global inv_sel_combo_1
+      est_to_str_1 = edit_to.get()
+      sql = "SELECT * FROM Customer WHERE businessname=%s"
+      val = (est_to_str_1,)
+      fbcursor.execute(sql,val)
+      est_sel_combo_1 = fbcursor.fetchone()
+      edit_estimate_ee2.delete('1.0',END)
+      edit_estimate_ee2.insert('1.0',est_sel_combo_1[5])
+      edit_estimate_ee3.delete(0, END)
+      edit_estimate_ee3.insert(0, est_sel_combo_1[6])
+      edit_estimate_ee4.delete('1.0',END)
+      edit_estimate_ee4.insert('1.0',est_sel_combo_1[7])
+      edit_estimate_ee5.delete(0,END)
+      edit_estimate_ee5.insert(0,est_sel_combo_1[9])
+      edit_estimate_ee6.delete(0,END)
+      edit_estimate_ee6.insert(0,est_sel_combo_1[12])
+
+
+    def edit_copy_cust_details_1():
+      est_to_str_2 = edit_to.get()
+      if est_to_str_2 != "":
+        sql = "SELECT * FROM Customer WHERE businessname=%s"
+        val = (est_to_str_2,)
+        fbcursor.execute(sql,val)
+        est_sel_combo_2 = fbcursor.fetchone()
+        edit_estimate_ee3.delete(0, END)
+        edit_estimate_ee3.insert(0, est_sel_combo_2[6])
+        edit_estimate_ee4.delete('1.0',END)
+        edit_estimate_ee4.insert('1.0',est_sel_combo_2[7])
+      else:
+        edit_estimate_ee3.delete(0, END)
+        edit_estimate_ee3.insert(0, edit_est_data[24])
+        edit_estimate_ee4.delete('1.0',END)
+        edit_estimate_ee4.insert('1.0',edit_est_data[25])
+
+
+    sql = "select businessname from Customer"
+    fbcursor.execute(sql,)
+    edit_cdata = fbcursor.fetchall()
+
+    edit_estimate_orderr1 = Label(edit_estimate_labelframee1, text="Estimate to").place(x=10,y=5)
+    edit_to = StringVar()
+    edit_estimate_ee1 = ttk.Combobox(edit_estimate_labelframee1,width=28,textvariable=edit_to)
+    edit_estimate_ee1.place(x=80,y=5)
+    edit_estimate_ee1['values'] = edit_cdata
+    edit_estimate_ee1.bind("<<ComboboxSelected>>", est_to_combo_1)
+
+    edit_estimate_addresss=Label(edit_estimate_labelframee1,text="Address").place(x=10,y=30)
+    edit_estimate_ee2=Text(edit_estimate_labelframee1,width=23)
+    edit_estimate_ee2.place(x=80,y=30,height=70)
+
+    edit_estimate_shipp=Label(edit_estimate_labelframee1,text="Ship to").place(x=342,y=5)
+    edit_estimate_ee3=Entry(edit_estimate_labelframee1,width=30)
+    edit_estimate_ee3.place(x=402,y=3)
+
+    edit_estimate_addresss1=Label(edit_estimate_labelframee1,text="Address").place(x=340,y=30)
+    edit_estimate_ee4=Text(edit_estimate_labelframee1,width=23)
+    edit_estimate_ee4.place(x=402,y=30,height=70)
+
+    edit_estimate_bttn1=Button(edit_estimate_labelframee1,width=3,height=2,compound = LEFT,text=">>",command=edit_copy_cust_details_1)
+    edit_estimate_bttn1.place(x=280, y=50)
     
     edit_estimate_labelframee2 = LabelFrame(edit_estimate_fir1Frame,text="")
     edit_estimate_labelframee2.place(x=10,y=130,width=640,height=42)
     edit_estimate_emaill=Label(edit_estimate_labelframee2,text="Email").place(x=10,y=5)
-    edit_estimate_ee5=Entry(edit_estimate_labelframee2,width=30).place(x=80,y=5)
+    edit_estimate_ee5=Entry(edit_estimate_labelframee2,width=30)
+    edit_estimate_ee5.place(x=80,y=5)
+
     edit_estimate_smms=Label(edit_estimate_labelframee2,text="SMS Number").place(x=328,y=5)
-    edit_estimate_ee6=Entry(edit_estimate_labelframee2,width=30).place(x=402,y=5)
+    edit_estimate_ee6=Entry(edit_estimate_labelframee2,width=30)
+    edit_estimate_ee6.place(x=402,y=5)
+
+    # edit_estimate_ee1.delete(0,END)
+    # edit_estimate_ee1.insert(0,edit_est_data[20])
+    # edit_estimate_ee2.delete('1.0',END)
+    # edit_estimate_ee2.insert('1.0',edit_est_data[21])
+    # edit_estimate_ee3.delete(0, END)
+    # edit_estimate_ee3.insert(0, edit_est_data[22])
+    # edit_estimate_ee4.delete('1.0',END)
+    # edit_estimate_ee4.insert('1.0',edit_est_data[23])
+    # edit_estimate_ee5.delete(0,END)
+    # edit_estimate_ee5.insert(0,edit_est_data[24])
+    # edit_estimate_ee6.delete(0,END)
+    # edit_estimate_ee6.insert(0,edit_est_data[25])
       
     edit_estimate_labelframe = LabelFrame(edit_estimate_fir1Frame,text="Estimate",font=("arial",15))
     edit_estimate_labelframe.place(x=652,y=5,width=290,height=170)
     edit_estimate_order0=Label(edit_estimate_labelframe,text="Estimate#").place(x=5,y=5)
 
-    edit_estimate_ee01=Entry(edit_estimate_labelframe,width=25).place(x=100,y=5,)
+    edit_estimate_ee01=Entry(edit_estimate_labelframe,width=25)
+    edit_estimate_ee01.place(x=100,y=5,)
 
     edit_estimate_orderdate=Label(edit_estimate_labelframe,text="Estimate date").place(x=5,y=33)
-    edit_estimate_ee02=Entry(edit_estimate_labelframe,width=20).place(x=150,y=33)
+    edit_estimate_ee02=Entry(edit_estimate_labelframe,width=20)
+    edit_estimate_ee02.place(x=150,y=33)
+
     edit_estimate_checkvarStatus5=IntVar()
     edit_estimate_duedate=Checkbutton(edit_estimate_labelframe,variable = edit_estimate_checkvarStatus5,text="Due date",onvalue =0 ,offvalue = 1).place(x=5,y=62)
-    edit_estimate_ee03=Entry(edit_estimate_labelframe,width=20).place(x=150,y=62)
+    edit_estimate_ee03=Entry(edit_estimate_labelframe,width=20)
+    edit_estimate_ee03.place(x=150,y=62)
+
     edit_estimate_termss=Label(edit_estimate_labelframe,text="Terms").place(x=5,y=92)
-    edit_estimate_ee04=ttk.Combobox(edit_estimate_labelframe, value="",width=25).place(x=100,y=92)
+    edit_estimate_ee04=ttk.Combobox(edit_estimate_labelframe, value="",width=25)
+    edit_estimate_ee04.place(x=100,y=92)
+
     edit_estimate_reff=Label(edit_estimate_labelframe,text="Order ref#").place(x=5,y=118)
-    edit_estimate_ee11=Entry(edit_estimate_labelframe,width=27).place(x=100,y=118)
+    edit_estimate_ee11=Entry(edit_estimate_labelframe,width=27)
+    edit_estimate_ee11.place(x=100,y=118)
 
     edit_estimate_fir2Frame=Frame(edit_estimate_pop, height=150,width=100,bg="#f5f3f2")
     edit_estimate_fir2Frame.pack(side="top", fill=X)
