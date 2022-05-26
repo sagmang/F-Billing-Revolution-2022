@@ -272,6 +272,7 @@ def mainpage():
 
     #select customer
     def estimate_custom():
+      global estimate_cuselection
       estimate_cuselection=Toplevel()
       estimate_cuselection.title("Select Customer")
       estimate_cuselection.geometry("930x650+240+10")
@@ -433,14 +434,58 @@ def mainpage():
 
         estimate_btn51=Button(estimate_ven,width=60,height=10,bg="#f5f3f2",compound = LEFT,image=tick ,text="OK").place(x=20, y=615)
         estimate_btn52=Button(estimate_ven,width=60,height=10,bg="#f5f3f2",compound = LEFT,image=cancel,text="Cancel").place(x=800, y=615)
-          
+      
+
+      # filter customers
+
+      def estfilter_customer():
+        if estimate_e61.get() == '':
+          sql = "SELECT * FROM Customer"
+          fbcursor.execute(sql,)
+          est_customer_details = fbcursor.fetchall()
+          for record in estimate_cusventtree.get_children():
+            estimate_cusventtree.delete(record)
+
+          count = 0
+          for i in est_customer_details:
+            if True:
+              estimate_cusventtree.insert(parent='',index='end',iid=i,text='',values=(i[0],i[4],i[10],i[8]))
+            else:
+              pass
+          count += 1
+        else:
+          filter = estimate_e61.get()
+          for record in estimate_cusventtree.get_children():
+            estimate_cusventtree.delete(record)
+
+          sql = "SELECT * FROM Customer WHERE businessname=%s"
+          val = (filter, )
+          fbcursor.execute(sql, val)
+          est_customer_details = fbcursor.fetchall()
+
+      
+          count=0
+          for i in est_customer_details:
+            if True:
+              estimate_cusventtree.insert(parent='', index='end', iid=i, text='', values=(i[0],i[4],i[10],i[8]))  
+            else:
+              pass
+          count += 1
+        
                 
 
       estimate_enter=Label(estimate_cuselection, text="Enter filter text").place(x=5, y=10)
-      estimate_e61=Entry(estimate_cuselection, width=20).place(x=110, y=10)
-      estimate_text6=Label(estimate_cuselection, text="Filtered column").place(x=340, y=10)
-      estimate_e26=Entry(estimate_cuselection, width=20).place(x=450, y=10)
+      estimate_e61=Entry(estimate_cuselection, width=20)
+      estimate_e61.place(x=110, y=10)
+      # estimate_text6=Label(estimate_cuselection, text="Filtered column").place(x=340, y=10)
+      # estimate_e26=Entry(estimate_cuselection, width=20).place(x=450, y=10)
 
+      estimate_cust_filter_button=Button(estimate_cuselection, text='Click Here',command=estfilter_customer)
+      estimate_cust_filter_button.place(x=240, y=9,height=20,width=60)
+
+
+
+      global estimate_cusventtree
       estimate_cusventtree=ttk.Treeview(estimate_cuselection, height=27)
       estimate_cusventtree["columns"]=["1","2","3", "4"]
       estimate_cusventtree.column("#0", width=35)
@@ -467,6 +512,27 @@ def mainpage():
           pass
       count += 1
 
+      def estcust_tree_fetch():
+        estcust_tree_item = estimate_cusventtree.item(estimate_cusventtree.focus())["values"][0]
+        sql = "SELECT * FROM Customer WHERE customerid=%s"
+        val = (estcust_tree_item,)
+        fbcursor.execute(sql,val)
+        estsel_cust_str = fbcursor.fetchone()
+        estimate_combo_name1.delete(0, END)
+        estimate_combo_name1.insert(0,estsel_cust_str[4])
+        estimate_addresstext2.delete('1.0',END)
+        estimate_addresstext2.insert('1.0',estsel_cust_str[5])
+        estimate_shipto3.delete(0, END)
+        estimate_shipto3.insert(0, estsel_cust_str[6])
+        estimate_ship_address4.delete('1.0',END)
+        estimate_ship_address4.insert('1.0',estsel_cust_str[7])
+        estimate_email5.delete(0,END)
+        estimate_email5.insert(0,estsel_cust_str[9])
+        estimate_sms6.delete(0,END)
+        estimate_sms6.insert(0,estsel_cust_str[12])
+
+        estimate_cuselection.destroy()
+
 
 
       estimate_ctegorytree=ttk.Treeview(estimate_cuselection, height=27)
@@ -477,6 +543,44 @@ def mainpage():
       estimate_ctegorytree.heading("1",text="View filter by category", anchor=CENTER)
       estimate_ctegorytree.place(x=660, y=45)
 
+      def estlist_filter_customer(event):
+        estselected_cust_indices = est_cust_fil_cat_list.curselection()
+        selected_cust_filter = ",".join([est_cust_fil_cat_list.get(i) for i in estselected_cust_indices])
+
+        if selected_cust_filter == "               View all records" or selected_cust_filter == "               View only Client/Vendor" or selected_cust_filter == "               Default":
+          cust_all_sql = "SELECT * FROM Customer"
+          fbcursor.execute(cust_all_sql)
+          cust_all_data = fbcursor.fetchall()
+          for record in estimate_cusventtree.get_children():
+            estimate_cusventtree.delete(record)
+          count_all = 0
+          for i in cust_all_data:
+            estimate_cusventtree.insert(parent='',index='end',iid=i,text='',values=(i[0],i[4],i[10],i[8]))
+          count_all += 1
+        elif selected_cust_filter == "               View only Client type":
+          client_sql = "SELECT * FROM Customer WHERE customertype=%s"
+          client_val = ('Client',)
+          fbcursor.execute(client_sql,client_val)
+          client_data = fbcursor.fetchall()
+          for record in estimate_cusventtree.get_children():
+            estimate_cusventtree.delete(record)
+          count_c = 0
+          for i in client_data:
+            estimate_cusventtree.insert(parent='',index='end',iid=i,text='',values=(i[0],i[4],i[10],i[8]))
+          count_c += 1
+        else:
+          vendor_sql = "SELECT * FROM Customer WHERE customertype=%s"
+          vendor_val = ('Vendor',)
+          fbcursor.execute(vendor_sql,vendor_val)
+          vendor_data = fbcursor.fetchall()
+          for record in estimate_cusventtree.get_children():
+            estimate_cusventtree.delete(record)
+          count_v = 0
+          for i in vendor_data:
+            estimate_cusventtree.insert(parent='',index='end',iid=i,text='',values=(i[0],i[4],i[10],i[8]))
+          count_v += 1
+
+
       est_cust_fil_cat_list = Listbox(estimate_cuselection,height=34,width=40,bg="white",activestyle="dotbox",fg="black",highlightbackground="white")
       est_cust_fil_cat_list.insert(0,"               View all records")
       est_cust_fil_cat_list.insert(1,"               View only Client/Vendor")
@@ -484,14 +588,15 @@ def mainpage():
       est_cust_fil_cat_list.insert(3,"               View only Vendor type")
       est_cust_fil_cat_list.insert(4,"               Default")
       est_cust_fil_cat_list.place(x=660,y=63)
-      est_cust_fil_cat_list.bind('<<ListboxSelect>>')
+      est_cust_fil_cat_list.bind('<<ListboxSelect>>',estlist_filter_customer)
 
 
       estimate_scrollbar = Scrollbar(estimate_cuselection)
       estimate_scrollbar.place(x=640, y=45, height=560)
-      estimate_scrollbar.config( command=tree.yview )
+      estimate_scrollbar.config( command=estimate_cusventtree.yview )
 
-      estimate_btn71=Button(estimate_cuselection,compound = LEFT,image=tick ,text="ok", width=60).place(x=15, y=610)
+      estimate_btn71=Button(estimate_cuselection,compound = LEFT,image=tick ,text="ok", width=60, command=estcust_tree_fetch)
+      estimate_btn71.place(x=15, y=610)
       estimate_btn72=Button(estimate_cuselection,compound = LEFT,image=tick,text="Edit selected customer", width=150,command=estimate_create1).place(x=250, y=610)
       estimate_btn73=Button(estimate_cuselection,compound = LEFT,image=tick, text="Add new customer", width=150,command=estimate_create1).place(x=435, y=610)
       estimate_btn74=Button(estimate_cuselection,compound = LEFT,image=cancel ,text="Cancel", width=60).place(x=740, y=610)   
@@ -984,6 +1089,12 @@ def mainpage():
       est_no = 1
     estimate_number_entry.insert(0,est_no)
 
+    def estimate_due_check():
+      if estimate1_checkvarStatus5.get() == 0:
+        estimate_duedate_entry['state'] = DISABLED
+      else:
+        estimate_duedate_entry['state'] = NORMAL
+
     
     est_term_sql = "SELECT terms_of_payment FROM terms_of_payment"
     fbcursor.execute(est_term_sql,)
@@ -996,8 +1107,9 @@ def mainpage():
     estimate_orderdate=Label(estimate_labelframe,text="Estimate date").place(x=5,y=33)
     estimate_date_entry=DateEntry(estimate_labelframe,width=20)
     estimate_date_entry.place(x=150,y=33)
-    estimate_checkvarStatus5=IntVar()
-    estimate_duedate=Checkbutton(estimate_labelframe,variable = estimate_checkvarStatus5,text="Due date",onvalue =0 ,offvalue = 1).place(x=5,y=62)
+    estimate1_checkvarStatus5=IntVar()
+    estimate_duedate=Checkbutton(estimate_labelframe,variable = estimate1_checkvarStatus5,text="Due date",onvalue =0 ,offvalue = 1, command=estimate_due_check)
+    estimate_duedate.place(x=5,y=62)
     estimate_duedate_entry=DateEntry(estimate_labelframe,width=20)
     estimate_duedate_entry.place(x=150,y=62)
     estimate_termss=Label(estimate_labelframe,text="Terms").place(x=5,y=92)
@@ -1155,12 +1267,12 @@ def mainpage():
     estimates_pvt_notes=Text(estimate_noteFrame,width=85,height=7)
     estimates_pvt_notes.place(x=10,y=32)
 
-    # est_term_sql = "SELECT Predefinedtextforestimates FROM company"
-    # fbcursor.execute(est_term_sql,)
-    # est_term_data = fbcursor.fetchall()
-    # trdata = []
-    # for i in est_term_data:
-    #   trdata.append(i[0])
+    est_term_sql = "SELECT Predefinedtextforestimates FROM company"
+    fbcursor.execute(est_term_sql,)
+    est_term_data = fbcursor.fetchall()
+    trdata = []
+    for i in est_term_data:
+      trdata.append(i[0])
  
     estimates_eterm_text=scrolledtext.ScrolledText(estimate_termsFrame, undo=True,width=85,height=7)
     estimates_eterm_text.place(x=10,y=10)
@@ -1215,10 +1327,12 @@ def mainpage():
     edit_estimate_pop=Toplevel(estimate_midFrame)
     edit_estimate_pop.title("Estimate")
     edit_estimate_pop.geometry("950x690+150+0")
-    # edit_est_fetch = tree.item(tree.focus())["values"][1]
-    sql_edit = "SELECT * FROM estimate WHERE estimate_number"
-    # val_edit = (edit_est_fetch,)
-    fbcursor.execute(sql_edit)
+    #edit_est_fetch = tree.item(tree.focus())["values"][0]
+    edit_est_fetch = est_tree.item(est_tree.focus())["values"][1]
+    #print(itemid)
+    sql_edit = "SELECT * FROM estimate WHERE estimate_number=%s"
+    val_edit = (edit_est_fetch,)
+    fbcursor.execute(sql_edit, val_edit)
     global edit_est_data
     edit_est_data = fbcursor.fetchone()
     
@@ -1323,11 +1437,47 @@ def mainpage():
         edit_estimate_btn52=Button(edit_estimate_ven,width=60,height=10,bg="#f5f3f2",compound = LEFT,image=cancel,text="Cancel").place(x=800, y=615)
           
                 
+      # filter customers
+      
+      def edit_filter_customer_1():
+        if edit_estimate_e61.get() == '':
+          sql = "SELECT * FROM Customer"
+          fbcursor.execute(sql)
+          customer_details = fbcursor.fetchall()
+          for record in edit_estimate_cusventtree.get_children():
+            edit_estimate_cusventtree.delete(record)
 
+          count=0
+          for i in customer_details:
+            if True:
+              edit_estimate_cusventtree.insert(parent='',index='end',iid=i,text='',values=(i[0],i[4],i[10],i[8]))
+            else:
+              pass
+          count += 1
+        else:
+          filter = edit_estimate_e61.get()
+          for record in edit_estimate_cusventtree.get_children():
+            edit_estimate_cusventtree.delete(record)
+
+          sql = "SELECT * FROM Customer WHERE businessname=%s"
+          val = (filter, )
+          fbcursor.execute(sql,val)
+          customer_details = fbcursor.fetchall() 
+
+          count = 0
+          for i in customer_details:
+            if True:
+              edit_estimate_cusventtree.insert(parent='',index='end',iid=i,text='',values=(i[0],i[4],i[10],i[8]))
+            else:
+              pass
+          count += 1
       edit_estimate_enter=Label(edit_estimate_cuselection, text="Enter filter text").place(x=5, y=10)
-      edit_estimate_e61=Entry(edit_estimate_cuselection, width=20).place(x=110, y=10)
-      edit_estimate_text6=Label(edit_estimate_cuselection, text="Filtered column").place(x=340, y=10)
-      edit_estimate_e26=Entry(edit_estimate_cuselection, width=20).place(x=450, y=10)
+      edit_estimate_e61=Entry(edit_estimate_cuselection, width=20)
+      edit_estimate_e61.place(x=110, y=10)
+      # edit_estimate_text6=Label(edit_estimate_cuselection, text="Filtered column").place(x=340, y=10)
+      # edit_estimate_e26=Entry(edit_estimate_cuselection, width=20).place(x=450, y=10)
+      edit_cust_filter_button_1=Button(edit_estimate_cuselection, text="Click Here",command=edit_filter_customer_1)
+      edit_cust_filter_button_1.place(x=240, y=9,height=20,width=60)
 
       edit_estimate_cusventtree=ttk.Treeview(edit_estimate_cuselection, height=27)
       edit_estimate_cusventtree["columns"]=["1","2","3", "4"]
@@ -1387,6 +1537,43 @@ def mainpage():
       edit_estimate_ctegorytree.heading("1",text="View filter by category", anchor=CENTER)
       edit_estimate_ctegorytree.place(x=660, y=45)
 
+      def edit_list_filter_customer_1(event):
+        edit_selected_cust_indices_1 = edit_fil_cat_list_1.curselection()
+        selected_cust_filter_1 = ",".join([edit_fil_cat_list_1.get(i) for i in edit_selected_cust_indices_1])
+
+        if selected_cust_filter_1 == "               View all records" or selected_cust_filter_1 == "               View only Client/Vendor" or selected_cust_filter_1 == "               Default":
+          cust_all_sql_1 = "SELECT * FROM Customer"
+          fbcursor.execute(cust_all_sql_1)
+          cust_all_data_1 = fbcursor.fetchall()
+          for record in edit_estimate_cusventtree.get_children():
+            edit_estimate_cusventtree.delete(record)
+          count_all = 0
+          for i in cust_all_data_1:
+            edit_estimate_cusventtree.insert(parent='',index='end',iid=i,text='',values=(i[0],i[4],i[10],i[8]))
+          count_all += 1
+        elif selected_cust_filter_1 == "               View only Client type":
+          client_sql_1 = "SELECT * FROM Customer WHERE customertype=%s"
+          client_val_1 = ('Client',)
+          fbcursor.execute(client_sql_1,client_val_1)
+          client_data_1 = fbcursor.fetchall()
+          for record in edit_estimate_cusventtree.get_children():
+            edit_estimate_cusventtree.delete(record)
+          count_c = 0
+          for i in client_data_1:
+            edit_estimate_cusventtree.insert(parent='',index='end',iid=i,text='',values=(i[0],i[4],i[10],i[8]))
+          count_c += 1
+        else:
+          vendor_sql_1 = "SELECT * FROM Customer WHERE customertype=%s"
+          vendor_val_1 = ('Vendor',)
+          fbcursor.execute(vendor_sql_1,vendor_val_1)
+          vendor_data_1 = fbcursor.fetchall()
+          for record in edit_estimate_cusventtree.get_children():
+            edit_estimate_cusventtree.delete(record)
+          count_v = 0
+          for i in vendor_data_1:
+            edit_estimate_cusventtree.insert(parent='',index='end',iid=i,text='',values=(i[0],i[4],i[10],i[8]))
+          count_v += 1
+
       edit_fil_cat_list_1 = Listbox(edit_estimate_cuselection,height=34,width=40,bg="white",activestyle="dotbox",fg="black",highlightbackground="white")
       edit_fil_cat_list_1.insert(0,"               View all records")
       edit_fil_cat_list_1.insert(1,"               View only Client/Vendor")
@@ -1394,7 +1581,7 @@ def mainpage():
       edit_fil_cat_list_1.insert(3,"               View only Vendor type")
       edit_fil_cat_list_1.insert(4,"               Default")
       edit_fil_cat_list_1.place(x=660,y=63)
-      edit_fil_cat_list_1.bind('<<ListboxSelect>>')
+      edit_fil_cat_list_1.bind('<<ListboxSelect>>',edit_list_filter_customer_1)
 
       edit_estimate_scrollbar = Scrollbar(edit_estimate_cuselection)
       edit_estimate_scrollbar.place(x=640, y=45, height=560)
@@ -1881,23 +2068,58 @@ def mainpage():
 
     edit_estimate_ee01=Entry(edit_estimate_labelframe,width=25)
     edit_estimate_ee01.place(x=100,y=5,)
+    edit_estimate_ee01.delete(0,'end')
+    edit_estimate_ee01.insert(0, edit_est_data[1])
+
+    def est_due_check_1():
+      if edit_estimate_checkvarStatus5.get() == 0:
+        edit_estimate_ee03['state'] = DISABLED
+      else:
+        edit_estimate_ee03['state'] = NORMAL
+
 
     edit_estimate_orderdate=Label(edit_estimate_labelframe,text="Estimate date").place(x=5,y=33)
-    edit_estimate_ee02=Entry(edit_estimate_labelframe,width=20)
+    edit_estimate_ee02=DateEntry(edit_estimate_labelframe,width=20)
     edit_estimate_ee02.place(x=150,y=33)
 
     edit_estimate_checkvarStatus5=IntVar()
-    edit_estimate_duedate=Checkbutton(edit_estimate_labelframe,variable = edit_estimate_checkvarStatus5,text="Due date",onvalue =0 ,offvalue = 1).place(x=5,y=62)
-    edit_estimate_ee03=Entry(edit_estimate_labelframe,width=20)
+    edit_estimate_duedate=Checkbutton(edit_estimate_labelframe,variable = edit_estimate_checkvarStatus5,text="Due date",onvalue =0 ,offvalue = 1,command=est_due_check_1)
+    edit_estimate_duedate.place(x=5,y=62)
+    edit_estimate_ee03=DateEntry(edit_estimate_labelframe,width=20)
     edit_estimate_ee03.place(x=150,y=62)
 
+    est_term_sql_1 = "SELECT terms_of_payment FROM terms_of_payment"
+    fbcursor.execute(est_term_sql_1,)
+    est_term_data_1 = fbcursor.fetchall()
+    esttdata_1 = []
+    for i in est_term_data_1:
+      esttdata_1.append(i[0])
+
     edit_estimate_termss=Label(edit_estimate_labelframe,text="Terms").place(x=5,y=92)
-    edit_estimate_ee04=ttk.Combobox(edit_estimate_labelframe, value="",width=25)
+    estterm = StringVar()
+    edit_estimate_ee04=ttk.Combobox(edit_estimate_labelframe, textvariable=estterm,width=25)
     edit_estimate_ee04.place(x=100,y=92)
+    edit_estimate_ee04['values'] = esttdata_1
+    edit_estimate_ee04.bind("<<ComboboxSelected>>")
 
     edit_estimate_reff=Label(edit_estimate_labelframe,text="Order ref#").place(x=5,y=118)
     edit_estimate_ee11=Entry(edit_estimate_labelframe,width=27)
     edit_estimate_ee11.place(x=100,y=118)
+
+    edit_estimate_ee02.delete(0, END)
+    edit_estimate_ee02.insert(0, edit_est_data[2])
+    if edit_estimate_checkvarStatus5 is not None:
+      edit_estimate_checkvarStatus5.set(1)
+    else:
+      edit_estimate_checkvarStatus5.set(1)
+    edit_estimate_ee03['state'] = NORMAL
+    edit_estimate_ee03.delete(0, END)
+    edit_estimate_ee03.insert(0, edit_est_data[3])
+    edit_estimate_ee04.delete(0, END)
+    edit_estimate_ee04.insert(0, edit_est_data[30])
+    # edit_estimate_ee11.delete(0, END)
+    # edit_estimate_ee11.insert(0, edit_est_data[5])
+    
 
     edit_estimate_fir2Frame=Frame(edit_estimate_pop, height=150,width=100,bg="#f5f3f2")
     edit_estimate_fir2Frame.pack(side="top", fill=X)
@@ -2154,8 +2376,14 @@ def mainpage():
   #email
         
   def estimate_emailord():
+  # try:
+  #   emitid = pordtree.item(pordtree.focus())["values"][1]
+  #   sql = "select * from porder where porderid = %s"
+  #   val = (emitid, )
+  #   fbcursor.execute(sql, val)
+  #   emailnow = fbcursor.fetchone()
     estimate_mailDetail=Toplevel()
-    estimate_mailDetail.title("Orders E-Mail")
+    estimate_mailDetail.title("E-Mail")
     estimate_ep2 = PhotoImage(file = "images/fbicon.png")
     estimate_mailDetail.iconphoto(False, estimate_ep2)
     estimate_mailDetail.geometry("1030x550+150+120")
@@ -2535,29 +2763,29 @@ def mainpage():
         expand=YES,
         )
 
-      
-      tree = ttk.Treeview(self.left_frame, columns = (1,2,3,4,5,6,7,8,9,10), height = 15, show = "headings")
-      tree.pack(side = 'top')
-      tree.heading(1)
-      tree.heading(2, text="Estimate#")
-      tree.heading(3, text="Estimate date")
-      tree.heading(4, text="Due date")
-      tree.heading(5, text="Customer Name")
-      tree.heading(6, text="Status")
-      tree.heading(7, text="Emailed on")
-      tree.heading(8, text="Printed on")
-      tree.heading(9, text="SMS on")
-      tree.heading(10, text="Estimate Total")   
-      tree.column(1, width = 30)
-      tree.column(2, width = 150)
-      tree.column(3, width = 140)
-      tree.column(4, width = 130)
-      tree.column(5, width = 200)
-      tree.column(6, width = 130)
-      tree.column(7, width = 150)
-      tree.column(8, width = 130)
-      tree.column(9, width = 130)
-      tree.column(10, width = 160)
+      global est_tree
+      est_tree = ttk.Treeview(self.left_frame, columns = (1,2,3,4,5,6,7,8,9,10), height = 15, show = "headings")
+      est_tree.pack(side = 'top')
+      est_tree.heading(1)
+      est_tree.heading(2, text="Estimate#")
+      est_tree.heading(3, text="Estimate date")
+      est_tree.heading(4, text="Due date")
+      est_tree.heading(5, text="Customer Name")
+      est_tree.heading(6, text="Status")
+      est_tree.heading(7, text="Emailed on")
+      est_tree.heading(8, text="Printed on")
+      est_tree.heading(9, text="SMS on")
+      est_tree.heading(10, text="Estimate Total")   
+      est_tree.column(1, width = 30)
+      est_tree.column(2, width = 150)
+      est_tree.column(3, width = 140)
+      est_tree.column(4, width = 130)
+      est_tree.column(5, width = 200)
+      est_tree.column(6, width = 130)
+      est_tree.column(7, width = 150)
+      est_tree.column(8, width = 130)
+      est_tree.column(9, width = 130)
+      est_tree.column(10, width = 160)
 
       sql = "SELECT * FROM estimate"
       fbcursor.execute(sql)
@@ -2566,14 +2794,14 @@ def mainpage():
       count = 0
       for i in estimate_records:
         if True:
-          tree.insert(parent='',index='end',iid=i,text='',values=('',i[1],i[2],i[3],'',i[4],i[5],i[6],i[7],i[8]))
+          est_tree.insert(parent='',index='end',iid=i,text='',values=('',i[1],i[2],i[3],'',i[4],i[5],i[6],i[7],i[8]))
         else:
           pass
       count += 1
 
       scrollbar = Scrollbar(self.left_frame)
       scrollbar.place(x=990+330+15, y=0, height=300+20)
-      scrollbar.config( command=tree.yview )
+      scrollbar.config( command=est_tree.yview )
 
       tabControl = ttk.Notebook(self.left_frame,width=1)
       tab1 = ttk.Frame(tabControl)
@@ -2586,41 +2814,41 @@ def mainpage():
       tabControl.add(tab4,image=photo11,compound = LEFT, text ='Documents')
       tabControl.pack(expand = 1, fill ="both")
       
-      tree = ttk.Treeview(tab1, columns = (1,2,3,4,5,6,7,8,), height = 15, show = "headings")
-      tree.pack(side = 'top')
-      tree.heading(1)
-      tree.heading(2, text="Product/Service ID",)
-      tree.heading(3, text="Name")
-      tree.heading(4, text="Description")
-      tree.heading(5, text="Price")
-      tree.heading(6, text="QTY")
-      tree.heading(7, text="Tax1")
-      tree.heading(8, text="Line Total")   
-      tree.column(1, width = 50)
-      tree.column(2, width = 270)
-      tree.column(3, width = 250)
-      tree.column(4, width = 300)
-      tree.column(5, width = 130)
-      tree.column(6, width = 100)
-      tree.column(7, width = 100)
-      tree.column(8, width = 150)
+      esttree = ttk.Treeview(tab1, columns = (1,2,3,4,5,6,7,8,), height = 15, show = "headings")
+      esttree.pack(side = 'top')
+      esttree.heading(1)
+      esttree.heading(2, text="Product/Service ID",)
+      esttree.heading(3, text="Name")
+      esttree.heading(4, text="Description")
+      esttree.heading(5, text="Price")
+      esttree.heading(6, text="QTY")
+      esttree.heading(7, text="Tax1")
+      esttree.heading(8, text="Line Total")   
+      esttree.column(1, width = 50)
+      esttree.column(2, width = 270)
+      esttree.column(3, width = 250)
+      esttree.column(4, width = 300)
+      esttree.column(5, width = 130)
+      esttree.column(6, width = 100)
+      esttree.column(7, width = 100)
+      esttree.column(8, width = 150)
 
       note1=Text(tab2, width=170,height=10).place(x=10, y=10)
 
       note1=Text(tab3, width=170,height=10).place(x=10, y=10)
 
-      tree = ttk.Treeview(tab4, columns = (1,2,3), height = 15, show = "headings")
-      tree.pack(side = 'top')
-      tree.heading(1)
-      tree.heading(2, text="Attach to Email",)
-      tree.heading(3, text="Filename")
-      tree.column(1, width = 70)
-      tree.column(2, width = 270)
-      tree.column(3, width = 1000)
+      esttree1 = ttk.Treeview(tab4, columns = (1,2,3), height = 15, show = "headings")
+      esttree1.pack(side = 'top')
+      esttree1.heading(1)
+      esttree1.heading(2, text="Attach to Email",)
+      esttree1.heading(3, text="Filename")
+      esttree1.column(1, width = 70)
+      esttree1.column(2, width = 270)
+      esttree1.column(3, width = 1000)
 
       scrollbar = Scrollbar(self.left_frame)
       scrollbar.place(x=990+330+15, y=360, height=190)
-      scrollbar.config( command=tree.yview )
+      scrollbar.config( command=est_tree.yview )
         
   myapp = MyApp(tab3)
   
