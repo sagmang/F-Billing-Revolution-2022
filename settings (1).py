@@ -634,6 +634,21 @@ def mainpage():
         estimate_tabControl.add(estimate_tab2,compound = LEFT, text ='Product Image')
       
         estimate_tabControl.pack(expand = 1, fill ="both")
+
+        global filename
+        filename = ""
+
+        def upload_file():
+          global filename,img, b2
+          f_types =[('Png files','*.png'),('Jpg Files', '*.jpg')]
+          filename = filedialog.askopenfilename(filetypes=f_types)
+          shutil.copyfile(filename, os.getcwd()+'/images/'+filename.split('/')[-1])
+          image = Image.open(filename)
+          resize_image = image.resize((350, 350))
+          img = ImageTk.PhotoImage(resize_image)
+          b2 = Button(estimate_imageFrame,image=img)
+          b2.place(x=130, y=80)
+    
       
         estimate_innerFrame = Frame(estimate_tab1,bg="#f5f3f2", relief=GROOVE)
         estimate_innerFrame.pack(side="top",fill=BOTH)
@@ -766,10 +781,10 @@ def mainpage():
         estimate_browseimg=Label(estimate_imageFrame,text=" Browse for product image file(recommended image type:JPG,size 480x320 pixels) ",bg='#f5f3f2')
         estimate_browseimg.place(x=15,y=35)
 
-        estimate_browsebutton=Button(estimate_imageFrame,text = 'Browse')
+        estimate_browsebutton=Button(estimate_imageFrame,text = 'Browse',command=upload_file)
         estimate_browsebutton.place(x=580,y=30,height=30,width=50)
         
-        estimate_removeButton = Button(estimate_imageFrame,compound = LEFT,image=cancel, text ="Remove Product Image",width=150)
+        estimate_removeButton = Button(estimate_imageFrame,compound = LEFT,image=cancel, text ="Remove Product Image",width=150, command=lambda: b2.destroy())
         estimate_removeButton.place(x=400,y=450)
 
 
@@ -781,6 +796,9 @@ def mainpage():
       estimate_text10=Label(estimate_newselection, text="Filtered column").place(x=340, y=10)
       estimate_e20=Entry(estimate_newselection, width=20).place(x=450, y=10)
 
+      
+      
+      global estimate_cusventtree1
       estimate_cusventtree1=ttk.Treeview(estimate_newselection, height=27)
       estimate_cusventtree1["columns"]=["1","2","3", "4","5"]
       estimate_cusventtree1.column("#0", width=35)
@@ -795,7 +813,11 @@ def mainpage():
       estimate_cusventtree1.heading("3",text="Unit price")
       estimate_cusventtree1.heading("4",text="Service")
       estimate_cusventtree1.heading("5",text="Stock")
+      estimate_cusventtree1.tag_configure('green', foreground='green')
+      estimate_cusventtree1.tag_configure('red', foreground='red')
+      estimate_cusventtree1.tag_configure('blue', foreground='blue')
       estimate_cusventtree1.place(x=5, y=45)
+        
 
       estimate_sql = "SELECT * FROM Productservice"
       fbcursor.execute(estimate_sql)
@@ -808,6 +830,74 @@ def mainpage():
         else:
           pass
       count += 1
+
+     
+      # countp = 0
+      # sql = 'select * from Productservice'
+      # fbcursor.execute(sql)
+      # prodata = fbcursor.fetchall()
+      # for i in prodata:
+      #   if i[12] == '1':
+      #     servi = '🗹'
+      #   else:
+      #     servi = ''
+      #   sql = "select currencysign,currsignplace from company"
+      #   fbcursor.execute(sql)
+      #   currsymb = fbcursor.fetchone()
+      #   if not currsymb: 
+      #     if i[13] > i[14]:
+      #       estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('green',))
+      #       countp += 1              
+      #     elif i[12] == '1':
+      #       estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('blue',))
+      #       countp += 1
+      #     else:
+      #       estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('red',))
+      #       countp += 1
+                  
+      #   elif currsymb[1] == "before amount":
+      #     if (i[13]) > (i[14]):
+      #       estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],currsymb[0]+i[7],servi,i[13]),tags=('green',))
+      #       countp += 1
+      #     elif i[12] == '1':
+      #       estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],currsymb[0]+i[7],servi,i[13]),tags=('blue',))
+      #       countp += 1
+      #     else:
+      #       estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],currsymb[0]+i[7],servi,i[13]),tags=('red',))
+      #       countp += 1
+
+      #   elif currsymb[1] == "before amount with space":
+      #     if i[13] > i[14]:
+      #       estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],currsymb[0] +" "+i[7],servi,i[13]),tags=('green',))
+      #       countp += 1
+      #     elif i[12] == '1':
+      #       estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],currsymb[0] +" "+i[7],servi,i[13]),tags=('blue',))
+      #       countp += 1
+      #     else:
+      #       estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],currsymb[0] +" "+i[7],servi,i[13]),tags=('red',))
+      #       countp += 1
+
+      #   elif currsymb[1] == "after amount":
+      #     if i[13] > i[14]:
+      #       estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+currsymb[0],servi,i[13]),tags=('green',))
+      #       countp += 1
+      #     elif i[12] == '1':
+      #       estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+currsymb[0],servi,i[13]),tags=('blue',))
+      #       countp += 1
+      #     else:
+      #       estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+currsymb[0],servi,i[13]),tags=('red',))
+      #       countp += 1
+
+      #   elif currsymb[1] == "after amount with space":
+      #     if i[13] > i[14]:
+      #       estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='hello', values=(i[2],i[4],i[7]+" "+currsymb[0],servi,i[13]),tags=('green',))
+      #       countp += 1
+      #     elif i[12] == '1':
+      #       estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='hello', values=(i[2],i[4],i[7]+" "+currsymb[0],servi,i[13]),tags=('blue',))
+      #       countp += 1
+      #     else:
+      #       estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='hello', values=(i[2],i[4],i[7]+" "+currsymb[0],servi,i[13]),tags=('red',))
+      #       countp += 1
 
 
       estimate_ctegorytree1=ttk.Treeview(estimate_newselection, height=27)
@@ -832,9 +922,10 @@ def mainpage():
       estimate_scrollbar10.config( command=tree.yview )
     
 
-      estimate_btn11=Button(estimate_newselection,compound = LEFT,image=tick ,text="ok", width=60).place(x=15, y=610)
+      estimate_btn11=Button(estimate_newselection,compound = LEFT,image=tick ,text="ok", width=60, command=product_tree_fetch).place(x=15, y=610)
       estimate_btn11=Button(estimate_newselection,compound = LEFT,image=tick , text="Edit product/Service", width=150,command=product).place(x=250, y=610)
-      estimate_btn11=Button(estimate_newselection,compound = LEFT,image=tick , text="Add product/Service", width=150,command=product).place(x=435, y=610)
+      estimate_btnadd=Button(estimate_newselection,compound = LEFT,image=tick , text="Add product/Service", width=150,command=estimate_product)
+      estimate_btnadd.place(x=435, y=610)
       estimate_btn11=Button(estimate_newselection,compound = LEFT,image=cancel ,text="Cancel", width=60).place(x=740, y=610)
 
 
@@ -1123,6 +1214,29 @@ def mainpage():
     estimate_fir2Frame=Frame(estimate_pop, height=150,width=100,bg="#f5f3f2")
     estimate_fir2Frame.pack(side="top", fill=X)
     estimate_listFrame = Frame(estimate_fir2Frame, bg="white", height=140,borderwidth=5,  relief=RIDGE)
+
+    def product_tree_fetch():
+        global sel_pro_str
+        product_tree_item = estimate_cusventtree1.item(estimate_cusventtree1.focus())["values"][0]
+        sql = "SELECT * FROM Productservice WHERE sku=%s"
+        val = (product_tree_item,)
+        fbcursor.execute(sql,val)
+        sel_pro_str = fbcursor.fetchone()
+        estimate_tree.insert(parent='',index='end',text='',values=(sel_pro_str[2],sel_pro_str[4],sel_pro_str[5],sel_pro_str[7],sel_pro_str[18],'',sel_pro_str[7]))
+    #     elif tax_radio == 2:
+    #       if sel_pro_str[10] == "1":
+    #         estimate_tree.insert(parent='',index='end',text='',values=(sel_pro_str[2],sel_pro_str[4],sel_pro_str[5],sel_pro_str[7],sel_pro_str[18],'','yes',sel_pro_str[7]))
+    #       else:
+    #         estimate_tree.insert(parent='',index='end',text='',values=(sel_pro_str[2],sel_pro_str[4],sel_pro_str[5],sel_pro_str[7],sel_pro_str[18],'','no',sel_pro_str[7]))
+    #     elif tax_radio == 3:
+    #       if sel_pro_str[10] == "1" and sel_pro_str[19] == "1":
+    #         estimate_tree.insert(parent='',index='end',text='',values=(sel_pro_str[2],sel_pro_str[4],sel_pro_str[5],sel_pro_str[7],sel_pro_str[18],'','yes','yes',sel_pro_str[7]))
+    #       elif sel_pro_str[10] == "1" and sel_pro_str[19] == "0":
+    #         estimate_tree.insert(parent='',index='end',text='',values=(sel_pro_str[2],sel_pro_str[4],sel_pro_str[5],sel_pro_str[7],sel_pro_str[18],'','yes','no',sel_pro_str[7]))
+    #       elif sel_pro_str[10] == "0" and sel_pro_str[19] == "1":
+    #         estimate_tree.insert(parent='',index='end',text='',values=(sel_pro_str[2],sel_pro_str[4],sel_pro_str[5],sel_pro_str[7],sel_pro_str[18],'','no','yes',sel_pro_str[7]))
+    #       else:
+    #         estimate_tree.insert(parent='',index='end',text='',values=(sel_pro_str[2],sel_pro_str[4],sel_pro_str[5],sel_pro_str[7],sel_pro_str[18],'','no','no',sel_pro_str[7]))
     
     estimate_tree=ttk.Treeview(estimate_listFrame)
     estimate_tree["columns"]=["1","2","3","4","5","6","7","8"]
@@ -1263,19 +1377,30 @@ def mainpage():
     estimates_efooter_text.place(x=125,y=85)
     estimates_efooter_text.bind("<<ComboboxSelected>>")
 
+    # sql = "select * from Productservice"
+    # #val = (itemid, )
+    # fbcursor.execute(sql)
+    # est_psdata = fbcursor.fetchone()
+
     estimates_texttt=Label(estimate_noteFrame,text="Private notes(not shown on invoice/order/estemates)").place(x=10,y=10)
     estimates_pvt_notes=Text(estimate_noteFrame,width=85,height=7)
     estimates_pvt_notes.place(x=10,y=32)
+    # try:
+    #   estimates_pvt_notes.insert("1.0", est_psdata[16])
+    # except:
+    #   pass
 
-    est_term_sql = "SELECT Predefinedtextforestimates FROM company"
-    fbcursor.execute(est_term_sql,)
-    est_term_data = fbcursor.fetchall()
-    trdata = []
-    for i in est_term_data:
-      trdata.append(i[0])
- 
+
+    # est_term_sql = "SELECT * FROM company"
+    # fbcursor.execute(est_term_sql,)
+    # est_term_data = fbcursor.fetchone()
+    
     estimates_eterm_text=scrolledtext.ScrolledText(estimate_termsFrame, undo=True,width=85,height=7)
     estimates_eterm_text.place(x=10,y=10)
+    # try:
+    #   estimates_eterm_text.insert("1.0", est_term_data[39])
+    # except:
+    #   pass
 
     estimates_ecomments=Text(estimate_commentFrame,width=85,height=7)
     estimates_ecomments.place(x=10,y=10)
@@ -2422,9 +2547,9 @@ def mainpage():
     estimate_mylbl_emailtoaddr=Label(estimate_messagelbframe, text="Email to address").place(x=5, y=5)
     estimate_emailtoent=Entry(estimate_messagelbframe, width=50).place(x=120, y=5)
     estimate_sendemail_btn=Button(estimate_messagelbframe, text="Send Email", width=10, height=1).place(x=600, y=10)
-    estimate_lbl_carcopyto=Label(messagelbframe, text="Carbon copy to").place(x=5, y=32)
-    estimate_carcopyent=Entry(messagelbframe, width=50).place(x=120, y=32)
-    estimate_stopemail_btn=Button(messagelbframe, text="Stop sending", width=10, height=1).place(x=600, y=40)
+    # estimate_lbl_carcopyto=Label(messagelbframe, text="Carbon copy to").place(x=5, y=32)
+    # estimate_carcopyent=Entry(messagelbframe, width=50).place(x=120, y=32)
+    # estimate_stopemail_btn=Button(messagelbframe, text="Stop sending", width=10, height=1).place(x=600, y=40)
     estimate_lbl_subject=Label(messagelbframe, text="Subject").place(x=5, y=59)
     estimate_subent=Entry(messagelbframe, width=50).place(x=120, y=59)
 
@@ -2614,7 +2739,7 @@ def mainpage():
       estimate_findin1=Label(estimate_etop,text="Find in:",pady=5,padx=10).place(x=5,y=47)
       estimate_my_n1 = StringVar()
       estimate_findIN = ttk.Combobox(estimate_etop, width = 30, textvariable = estimate_my_n1 )
-      estimate_findIN['values'] = ('Product/Service id', ' Category', ' Active',' name',' stock',' location', ' image',' <<All>>')                       
+      estimate_findIN['values'] = ('Estimate#', 'Estimate date', 'Due date','Customer name','Status','Emailed on', 'Printed on', 'SMS on','Estimate total','<<All>>')                       
       estimate_findIN.place(x=90,y=54)
       estimate_findIN.current(0)
 
@@ -2624,14 +2749,14 @@ def mainpage():
       estimate_match1=Label(estimate_etop,text="Match:",pady=5,padx=10).place(x=5,y=74)
       estimate_my_n2 = StringVar()
       estimate_match = ttk.Combobox(estimate_etop, width = 23, textvariable = estimate_my_n2 )   
-      estimate_match['values'] = ('From Any part',' Whole Field',' From the beginning of the field')                                   
+      estimate_match['values'] = ('From any part of field',' Whole Field',' From the beginning of the field')                                   
       estimate_match.place(x=90,y=83)
       estimate_match.current(0)
 
       estimate_my_search1=Label(estimate_etop,text="Search:",pady=5,padx=10).place(x=5,y=102)
       estimate_my_n3 = StringVar()
       estimate_my_search = ttk.Combobox(estimate_etop, width = 23, textvariable = estimate_my_n3 )
-      estimate_my_search['values'] = ('All', 'up',' Down')
+      estimate_my_search['values'] = ('Up', 'Down','All')
       estimate_my_search.place(x=90,y=112)
       estimate_my_search.current(0)
       estimate_checkvarStatus4=IntVar()  
@@ -2701,9 +2826,9 @@ def mainpage():
   estimate_lbl_invdt.grid(row=0, column=0, pady=5, padx=(5, 0))
   estimate_lbl_invdtt = Label(estimate_lbframe, text="Estimate date to  :  ", bg="#f8f8f2")
   estimate_lbl_invdtt.grid(row=1, column=0, pady=5, padx=(5, 0))
-  estimate_invdt = Entry(estimate_lbframe, width=15)
+  estimate_invdt = DateEntry(estimate_lbframe, width=15)
   estimate_invdt.grid(row=0, column=1)
-  estimate_invdtt = Entry(estimate_lbframe, width=15)
+  estimate_invdtt = DateEntry(estimate_lbframe, width=15)
   estimate_invdtt.grid(row=1, column=1)
   estimate_checkvarr1 = IntVar()
   estimate_chkbtnn1 = Checkbutton(estimate_lbframe, text = "Apply filter", variable = estimate_checkvarr1, onvalue = 1, offvalue = 0, height = 2, width = 8, bg="#f8f8f2")
