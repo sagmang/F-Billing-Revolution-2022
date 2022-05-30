@@ -35,6 +35,7 @@ from openpyxl import load_workbook
 import shutil
 import csv
 import json
+from tkinter import font,colorchooser
 
 
 fbilldb = mysql.connector.connect(
@@ -154,6 +155,8 @@ right = PhotoImage(file="images/right.png")
 center = PhotoImage(file="images/center.png")
 hyperlink = PhotoImage(file="images/hyperlink.png")
 remove = PhotoImage(file="images/eraser.png")
+
+#color = PhotoImage(file="images/colour.png")
   
   
 photo = PhotoImage(file = "images/plus.png")
@@ -168,7 +171,7 @@ photo8 = PhotoImage(file = "images/refresh_E.png")
 photo9 = PhotoImage(file = "images/sum.png")
 photo10 = PhotoImage(file = "images/text-message.png")
 
-est_logo = PhotoImage(file = "images/company_logo.png")
+#est_logo = PhotoImage(file = "images/company_logo.png")
 
 def mainpage():
   root.iconify()
@@ -813,92 +816,84 @@ def mainpage():
       estimate_cusventtree1.heading("3",text="Unit price")
       estimate_cusventtree1.heading("4",text="Service")
       estimate_cusventtree1.heading("5",text="Stock")
+      estimate_cusventtree1.place(x=5, y=45)
       estimate_cusventtree1.tag_configure('green', foreground='green')
       estimate_cusventtree1.tag_configure('red', foreground='red')
       estimate_cusventtree1.tag_configure('blue', foreground='blue')
-      estimate_cusventtree1.place(x=5, y=45)
+
+    
+      countp = 0
+      sql = 'select * from Productservice'
+      fbcursor.execute(sql)
+      estprodata = fbcursor.fetchall()
+      for i in estprodata:
+        if i[12] == '1':
+          servi = '🗹'
+        else:
+          servi = ''
+        sql = "select currencysign,currsignplace from company"
+        fbcursor.execute(sql)
+        estcurrsymb = fbcursor.fetchone()
+        if not estcurrsymb: 
+          if i[13] > i[14]:
+            estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('green',))
+            countp += 1              
+          elif i[12] == '1':
+            estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('blue',))
+            countp += 1
+          else:
+            estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('red',))
+            countp += 1
+                  
+        elif estcurrsymb[1] == "before amount":
+          if (i[13]) > (i[14]):
+            estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('green',))
+            countp += 1
+          elif i[12] == '1':
+            estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('blue',))
+            countp += 1
+          else:
+            estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('red',))
+            countp += 1
+
+        elif estcurrsymb[1] == "before amount with space":
+          if i[13] > i[14]:
+            estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('green',))
+            countp += 1
+          elif i[12] == '1':
+            estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('blue',))
+            countp += 1
+          else:
+            estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('red',))
+            countp += 1
+
+        elif estcurrsymb[1] == "after amount":
+          if i[13] > i[14]:
+            estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('green',))
+            countp += 1
+          elif i[12] == '1':
+            estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('blue',))
+            countp += 1
+          else:
+            estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('red',))
+            countp += 1
+
+        elif estcurrsymb[1] == "after amount with space":
+          if i[13] > i[14]:
+            estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='hello', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('green',))
+            countp += 1
+          elif i[12] == '1':
+            estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='hello', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('blue',))
+            countp += 1
+          else:
+            estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='hello', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('red',))
+            countp += 1
+
+      
         
 
-      estimate_sql = "SELECT * FROM Productservice"
-      fbcursor.execute(estimate_sql)
-      est_product_details = fbcursor.fetchall()
-
-      count = 0
-      for p in est_product_details:
-        if True:
-          estimate_cusventtree1.insert(parent='',index='end',iid=p,text='',values=(p[0],p[4],p[7],p[12],p[13]))
-        else:
-          pass
-      count += 1
-
      
-      # countp = 0
-      # sql = 'select * from Productservice'
-      # fbcursor.execute(sql)
-      # prodata = fbcursor.fetchall()
-      # for i in prodata:
-      #   if i[12] == '1':
-      #     servi = '🗹'
-      #   else:
-      #     servi = ''
-      #   sql = "select currencysign,currsignplace from company"
-      #   fbcursor.execute(sql)
-      #   currsymb = fbcursor.fetchone()
-      #   if not currsymb: 
-      #     if i[13] > i[14]:
-      #       estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('green',))
-      #       countp += 1              
-      #     elif i[12] == '1':
-      #       estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('blue',))
-      #       countp += 1
-      #     else:
-      #       estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('red',))
-      #       countp += 1
-                  
-      #   elif currsymb[1] == "before amount":
-      #     if (i[13]) > (i[14]):
-      #       estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],currsymb[0]+i[7],servi,i[13]),tags=('green',))
-      #       countp += 1
-      #     elif i[12] == '1':
-      #       estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],currsymb[0]+i[7],servi,i[13]),tags=('blue',))
-      #       countp += 1
-      #     else:
-      #       estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],currsymb[0]+i[7],servi,i[13]),tags=('red',))
-      #       countp += 1
-
-      #   elif currsymb[1] == "before amount with space":
-      #     if i[13] > i[14]:
-      #       estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],currsymb[0] +" "+i[7],servi,i[13]),tags=('green',))
-      #       countp += 1
-      #     elif i[12] == '1':
-      #       estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],currsymb[0] +" "+i[7],servi,i[13]),tags=('blue',))
-      #       countp += 1
-      #     else:
-      #       estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],currsymb[0] +" "+i[7],servi,i[13]),tags=('red',))
-      #       countp += 1
-
-      #   elif currsymb[1] == "after amount":
-      #     if i[13] > i[14]:
-      #       estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+currsymb[0],servi,i[13]),tags=('green',))
-      #       countp += 1
-      #     elif i[12] == '1':
-      #       estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+currsymb[0],servi,i[13]),tags=('blue',))
-      #       countp += 1
-      #     else:
-      #       estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+currsymb[0],servi,i[13]),tags=('red',))
-      #       countp += 1
-
-      #   elif currsymb[1] == "after amount with space":
-      #     if i[13] > i[14]:
-      #       estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='hello', values=(i[2],i[4],i[7]+" "+currsymb[0],servi,i[13]),tags=('green',))
-      #       countp += 1
-      #     elif i[12] == '1':
-      #       estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='hello', values=(i[2],i[4],i[7]+" "+currsymb[0],servi,i[13]),tags=('blue',))
-      #       countp += 1
-      #     else:
-      #       estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='hello', values=(i[2],i[4],i[7]+" "+currsymb[0],servi,i[13]),tags=('red',))
-      #       countp += 1
-
+      
 
       estimate_ctegorytree1=ttk.Treeview(estimate_newselection, height=27)
       estimate_ctegorytree1["columns"]=["1"]
@@ -920,9 +915,97 @@ def mainpage():
       estimate_scrollbar10 = Scrollbar(estimate_newselection)
       estimate_scrollbar10.place(x=640, y=45, height=560)
       estimate_scrollbar10.config( command=tree.yview )
-    
 
-      estimate_btn11=Button(estimate_newselection,compound = LEFT,image=tick ,text="ok", width=60, command=product_tree_fetch).place(x=15, y=610)
+      def estselepro():
+          global estpriceview
+          estpriceview = Label(estimate_listFrame,bg="#f5f3f2")
+          estpriceview.place(x=850,y=200,width=78,height=18)
+          proskuid = estimate_cusventtree1.item(estimate_cusventtree1.focus())["values"][0]
+          sql = "select * from Productservice where sku = %s"
+          val = (proskuid,)
+          fbcursor.execute(sql,val)
+          prosele = fbcursor.fetchone()
+          sql = "select * from company"
+          fbcursor.execute(sql)
+          create_maintree_insert = fbcursor.fetchone()
+          if prosele[10] == '1':
+            tax1 = '🗹'
+          else:
+            tax1 = ''
+          if prosele[19] == '1':
+            tax2 = '🗹'
+          else:
+            tax2 = ''
+          if not create_maintree_insert:
+            estimate_tree.insert(parent='', index='end',text='', values=(prosele[2],prosele[4],prosele[5],prosele[7],1,prosele[8],tax1,prosele[7]*1))
+
+          elif create_maintree_insert[12] == "1":
+            estimate_tree.insert(parent='', index='end',text='', values=(prosele[2],prosele[4],prosele[5],prosele[7],1,prosele[8],prosele[7]*1))
+            total = 0.0
+            for child in estimate_tree.get_children():
+              total += float(estimate_tree.item(child, 'values')[6])
+            estpriceview.config(text=total)
+            estimate_total1.config(text=total)
+            estimate_balancee1.config(text=total)
+            estimate_subbb1.config(text=total)
+          elif create_maintree_insert[12] == "2":
+            estimate_tree.insert(parent='', index='end',text='', values=(prosele[2],prosele[4],prosele[5],prosele[7],1,prosele[8],tax1,prosele[7]*1))
+            total = 0.0
+            for child in estimate_tree.get_children():
+              total += float(estimate_tree.item(child, 'values')[7])
+            estpriceview.config(text=total)
+            estimate_subbb1.config(text=total)
+
+            tot = 0.0
+            totaltax1 = 0.0
+            for child in estimate_tree.get_children():
+              checktax1 = list(estimate_tree.item(child, 'values'))
+              if checktax1[6] == "🗹":
+                totaltax1 =(totaltax1 + float(checktax1[7]))
+                estimate_ttax1.config(text=(float(totaltax1)*float(estimates_tax4.get())/100))
+                tot = (float(totaltax1)*float(estimates_tax4.get())/100)
+              else:
+                pass
+            estimate_total1.config(text=total+tot)
+            estimate_balancee1.config(text=total+tot)
+              
+          elif create_maintree_insert[12] == "3":
+            estimate_tree.insert(parent='', index='end',text='', values=(prosele[2],prosele[4],prosele[5],prosele[7],1,prosele[8],tax1,tax2,prosele[7]*1))
+            total = 0.0
+            for child in estimate_tree.get_children():
+              total += float(estimate_tree.item(child, 'values')[8])
+            estpriceview.config(text=total)
+            estimate_subbb1.config(text=total)
+            
+            tot = 0.0
+            totaltax1 = 0.0
+            for child in estimate_tree.get_children():
+              checktax1 = list(estimate_tree.item(child, 'values'))
+              if checktax1[6] == "🗹":
+                totaltax1 =(totaltax1 + float(checktax1[8]))
+                estimate_ttax1.config(text=(float(totaltax1)*float(estimates_tax4.get())/100))
+                tot = (float(totaltax1)*float(estimates_tax4.get())/100)
+              else:
+                pass
+            
+            tot2 = 0.0
+            totaltax2 = 0.0
+            for child in estimate_tree.get_children():
+              checktax1 = list(estimate_tree.item(child, 'values'))
+              if checktax1[7] == "🗹":
+                totaltax2 =(totaltax2 + float(checktax1[8]))
+                estimate_ttax2.config(text=(float(totaltax2)*float(estimates_tax5.get())/100))
+                
+                tot2 = (float(totaltax2)*float(estimates_tax5.get())/100)
+              else:
+                pass
+
+            estimate_total1.config(text=total+tot+tot2)
+            estimate_balancee1.config(text=total+tot+tot2)
+          
+          estimate_newselection.destroy()
+
+      estimate_btn11=Button(estimate_newselection,compound = LEFT,image=tick ,text="ok", width=60, command=estselepro).place(x=15, y=610)
       estimate_btn11=Button(estimate_newselection,compound = LEFT,image=tick , text="Edit product/Service", width=150,command=product).place(x=250, y=610)
       estimate_btnadd=Button(estimate_newselection,compound = LEFT,image=tick , text="Add product/Service", width=150,command=estimate_product)
       estimate_btnadd.place(x=435, y=610)
@@ -1062,11 +1145,20 @@ def mainpage():
     estimate_w4 = Canvas(estimate_firFrame, width=1, height=65, bg="#b3b3b3", bd=0)
     estimate_w4.pack(side="left", padx=5)
 
-    estimate_smss1= Button(estimate_firFrame,compound="top", text="Set Status\nto Accepted",relief=RAISED, image=mark1,bg="#f5f3f2", fg="black", height=55, bd=1, width=55)
+    def on_click():
+      text.set("Accepted")
+      
+
+    def eston_click():
+      text.set("Declined")
+      
+      
+
+    estimate_smss1= Button(estimate_firFrame,compound="top", text="Set Status\nto Accepted",relief=RAISED, image=mark1,bg="#f5f3f2", fg="black", height=55, bd=1, width=55, command=on_click)
     estimate_smss1.pack(side="left", pady=3, ipadx=4)
 
-    estimate_smss1= Button(estimate_firFrame,compound="top", text="Set Status\nto Declined",relief=RAISED, image=mark1,bg="#f5f3f2", fg="black", height=55, bd=1, width=55)
-    estimate_smss1.pack(side="left", pady=3, ipadx=4)
+    estimate_smss2= Button(estimate_firFrame,compound="top", text="Set Status\nto Declined",relief=RAISED, image=mark1,bg="#f5f3f2", fg="black", height=55, bd=1, width=55, command=eston_click)
+    estimate_smss2.pack(side="left", pady=3, ipadx=4)
 
     def estimate_calcu():
       subprocess.Popen('C:\\Windows\\System32\\calc.exe')
@@ -1215,51 +1307,105 @@ def mainpage():
     estimate_fir2Frame.pack(side="top", fill=X)
     estimate_listFrame = Frame(estimate_fir2Frame, bg="white", height=140,borderwidth=5,  relief=RIDGE)
 
-    def product_tree_fetch():
-        global sel_pro_str
-        product_tree_item = estimate_cusventtree1.item(estimate_cusventtree1.focus())["values"][0]
-        sql = "SELECT * FROM Productservice WHERE sku=%s"
-        val = (product_tree_item,)
-        fbcursor.execute(sql,val)
-        sel_pro_str = fbcursor.fetchone()
-        estimate_tree.insert(parent='',index='end',text='',values=(sel_pro_str[2],sel_pro_str[4],sel_pro_str[5],sel_pro_str[7],sel_pro_str[18],'',sel_pro_str[7]))
-    #     elif tax_radio == 2:
-    #       if sel_pro_str[10] == "1":
-    #         estimate_tree.insert(parent='',index='end',text='',values=(sel_pro_str[2],sel_pro_str[4],sel_pro_str[5],sel_pro_str[7],sel_pro_str[18],'','yes',sel_pro_str[7]))
-    #       else:
-    #         estimate_tree.insert(parent='',index='end',text='',values=(sel_pro_str[2],sel_pro_str[4],sel_pro_str[5],sel_pro_str[7],sel_pro_str[18],'','no',sel_pro_str[7]))
-    #     elif tax_radio == 3:
-    #       if sel_pro_str[10] == "1" and sel_pro_str[19] == "1":
-    #         estimate_tree.insert(parent='',index='end',text='',values=(sel_pro_str[2],sel_pro_str[4],sel_pro_str[5],sel_pro_str[7],sel_pro_str[18],'','yes','yes',sel_pro_str[7]))
-    #       elif sel_pro_str[10] == "1" and sel_pro_str[19] == "0":
-    #         estimate_tree.insert(parent='',index='end',text='',values=(sel_pro_str[2],sel_pro_str[4],sel_pro_str[5],sel_pro_str[7],sel_pro_str[18],'','yes','no',sel_pro_str[7]))
-    #       elif sel_pro_str[10] == "0" and sel_pro_str[19] == "1":
-    #         estimate_tree.insert(parent='',index='end',text='',values=(sel_pro_str[2],sel_pro_str[4],sel_pro_str[5],sel_pro_str[7],sel_pro_str[18],'','no','yes',sel_pro_str[7]))
-    #       else:
-    #         estimate_tree.insert(parent='',index='end',text='',values=(sel_pro_str[2],sel_pro_str[4],sel_pro_str[5],sel_pro_str[7],sel_pro_str[18],'','no','no',sel_pro_str[7]))
     
-    estimate_tree=ttk.Treeview(estimate_listFrame)
-    estimate_tree["columns"]=["1","2","3","4","5","6","7","8"]
 
-    estimate_tree.column("#0", width=40)
-    estimate_tree.column("1", width=80)
-    estimate_tree.column("2", width=190)
-    estimate_tree.column("3", width=190)
-    estimate_tree.column("4", width=80)
-    estimate_tree.column("5", width=60)
-    estimate_tree.column("6", width=60)
-    estimate_tree.column("7", width=60)
-    estimate_tree.column("8", width=80)
-    
-    estimate_tree.heading("#0")
-    estimate_tree.heading("1",text="ID/SKU")
-    estimate_tree.heading("2",text="Product/Service")
-    estimate_tree.heading("3",text="Description")
-    estimate_tree.heading("4",text="Unit Price")
-    estimate_tree.heading("5",text="Quality")
-    estimate_tree.heading("6",text="Pcs/Weight")
-    estimate_tree.heading("7",text="Tax1")
-    estimate_tree.heading("8",text="Price")
+    sql = "select * from company"
+    fbcursor.execute(sql)
+    taxdata = fbcursor.fetchone()
+    if not taxdata:
+      estimate_tree=ttk.Treeview(estimate_listFrame)
+      estimate_tree["columns"]=["1","2","3","4","5","6","7"]
+
+      estimate_tree.column("#0", width=40)
+      estimate_tree.column("1", width=80)
+      estimate_tree.column("2", width=190)
+      estimate_tree.column("3", width=190)
+      estimate_tree.column("4", width=80)
+      estimate_tree.column("5", width=60)
+      estimate_tree.column("6", width=60)
+      estimate_tree.column("7", width=60)
+      #estimate_tree.column("8", width=80)
+      
+      estimate_tree.heading("#0")
+      estimate_tree.heading("1",text="ID/SKU")
+      estimate_tree.heading("2",text="Product/Service")
+      estimate_tree.heading("3",text="Description")
+      estimate_tree.heading("4",text="Unit Price")
+      estimate_tree.heading("5",text="Quantity")
+      estimate_tree.heading("6",text="Pcs/Weight")
+      # estimate_tree.heading("7",text="Tax1")
+      estimate_tree.heading("7",text="Price")
+    elif taxdata[12] == "1":
+      estimate_tree=ttk.Treeview(estimate_listFrame)
+      estimate_tree["columns"]=["1","2","3","4","5","6","7"]
+
+      estimate_tree.column("#0", width=40)
+      estimate_tree.column("1", width=80)
+      estimate_tree.column("2", width=190)
+      estimate_tree.column("3", width=190)
+      estimate_tree.column("4", width=80)
+      estimate_tree.column("5", width=60)
+      estimate_tree.column("6", width=60)
+      estimate_tree.column("7", width=60)
+      #estimate_tree.column("8", width=80)
+      
+      estimate_tree.heading("#0")
+      estimate_tree.heading("1",text="ID/SKU")
+      estimate_tree.heading("2",text="Product/Service")
+      estimate_tree.heading("3",text="Description")
+      estimate_tree.heading("4",text="Unit Price")
+      estimate_tree.heading("5",text="Quantity")
+      estimate_tree.heading("6",text="Pcs/Weight")
+      # estimate_tree.heading("7",text="Tax1")
+      estimate_tree.heading("7",text="Price")
+    elif taxdata[12] == "2":
+      estimate_tree=ttk.Treeview(estimate_listFrame)
+      estimate_tree["columns"]=["1","2","3","4","5","6","7","8"]
+
+      estimate_tree.column("#0", width=40)
+      estimate_tree.column("1", width=80)
+      estimate_tree.column("2", width=190)
+      estimate_tree.column("3", width=190)
+      estimate_tree.column("4", width=80)
+      estimate_tree.column("5", width=60)
+      estimate_tree.column("6", width=60)
+      estimate_tree.column("7", width=60)
+      estimate_tree.column("8", width=80)
+      
+      estimate_tree.heading("#0")
+      estimate_tree.heading("1",text="ID/SKU")
+      estimate_tree.heading("2",text="Product/Service")
+      estimate_tree.heading("3",text="Description")
+      estimate_tree.heading("4",text="Unit Price")
+      estimate_tree.heading("5",text="Quantity")
+      estimate_tree.heading("6",text="Pcs/Weight")
+      estimate_tree.heading("7",text="Tax1")
+      estimate_tree.heading("8",text="Price")
+    elif taxdata[12] == "3":
+      estimate_tree=ttk.Treeview(estimate_listFrame)
+      estimate_tree["columns"]=["1","2","3","4","5","6","7","8","9"]
+
+      estimate_tree.column("#0", width=40)
+      estimate_tree.column("1", width=80)
+      estimate_tree.column("2", width=190)
+      estimate_tree.column("3", width=190)
+      estimate_tree.column("4", width=80)
+      estimate_tree.column("5", width=60)
+      estimate_tree.column("6", width=60)
+      estimate_tree.column("7", width=60)
+      estimate_tree.column("8", width=60)
+      estimate_tree.column("9", width=80)
+      
+      estimate_tree.heading("#0")
+      estimate_tree.heading("1",text="ID/SKU")
+      estimate_tree.heading("2",text="Product/Service")
+      estimate_tree.heading("3",text="Description")
+      estimate_tree.heading("4",text="Unit Price")
+      estimate_tree.heading("5",text="Quantity")
+      estimate_tree.heading("6",text="Pcs/Weight")
+      estimate_tree.heading("7",text="Tax1")
+      estimate_tree.heading("8",text="Tax2")
+      estimate_tree.heading("9",text="Price")
     
     estimate_tree.pack(fill="both", expand=1)
     estimate_listFrame.pack(side="top", fill="both", padx=5, pady=3, expand=1)
@@ -1310,6 +1456,10 @@ def mainpage():
     estimates_tax=Label(estimate_labelfram1,text="Tax1").place(x=420,y=35)
     estimates_tax4=Entry(estimate_labelfram1,width=7)
     estimates_tax4.place(x=460,y=35)
+
+    estimates_taax5=Label(estimate_labelfram1,text="Tax2").place(x=420,y=60)
+    estimates_tax5=Entry(estimate_labelfram1,width=7)
+    estimates_tax5.place(x=460,y=60)
     estimates_template=Label(estimate_labelfram1,text="Template").place(x=37,y=70)
 
     est_temp_sql1 = "SELECT Defaultestimatetemplate FROM company "
@@ -1346,7 +1496,9 @@ def mainpage():
     
     estimate_statusfrme = LabelFrame(estimate_labelfram1,text="Status",font=("arial",15))
     estimate_statusfrme.place(x=540,y=0,width=160,height=160)
-    estimates_draft=Label(estimate_statusfrme, text="Draft",font=("arial", 15, "bold"), fg="grey")
+    text = StringVar()
+    text.set("Draft")
+    estimates_draft=Label(estimate_statusfrme,font=("arial", 15, "bold"), fg="grey",textvariable=text)
     estimates_draft.place(x=50, y=3)
     estimates_on1=Label(estimate_statusfrme, text="Emailed on:").place( y=50)
     estimates_nev1=Label(estimate_statusfrme, text="Never")
@@ -1404,21 +1556,142 @@ def mainpage():
 
     estimates_ecomments=Text(estimate_commentFrame,width=85,height=7)
     estimates_ecomments.place(x=10,y=10)
+    # def est_upload_file1():
+    #     global filename
+    #     import shutil
+    #     f_types =[('Png files','.png'),('Jpg Files', '.jpg'),('All Files', '*.*')]
+        
+    #     filename = filedialog.askopenfilename(filetypes=f_types)
+    #     shutil.copyfile(filename, os.getcwd()+'/images/'+filename.split('/')[-1])
+    #     # sql = 'INSERT INTO documents (add_document) VALUES (%s) WHERE orderid=%s'
+    #     #esttt = frck
+    #     sql= 'INSERT INTO documents(add_document,orderid) VALUES(%s,%s)'
+    #     val = (filename.split('/')[-1])
+    #     fbcursor.execute(sql,val)
+    #     fbilldb.commit()
 
-    estimates_btn1=Button(estimate_documentFrame,height=2,width=3,text="+").place(x=5,y=10)
-    estimates_btn2=Button(estimate_documentFrame,height=2,width=3,text="-").place(x=5,y=50)
-    estimates_texttt1=Label(estimate_documentFrame,text="Attached documents or image files.If you attach large email then email taken long time to send").place(x=50,y=10)
-    estimates_cusventtree=ttk.Treeview(estimate_documentFrame, height=5)
-    estimates_cusventtree["columns"]=["1","2","3"]
-    estimates_cusventtree.column("#0", width=20)
-    estimates_cusventtree.column("1", width=250)
-    estimates_cusventtree.column("2", width=250)
-    estimates_cusventtree.column("2", width=200)
-    estimates_cusventtree.heading("#0",text="", anchor=W)
-    estimates_cusventtree.heading("1",text="Attach to Email")
-    estimates_cusventtree.heading("2",text="Filename")
-    estimates_cusventtree.heading("3",text="Filesize")  
-    estimates_cusventtree.place(x=50, y=45)
+    #     #sqldoc='SELECT * FROM documents Where orderid=%s'
+    #     #vall=(,)
+    #     #fbcursor.execute(sqldoc, vall)
+
+    #     for record in estimates_cusventtree.get_children():
+    #           estimates_cusventtree.delete(record) 
+    #     j = 0
+    #     for i in fbcursor:
+    #      estimates_cusventtree.insert(parent='', index='end', iid=i, text='', values=(i[2]))
+    #     j += 1
+    
+    # def estvattad():
+    #   itemidcs = estimates_cusventtree.item(estimates_cusventtree.focus())["values"][0]
+    #   # print(itemid,)
+    #   # Nullified="NULL"
+    #   #sql91 = "DELETE FROM documents WHERE add_document=%s AND orderid=%s"
+    #   # val91 = (Nullified,frck,)
+    #   val91=(itemidcs,,)
+    #   fbcursor.execute(sql91, val91)
+    #   fbilldb.commit()
+    #   estimates_cusventtree.delete(estimates_cusventtree.selection()[0])
+
+    # estimates_btn1=Button(estimate_documentFrame,height=2,width=3,text="+").place(x=5,y=10)
+    # estimates_btn2=Button(estimate_documentFrame,height=2,width=3,text="-").place(x=5,y=50)
+    # estimates_texttt1=Label(estimate_documentFrame,text="Attached documents or image files.If you attach large email then email taken long time to send").place(x=50,y=10)
+    # def estaddpsfile_image1(event):
+    #   edit_window_img1 = Toplevel()
+    #   edit_window_img1.title("View Image")
+    #   edit_window_img1.geometry("700x500")
+      
+      
+    #   itemid = estimates_cusventtree.item(estimates_cusventtree.focus())["values"][0]
+    #   sql = "select * from documents where orderid = %s"
+    #   val = 
+
+    #   fbcursor.execute(sql, val)
+    #   psdata = fbcursor.fetchone() 
+    #   image = Image.open("images/"+psdata[2])
+    #   resize_image = image.resize((700, 500))
+    #   image = ImageTk.PhotoImage(resize_image)
+    #   psimage = Label(edit_window_img1,image=image)
+    #   psimage.photo = image
+    #   psimage.pack()
+    def attach_file():
+      global file,file_type
+      file_type = [('png files','.png'),('jpg files','.jpg'),('all files','.')]
+      file = filedialog.askopenfilename(initialdir="/",filetypes=file_type)
+      shutil.copyfile(file, os.getcwd()+'/images/'+file.split('/')[-1])
+      file_size = convertion(os.path.getsize(file))
+      doc_tree.insert(parent='',index='end',iid=file.split('/')[-1],text='',values=('',file.split('/')[-1],file_size))
+      
+
+    #################### size convertion of files############################
+    def convertion(B):
+      BYTE = float(B)
+      KB = float(1024)
+      MB = float(KB**2)
+
+      if BYTE < KB:
+        return '{0} {1}'.format(BYTE,'Bytes' if 0 == B > 1 else 'Byte')
+      elif KB <= BYTE < MB:
+        return '{0:.2f} KB'.format(BYTE / KB)
+      elif MB <= BYTE:
+        return '{0:.2f} MB'.format(BYTE / MB)
+    ############### delete file #################
+    def delete_file():
+      selected_doc_item = doc_tree.selection()[0]
+      doc_tree.delete(selected_doc_item)
+
+
+    ############## show file ###############
+
+    def show_sel_file(event):
+      selected_file = doc_tree.item(doc_tree.focus())["values"][1]
+      show = Toplevel()
+      show.geometry("700x500")
+      show.title("View Files")
+      if selected_file.lower().endswith(('.png','.jpg')):
+        open_image = Image.open("images/"+selected_file)
+        resize_img = open_image.resize((700,500))
+        img = ImageTk.PhotoImage(resize_img)
+        image = Label(show,image=img)
+        image.photo = img
+        image.pack()
+      else:
+        with open("images/"+selected_file,mode='r',encoding="utf-8",errors="ignore") as none_img:
+          data = none_img.read()
+          image = Label(show,text=data)
+          image.pack()
+    
+
+    doc_plus_btn=Button(estimate_documentFrame,text="+",width=20,height=25,image=photo,command=attach_file)
+    doc_plus_btn.place(x=5,y=10)
+    doc_minus_btn=Button(estimate_documentFrame,height=25,width=20,text="-",command=delete_file)
+    doc_minus_btn.place(x=5,y=30)
+    # doc_txt_label=Label(estimate_documentFrame,text="Attached documents or image files.If you attach large email then email taken long time to send").place(x=50,y=10)
+    doc_tree=ttk.Treeview(estimate_documentFrame, height=5)
+    doc_tree["columns"]=["1","2","3"]
+    doc_tree.column("#0", width=20,anchor=CENTER)
+    doc_tree.column("1", width=130,anchor=CENTER)
+    doc_tree.column("2", width=380,anchor=CENTER)
+    doc_tree.column("3", width=130,anchor=CENTER)
+    doc_tree.heading("#0",text="", anchor=W)
+    doc_tree.heading("1",text="Attach to Email")
+    doc_tree.heading("2",text="Filename")
+    doc_tree.heading("3",text="Filesize")  
+    doc_tree.place(x=50, y=25)
+    doc_tree.bind('<Double-Button-1>',show_sel_file)
+
+    # estimates_cusventtree=ttk.Treeview(estimate_documentFrame, height=5)
+    # estimates_cusventtree["columns"]=["1","2","3"]
+    # estimates_cusventtree.column("#0", width=20)
+    # estimates_cusventtree.column("1", width=250)
+    # # estimates_cusventtree.column("2", width=250)
+    # # estimates_cusventtree.column("2", width=200)
+    # estimates_cusventtree.heading("#0",text="", anchor=W)
+    # #estimates_cusventtree.heading("1",text="Attach to Email")
+    # estimates_cusventtree.heading("2",text="Filename")
+    # #estimates_cusventtree.heading("3",text="Filesize")  
+    # estimates_cusventtree.place(x=50, y=45)
+    # estimates_cusventtree.place(x=50, y=20)
+    # estimates_cusventtree.bind('<Double-Button-1>')
     
 
     estimate_fir4Frame1=Frame(estimate_pop,height=190,width=210,bg="#f5f3f2")
@@ -1427,21 +1700,26 @@ def mainpage():
     estimate_summaryfrme.place(x=0,y=0,width=200,height=170)
     estimate_discounttt=Label(estimate_summaryfrme, text="Discount").place(x=0 ,y=0)
     estimate_discounttt1=Label(estimate_summaryfrme, text="$0.00").place(x=130 ,y=0)
-    estimate_subbb=Label(estimate_summaryfrme, text="Subtotal").place(x=0 ,y=21)
-    estimate_subbb1=Label(estimate_summaryfrme, text="$0.00").place(x=130 ,y=21)
-    estimate_ttaax=Label(estimate_summaryfrme, text="Tax1").place(x=0 ,y=42)
-    estimate_ttax1=Label(estimate_summaryfrme, text="$0.00").place(x=130 ,y=42)
-    estimate_costt=Label(estimate_summaryfrme, text="Extra cost").place(x=0 ,y=63)
-    estimate_costtt=Label(estimate_summaryfrme, text="$0.00").place(x=130 ,y=63)
-    estimate_total=Label(estimate_summaryfrme, text="Estimate total").place(x=0 ,y=84)
+    estimate_subbb=Label(estimate_summaryfrme, text="Subtotal").place(x=0 ,y=15)
+    estimate_subbb1=Label(estimate_summaryfrme, text="$0.00")
+    estimate_subbb1.place(x=130 ,y=15)
+    estimate_ttaax=Label(estimate_summaryfrme, text="Tax1").place(x=0 ,y=30)
+    estimate_ttax1=Label(estimate_summaryfrme, text="$0.00")
+    estimate_ttax1.place(x=130 ,y=30)
+    estimate_ttaaax=Label(estimate_summaryfrme, text="Tax2").place(x=0 ,y=45)
+    estimate_ttax2=Label(estimate_summaryfrme, text="$0.00")
+    estimate_ttax2.place(x=130 ,y=45)
+    estimate_costt=Label(estimate_summaryfrme, text="Extra cost").place(x=0 ,y=60)
+    estimate_costtt=Label(estimate_summaryfrme, text="$0.00").place(x=130 ,y=60)
+    estimate_total=Label(estimate_summaryfrme, text="Estimate total").place(x=0 ,y=75)
     estimate_total1=Label(estimate_summaryfrme, text="$0.00")
-    estimate_total1.place(x=130 ,y=84)
-    estimate_totalll=Label(estimate_summaryfrme, text="Total paid").place(x=0 ,y=105)
+    estimate_total1.place(x=130 ,y=75)
+    estimate_totalll=Label(estimate_summaryfrme, text="Total paid").place(x=0 ,y=90)
     estimate_totalpaid1=Label(estimate_summaryfrme, text="$0.00")
-    estimate_totalpaid1.place(x=130 ,y=105)
-    estimate_balancee=Label(estimate_summaryfrme, text="Balance").place(x=0 ,y=126)
+    estimate_totalpaid1.place(x=130 ,y=90)
+    estimate_balancee=Label(estimate_summaryfrme, text="Balance").place(x=0 ,y=105)
     estimate_balancee1=Label(estimate_summaryfrme, text="$0.00")
-    estimate_balancee1.place(x=130 ,y=126)
+    estimate_balancee1.place(x=130 ,y=105)
 
     estimate_fir5Frame1=Frame(estimate_pop,height=38,width=210)
     estimate_fir5Frame1.place(x=735,y=485)
@@ -2501,31 +2779,39 @@ def mainpage():
   #email
         
   def estimate_emailord():
-  # try:
-  #   emitid = pordtree.item(pordtree.focus())["values"][1]
-  #   sql = "select * from porder where porderid = %s"
-  #   val = (emitid, )
-  #   fbcursor.execute(sql, val)
-  #   emailnow = fbcursor.fetchone()
+    # try:
+    #   emitid = pordtree.item(pordtree.focus())["values"][1]
+    #   sql = "select * from porder where porderid = %s"
+    #   val = (emitid, )
+    #   fbcursor.execute(sql, val)
+    #   emailnow = fbcursor.fetchone()
     estimate_mailDetail=Toplevel()
     estimate_mailDetail.title("E-Mail")
     estimate_ep2 = PhotoImage(file = "images/fbicon.png")
     estimate_mailDetail.iconphoto(False, estimate_ep2)
     estimate_mailDetail.geometry("1030x550+150+120")
-  
+    
     def estimate_my_SMTP():
         if True:
             estimate_em_ser_conbtn.destroy()
             estimate_mysmtpservercon=LabelFrame(estimate_account_Frame,text="SMTP server connection(ask your ISP for your SMTP settings)", height=165, width=380)
             estimate_mysmtpservercon.place(x=610, y=110)
-            estimate_lbl_hostn=Label(estimate_mysmtpservercon, text="Hostname").place(x=5, y=10)
-            estimate_hostnent=Entry(estimate_mysmtpservercon, width=30).place(x=80, y=10)
-            estimate_lbl_portn=Label(estimate_mysmtpservercon, text="Port").place(x=5, y=35)
-            estimate_portent=Entry(estimate_mysmtpservercon, width=30).place(x=80, y=35)
-            estimate_elbl_usn=Label(estimate_mysmtpservercon, text="Username").place(x=5, y=60)
-            estimate_unament=Entry(estimate_mysmtpservercon, width=30).place(x=80, y=60)
-            estimate_eelbl_pasn=Label(estimate_mysmtpservercon, text="Password").place(x=5, y=85)
-            estimate_pwdent=Entry(estimate_mysmtpservercon, width=30).place(x=80, y=85)
+            estimate_lbl_hostn=Label(estimate_mysmtpservercon, text="Hostname")
+            estimate_lbl_hostn.place(x=5, y=10)
+            estimate_hostnent=Entry(estimate_mysmtpservercon, width=30)
+            estimate_hostnent.place(x=80, y=10)
+            estimate_lbl_portn=Label(estimate_mysmtpservercon, text="Port")
+            estimate_lbl_portn.place(x=5, y=35)
+            estimate_portent=Entry(estimate_mysmtpservercon, width=30)
+            estimate_portent.place(x=80, y=35)
+            estimate_elbl_usn=Label(estimate_mysmtpservercon, text="Username")
+            estimate_elbl_usn.place(x=5, y=60)
+            estimate_unament=Entry(estimate_mysmtpservercon, width=30)
+            estimate_unament.place(x=80, y=60)
+            estimate_eelbl_pasn=Label(estimate_mysmtpservercon, text="Password")
+            estimate_eelbl_pasn.place(x=5, y=85)
+            estimate_pwdent=Entry(estimate_mysmtpservercon, width=30)
+            estimate_pwdent.place(x=80, y=85)
             estimate_ssl_chkvar=IntVar()
             estimate_ssl_chkbtn=Checkbutton(estimate_mysmtpservercon, variable=estimate_ssl_chkvar, text="This server requires a secure connection(SSL)", onvalue=1, offvalue=0)
             estimate_ssl_chkbtn.place(x=50, y=110)
@@ -2544,15 +2830,23 @@ def mainpage():
     estimate_email_Notebook.place(x=0, y=0)
     estimate_messagelbframe=LabelFrame(estimate_email_Frame,text="Message", height=495, width=730)
     estimate_messagelbframe.place(x=5, y=5)
-    estimate_mylbl_emailtoaddr=Label(estimate_messagelbframe, text="Email to address").place(x=5, y=5)
-    estimate_emailtoent=Entry(estimate_messagelbframe, width=50).place(x=120, y=5)
-    estimate_sendemail_btn=Button(estimate_messagelbframe, text="Send Email", width=10, height=1).place(x=600, y=10)
-    # estimate_lbl_carcopyto=Label(messagelbframe, text="Carbon copy to").place(x=5, y=32)
-    # estimate_carcopyent=Entry(messagelbframe, width=50).place(x=120, y=32)
-    # estimate_stopemail_btn=Button(messagelbframe, text="Stop sending", width=10, height=1).place(x=600, y=40)
-    estimate_lbl_subject=Label(messagelbframe, text="Subject").place(x=5, y=59)
-    estimate_subent=Entry(messagelbframe, width=50).place(x=120, y=59)
 
+    global email_address, email_subject, email_from,email_pswrd,carcopyem_address,mframe,htcodeframe,lstfrm,langs
+    email_address = StringVar() 
+    email_subject = StringVar()
+    email_from = StringVar()
+    email_pswrd = StringVar()
+
+    estimate_mylbl_emailtoaddr=Label(estimate_messagelbframe, text="Email to address").place(x=5, y=5)
+    estimate_emailtoent=Entry(estimate_messagelbframe, width=70).place(x=120, y=5)
+    estimate_mylbl_ccto=Label(estimate_messagelbframe, text="Carbon Copy to").place(x=5, y=30)
+    estimate_cctoent=Entry(estimate_messagelbframe, width=70).place(x=120, y=30)
+    estimate_mylbl_emailsub=Label(estimate_messagelbframe, text="Subject").place(x=5, y=55)
+    estimate_subent=Entry(estimate_messagelbframe, width=70).place(x=120, y=55)
+    
+    estimate_sendemail_btn=Button(estimate_messagelbframe, text="Send Email", width=10, height=1).place(x=600, y=10)
+    estimate_sendemail_btn=Button(estimate_messagelbframe, text="Stop Sending", width=10, height=1).place(x=600, y=50)
+    
     estimate_nstyle = ttk.Style()
     estimate_nstyle.theme_use('default')
     estimate_nstyle.configure('TNotebook.Tab', background="#999999", width=20, padding=5)
@@ -2563,66 +2857,148 @@ def mainpage():
     estimate_mess_Notebook.add(estimate_htmlsourse_Frame, text="Html sourse code")
     estimate_mess_Notebook.place(x=5, y=90)
 
-    estimate_mybtn1=Button(estimate_emailmessage_Frame,width=31,height=23,compound = LEFT,image=selectall).place(x=0, y=1)  
-    estimate_mybtn2=Button(estimate_emailmessage_Frame,width=31,height=23,compound = LEFT,image=cut).place(x=36, y=1)
-    estimate_mybtn3=Button(estimate_emailmessage_Frame,width=31,height=23,compound = LEFT,image=copy).place(x=73, y=1)
-    estimate_mybtn4=Button(estimate_emailmessage_Frame,width=31,height=23,compound = LEFT,image=paste).place(x=105, y=1)
-    estimate_mybtn5=Button(estimate_emailmessage_Frame,width=31,height=23,compound = LEFT,image=undo).place(x=140, y=1)
-    estimate_mybtn6=Button(estimate_emailmessage_Frame,width=31,height=23,compound = LEFT,image=redo).place(x=175, y=1)
-    estimate_mybtn7=Button(estimate_emailmessage_Frame,width=31,height=23,compound = LEFT,image=bold).place(x=210, y=1)
-    estimate_mybtn8=Button(estimate_emailmessage_Frame,width=31,height=23,compound = LEFT,image=italics).place(x=245, y=1)
-    estimate_mybtn9=Button(estimate_emailmessage_Frame,width=31,height=23,compound = LEFT,image=underline).place(x=280, y=1)
-    estimate_mybtn10=Button(estimate_emailmessage_Frame,width=31,height=23,compound = LEFT,image=left).place(x=315, y=1)
-    estimate_mybtn11=Button(estimate_emailmessage_Frame,width=31,height=23,compound = LEFT,image=right).place(x=350, y=1)
-    estimate_mybtn12=Button(estimate_emailmessage_Frame,width=31,height=23,compound = LEFT,image=center).place(x=385, y=1)
-    estimate_mybtn13=Button(estimate_emailmessage_Frame,width=31,height=23,compound = LEFT,image=hyperlink).place(x=420, y=1)
-    estimate_mybtn14=Button(estimate_emailmessage_Frame,width=31,height=23,compound = LEFT,image=remove).place(x=455, y=1)
+    estimate_mybtn1=Button(estimate_emailmessage_Frame,width=31,height=23,compound = LEFT,image=selectall, command=lambda:estmemaiframe.event_generate('<Control a>'))
+    estimate_mybtn1.place(x=0, y=1)
 
-    estimate_dropcomp = ttk.Combobox(estimate_emailmessage_Frame, width=12, height=3).place(x=500, y=5)
-    estimate_mydropcompo = ttk.Combobox(estimate_emailmessage_Frame, width=6, height=3).place(x=600, y=5)
+    estimate_mybtn2=Button(estimate_emailmessage_Frame,width=31,height=23,compound = LEFT,image=cut,command=lambda :estmemaiframe.event_generate('<Control x>'))
+    estimate_mybtn2.place(x=36, y=1)
+
+    estimate_mybtn3=Button(estimate_emailmessage_Frame,width=31,height=23,compound = LEFT,image=copy,command=lambda :estmemaiframe.event_generate('<Control c>'))
+    estimate_mybtn3.place(x=73, y=1)
+
+    estimate_mybtn4=Button(estimate_emailmessage_Frame,width=31,height=23,compound = LEFT,image=paste,command=lambda :estmemaiframe.event_generate('<Control v>'))
+    estimate_mybtn4.place(x=105, y=1)
+
+    estimate_mybtn5=Button(estimate_emailmessage_Frame,width=31,height=23,compound = LEFT,image=undo)
+    estimate_mybtn5.place(x=140, y=1)
+
+    estimate_mybtn6=Button(estimate_emailmessage_Frame,width=31,height=23,compound = LEFT,image=redo)
+    estimate_mybtn6.place(x=175, y=1)
+
+    # fontSize=12
+    # fontStyle='Helvetica'
+    # def font_style(event):
+    #   global fontStyle
+    #   fontStyle=font_family__variable.get()
+    #   estmemaiframe.config(font=(fontStyle,fontSize))
+
+    estimate_mybtn7=Button(estimate_emailmessage_Frame,width=31,height=23,compound = LEFT,image=bold)
+    estimate_mybtn7.place(x=210, y=1)
+
+    estimate_mybtn8=Button(estimate_emailmessage_Frame,width=31,height=23,compound = LEFT,image=italics)
+    estimate_mybtn8.place(x=245, y=1)
+
+    estimate_mybtn9=Button(estimate_emailmessage_Frame,width=31,height=23,compound = LEFT,image=underline)
+    estimate_mybtn9.place(x=280, y=1)
+
+    def est_align_left():
+      data=estmemaiframe.get(0.0,END)
+      estmemaiframe.tag_config('left',justify=LEFT)
+      estmemaiframe.delete(0.0,END)
+      estmemaiframe.insert(INSERT,data,'left')
+
+    estimate_mybtn10=Button(estimate_emailmessage_Frame,width=31,height=23,compound = LEFT,image=left, command=est_align_left)
+    estimate_mybtn10.place(x=315, y=1)
+
+    def est_align_right():
+      data=estmemaiframe.get(0.0,END)
+      estmemaiframe.tag_config('right',justify=RIGHT)
+      estmemaiframe.delete(0.0,END)
+      estmemaiframe.insert(INSERT,data,'right')
+
+    estimate_mybtn11=Button(estimate_emailmessage_Frame,width=31,height=23,compound = LEFT,image=right, command=est_align_right)
+    estimate_mybtn11.place(x=350, y=1)
+
+    def est_align_center():
+      data=estmemaiframe.get(0.0,END)
+      estmemaiframe.tag_config('center',justify=CENTER)
+      estmemaiframe.delete(0.0,END)
+      estmemaiframe.insert(INSERT,data,'center')
+
+    estimate_mybtn12=Button(estimate_emailmessage_Frame,width=31,height=23,compound = LEFT,image=center, command=est_align_center)
+    estimate_mybtn12.place(x=385, y=1)
+
+    estimate_mybtn13=Button(estimate_emailmessage_Frame,width=31,height=23,compound = LEFT,image=hyperlink)
+    estimate_mybtn13.place(x=420, y=1)
+
+    estimate_mybtn14=Button(estimate_emailmessage_Frame,width=31,height=23,compound = LEFT,image=remove,command=lambda :estmemaiframe.delete(0.0,END))
+    estimate_mybtn14.place(x=455, y=1)
+
+    estimate_dropcomp = ttk.Combobox(estimate_emailmessage_Frame, width=12, height=7)
+    estimate_dropcomp['values'] = ('Black','Maroon','Green','Olive','Navy','Purple','Teal','Gray','Silver','Red','Lime','Yellow','Blue','Fuchsia','Aqua','White','Active Border','Active Caption','Application','Background','Button Face','Button Highlight','Button Shadow','Button Text','Caption Text','Gradient Active','Gradient Inactive','Gray Text','Highlight Background','Highlight Text','Hot Light','Inactive Border','Inactive Caption','Inactive Caption','Info Background','Info Text','meny Background','Menu Bar','Menu Highlight','Menu Text','Scroll Bar','3D dark Shadow','3D Light','Window Background','Window Frame','Window Text')
+    estimate_dropcomp.place(x=500, y=5)    
+    estimate_dropcomp.current(0)
+
+    # def est_color_select():
+    #   color=colorchooser.askcolor()
+    #   estmemaiframe.config(fg=color[1])
+
+    # estimate_mybtn15=Button(estimate_emailmessage_Frame,width=31,height=23,compound = LEFT,image=color,command=est_color_select)
+    # estimate_mybtn15.place(x=485, y=1)
+
+    
+    estimate_mydropcompo = ttk.Combobox(estimate_emailmessage_Frame, width=6, height=7)
+    estimate_mydropcompo['values'] = ('1','2','3','4','5','6','7')
+    estimate_mydropcompo.place(x=600, y=5)
+    estimate_mydropcompo.current(0)
     estimate_mframe=Frame(estimate_emailmessage_Frame, height=350, width=710, bg="white")
     estimate_mframe.place(x=0, y=28)
+  
+    estscrollbar = Scrollbar(estimate_mframe)
+    estscrollbar.place(x=20, y=120, height=5)
+    estmemaiframe=Text(estimate_mframe,yscrollcommand=estscrollbar.set,font=('Helvetica',12),undo=True)
+    estmemaiframe.pack(fill=BOTH,pady=5,expand=True)
+    estscrollbar.config(command=estmemaiframe.yview)
+
+
     estimate_e_btn1=Button(estimate_htmlsourse_Frame,width=31,height=23,compound = LEFT,image=selectall).place(x=0, y=1)
     estimate_e_btn2=Button(estimate_htmlsourse_Frame,width=31,height=23,compound = LEFT,image=cut).place(x=36, y=1)
     estimate_e_btn3=Button(estimate_htmlsourse_Frame,width=31,height=23,compound = LEFT,image=copy).place(x=73, y=1)
     estimate_e_btn4=Button(estimate_htmlsourse_Frame,width=31,height=23,compound = LEFT,image=paste).place(x=105, y=1)
     estimate_e_mframe=Frame(estimate_htmlsourse_Frame, height=350, width=710, bg="white")
     estimate_e_mframe.place(x=0, y=28)
-    estimate_attachlbframe=LabelFrame(estimate_email_Frame,text="Attachment(s)", height=350, width=280)
+    estimate_attachlbframe=LabelFrame(estimate_email_Frame,text="Attachment(s)", height=365, width=280)
     estimate_attachlbframe.place(x=740, y=5)
     estimate_htcodeframe=Frame(estimate_attachlbframe, height=220, width=265, bg="white").place(x=5, y=5)
     estimate_lbl_btn_info=Label(estimate_attachlbframe, text="Double click on attachment to view").place(x=30, y=230)
-    estimate_e_btn17=Button(estimate_attachlbframe, width=20, text="Add attacment file...").place(x=60, y=260)
-    estimate_e_btn18=Button(estimate_attachlbframe, width=20, text="Remove attacment").place(x=60, y=295)
+    estimate_e_btn17=Button(estimate_attachlbframe,image=photo,compound = LEFT,width=140,text="Add attacment file...")
+    estimate_e_btn17.place(x=60, y=260)
+    estimate_e_btn18=Button(estimate_attachlbframe, width=20, text="Remove attacment")
+    estimate_e_btn18.place(x=60, y=305)
     estimate_lbl_tt_info=Label(estimate_email_Frame, text="You can create predefined invoice, order, estimate\nand payment receipt email templates under Main\nmenu/Settings/E-Mail templates tab")
     estimate_lbl_tt_info.place(x=740, y=370)
 
     estimate_ready_frame=Frame(estimate_mailDetail, height=20, width=1080, bg="#b3b3b3").place(x=0,y=530)
     
-    estimate_sendatalbframe=LabelFrame(estimate_account_Frame,text="E-Mail(Sender data)",height=270, width=600)
+    estimate_sendatalbframe=LabelFrame(estimate_account_Frame,text="E-Mail(Sender data)",height=300, width=600)
     estimate_sendatalbframe.place(x=5, y=5)
     estimate_lbl_sendermail=Label(estimate_sendatalbframe, text="Your company email address").place(x=5, y=30)
-    estimate_sentent=Entry(estimate_sendatalbframe, width=40).place(x=195, y=30)
-    estimate_lbl_orcompanyname=Label(estimate_sendatalbframe, text="Your name or company name").place(x=5, y=60)
-    estimate_nament=Entry(estimate_sendatalbframe, width=40).place(x=195, y=60)
-    estimate_lbl_reply=Label(estimate_sendatalbframe, text="Reply to email address").place(x=5, y=90)
-    estimate_replyent=Entry(estimate_sendatalbframe, width=40).place(x=195, y=90)
-    estimate_lbl_sign=Label(estimate_sendatalbframe, text="Signature").place(x=5, y=120)
-    estimate_signent=Entry(estimate_sendatalbframe,width=50).place(x=100, y=120,height=75)
+    estimate_sentent=Entry(estimate_sendatalbframe, width=40)
+    estimate_sentent.place(x=195, y=30)
+    estimate_lbl_orcompanyname=Label(estimate_sendatalbframe, text="Your name or company name").place(x=5, y=70)
+    estimate_nament=Entry(estimate_sendatalbframe, width=40)
+    estimate_nament.place(x=195, y=70)
+    estimate_lbl_reply=Label(estimate_sendatalbframe, text="Reply to email address").place(x=5, y=110)
+    estimate_replyent=Entry(estimate_sendatalbframe, width=40)
+    estimate_replyent.place(x=195, y=110)
+    estimate_lbl_sign=Label(estimate_sendatalbframe, text="Signature").place(x=5, y=150)
+    estimate_signent=Entry(estimate_sendatalbframe,width=40)
+    estimate_signent.place(x=195, y=150,height=75)
     estimate_confirm_chkvar=IntVar()
     estimate_confirm_chkbtn=Checkbutton(estimate_sendatalbframe, variable=estimate_confirm_chkvar, text="Confirmation reading", onvalue=1, offvalue=0)
-    estimate_confirm_chkbtn.place(x=200, y=215)
-    estimate_e_mybtn18=Button(estimate_account_Frame, width=15, text="Save settings").place(x=25, y=285)
+    estimate_confirm_chkbtn.place(x=195, y=225)
+    estimate_e_mybtn18=Button(estimate_account_Frame, width=15, text="Save settings")
+    estimate_e_mybtn18.place(x=25, y=310)
 
     estimate_esendatalbframe=LabelFrame(estimate_account_Frame,text="SMTP Server",height=100, width=380)
     estimate_esendatalbframe.place(x=610, y=5)
     estimate_servar=IntVar()
-    estimate_SMTP_rbtn=Radiobutton(estimate_sendatalbframe, text="Use the Built-In SMTP Server Settings", variable=estimate_servar, value=1)
+    estimate_SMTP_rbtn=Radiobutton(estimate_esendatalbframe, text="Use the Built-In SMTP Server Settings", variable=estimate_servar, value=1)
     estimate_SMTP_rbtn.place(x=10, y=10)
-    estimate_MySMTP_rbtn=Radiobutton(estimate_sendatalbframe, text="Use My Own SMTP Server Settings(Recommended)", variable=estimate_servar, value=2, command=estimate_my_SMTP)
-    estimate_MySMTP_rbtn.place(x=10, y=40)
+    estimate_MySMTP_rbtn=Radiobutton(estimate_esendatalbframe, text="Use My Own SMTP Server Settings(Recommended)", variable=estimate_servar, value=2, command=estimate_my_SMTP)
+    estimate_MySMTP_rbtn.place(x=10, y=50)
     estimate_em_ser_conbtn=Button(estimate_account_Frame, text="Test E-mail Server Connection")
-    estimate_em_ser_conbtn.place(x=710, y=110)
+    estimate_em_ser_conbtn.place(x=710, y=140)
 
 
 
