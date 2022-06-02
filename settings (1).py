@@ -227,6 +227,7 @@ def mainpage():
     estimate_pop.geometry("950x690+150+0")
 
     def add_new_estimate():
+      #estidd = estimate_number_entry0.get()
       estimate_number = estimate_number_entry.get()
       estdate = estimate_date_entry.get_date()
       duedate = estimate_duedate_entry.get_date()
@@ -256,7 +257,7 @@ def mainpage():
       term_of_payment = estimate_eterms.get()
       terms = estimates_eterm_text.get("1.0","end-1c")
       comments = estimates_ecomments.get("1.0","end-1c")
-      # private_notes = estimates_pvt_notes.get("1.0",END)
+      private_notes = estimates_pvt_notes.get("1.0","end-1c")
 
       # private_sql = "INSERT INTO invoice_private_notes(private_notes) VALUES(%s)"
       # private_val = (private_notes,)
@@ -274,11 +275,47 @@ def mainpage():
 
       
 
-      estimate_sql="INSERT INTO estimate (estimate_number,estdate,duedate,status,emailon,printon,esttot,totpaid,balance,extracostname,extracost,template, salesper,discourate,tax1, category,businessname,businessaddress,shipname, shipaddress,cpemail,cpmobileforsms,title_text, header_text,footer_text,term_of_payment,terms,comments) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)" #adding values into db
-      estimate_val=(estimate_number,estdate,duedate,status,emailon,printon,esttot,totpaid,balance,extracostname,extracost,template, salesper,discourate,tax1, category,businessname,businessaddress,shipname, shipaddress,cpemail,cpmobileforsms,title_text, header_text, footer_text,term_of_payment,terms,comments)
+      estimate_sql="INSERT INTO estimate (estimate_number,estdate,duedate,status,emailon,printon,esttot,totpaid,balance,extracostname,extracost,template, salesper,discourate,tax1, category,businessname,businessaddress,shipname, shipaddress,cpemail,cpmobileforsms,title_text, header_text,footer_text,term_of_payment,terms,comments,private_notes) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)" #adding values into db
+      estimate_val=(estimate_number,estdate,duedate,status,emailon,printon,esttot,totpaid,balance,extracostname,extracost,template, salesper,discourate,tax1, category,businessname,businessaddress,shipname, shipaddress,cpemail,cpmobileforsms,title_text, header_text, footer_text,term_of_payment,terms,comments,private_notes)
       fbcursor.execute(estimate_sql,estimate_val)
       fbilldb.commit()
-      messagebox.showinfo("F-Billing Revolution","Estimate saved")
+      #messagebox.showinfo("F-Billing Revolution","Estimate saved")
+
+   
+      sql = "select * from company"
+      fbcursor.execute(sql)
+      est_pro_ser = fbcursor.fetchone()
+      for child in estimate_tree.get_children():
+        insert_estpro_ser = list(estimate_tree.item(child, 'values'))
+        if not est_pro_ser:
+          sql = 'insert into storingproduct(estimate_number,sku,name,description,unitprice,quantity,peices,price) values(%s,%s,%s,%s,%s,%s,%s,%s)'
+          val = (estimate_number,insert_estpro_ser[0],insert_estpro_ser[1],insert_estpro_ser[2],insert_estpro_ser[3],insert_estpro_ser[4],insert_estpro_ser[5],insert_estpro_ser[6])
+          fbcursor.execute(sql,val)
+          fbilldb.commit()
+        elif not est_pro_ser[12] == "1":
+          sql = 'insert into storingproduct(estimate_number,sku,name,description,unitprice,quantity,peices,price) values(%s,%s,%s,%s,%s,%s,%s,%s)'
+          val = (estimate_number,insert_estpro_ser[0],insert_estpro_ser[1],insert_estpro_ser[2],insert_estpro_ser[3],insert_estpro_ser[4],insert_estpro_ser[5],insert_estpro_ser[6])
+          fbcursor.execute(sql,val)
+          fbilldb.commit()
+        elif not est_pro_ser[12] == "2":
+          sql = 'insert into storingproduct(estimate_number,sku,name,description,unitprice,quantity,peices,tax1,price) values(%s,%s,%s,%s,%s,%s,%s,%s,%s)'
+          val = (estimate_number,insert_estpro_ser[0],insert_estpro_ser[1],insert_estpro_ser[2],insert_estpro_ser[3],insert_estpro_ser[4],insert_estpro_ser[5],insert_estpro_ser[6],insert_estpro_ser[7])
+          fbcursor.execute(sql,val)
+          fbilldb.commit()
+        elif not est_pro_ser[12] == "3":
+          sql = 'insert into storingproduct(estimate_number,sku,name,description,unitprice,quantity,peices,tax1,tax2,price) values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'
+          val = (estimate_number,insert_estpro_ser[0],insert_estpro_ser[1],insert_estpro_ser[2],insert_estpro_ser[3],insert_estpro_ser[4],insert_estpro_ser[5],insert_estpro_ser[6],insert_estpro_ser[7],insert_estpro_ser[8])
+          fbcursor.execute(sql,val)
+          fbilldb.commit()
+      
+      #---------------Documents Insert--------------#
+      for child in doc_tree.get_children():
+        est_doc_list = list(doc_tree.item(child, 'values'))
+        sql = 'insert into documents(estimate_number,documents) values(%s,%s)'
+        val = (estimate_number,est_doc_list[1])
+        fbcursor.execute(sql,val)
+        fbilldb.commit()
+
 
 
     #select customer
@@ -900,13 +937,13 @@ def mainpage():
 
         elif estcurrsymb[1] == "after amount with space":
           if i[13] > i[14]:
-            estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='hello', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('green',))
+            estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('green',))
             countp += 1
           elif i[12] == '1':
-            estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='hello', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('blue',))
+            estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('blue',))
             countp += 1
           else:
-            estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='hello', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('red',))
+            estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('red',))
             countp += 1
 
       
@@ -949,11 +986,11 @@ def mainpage():
           fbcursor.execute(sql)
           create_maintree_insert = fbcursor.fetchone()
           if prosele[10] == '1':
-            tax1 = '🗹'
+            tax1 = 'yes'
           else:
             tax1 = ''
           if prosele[19] == '1':
-            tax2 = '🗹'
+            tax2 = 'yes'
           else:
             tax2 = ''
           if not create_maintree_insert:
@@ -961,47 +998,65 @@ def mainpage():
 
           elif create_maintree_insert[12] == "1":
             estimate_tree.insert(parent='', index='end',text='', values=(prosele[2],prosele[4],prosele[5],prosele[7],1,prosele[8],prosele[7]*1))
+            extracs = 0.0
+            discou = 0.0
             total = 0.0
             for child in estimate_tree.get_children():
               total += float(estimate_tree.item(child, 'values')[6])
+            discou = (total*float(estimates_discount2.get())/100)
+            extracs = (extracs+float(estimates_cost3.get()))
+            estimate_costtt.config(text=estimates_cost3.get())
+            estimate_discounttt1.config(text=discou)
             estpriceview.config(text=total)
-            estimate_total1.config(text=total)
-            estimate_balancee1.config(text=total)
-            estimate_subbb1.config(text=total)
+            estimate_total1.config(text=total-discou+extracs)
+            estimate_balancee1.config(text=total-discou+extracs)
+            estimate_subbb1.config(text=total-discou)
           elif create_maintree_insert[12] == "2":
             estimate_tree.insert(parent='', index='end',text='', values=(prosele[2],prosele[4],prosele[5],prosele[7],1,prosele[8],tax1,prosele[7]*1))
+            extracs = 0.0
+            discou = 0.0
             total = 0.0
             for child in estimate_tree.get_children():
               total += float(estimate_tree.item(child, 'values')[7])
+            discou = (total*float(estimates_discount2.get())/100)
+            extracs = (extracs+float(estimates_cost3.get()))
+            estimate_costtt.config(text=estimates_cost3.get())
+            estimate_discounttt1.config(text=discou)
             estpriceview.config(text=total)
-            estimate_subbb1.config(text=total)
+            estimate_subbb1.config(text=total-discou)
 
             tot = 0.0
             totaltax1 = 0.0
             for child in estimate_tree.get_children():
               checktax1 = list(estimate_tree.item(child, 'values'))
-              if checktax1[6] == "🗹":
+              if checktax1[6] == "yes":
                 totaltax1 =(totaltax1 + float(checktax1[7]))
                 estimate_ttax1.config(text=(float(totaltax1)*float(estimates_tax4.get())/100))
                 tot = (float(totaltax1)*float(estimates_tax4.get())/100)
               else:
                 pass
-            estimate_total1.config(text=total+tot)
-            estimate_balancee1.config(text=total+tot)
+            estimate_total1.config(text=total+tot-discou+extracs)
+            estimate_balancee1.config(text=total+tot-discou+extracs)
               
           elif create_maintree_insert[12] == "3":
             estimate_tree.insert(parent='', index='end',text='', values=(prosele[2],prosele[4],prosele[5],prosele[7],1,prosele[8],tax1,tax2,prosele[7]*1))
+            extracs = 0.0
+            discou = 0.0
             total = 0.0
             for child in estimate_tree.get_children():
               total += float(estimate_tree.item(child, 'values')[8])
+            extracs = (extracs+float(estimates_cost3.get()))
+            estimate_costtt.config(text=estimates_cost3.get())
+            discou = (total*float(estimates_discount2.get())/100)
+            estimate_discounttt1.config(text=discou)
             estpriceview.config(text=total)
-            estimate_subbb1.config(text=total)
+            estimate_subbb1.config(text=total-discou)
             
             tot = 0.0
             totaltax1 = 0.0
             for child in estimate_tree.get_children():
               checktax1 = list(estimate_tree.item(child, 'values'))
-              if checktax1[6] == "🗹":
+              if checktax1[6] == "yes":
                 totaltax1 =(totaltax1 + float(checktax1[8]))
                 estimate_ttax1.config(text=(float(totaltax1)*float(estimates_tax4.get())/100))
                 tot = (float(totaltax1)*float(estimates_tax4.get())/100)
@@ -1012,7 +1067,7 @@ def mainpage():
             totaltax2 = 0.0
             for child in estimate_tree.get_children():
               checktax1 = list(estimate_tree.item(child, 'values'))
-              if checktax1[7] == "🗹":
+              if checktax1[7] == "yes":
                 totaltax2 =(totaltax2 + float(checktax1[8]))
                 estimate_ttax2.config(text=(float(totaltax2)*float(estimates_tax5.get())/100))
                 
@@ -1020,8 +1075,8 @@ def mainpage():
               else:
                 pass
 
-            estimate_total1.config(text=total+tot+tot2)
-            estimate_balancee1.config(text=total+tot+tot2)
+            estimate_total1.config(text=total+tot+tot2-discou+extracs)
+            estimate_balancee1.config(text=total+tot+tot2-discou+extracs)
           
           estimate_newselection.destroy()
 
@@ -1259,7 +1314,7 @@ def mainpage():
     estimate_labelframe.place(x=652,y=5,width=290,height=170)
 
     
-
+   
     estimate_order0=Label(estimate_labelframe,text="Estimate#").place(x=5,y=5)
     estimate_number_entry=Entry(estimate_labelframe,width=25)
     estimate_number_entry.place(x=100,y=5,)
@@ -1333,7 +1388,7 @@ def mainpage():
     fbcursor.execute(sql)
     taxdata = fbcursor.fetchone()
     if not taxdata:
-      global estimate_tree
+      #global estimate_tree
       estimate_tree=ttk.Treeview(estimate_listFrame)
       estimate_tree["columns"]=["1","2","3","4","5","6","7"]
 
@@ -1431,33 +1486,7 @@ def mainpage():
     estimate_tree.pack(fill="both", expand=1)
     estimate_listFrame.pack(side="top", fill="both", padx=5, pady=3, expand=1)
 
-    #----------------------------product/service insert------------------------#
-    sql = "select * from company"
-    fbcursor.execute(sql)
-    est_pro_ser = fbcursor.fetchone()
-    for child in estimate_tree.get_children():
-      insert_estpro_ser = list(estimate_tree.item(child, 'values'))
-      if not est_pro_ser:
-        sql = 'insert into storingproduct(estimate_number,sku,name,description,unitprice,quantity,peices,price) values(%s,%s,%s,%s,%s,%s,%s,%s)'
-        val = (insert_estpro_ser[0],insert_estpro_ser[1],insert_estpro_ser[2],insert_estpro_ser[3],insert_estpro_ser[4],insert_estpro_ser[5],insert_estpro_ser[6])
-        fbcursor.execute(sql,val)
-        fbilldb.commit()
-      elif not est_pro_ser[12] == "1":
-        sql = 'insert into storingproduct(estimate_number,sku,name,description,unitprice,quantity,peices,price) values(%s,%s,%s,%s,%s,%s,%s,%s)'
-        val = (insert_estpro_ser[0],insert_estpro_ser[1],insert_estpro_ser[2],insert_estpro_ser[3],insert_estpro_ser[4],insert_estpro_ser[5],insert_estpro_ser[6])
-        fbcursor.execute(sql,val)
-        fbilldb.commit()
-      elif not est_pro_ser[12] == "2":
-        sql = 'insert into storingproduct(estimate_number,sku,name,description,unitprice,quantity,peices,price) values(%s,%s,%s,%s,%s,%s,%s,%s)'
-        val = (insert_estpro_ser[0],insert_estpro_ser[1],insert_estpro_ser[2],insert_estpro_ser[3],insert_estpro_ser[4],insert_estpro_ser[5],insert_estpro_ser[6],insert_estpro_ser[7])
-        fbcursor.execute(sql,val)
-        fbilldb.commit()
-      elif not est_pro_ser[12] == "3":
-        sql = 'insert into storingproduct(estimate_number,sku,name,description,unitprice,quantity,peices,price) values(%s,%s,%s,%s,%s,%s,%s,%s)'
-        val = (insert_estpro_ser[0],insert_estpro_ser[1],insert_estpro_ser[2],insert_estpro_ser[3],insert_estpro_ser[4],insert_estpro_ser[5],insert_estpro_ser[6],insert_estpro_ser[7],insert_estpro_ser[8])
-        fbcursor.execute(sql,val)
-        fbilldb.commit()
-
+    
     
 
 
@@ -1493,17 +1522,22 @@ def mainpage():
     for i in est_extracost_data:
       exdata.append(i[0])
 
+    
     estimates_cost1=Label(estimate_labelfram1,text="Extra cost name").place(x=2,y=5)
     estimates_costname1=ttk.Combobox(estimate_labelfram1, value=exdata,width=20)
     estimates_costname1.place(x=115,y=5)
 
     estimates_rate=Label(estimate_labelfram1,text="Discount rate").place(x=370,y=5)
-    estimates_discount2=Spinbox(estimate_labelfram1,width=6,from_=0,to=10,justify=RIGHT)
+    estimates_discount2=Spinbox(estimate_labelfram1,width=6,from_=0,to=100,justify=RIGHT)
     estimates_discount2.place(x=460,y=5)
+    
 
+    estextra=IntVar()
     estimates_cost2=Label(estimate_labelfram1,text="Extra cost").place(x=35,y=35)
-    estimates_cost3=Entry(estimate_labelfram1,width=10)
+    estimates_cost3=Entry(estimate_labelfram1,width=10,textvariable=estextra)
     estimates_cost3.place(x=115,y=35)
+    
+
     estimates_tax=Label(estimate_labelfram1,text="Tax1").place(x=420,y=35)
     estimates_tax4=Entry(estimate_labelfram1,width=7)
     estimates_tax4.place(x=460,y=35)
@@ -1656,10 +1690,10 @@ def mainpage():
           image.pack()
     
 
-    doc_plus_btn=Button(estimate_documentFrame,text="+",width=20,height=25,image=photo,command=attach_file)
+    doc_plus_btn=Button(estimate_documentFrame,text="+",width=2,height=2,command=attach_file)
     doc_plus_btn.place(x=5,y=10)
-    doc_minus_btn=Button(estimate_documentFrame,height=25,width=20,text="-",command=delete_file)
-    doc_minus_btn.place(x=5,y=30)
+    doc_minus_btn=Button(estimate_documentFrame,height=2,width=2,text="-",command=delete_file)
+    doc_minus_btn.place(x=5,y=60)
     # doc_txt_label=Label(estimate_documentFrame,text="Attached documents or image files.If you attach large email then email taken long time to send").place(x=50,y=10)
     global doc_tree
     doc_tree=ttk.Treeview(estimate_documentFrame, height=5)
@@ -1675,13 +1709,7 @@ def mainpage():
     doc_tree.place(x=50, y=25)
     doc_tree.bind('<Double-Button-1>',show_sel_file)
 
-    #---------------Documents Insert--------------#
-    for child in doc_tree.get_children():
-      est_doc_list = list(doc_tree.item(child, 'values'))
-      sql = 'insert into documents(estimate_number,documents) values(%s,%s)'
-      val = (est_doc_list[1])
-      fbcursor.execute(sql,val)
-      fbilldb.commit()
+   
 
     # #---------------Refresh insert tree--------------#
     # for record in est_tree.get_children():
@@ -1701,8 +1729,9 @@ def mainpage():
     estimate_fir4Frame1.place(x=740,y=520)
     estimate_summaryfrme = LabelFrame(estimate_fir4Frame1,text="Summary",font=("arial",15))
     estimate_summaryfrme.place(x=0,y=0,width=200,height=170)
-    estimate_discounttt=Label(estimate_summaryfrme, text="Discount").place(x=0 ,y=0)
-    estimate_discounttt1=Label(estimate_summaryfrme, text="$0.00").place(x=130 ,y=0)
+    estimate_discounttt=Label(estimate_summaryfrme, text=""+estimates_discount2.get()+"%"+"Discount").place(x=0 ,y=0)
+    estimate_discounttt1=Label(estimate_summaryfrme, text="$0.00")
+    estimate_discounttt1.place(x=130 ,y=0)
     estimate_subbb=Label(estimate_summaryfrme, text="Subtotal").place(x=0 ,y=15)
     estimate_subbb1=Label(estimate_summaryfrme, text="$0.00")
     estimate_subbb1.place(x=130 ,y=15)
@@ -1713,7 +1742,8 @@ def mainpage():
     estimate_ttax2=Label(estimate_summaryfrme, text="$0.00")
     estimate_ttax2.place(x=130 ,y=45)
     estimate_costt=Label(estimate_summaryfrme, text="Extra cost").place(x=0 ,y=60)
-    estimate_costtt=Label(estimate_summaryfrme, text="$0.00").place(x=130 ,y=60)
+    estimate_costtt=Label(estimate_summaryfrme, text="$0.00")
+    estimate_costtt.place(x=130 ,y=60)
     estimate_total=Label(estimate_summaryfrme, text="Estimate total").place(x=0 ,y=75)
     estimate_total1=Label(estimate_summaryfrme, text="$0.00")
     estimate_total1.place(x=130 ,y=75)
@@ -2874,7 +2904,7 @@ def mainpage():
         psimage.photo = image
         psimage.pack()
 
-  def UploadAction(event=None):
+  def est_UploadAction(event=None):
       global filenamez
 
       filenamez = askopenfilename(filetypes=(("png file ",'.png'),("jpg file", ".jpg"), ('PDF', '.pdf',), ("All files", ".*"),))
@@ -3060,13 +3090,18 @@ def mainpage():
     estimate_attachlbframe=LabelFrame(estimate_email_Frame,text="Attachment(s)", height=365, width=280)
     estimate_attachlbframe.place(x=740, y=5)
     estframe = StringVar()
-    estimate_htcodeframe=Listbox(estimate_attachlbframe, height=220, width=265, bg="white",listvariable=estframe)
+    estimate_htcodeframe=Listbox(estimate_attachlbframe, height=13, width=43, bg="white",listvariable=estframe)
     estimate_htcodeframe.place(x=5, y=5)
     estimate_htcodeframe.bind('<Double-Button-1>',est_empsfile_image)
     estimate_lbl_btn_info=Label(estimate_attachlbframe, text="Double click on attachment to view").place(x=30, y=230)
-    estimate_e_btn17=Button(estimate_attachlbframe,image=photo,compound = LEFT,width=140,text="Add attacment file...",command=UploadAction)
+    estimate_e_btn17=Button(estimate_attachlbframe,image=photo,compound = LEFT,width=140,text="Add attacment file...",command=est_UploadAction)
     estimate_e_btn17.place(x=60, y=260)
-    estimate_e_btn18=Button(estimate_attachlbframe, width=20, text="Remove attacment")
+    def est_deletefile():
+      est_remove=estimate_htcodeframe.curselection()
+      yawn=estimate_htcodeframe.get(est_remove) 
+      print(yawn)       
+      estimate_htcodeframe.delete(ACTIVE)
+    estimate_e_btn18=Button(estimate_attachlbframe, width=20, text="Remove attacment",command=est_deletefile)
     estimate_e_btn18.place(x=60, y=305)
     estimate_lbl_tt_info=Label(estimate_email_Frame, text="You can create predefined invoice, order, estimate\nand payment receipt email templates under Main\nmenu/Settings/E-Mail templates tab")
     estimate_lbl_tt_info.place(x=740, y=370)
@@ -3079,7 +3114,7 @@ def mainpage():
     estimate_sentent=Entry(estimate_sendatalbframe, width=40)
     estimate_sentent.place(x=250, y=30)
     estimate_lbl_orcompanyname=Label(estimate_sendatalbframe, text="Password").place(x=120, y=70)
-    estimate_nament=Entry(estimate_sendatalbframe, width=40)
+    estimate_nament=Entry(estimate_sendatalbframe, width=40,show="*")
     estimate_nament.place(x=250, y=70)
     # estimate_lbl_reply=Label(estimate_sendatalbframe, text="Reply to email address").place(x=5, y=110)
     # estimate_replyent=Entry(estimate_sendatalbframe, width=40)
