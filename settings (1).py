@@ -259,19 +259,6 @@ def mainpage():
       comments = estimates_ecomments.get("1.0","end-1c")
       private_notes = estimates_pvt_notes.get("1.0","end-1c")
 
-      # private_sql = "INSERT INTO invoice_private_notes(private_notes) VALUES(%s)"
-      # private_val = (private_notes,)
-      # fbcursor.execute(private_sql,private_val)
-      # fbilldb.commit()
-
-      # private_get_sql = "SELECT invoicepvtnoteid FROM invoice_private_notes WHERE private_notes=%s"
-      # private_get_val = (private_notes,)
-      # fbcursor.execute(private_get_sql,private_get_val)
-      # private_data = fbcursor.fetchone()
-      # privatenoteid = 0
-      # for p in private_data:
-      #   pass
-      # privatenoteid += p
 
       
 
@@ -315,6 +302,17 @@ def mainpage():
         val = (estimate_number,est_doc_list[1])
         fbcursor.execute(sql,val)
         fbilldb.commit()
+      #---------------Refresh insert tree--------------#
+      for record in est_tree.get_children():
+        est_tree.delete(record)
+      sql = "select * from estimate"
+      fbcursor.execute(sql)
+      est_refresh = fbcursor.fetchall()
+      count0 = 0
+      for i in est_refresh:
+        est_tree.insert(parent='', index='end', iid=count0, text='', values=('',i[1],i[2],i[3],'',i[4],i[5],i[6],i[7],i[8]))
+        count0 += 1
+      estimate_pop.destroy()
 
 
 
@@ -914,7 +912,7 @@ def mainpage():
             countp += 1
 
         elif estcurrsymb[1] == "before amount with space":
-          if i[13] > i[14]:
+          if (i[13]) > (i[14]):
             estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('green',))
             countp += 1
           elif i[12] == '1':
@@ -925,7 +923,7 @@ def mainpage():
             countp += 1
 
         elif estcurrsymb[1] == "after amount":
-          if i[13] > i[14]:
+          if (i[13]) > (i[14]):
             estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('green',))
             countp += 1
           elif i[12] == '1':
@@ -936,7 +934,7 @@ def mainpage():
             countp += 1
 
         elif estcurrsymb[1] == "after amount with space":
-          if i[13] > i[14]:
+          if (i[13]) > (i[14]):
             estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('green',))
             countp += 1
           elif i[12] == '1':
@@ -974,111 +972,111 @@ def mainpage():
       estimate_scrollbar10.config( command=tree.yview )
 
       def estselepro():
-          global estpriceview
-          estpriceview = Label(estimate_listFrame,bg="#f5f3f2")
-          estpriceview.place(x=850,y=200,width=78,height=18)
-          proskuid = estimate_cusventtree1.item(estimate_cusventtree1.focus())["values"][0]
-          sql = "select * from Productservice where sku = %s"
-          val = (proskuid,)
-          fbcursor.execute(sql,val)
-          prosele = fbcursor.fetchone()
-          sql = "select * from company"
-          fbcursor.execute(sql)
-          create_maintree_insert = fbcursor.fetchone()
-          if prosele[10] == '1':
-            tax1 = 'yes'
-          else:
-            tax1 = ''
-          if prosele[19] == '1':
-            tax2 = 'yes'
-          else:
-            tax2 = ''
-          if not create_maintree_insert:
-            estimate_tree.insert(parent='', index='end',text='', values=(prosele[2],prosele[4],prosele[5],prosele[7],1,prosele[8],tax1,prosele[7]*1))
+        global estpriceview
+        estpriceview = Label(estimate_listFrame,bg="#f5f3f2")
+        estpriceview.place(x=850,y=200,width=78,height=18)
+        proskuid = estimate_cusventtree1.item(estimate_cusventtree1.focus())["values"][0]
+        sql = "select * from Productservice where sku = %s"
+        val = (proskuid,)
+        fbcursor.execute(sql,val)
+        prosele = fbcursor.fetchone()
+        sql = "select * from company"
+        fbcursor.execute(sql)
+        create_maintree_insert = fbcursor.fetchone()
+        if prosele[10] == '1':
+          tax1 = 'yes'
+        else:
+          tax1 = ''
+        if prosele[19] == '1':
+          tax2 = 'yes'
+        else:
+          tax2 = ''
+        if not create_maintree_insert:
+          estimate_tree.insert(parent='', index='end',text='', values=(prosele[2],prosele[4],prosele[5],prosele[7],1,prosele[8],tax1,prosele[7]*1))
 
-          elif create_maintree_insert[12] == "1":
-            estimate_tree.insert(parent='', index='end',text='', values=(prosele[2],prosele[4],prosele[5],prosele[7],1,prosele[8],prosele[7]*1))
-            extracs = 0.0
-            discou = 0.0
-            total = 0.0
-            for child in estimate_tree.get_children():
-              total += float(estimate_tree.item(child, 'values')[6])
-            discou = (total*float(estimates_discount2.get())/100)
-            extracs = (extracs+float(estimates_cost3.get()))
-            estimate_costtt.config(text=estimates_cost3.get())
-            estimate_discounttt1.config(text=discou)
-            estpriceview.config(text=total)
-            estimate_total1.config(text=total-discou+extracs)
-            estimate_balancee1.config(text=total-discou+extracs)
-            estimate_subbb1.config(text=total-discou)
-          elif create_maintree_insert[12] == "2":
-            estimate_tree.insert(parent='', index='end',text='', values=(prosele[2],prosele[4],prosele[5],prosele[7],1,prosele[8],tax1,prosele[7]*1))
-            extracs = 0.0
-            discou = 0.0
-            total = 0.0
-            for child in estimate_tree.get_children():
-              total += float(estimate_tree.item(child, 'values')[7])
-            discou = (total*float(estimates_discount2.get())/100)
-            extracs = (extracs+float(estimates_cost3.get()))
-            estimate_costtt.config(text=estimates_cost3.get())
-            estimate_discounttt1.config(text=discou)
-            estpriceview.config(text=total)
-            estimate_subbb1.config(text=total-discou)
+        elif create_maintree_insert[12] == "1":
+          estimate_tree.insert(parent='', index='end',text='', values=(prosele[2],prosele[4],prosele[5],prosele[7],1,prosele[8],prosele[7]*1))
+          extracs = 0.0
+          discou = 0.0
+          total = 0.0
+          for child in estimate_tree.get_children():
+            total += float(estimate_tree.item(child, 'values')[6])
+          discou = (total*float(estimates_discount2.get())/100)
+          extracs = (extracs+float(estimates_cost3.get()))
+          estimate_costtt.config(text=estimates_cost3.get())
+          estimate_discounttt1.config(text=discou)
+          estpriceview.config(text=total)
+          estimate_total1.config(text=total-discou+extracs)
+          estimate_balancee1.config(text=total-discou+extracs)
+          estimate_subbb1.config(text=total-discou)
+        elif create_maintree_insert[12] == "2":
+          estimate_tree.insert(parent='', index='end',text='', values=(prosele[2],prosele[4],prosele[5],prosele[7],1,prosele[8],tax1,prosele[7]*1))
+          extracs = 0.0
+          discou = 0.0
+          total = 0.0
+          for child in estimate_tree.get_children():
+            total += float(estimate_tree.item(child, 'values')[7])
+          discou = (total*float(estimates_discount2.get())/100)
+          extracs = (extracs+float(estimates_cost3.get()))
+          estimate_costtt.config(text=estimates_cost3.get())
+          estimate_discounttt1.config(text=discou)
+          estpriceview.config(text=total)
+          estimate_subbb1.config(text=total-discou)
 
-            tot = 0.0
-            totaltax1 = 0.0
-            for child in estimate_tree.get_children():
-              checktax1 = list(estimate_tree.item(child, 'values'))
-              if checktax1[6] == "yes":
-                totaltax1 =(totaltax1 + float(checktax1[7]))
-                estimate_ttax1.config(text=(float(totaltax1)*float(estimates_tax4.get())/100))
-                tot = (float(totaltax1)*float(estimates_tax4.get())/100)
-              else:
-                pass
-            estimate_total1.config(text=total+tot-discou+extracs)
-            estimate_balancee1.config(text=total+tot-discou+extracs)
-              
-          elif create_maintree_insert[12] == "3":
-            estimate_tree.insert(parent='', index='end',text='', values=(prosele[2],prosele[4],prosele[5],prosele[7],1,prosele[8],tax1,tax2,prosele[7]*1))
-            extracs = 0.0
-            discou = 0.0
-            total = 0.0
-            for child in estimate_tree.get_children():
-              total += float(estimate_tree.item(child, 'values')[8])
-            extracs = (extracs+float(estimates_cost3.get()))
-            estimate_costtt.config(text=estimates_cost3.get())
-            discou = (total*float(estimates_discount2.get())/100)
-            estimate_discounttt1.config(text=discou)
-            estpriceview.config(text=total)
-            estimate_subbb1.config(text=total-discou)
+          tot = 0.0
+          totaltax1 = 0.0
+          for child in estimate_tree.get_children():
+            checktax1 = list(estimate_tree.item(child, 'values'))
+            if checktax1[6] == "yes":
+              totaltax1 =(totaltax1 + float(checktax1[7]))
+              estimate_ttax1.config(text=(float(totaltax1)*float(estimates_tax4.get())/100))
+              tot = (float(totaltax1)*float(estimates_tax4.get())/100)
+            else:
+              pass
+          estimate_total1.config(text=total+tot-discou+extracs)
+          estimate_balancee1.config(text=total+tot-discou+extracs)
             
-            tot = 0.0
-            totaltax1 = 0.0
-            for child in estimate_tree.get_children():
-              checktax1 = list(estimate_tree.item(child, 'values'))
-              if checktax1[6] == "yes":
-                totaltax1 =(totaltax1 + float(checktax1[8]))
-                estimate_ttax1.config(text=(float(totaltax1)*float(estimates_tax4.get())/100))
-                tot = (float(totaltax1)*float(estimates_tax4.get())/100)
-              else:
-                pass
+        elif create_maintree_insert[12] == "3":
+          estimate_tree.insert(parent='', index='end',text='', values=(prosele[2],prosele[4],prosele[5],prosele[7],1,prosele[8],tax1,tax2,prosele[7]*1))
+          extracs = 0.0
+          discou = 0.0
+          total = 0.0
+          for child in estimate_tree.get_children():
+            total += float(estimate_tree.item(child, 'values')[8])
+          extracs = (extracs+float(estimates_cost3.get()))
+          estimate_costtt.config(text=estimates_cost3.get())
+          discou = (total*float(estimates_discount2.get())/100)
+          estimate_discounttt1.config(text=discou)
+          estpriceview.config(text=total)
+          estimate_subbb1.config(text=total-discou)
             
-            tot2 = 0.0
-            totaltax2 = 0.0
-            for child in estimate_tree.get_children():
-              checktax1 = list(estimate_tree.item(child, 'values'))
-              if checktax1[7] == "yes":
-                totaltax2 =(totaltax2 + float(checktax1[8]))
-                estimate_ttax2.config(text=(float(totaltax2)*float(estimates_tax5.get())/100))
-                
-                tot2 = (float(totaltax2)*float(estimates_tax5.get())/100)
-              else:
-                pass
-
-            estimate_total1.config(text=total+tot+tot2-discou+extracs)
-            estimate_balancee1.config(text=total+tot+tot2-discou+extracs)
+          tot = 0.0
+          totaltax1 = 0.0
+          for child in estimate_tree.get_children():
+            checktax1 = list(estimate_tree.item(child, 'values'))
+            if checktax1[6] == "yes":
+              totaltax1 =(totaltax1 + float(checktax1[8]))
+              estimate_ttax1.config(text=(float(totaltax1)*float(estimates_tax4.get())/100))
+              tot = (float(totaltax1)*float(estimates_tax4.get())/100)
+            else:
+              pass
           
-          estimate_newselection.destroy()
+          tot2 = 0.0
+          totaltax2 = 0.0
+          for child in estimate_tree.get_children():
+            checktax1 = list(estimate_tree.item(child, 'values'))
+            if checktax1[7] == "yes":
+              totaltax2 =(totaltax2 + float(checktax1[8]))
+              estimate_ttax2.config(text=(float(totaltax2)*float(estimates_tax5.get())/100))
+              
+              tot2 = (float(totaltax2)*float(estimates_tax5.get())/100)
+            else:
+              pass
+
+          estimate_total1.config(text=total+tot+tot2-discou+extracs)
+          estimate_balancee1.config(text=total+tot+tot2-discou+extracs)
+        
+        estimate_newselection.destroy()
 
       estimate_btn11=Button(estimate_newselection,compound = LEFT,image=tick ,text="ok", width=60, command=estselepro).place(x=15, y=610)
       estimate_btn11=Button(estimate_newselection,compound = LEFT,image=tick , text="Edit product/Service", width=150,command=product).place(x=250, y=610)
@@ -1222,11 +1220,11 @@ def mainpage():
 
     def on_click():
       text.set("Accepted")
-      
+        
 
     def eston_click():
       text.set("Declined")
-      
+       
       
 
     estimate_smss1= Button(estimate_firFrame,compound="top", text="Set Status\nto Accepted",relief=RAISED, image=mark1,bg="#f5f3f2", fg="black", height=55, bd=1, width=55, command=on_click)
@@ -1527,24 +1525,223 @@ def mainpage():
     estimates_costname1=ttk.Combobox(estimate_labelfram1, value=exdata,width=20)
     estimates_costname1.place(x=115,y=5)
 
+    def est_recalc_exc(event):
+      sql = "select * from company"
+      fbcursor.execute(sql)
+      taxdata1 = fbcursor.fetchone()
+      if taxdata1[12] == "1":
+        price = 0.0
+        total_cost = 0.0
+        exc = float(estimates_cost3.get())
+        dis_rate = float(estimates_discount2.get())
+        for i in estimate_tree.get_children():
+          price += float(estimate_tree.item(i,'values')[3])
+        discount_rate = (price*dis_rate)/100
+        total_cost += (price - discount_rate) + exc
+        estimate_discounttt.config(text= str(dis_rate) + "" +"% Discount")
+        estimate_discounttt1.config(text=round(discount_rate,2))
+        sub_tot = round((price - discount_rate),2)
+        estimate_subbb1.config(text=sub_tot)
+        estimate_costtt.config(text=round(exc,2))
+        estimate_total1.config(text=round(total_cost,2))
+        
+      elif taxdata1[12] == "2":
+        price = 0.0
+        p = 0.0
+        total_cost = 0.0
+        exc = float(estimates_cost3.get())
+        dis_rate = float(estimates_discount2.get())
+        tx1 = float(estimates_tax4.get())
+        for i in estimate_tree.get_children():
+          if estimate_tree.item(i,'values')[6] == "No":
+            p += float(estimate_tree.item(i,'values')[3])
+          else:
+            price += float(estimate_tree.item(i,'values')[3])
+        discount_rate = ((price + p) * dis_rate)/100
+        dis_price = (price * dis_rate)/100
+        dis_p = (p * dis_rate)/100
+        tax1_rate = ((price - dis_price)*tx1)/100
+        tx_calc = (price - dis_price) + tax1_rate
+        tx_calc1 = p - dis_p
+        total_cost += (tx_calc + tx_calc1) + exc 
+        estimate_discounttt.config(text= str(dis_rate) + "" +"% Discount")
+        estimate_discounttt1.config(text=round(discount_rate,2))
+        sub_tot = round(((price + p) - discount_rate),2)
+        estimate_subbb1.config(text=sub_tot)
+        estimate_ttax1.config(text=round(tax1_rate,2))
+        estimate_costtt.config(text=round(exc,2))
+        estimate_total1.config(text=round(total_cost,2))
+        
+      elif taxdata1[12] == "3":
+        price = 0.0
+        p1 = 0.0
+        p2 = 0.0
+        p3 = 0.0
+        total_cost = 0.0
+        tx1 = float(estimates_tax4.get())
+        tx2 = float(estimates_tax5.get())
+        exc = float(estimates_cost3.get())
+        dis_rate = float(estimates_discount2.get())
+        for i in estimate_tree.get_children():
+          if estimate_tree.item(i,'values')[6] == "No" and estimate_tree.item(i,'values')[7] == "No":
+            p1 += float(estimate_tree.item(i,'values')[3])
+          elif estimate_tree.item(i,'values')[6] == "Yes" and estimate_tree.item(i,'values')[7] == "No":
+            p2 += float(estimate_tree.item(i,'values')[3])
+          elif estimate_tree.item(i,'values')[6] == "No" and estimate_tree.item(i,'values')[7] == "Yes":
+            p3 += float(estimate_tree.item(i,'values')[3])
+          else:
+            price += float(estimate_tree.item(i,'values')[3])
+        discount_rate = ((p1 + p2 + p3 + price) * dis_rate)/100
+        dis_p2 = (p2 * dis_rate)/100
+        tax1_rate = ((p2 - dis_p2) * tx1)/100
+        dis_price = (price * dis_rate)/100
+        tax2_rate = ((price - dis_price) * tx1)/100
+        tax3_rate = ((price - dis_price) * tx2)/100
+        dis_p3= (p3 * dis_rate)/100
+        tax4_rate = ((p3 - dis_p3) * tx2)/100
+        dis_p4 = (p1 * dis_rate)/100
+        tx_calc1 = (p2 - dis_p2) + tax1_rate
+        tx_calc2 = (price - dis_price) + tax2_rate + tax3_rate
+        tx_calc3 = (p3 - dis_p3) + tax4_rate
+        tx_calc4 = (p1 - dis_p4)
+        total_cost += (tx_calc1 + tx_calc2 + tx_calc3 + tx_calc4) + exc
+        estimate_discounttt.config(text= str(dis_rate) + "" +"% Discount")
+        estimate_discounttt1.config(text=round(discount_rate,2))
+        sub_tot = round(((price + p1 + p2 + p3) - discount_rate),2)
+        estimate_subbb1.config(text="$" + "" + str(sub_tot))
+        estimate_ttax1.config(text=round((tax1_rate + tax2_rate),2))
+        estimate_ttax2.config(text=round((tax3_rate + tax4_rate),2))
+        estimate_costtt.config(text=round(exc,2))
+        estimate_total1.config(text=round(total_cost,2))
+        
+    def est_recalc_dis(event):
+      sql = "select * from company"
+      fbcursor.execute(sql)
+      taxdata1 = fbcursor.fetchone()
+      if taxdata1[12] == "1":
+        price = 0.0
+        total_cost = 0.0
+        exc = float(estimates_cost3.get())
+        dis_rate = float(estimates_discount2.get())
+        for i in estimate_tree.get_children():
+          price += float(estimate_tree.item(i,'values')[3])
+        discount_rate = (price*dis_rate)/100
+        total_cost += (price - discount_rate) + exc
+        estimate_discounttt.config(text= str(dis_rate) + "" +"% Discount")
+        estimate_discounttt1.config(text=round(discount_rate,2))
+        sub_tot = round((price - discount_rate),2)
+        estimate_subbb1.config(text=sub_tot)
+        estimate_costtt.config(text=round(exc,2))
+        estimate_total1.config(text=round(total_cost,2))
+        
+      elif taxdata1[12] == "2":
+        price = 0.0
+        p = 0.0
+        total_cost = 0.0
+        exc = float(estimates_cost3.get())
+        dis_rate = float(estimates_discount2.get())
+        tx1 = float(estimates_tax4.get())
+        for i in estimate_tree.get_children():
+          if estimate_tree.item(i,'values')[6] == "No":
+            p += float(estimate_tree.item(i,'values')[3])
+          else:
+            price += float(estimate_tree.item(i,'values')[3])
+        discount_rate = ((price + p) * dis_rate)/100
+        dis_price = (price * dis_rate)/100
+        dis_p = (p * dis_rate)/100
+        tax1_rate = ((price - dis_price)*tx1)/100
+        tx_calc = (price - dis_price) + tax1_rate
+        tx_calc1 = p - dis_p
+        total_cost += (tx_calc + tx_calc1) + exc 
+        estimate_discounttt.config(text= str(dis_rate) + "" +"% Discount")
+        estimate_discounttt1.config(text=round(discount_rate,2))
+        sub_tot = round(((price + p) - discount_rate),2)
+        estimate_subbb1.config(text=sub_tot)
+        estimate_ttax1.config(text=round(tax1_rate,2))
+        estimate_costtt.config(text=round(exc,2))
+        estimate_total1.config(text=round(total_cost,2))
+        
+      elif taxdata1[12] == "3":
+        price = 0.0
+        p1 = 0.0
+        p2 = 0.0
+        p3 = 0.0
+        total_cost = 0.0
+        tx1 = float(estimates_tax4.get())
+        tx2 = float(estimates_tax5.get())
+        exc = float(estimates_cost3.get())
+        dis_rate = float(estimates_discount2.get())
+        for i in estimate_tree.get_children():
+          if estimate_tree.item(i,'values')[6] == "No" and estimate_tree.item(i,'values')[7] == "No":
+            p1 += float(estimate_tree.item(i,'values')[3])
+          elif estimate_tree.item(i,'values')[6] == "Yes" and estimate_tree.item(i,'values')[7] == "No":
+            p2 += float(estimate_tree.item(i,'values')[3])
+          elif estimate_tree.item(i,'values')[6] == "No" and estimate_tree.item(i,'values')[7] == "Yes":
+            p3 += float(estimate_tree.item(i,'values')[3])
+          else:
+            price += float(estimate_tree.item(i,'values')[3])
+        discount_rate = ((p1 + p2 + p3 + price) * dis_rate)/100
+        dis_p2 = (p2 * dis_rate)/100
+        tax1_rate = ((p2 - dis_p2) * tx1)/100
+        dis_price = (price * dis_rate)/100
+        tax2_rate = ((price - dis_price) * tx1)/100
+        tax3_rate = ((price - dis_price) * tx2)/100
+        dis_p3= (p3 * dis_rate)/100
+        tax4_rate = ((p3 - dis_p3) * tx2)/100
+        dis_p4 = (p1 * dis_rate)/100
+        tx_calc1 = (p2 - dis_p2) + tax1_rate
+        tx_calc2 = (price - dis_price) + tax2_rate + tax3_rate
+        tx_calc3 = (p3 - dis_p3) + tax4_rate
+        tx_calc4 = (p1 - dis_p4)
+        total_cost += (tx_calc1 + tx_calc2 + tx_calc3 + tx_calc4) + exc
+        estimate_discounttt.config(text= str(dis_rate) + "" +"% Discount")
+        estimate_discounttt1.config(text=round(discount_rate,2))
+        sub_tot = round(((price + p1 + p2 + p3) - discount_rate),2)
+        estimate_subbb1.config(text="$" + "" + str(sub_tot))
+        estimate_ttax1.config(text=round((tax1_rate + tax2_rate),2))
+        estimate_ttax2.config(text=round((tax3_rate + tax4_rate),2))
+        estimate_costtt.config(text=round(exc,2))
+        estimate_total1.config(text=round(total_cost,2))
+
     estimates_rate=Label(estimate_labelfram1,text="Discount rate").place(x=370,y=5)
     estimates_discount2=Spinbox(estimate_labelfram1,width=6,from_=0,to=100,justify=RIGHT)
     estimates_discount2.place(x=460,y=5)
-    
+    estimates_discount2.bind('<Button-1>',est_recalc_dis)
 
-    estextra=IntVar()
     estimates_cost2=Label(estimate_labelfram1,text="Extra cost").place(x=35,y=35)
-    estimates_cost3=Entry(estimate_labelfram1,width=10,textvariable=estextra)
+    estimates_cost3=Entry(estimate_labelfram1,width=10,justify=RIGHT)
     estimates_cost3.place(x=115,y=35)
+    estimates_cost3.bind('<KeyRelease>',est_recalc_exc)
+    estimates_cost3.delete(0,END)
+    estimates_cost3.insert(0,"0")
+
+    est_comp_sql = "SELECT * FROM company"
+    fbcursor.execute(est_comp_sql,)
+    taxdata1 = fbcursor.fetchone()
+    if taxdata1[12] == "1":
+      pass
+    elif taxdata1[12] == "2":
+      estimates_tax=Label(estimate_labelfram1,text="Tax1").place(x=420,y=35)
+      estimates_tax4=Entry(estimate_labelfram1,width=7,justify=RIGHT)
+      estimates_tax4.place(x=460,y=35)
+      def1_val = tax1ratee.get()
+      estimates_tax4.delete(0, END)
+      estimates_tax4.insert(0, def1_val)
+    elif taxdata1[12] == "3":
+      estimates_tax=Label(estimate_labelfram1,text="Tax1").place(x=420,y=35)
+      estimates_tax4=Entry(estimate_labelfram1,width=7,justify=RIGHT)
+      estimates_tax4.place(x=460,y=35)
+      def1_val = tax1ratee.get()
+      estimates_tax4.delete(0, END)
+      estimates_tax4.insert(0, def1_val)
+      estimates_taax5=Label(estimate_labelfram1,text="Tax2").place(x=420,y=65)
+      estimates_tax5=Entry(estimate_labelfram1,width=7,justify=RIGHT)
+      estimates_tax5.place(x=460,y=65)
+      def2_val = tax2ratee.get()
+      estimates_tax5.delete(0, END)
+      estimates_tax5.insert(0, def2_val)
+
     
-
-    estimates_tax=Label(estimate_labelfram1,text="Tax1").place(x=420,y=35)
-    estimates_tax4=Entry(estimate_labelfram1,width=7)
-    estimates_tax4.place(x=460,y=35)
-
-    estimates_taax5=Label(estimate_labelfram1,text="Tax2").place(x=420,y=60)
-    estimates_tax5=Entry(estimate_labelfram1,width=7)
-    estimates_tax5.place(x=460,y=60)
     estimates_template=Label(estimate_labelfram1,text="Template").place(x=37,y=70)
 
     est_temp_sql1 = "SELECT Defaultestimatetemplate FROM company "
@@ -1554,26 +1751,17 @@ def mainpage():
     for i in est_temp_data1:
       tempdata.append(i[0])
 
-    # sql = "select * from estimate"
-    # fbcursor.execute(sql)
-    # est_sdata = fbcursor.fetchone()
     
 
     estimates_etemplate=ttk.Combobox(estimate_labelfram1, value=tempdata,width=25)
     estimates_etemplate.place(x=115,y=70)
-    # if not est_sdata:
-    #   pass
-    # else:
-    #   estimates_etemplate.insert(0, est_sdata[13])
+   
 
 
     estimates_sales=Label(estimate_labelfram1,text="Sales Person").place(x=25,y=100)
     estimates_sales6=Entry(estimate_labelfram1,width=18)
     estimates_sales6.place(x=115,y=100)
-    # if not est_sdata:
-    #   pass
-    # else:
-    #   estimates_sales6.insert(0, est_sdata[14])
+    
 
     estimates_category=Label(estimate_labelfram1,text="Category").place(x=300,y=100)
     estimates_category7=Entry(estimate_labelfram1,width=22)
@@ -1614,18 +1802,11 @@ def mainpage():
     estimates_efooter_text.place(x=125,y=85)
     estimates_efooter_text.bind("<<ComboboxSelected>>")
 
-    # sql = "select * from Productservice"
-    # #val = (itemid, )
-    # fbcursor.execute(sql)
-    # est_psdata = fbcursor.fetchone()
 
     estimates_texttt=Label(estimate_noteFrame,text="Private notes(not shown on invoice/order/estemates)").place(x=10,y=10)
     estimates_pvt_notes=Text(estimate_noteFrame,width=85,height=7)
     estimates_pvt_notes.place(x=10,y=32)
-    # try:
-    #   estimates_pvt_notes.insert("1.0", est_psdata[16])
-    # except:
-    #   pass
+   
 
 
     est_term_sql = "SELECT * FROM company"
@@ -1711,25 +1892,15 @@ def mainpage():
 
    
 
-    # #---------------Refresh insert tree--------------#
-    # for record in est_tree.get_children():
-    #   est_tree.delete(record)
-    # sql = "select * from estimate"
-    # fbcursor.execute(sql)
-    # est_refresh = fbcursor.fetchall()
-    # count0 = 0
-    # for i in est_refresh:
-    #   est_tree.insert(parent='', index='end', iid=count0, text='', values=('',i[1],i[2],i[3],'',i[4],i[5],i[6],i[7],i[8]))
-    #   count0 += 1
-    # estimate_pop.destroy()
-
+    
     
 
     estimate_fir4Frame1=Frame(estimate_pop,height=190,width=210,bg="#f5f3f2")
     estimate_fir4Frame1.place(x=740,y=520)
     estimate_summaryfrme = LabelFrame(estimate_fir4Frame1,text="Summary",font=("arial",15))
     estimate_summaryfrme.place(x=0,y=0,width=200,height=170)
-    estimate_discounttt=Label(estimate_summaryfrme, text=""+estimates_discount2.get()+"%"+"Discount").place(x=0 ,y=0)
+    estimate_discounttt=Label(estimate_summaryfrme, text="Discount")
+    estimate_discounttt.place(x=0 ,y=0)
     estimate_discounttt1=Label(estimate_summaryfrme, text="$0.00")
     estimate_discounttt1.place(x=130 ,y=0)
     estimate_subbb=Label(estimate_summaryfrme, text="Subtotal").place(x=0 ,y=15)
@@ -2650,17 +2821,42 @@ def mainpage():
     edit_estimates_on2=Label(edit_estimate_statusfrme, text="Printed on:").place( y=90)
     edit_estimates_nev2=Label(edit_estimate_statusfrme, text="Never").place(x=100,y=90)
 
+    estedit_header_sql = "SELECT headerandfooter FROM header_and_footer"
+    fbcursor.execute(estedit_header_sql,)
+    est_header_data = fbcursor.fetchall()
+    edithfdata = []
+    for i in est_header_data:
+      edithfdata.append(i[0])
+
+
     edit_estimates_text01=Label(edit_estimate_headerFrame,text="Title text").place(x=50,y=5)
-    edit_estimates_e01=ttk.Combobox(edit_estimate_headerFrame, value="",width=60).place(x=125,y=5)
+    edit_estimates_e01=ttk.Combobox(edit_estimate_headerFrame, value=edithfdata,width=60)
+    edit_estimates_e01.place(x=125,y=5)
+    edit_estimates_e01.bind("<<ComboboxSelected>>")
+
     edit_estimates_text02=Label(edit_estimate_headerFrame,text="Page header text").place(x=2,y=45)
-    edit_estimates_e11=ttk.Combobox(edit_estimate_headerFrame, value="",width=60).place(x=125,y=45)
+    edit_estimates_e11=ttk.Combobox(edit_estimate_headerFrame, value=edithfdata,width=60)
+    edit_estimates_e11.place(x=125,y=45)
+    edit_estimates_e11.bind("<<ComboboxSelected>>")
+
     edit_estimates_text03=Label(edit_estimate_headerFrame,text="Footer text").place(x=35,y=85)
-    edit_estimates_e21=ttk.Combobox(edit_estimate_headerFrame, value="",width=60).place(x=125,y=85)
+    edit_estimates_e21=ttk.Combobox(edit_estimate_headerFrame, value=edithfdata,width=60)
+    edit_estimates_e21.place(x=125,y=85)
+    edit_estimates_e21.bind("<<ComboboxSelected>>")
 
     edit_estimates_texttt=Label(edit_estimate_noteFrame,text="Private notes(not shown on invoice/order/estemates)").place(x=10,y=10)
     edit_estimates_e41=Text(edit_estimate_noteFrame,width=100,height=7).place(x=10,y=32)
+    
+    est_term_sql = "SELECT * FROM company"
+    fbcursor.execute(est_term_sql,)
+    estedit_term_data = fbcursor.fetchone()
 
-    edit_estimates_e51=Text(edit_estimate_termsFrame,width=100,height=9).place(x=10,y=10)
+    edit_estimates_e51=scrolledtext.ScrolledText(edit_estimate_termsFrame,width=85,height=7)
+    edit_estimates_e51.place(x=10,y=10)
+    try:
+      edit_estimates_e51.insert("1.0", estedit_term_data[39])
+    except:
+      pass
 
     edit_estimates_e61=Text(edit_estimate_commentFrame,width=100,height=9).place(x=10,y=10)
 
@@ -3093,8 +3289,9 @@ def mainpage():
     estimate_htcodeframe=Listbox(estimate_attachlbframe, height=13, width=43, bg="white",listvariable=estframe)
     estimate_htcodeframe.place(x=5, y=5)
     estimate_htcodeframe.bind('<Double-Button-1>',est_empsfile_image)
-    estimate_lbl_btn_info=Label(estimate_attachlbframe, text="Double click on attachment to view").place(x=30, y=230)
-    estimate_e_btn17=Button(estimate_attachlbframe,image=photo,compound = LEFT,width=140,text="Add attacment file...",command=est_UploadAction)
+    estimate_lbl_btn_info=Label(estimate_attachlbframe, text="Double click on attachment to view")
+    estimate_lbl_btn_info.place(x=30, y=230)
+    estimate_e_btn17=Button(estimate_attachlbframe,compound = LEFT,width=20,text="Add attacment file...",command=est_UploadAction)
     estimate_e_btn17.place(x=60, y=260)
     def est_deletefile():
       est_remove=estimate_htcodeframe.curselection()
@@ -3431,6 +3628,7 @@ def mainpage():
       scrollbar.place(x=990+330+15, y=0, height=300+20)
       scrollbar.config( command=est_tree.yview )
 
+
       tabControl = ttk.Notebook(self.left_frame,width=1)
       tab1 = ttk.Frame(tabControl)
       tab2 = ttk.Frame(tabControl)
@@ -3494,20 +3692,7 @@ def mainpage():
   pn.pack(side="left", padx=(5, 2))
   pn = Canvas(settframe, width=1, height=65, bg="#b3b3b3", bd=0)
   pn.pack(side="left", padx=(0, 5))
-  # def upload_filelogo():
-  #   global imglogo,filename
-  #   f_types =[('Png files','*.png'),('Jpg Files', '*.jpg')]
-  #   filena = filedialog.askopenfilename(filetypes=f_types)
-  #   shutil.copyfile(filena, os.getcwd()+'/images/'+filena.split('/')[-1])
-  #   print(filena.split('/')[-1])
-  #   image = Image.open(filena)
-  #   resize_image = image.resize((280, 160))
-  #   imglogo = ImageTk.PhotoImage(resize_image)
-    # b2 = Button(secondtab,image=img)
-    # b2.place(x=130, y=80)
   
-    # btlogo = Button(secondtab,width=280,height=160,image=imglogo)
-    # btlogo.place(x=580,y=280)
   global filename
   filename = ""
   def save_company():
