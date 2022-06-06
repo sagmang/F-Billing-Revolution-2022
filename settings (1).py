@@ -178,6 +178,7 @@ photo7 = PhotoImage(file = "images/priewok.png")
 photo8 = PhotoImage(file = "images/refresh_E.png")
 photo9 = PhotoImage(file = "images/sum.png")
 photo10 = PhotoImage(file = "images/text-message.png")
+#photoo11 = PhotoImage(file = "images/coloursel.png")
 
 #est_logo = PhotoImage(file = "images/company_logo.png")
 
@@ -274,22 +275,23 @@ def mainpage():
       est_pro_ser = fbcursor.fetchone()
       for child in estimate_tree.get_children():
         insert_estpro_ser = list(estimate_tree.item(child, 'values'))
+        #print(insert_estpro_ser[7],insert_estpro_ser[6])
         if not est_pro_ser:
           sql = 'insert into storingproduct(estimate_number,sku,name,description,unitprice,quantity,peices,price) values(%s,%s,%s,%s,%s,%s,%s,%s)'
           val = (estimate_number,insert_estpro_ser[0],insert_estpro_ser[1],insert_estpro_ser[2],insert_estpro_ser[3],insert_estpro_ser[4],insert_estpro_ser[5],insert_estpro_ser[6])
           fbcursor.execute(sql,val)
           fbilldb.commit()
-        elif not est_pro_ser[12] == "1":
+        elif  est_pro_ser[12] == "1":
           sql = 'insert into storingproduct(estimate_number,sku,name,description,unitprice,quantity,peices,price) values(%s,%s,%s,%s,%s,%s,%s,%s)'
           val = (estimate_number,insert_estpro_ser[0],insert_estpro_ser[1],insert_estpro_ser[2],insert_estpro_ser[3],insert_estpro_ser[4],insert_estpro_ser[5],insert_estpro_ser[6])
           fbcursor.execute(sql,val)
           fbilldb.commit()
-        elif not est_pro_ser[12] == "2":
+        elif est_pro_ser[12] == "2":
           sql = 'insert into storingproduct(estimate_number,sku,name,description,unitprice,quantity,peices,tax1,price) values(%s,%s,%s,%s,%s,%s,%s,%s,%s)'
           val = (estimate_number,insert_estpro_ser[0],insert_estpro_ser[1],insert_estpro_ser[2],insert_estpro_ser[3],insert_estpro_ser[4],insert_estpro_ser[5],insert_estpro_ser[6],insert_estpro_ser[7])
           fbcursor.execute(sql,val)
           fbilldb.commit()
-        elif not est_pro_ser[12] == "3":
+        elif est_pro_ser[12] == "3":
           sql = 'insert into storingproduct(estimate_number,sku,name,description,unitprice,quantity,peices,tax1,tax2,price) values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'
           val = (estimate_number,insert_estpro_ser[0],insert_estpro_ser[1],insert_estpro_ser[2],insert_estpro_ser[3],insert_estpro_ser[4],insert_estpro_ser[5],insert_estpro_ser[6],insert_estpro_ser[7],insert_estpro_ser[8])
           fbcursor.execute(sql,val)
@@ -686,7 +688,7 @@ def mainpage():
 
         def upload_file():
           global filename,img, b2
-          f_types =[('Png files','*.png'),('Jpg Files', '*.jpg')]
+          f_types =[('Png files','*.png'),('Jpg Files', '*.jpg'),('PDF', '*.pdf',)]
           filename = filedialog.askopenfilename(filetypes=f_types)
           shutil.copyfile(filename, os.getcwd()+'/images/'+filename.split('/')[-1])
           image = Image.open(filename)
@@ -1718,24 +1720,33 @@ def mainpage():
     est_comp_sql = "SELECT * FROM company"
     fbcursor.execute(est_comp_sql,)
     taxdata1 = fbcursor.fetchone()
+    estimates_tax=Label(estimate_labelfram1,text="Tax1")
+    estimates_tax4=Entry(estimate_labelfram1,width=7,justify=RIGHT)
+    estimates_taax5=Label(estimate_labelfram1,text="Tax2")
+    estimates_tax5=Entry(estimate_labelfram1,width=7,justify=RIGHT)
     if taxdata1[12] == "1":
-      pass
+      estimates_tax4.insert(0, 0)
+      estimates_tax5.insert(0, 0)
     elif taxdata1[12] == "2":
-      estimates_tax=Label(estimate_labelfram1,text="Tax1").place(x=420,y=35)
-      estimates_tax4=Entry(estimate_labelfram1,width=7,justify=RIGHT)
+      
+      estimates_tax.place(x=420,y=35)
+      
       estimates_tax4.place(x=460,y=35)
       def1_val = tax1ratee.get()
       estimates_tax4.delete(0, END)
       estimates_tax4.insert(0, def1_val)
+      estimates_tax5.insert(0, 0)
     elif taxdata1[12] == "3":
-      estimates_tax=Label(estimate_labelfram1,text="Tax1").place(x=420,y=35)
-      estimates_tax4=Entry(estimate_labelfram1,width=7,justify=RIGHT)
+      
+      estimates_tax.place(x=420,y=35)
+      
       estimates_tax4.place(x=460,y=35)
       def1_val = tax1ratee.get()
       estimates_tax4.delete(0, END)
       estimates_tax4.insert(0, def1_val)
-      estimates_taax5=Label(estimate_labelfram1,text="Tax2").place(x=420,y=65)
-      estimates_tax5=Entry(estimate_labelfram1,width=7,justify=RIGHT)
+      
+      estimates_taax5.place(x=420,y=65)
+      
       estimates_tax5.place(x=460,y=65)
       def2_val = tax2ratee.get()
       estimates_tax5.delete(0, END)
@@ -1825,7 +1836,7 @@ def mainpage():
     
     def attach_file():
       global file,file_type
-      file_type = [('png files','.png'),('jpg files','.jpg'),('all files','.')]
+      file_type = [('png files','.png'),('jpg files','.jpg'),('PDF', '.pdf',),('all files','.')]
       file = filedialog.askopenfilename(initialdir="/",filetypes=file_type)
       shutil.copyfile(file, os.getcwd()+'/images/'+file.split('/')[-1])
       file_size = convertion(os.path.getsize(file))
@@ -2668,18 +2679,6 @@ def mainpage():
     edit_estimate_ee6=Entry(edit_estimate_labelframee2,width=30)
     edit_estimate_ee6.place(x=402,y=5)
 
-    # edit_estimate_ee1.delete(0,END)
-    # edit_estimate_ee1.insert(0,edit_est_data[20])
-    # edit_estimate_ee2.delete('1.0',END)
-    # edit_estimate_ee2.insert('1.0',edit_est_data[21])
-    # edit_estimate_ee3.delete(0, END)
-    # edit_estimate_ee3.insert(0, edit_est_data[22])
-    # edit_estimate_ee4.delete('1.0',END)
-    # edit_estimate_ee4.insert('1.0',edit_est_data[23])
-    # edit_estimate_ee5.delete(0,END)
-    # edit_estimate_ee5.insert(0,edit_est_data[24])
-    # edit_estimate_ee6.delete(0,END)
-    # edit_estimate_ee6.insert(0,edit_est_data[25])
       
     edit_estimate_labelframe = LabelFrame(edit_estimate_fir1Frame,text="Estimate",font=("arial",15))
     edit_estimate_labelframe.place(x=652,y=5,width=290,height=170)
@@ -2844,13 +2843,15 @@ def mainpage():
     edit_estimates_e21.place(x=125,y=85)
     edit_estimates_e21.bind("<<ComboboxSelected>>")
 
+    
     edit_estimates_texttt=Label(edit_estimate_noteFrame,text="Private notes(not shown on invoice/order/estemates)").place(x=10,y=10)
-    edit_estimates_e41=Text(edit_estimate_noteFrame,width=100,height=7).place(x=10,y=32)
+    edit_estimates_e41=Text(edit_estimate_noteFrame,width=100,height=7)
+    edit_estimates_e41.place(x=10,y=32)
     
     est_term_sql = "SELECT * FROM company"
     fbcursor.execute(est_term_sql,)
     estedit_term_data = fbcursor.fetchone()
-
+  
     edit_estimates_e51=scrolledtext.ScrolledText(edit_estimate_termsFrame,width=85,height=7)
     edit_estimates_e51.place(x=10,y=10)
     try:
@@ -3017,7 +3018,7 @@ def mainpage():
         
 
 
-  #email
+  ######################----------Email-----------#########################
   def est_send_mail():
 
       sender_email = "infoxfbilling@gmail.com" #email_from.get()                                 
@@ -3201,20 +3202,49 @@ def mainpage():
     estimate_mybtn6=Button(estimate_emailmessage_Frame,width=31,height=23,compound = LEFT,image=redo)
     estimate_mybtn6.place(x=175, y=1)
 
-    # fontSize=12
-    # fontStyle='Helvetica'
-    # def font_style(event):
-    #   global fontStyle
-    #   fontStyle=font_family__variable.get()
-    #   estmemaiframe.config(font=(fontStyle,fontSize))
+    def est_bold_text():
+      bold_font = font.Font(estmemaiframe, estmemaiframe.cget("font"))
+      bold_font.configure(weight="bold")
 
-    estimate_mybtn7=Button(estimate_emailmessage_Frame,width=31,height=23,compound = LEFT,image=bold)
+      estmemaiframe.tag_configure("bold", font=bold_font)
+
+      current_tags = estmemaiframe.tag_names("sel.first")
+
+      if "bold" in current_tags:
+        estmemaiframe.tag_remove("bold", "sel.first", "sel.last")
+      else:
+        estmemaiframe.tag_add("bold", "sel.first", "sel.last")
+
+    estimate_mybtn7=Button(estimate_emailmessage_Frame,width=31,height=23,compound = LEFT,image=bold,command=est_bold_text)
     estimate_mybtn7.place(x=210, y=1)
 
-    estimate_mybtn8=Button(estimate_emailmessage_Frame,width=31,height=23,compound = LEFT,image=italics)
+    def italic_text():
+      italic_font = font.Font(estmemaiframe, estmemaiframe.cget("font"))
+      italic_font.configure(slant="italic")
+
+      estmemaiframe.tag_configure("italic", font=italic_font)
+
+      current_tags = estmemaiframe.tag_names("sel.first")
+
+      if "italic" in current_tags:
+        estmemaiframe.tag_remove("italic", "sel.first", "sel.last")
+      else:
+        estmemaiframe.tag_add("italic", "sel.first", "sel.last")
+
+    estimate_mybtn8=Button(estimate_emailmessage_Frame,width=31,height=23,compound = LEFT,image=italics,command=italic_text)
     estimate_mybtn8.place(x=245, y=1)
 
-    estimate_mybtn9=Button(estimate_emailmessage_Frame,width=31,height=23,compound = LEFT,image=underline)
+    def underline_text():
+      try:
+          if estmemaiframe.tag_nextrange('underline_selection', 'sel.first', 'sel.last') != ():
+              estmemaiframe.tag_remove('underline_selection', 'sel.first', 'sel.last')
+          else:
+              estmemaiframe.tag_add('underline_selection', 'sel.first', 'sel.last')
+              estmemaiframe.tag_configure('underline_selection', underline=True)
+      except TclError:
+          pass
+
+    estimate_mybtn9=Button(estimate_emailmessage_Frame,width=31,height=23,compound = LEFT,image=underline, command=underline_text)
     estimate_mybtn9.place(x=280, y=1)
 
     def est_align_left():
@@ -3250,23 +3280,37 @@ def mainpage():
     estimate_mybtn14=Button(estimate_emailmessage_Frame,width=31,height=23,compound = LEFT,image=remove,command=lambda :estmemaiframe.delete(0.0,END))
     estimate_mybtn14.place(x=455, y=1)
 
-    estimate_dropcomp = ttk.Combobox(estimate_emailmessage_Frame, width=12, height=7)
-    estimate_dropcomp['values'] = ('Black','Maroon','Green','Olive','Navy','Purple','Teal','Gray','Silver','Red','Lime','Yellow','Blue','Fuchsia','Aqua','White','Active Border','Active Caption','Application','Background','Button Face','Button Highlight','Button Shadow','Button Text','Caption Text','Gradient Active','Gradient Inactive','Gray Text','Highlight Background','Highlight Text','Hot Light','Inactive Border','Inactive Caption','Inactive Caption','Info Background','Info Text','meny Background','Menu Bar','Menu Highlight','Menu Text','Scroll Bar','3D dark Shadow','3D Light','Window Background','Window Frame','Window Text')
-    estimate_dropcomp.place(x=500, y=5)    
-    estimate_dropcomp.current(0)
+    # estimate_dropcomp = ttk.Combobox(estimate_emailmessage_Frame, width=12, height=7)
+    # estimate_dropcomp['values'] = ('Black','Maroon','Green','Olive','Navy','Purple','Teal','Gray','Silver','Red','Lime','Yellow','Blue','Fuchsia','Aqua','White','Active Border','Active Caption','Application','Background','Button Face','Button Highlight','Button Shadow','Button Text','Caption Text','Gradient Active','Gradient Inactive','Gray Text','Highlight Background','Highlight Text','Hot Light','Inactive Border','Inactive Caption','Inactive Caption','Info Background','Info Text','meny Background','Menu Bar','Menu Highlight','Menu Text','Scroll Bar','3D dark Shadow','3D Light','Window Background','Window Frame','Window Text')
+    # estimate_dropcomp.place(x=500, y=5)    
+    # estimate_dropcomp.current(0)
 
-    # def est_color_select():
-    #   color=colorchooser.askcolor()
-    #   estmemaiframe.config(fg=color[1])
+    def est_color_select():
+      color=colorchooser.askcolor()[1]
+      if color:
+      # if color:
 
-    # estimate_mybtn15=Button(estimate_emailmessage_Frame,width=31,height=23,compound = LEFT,image=color,command=est_color_select)
-    # estimate_mybtn15.place(x=485, y=1)
+        color_font = font.Font(estmemaiframe, estmemaiframe.cget("font"))
+
+        estmemaiframe.tag_configure("colored", font=color_font, foreground=color)
+
+        current_tags = estmemaiframe.tag_names("sel.first")
+
+        if "colored" in current_tags:
+          estmemaiframe.tag_remove("colored", "sel.first", "sel.last")
+        else:
+          estmemaiframe.tag_add("colored", "sel.first", "sel.last")
+
+   
+
+    estimate_mybtn15=Button(estimate_emailmessage_Frame,width=31,height=23,compound = LEFT,command=est_color_select)
+    estimate_mybtn15.place(x=485, y=1)
 
     
-    estimate_mydropcompo = ttk.Combobox(estimate_emailmessage_Frame, width=6, height=7)
-    estimate_mydropcompo['values'] = ('1','2','3','4','5','6','7')
-    estimate_mydropcompo.place(x=600, y=5)
-    estimate_mydropcompo.current(0)
+    # estimate_mydropcompo = ttk.Combobox(estimate_emailmessage_Frame, width=6, height=7)
+    # estimate_mydropcompo['values'] = ('1','2','3','4','5','6','7')
+    # estimate_mydropcompo.place(x=600, y=5)
+    # estimate_mydropcompo.current(0)
     estimate_mframe=Frame(estimate_emailmessage_Frame, height=350, width=710, bg="white")
     estimate_mframe.place(x=0, y=28)
   
@@ -3433,7 +3477,7 @@ def mainpage():
 
   #delete orders  
   def estimate_dele():  
-    messagebox.askyesno("Delete order", "Are you sure to delete this order? All products will be placed back into stock")
+    messagebox.askyesno("Are you sure to delete this Estimate?")
 
 
 
@@ -3497,6 +3541,8 @@ def mainpage():
 
   estimate_orderLabel = Button(estimate_midFrame,compound="top", text="View/Edit\nEstimate",relief=RAISED, image=photo1,bg="#f8f8f2", fg="black", height=55, bd=1, width=55,command=edit_estimates_create)
   estimate_orderLabel.pack(side="left")
+
+
 
   estimate_estimateLabel = Button(estimate_midFrame,compound="top", text="Delete\nSelected",relief=RAISED, image=photo2,bg="#f8f8f2", fg="black", height=55, bd=1, width=55,command=estimate_dele)
   estimate_estimateLabel.pack(side="left")
@@ -3564,6 +3610,72 @@ def mainpage():
   estimate_invoilabell1 = Label(estimate_mainFrame, text="Category filter", font=("arial", 15), bg="#f8f8f2")
   estimate_invoilabell1.pack(side="right", padx=(0,10))
 
+  def est_check_convertion(B):
+      BYTE = float(B)
+      KB = float(1024)
+      MB = float(KB**2)
+      if BYTE < KB:
+        return '{0} {1}'.format(BYTE,'Bytes' if 0 == B > 1 else 'Byte')
+      elif KB <= BYTE < MB:
+        return '{0:.2f} KB'.format(BYTE / KB)
+      elif MB <= BYTE:
+        return '{0:.2f} MB'.format(BYTE / MB)
+  ############----------Product---------###########
+  def est_view_details(event):
+    for record in esttree.get_children():
+      esttree.delete(record)
+    estitemnumber = est_tree.item(est_tree.focus())["values"][1]
+    sql = 'select * from storingproduct where estimate_number = %s'
+    val = (estitemnumber,)
+    fbcursor.execute(sql,val)
+    est_storingproduct = fbcursor.fetchall()
+    sql = 'select * from company'
+    fbcursor.execute(sql)
+    est_check_protax = fbcursor.fetchone()
+    counto = 0
+    if not est_check_protax:
+      for i in est_storingproduct:
+        esttree.insert(parent='',index='end',text='',values=('',i[2],i[6],i[7],i[8],i[9],i[13]))
+        counto += 1
+    elif est_check_protax[12] == '1':
+      for i in est_storingproduct:
+        esttree.insert(parent='',index='end',text='',values=('',i[2],i[6],i[7],i[8],i[9],i[13]))
+        counto += 1
+    elif est_check_protax[12] == '2':
+      for i in est_storingproduct:
+        esttree.insert(parent='',index='end',text='',values=('',i[2],i[6],i[7],i[8],i[9],i[11],i[13]))
+        counto += 1
+    elif est_check_protax[12] == '3':
+      for i in est_storingproduct:
+        esttree.insert(parent='',index='end',text='',values=('',i[2],i[6],i[7],i[8],i[9],i[11],i[12],i[13]))
+        counto += 1
+
+  ############----------Private note display---------###########
+  
+    sql = 'select private_notes from estimate where estimate_number = %s'
+    val = (estitemnumber,)
+    fbcursor.execute(sql,val)
+    est_privatenotes = fbcursor.fetchone()
+    est_pvt_note1.delete('1.0',END)
+    est_pvt_note1.insert('1.0',est_privatenotes[0])
+
+  ############----------Documents---------###########
+    
+    
+    for record in esttree1.get_children():
+      esttree1.delete(record)
+    doc_sql = "SELECT * FROM documents WHERE estimate_number=%s"
+    doc_val = (estitemnumber,)
+    fbcursor.execute(doc_sql,doc_val)
+    doc_details = fbcursor.fetchall()
+    print(doc_details)
+    countdoc = 0
+    for doc in doc_details:
+      file_size_3 = est_check_convertion(os.path.getsize("images/"+doc[6]))
+      esttree1.insert(parent='',index='end',iid=doc,text='',values=('',doc[6],file_size_3))
+    countdoc += 1
+      
+
   class MyApp:
     def __init__(self, parent):
       
@@ -3587,6 +3699,9 @@ def mainpage():
         fill=BOTH, 
         expand=YES,
         )
+      
+      
+
 
       global est_tree
       est_tree = ttk.Treeview(self.left_frame, columns = (1,2,3,4,5,6,7,8,9,10), height = 15, show = "headings")
@@ -3611,6 +3726,7 @@ def mainpage():
       est_tree.column(8, width = 130)
       est_tree.column(9, width = 130)
       est_tree.column(10, width = 160)
+      est_tree.bind('<ButtonRelease-1>',est_view_details)
 
       sql = "SELECT * FROM estimate"
       fbcursor.execute(sql)
@@ -3628,7 +3744,10 @@ def mainpage():
       scrollbar.place(x=990+330+15, y=0, height=300+20)
       scrollbar.config( command=est_tree.yview )
 
-
+      
+      
+      
+    
       tabControl = ttk.Notebook(self.left_frame,width=1)
       tab1 = ttk.Frame(tabControl)
       tab2 = ttk.Frame(tabControl)
@@ -3640,37 +3759,100 @@ def mainpage():
       tabControl.add(tab4,image=photo11,compound = LEFT, text ='Documents')
       tabControl.pack(expand = 1, fill ="both")
       
-      esttree = ttk.Treeview(tab1, columns = (1,2,3,4,5,6,7,8,), height = 15, show = "headings")
+      sql = "select * from company"
+      fbcursor.execute(sql)
+      tax_data = fbcursor.fetchone()
+      if not tax_data:
+        global esttree
+        esttree = ttk.Treeview(tab1, columns = (1,2,3,4,5,6,7,), height = 15, show = "headings")
+        esttree.heading(1)
+        esttree.heading(2, text="Product/Service ID",)
+        esttree.heading(3, text="Name")
+        esttree.heading(4, text="Description")
+        esttree.heading(5, text="Price")
+        esttree.heading(6, text="QTY")
+        esttree.heading(7, text="Line Total")   
+        esttree.column(1, width = 50)
+        esttree.column(2, width = 270)
+        esttree.column(3, width = 250)
+        esttree.column(4, width = 300)
+        esttree.column(5, width = 130)
+        esttree.column(6, width = 100)
+        esttree.column(7, width = 100)
+        
+      elif tax_data[12] == "1":
+        esttree = ttk.Treeview(tab1, columns = (1,2,3,4,5,6,7,), height = 15, show = "headings")
+        esttree.heading(1)
+        esttree.heading(2, text="Product/Service ID",)
+        esttree.heading(3, text="Name")
+        esttree.heading(4, text="Description")
+        esttree.heading(5, text="Price")
+        esttree.heading(6, text="QTY")
+        esttree.heading(7, text="Line Total")   
+        esttree.column(1, width = 50)
+        esttree.column(2, width = 270)
+        esttree.column(3, width = 250)
+        esttree.column(4, width = 300)
+        esttree.column(5, width = 130)
+        esttree.column(6, width = 100)
+        esttree.column(7, width = 100)
+        
+      elif tax_data[12] == "2":
+        esttree = ttk.Treeview(tab1, columns = (1,2,3,4,5,6,7,8,), height = 15, show = "headings")
+        esttree.heading(1)
+        esttree.heading(2, text="Product/Service ID",)
+        esttree.heading(3, text="Name")
+        esttree.heading(4, text="Description")
+        esttree.heading(5, text="Price")
+        esttree.heading(6, text="QTY")
+        esttree.heading(7, text="Tax1")
+        esttree.heading(8, text="Line Total")   
+        esttree.column(1, width = 50)
+        esttree.column(2, width = 270)
+        esttree.column(3, width = 250)
+        esttree.column(4, width = 300)
+        esttree.column(5, width = 130)
+        esttree.column(6, width = 100)
+        esttree.column(7, width = 100)
+        esttree.column(8, width = 150)
+      elif tax_data[12] == "3":
+        esttree = ttk.Treeview(tab1, columns = (1,2,3,4,5,6,7,8,9,), height = 15, show = "headings")
+        
+        esttree.heading(1)
+        esttree.heading(2, text="Product/Service ID",)
+        esttree.heading(3, text="Name")
+        esttree.heading(4, text="Description")
+        esttree.heading(5, text="Price")
+        esttree.heading(6, text="QTY")
+        esttree.heading(7, text="Tax1")
+        esttree.heading(8, text="Tax2")
+        esttree.heading(9, text="Line Total")   
+        esttree.column(1, width = 50)
+        esttree.column(2, width = 270)
+        esttree.column(3, width = 250)
+        esttree.column(4, width = 300)
+        esttree.column(5, width = 130)
+        esttree.column(6, width = 100)
+        esttree.column(7, width = 100)
+        esttree.column(8, width = 100)
+        esttree.column(9, width = 150)
       esttree.pack(side = 'top')
-      esttree.heading(1)
-      esttree.heading(2, text="Product/Service ID",)
-      esttree.heading(3, text="Name")
-      esttree.heading(4, text="Description")
-      esttree.heading(5, text="Price")
-      esttree.heading(6, text="QTY")
-      esttree.heading(7, text="Tax1")
-      esttree.heading(8, text="Line Total")   
-      esttree.column(1, width = 50)
-      esttree.column(2, width = 270)
-      esttree.column(3, width = 250)
-      esttree.column(4, width = 300)
-      esttree.column(5, width = 130)
-      esttree.column(6, width = 100)
-      esttree.column(7, width = 100)
-      esttree.column(8, width = 150)
 
-      note1=Text(tab2, width=170,height=10).place(x=10, y=10)
+      global est_pvt_note1
+      est_pvt_note1=Text(tab2, width=170,height=10)
+      est_pvt_note1.place(x=10, y=10)
 
       note1=Text(tab3, width=170,height=10).place(x=10, y=10)
 
+      global esttree1
       esttree1 = ttk.Treeview(tab4, columns = (1,2,3), height = 15, show = "headings")
       esttree1.pack(side = 'top')
       esttree1.heading(1)
       esttree1.heading(2, text="Attach to Email",)
       esttree1.heading(3, text="Filename")
       esttree1.column(1, width = 70)
-      esttree1.column(2, width = 270)
-      esttree1.column(3, width = 1000)
+      esttree1.column(2, width = 600)
+      esttree1.column(3, width = 600)
 
       scrollbar = Scrollbar(self.left_frame)
       scrollbar.place(x=990+330+15, y=360, height=190)
