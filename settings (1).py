@@ -44,6 +44,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import smtplib
 import datetime as dt
+from datetime import datetime, date
 
 
 fbilldb = mysql.connector.connect(
@@ -1279,12 +1280,16 @@ def mainpage():
     est_sql2 = "select businessname from Customer"
     fbcursor.execute(est_sql2,)
     estodata = fbcursor.fetchall()
+    est_cusdata = []
+    for i in estodata:
+      est_cusdata.append(i[0])
+
 
     estimate_orderr1 = Label(estimate_labelframee1, text="Estimate to").place(x=10,y=5)
     est_to = StringVar()
     estimate_combo_name1 = ttk.Combobox(estimate_labelframee1, width=28,textvariable=est_to)
     estimate_combo_name1.place(x=80,y=5)
-    estimate_combo_name1['values'] = estodata
+    estimate_combo_name1['values'] = est_cusdata
     estimate_combo_name1.bind("<<ComboboxSelected>>", est_to_combo)
 
     estimate_addresss=Label(estimate_labelframee1,text="Address").place(x=10,y=30)
@@ -1541,6 +1546,9 @@ def mainpage():
         discount_rate = (price*dis_rate)/100
         total_cost += (price - discount_rate) + exc
         estimate_discounttt.config(text= str(dis_rate) + "" +"% Discount")
+        estimate_totalpaid1.config(text="" +"0.00")
+        estimate_ttax1.config(text="" +"0.00")
+        estimate_ttax2.config(text="" +"0.00")
         estimate_discounttt1.config(text=round(discount_rate,2))
         sub_tot = round((price - discount_rate),2)
         estimate_subbb1.config(text=sub_tot)
@@ -1567,6 +1575,8 @@ def mainpage():
         tx_calc1 = p - dis_p
         total_cost += (tx_calc + tx_calc1) + exc 
         estimate_discounttt.config(text= str(dis_rate) + "" +"% Discount")
+        estimate_totalpaid1.config(text="" +"0.00")
+        estimate_ttax2.config(text="" +"0.00")
         estimate_discounttt1.config(text=round(discount_rate,2))
         sub_tot = round(((price + p) - discount_rate),2)
         estimate_subbb1.config(text=sub_tot)
@@ -1608,6 +1618,7 @@ def mainpage():
         tx_calc4 = (p1 - dis_p4)
         total_cost += (tx_calc1 + tx_calc2 + tx_calc3 + tx_calc4) + exc
         estimate_discounttt.config(text= str(dis_rate) + "" +"% Discount")
+        estimate_totalpaid1.config(text="" +"0.00")
         estimate_discounttt1.config(text=round(discount_rate,2))
         sub_tot = round(((price + p1 + p2 + p3) - discount_rate),2)
         estimate_subbb1.config(text="$" + "" + str(sub_tot))
@@ -1630,6 +1641,9 @@ def mainpage():
         discount_rate = (price*dis_rate)/100
         total_cost += (price - discount_rate) + exc
         estimate_discounttt.config(text= str(dis_rate) + "" +"% Discount")
+        estimate_totalpaid1.config(text="" +"0.00")
+        estimate_ttax1.config(text="" +"0.00")
+        estimate_ttax2.config(text="" +"0.00")
         estimate_discounttt1.config(text=round(discount_rate,2))
         sub_tot = round((price - discount_rate),2)
         estimate_subbb1.config(text=sub_tot)
@@ -1656,6 +1670,8 @@ def mainpage():
         tx_calc1 = p - dis_p
         total_cost += (tx_calc + tx_calc1) + exc 
         estimate_discounttt.config(text= str(dis_rate) + "" +"% Discount")
+        estimate_totalpaid1.config(text="" +"0.00")
+        estimate_ttax2.config(text="" +"0.00")
         estimate_discounttt1.config(text=round(discount_rate,2))
         sub_tot = round(((price + p) - discount_rate),2)
         estimate_subbb1.config(text=sub_tot)
@@ -1697,6 +1713,7 @@ def mainpage():
         tx_calc4 = (p1 - dis_p4)
         total_cost += (tx_calc1 + tx_calc2 + tx_calc3 + tx_calc4) + exc
         estimate_discounttt.config(text= str(dis_rate) + "" +"% Discount")
+        estimate_totalpaid1.config(text="" +"0.00")
         estimate_discounttt1.config(text=round(discount_rate,2))
         sub_tot = round(((price + p1 + p2 + p3) - discount_rate),2)
         estimate_subbb1.config(text="$" + "" + str(sub_tot))
@@ -2445,9 +2462,117 @@ def mainpage():
       edit_estimate_scrollbar10 = Scrollbar(edit_estimate_newselection)
       edit_estimate_scrollbar10.place(x=640, y=45, height=560)
       edit_estimate_scrollbar10.config( command=tree.yview )
+
+      def edit_estselepro():
+        global estpriceview
+        edit_estpriceview = Label(edit_estimate_listFrame,bg="#f5f3f2")
+        edit_estpriceview.place(x=850,y=200,width=78,height=18)
+        edit_proskuid = edit_estimate_cusventtree1.item(edit_estimate_cusventtree1.focus())["values"][0]
+        sql = "select * from Productservice where sku = %s"
+        val = (edit_proskuid,)
+        fbcursor.execute(sql,val)
+        prosele = fbcursor.fetchone()
+        sql = "select * from company"
+        fbcursor.execute(sql)
+        create_maintree_insert = fbcursor.fetchone()
+        if prosele[10] == '1':
+          tax1 = 'yes'
+        else:
+          tax1 = ''
+        if prosele[19] == '1':
+          tax2 = 'yes'
+        else:
+          tax2 = ''
+        if not create_maintree_insert:
+          edit_estimate_tree.insert(parent='', index='end',text='', values=(prosele[2],prosele[4],prosele[5],prosele[7],1,prosele[8],tax1,prosele[7]*1))
+
+        elif create_maintree_insert[12] == "1":
+          edit_estimate_tree.insert(parent='', index='end',text='', values=(prosele[2],prosele[4],prosele[5],prosele[7],1,prosele[8],prosele[7]*1))
+          extracs = 0.0
+          discou = 0.0
+          total = 0.0
+          for child in edit_estimate_tree.get_children():
+            total += float(edit_estimate_tree.item(child, 'values')[6])
+          discou = (total*float(edit_estimates_disrate.get())/100)
+          extracs = (extracs+float(edit_estimates_excost.get()))
+          edit_estimate_costtt.config(text=edit_estimates_excost.get())
+          edit_estimate_discounttt1.config(text=discou)
+          edit_estpriceview.config(text=total)
+          edit_estimate_orderrr1.config(text=total-discou+extracs)
+          edit_estimate_balancee1.config(text=total-discou+extracs)
+          edit_estimate_subbb1.config(text=total-discou)
+        elif create_maintree_insert[12] == "2":
+          edit_estimate_tree.insert(parent='', index='end',text='', values=(prosele[2],prosele[4],prosele[5],prosele[7],1,prosele[8],tax1,prosele[7]*1))
+          extracs = 0.0
+          discou = 0.0
+          total = 0.0
+          for child in edit_estimate_tree.get_children():
+            total += float(edit_estimate_tree.item(child, 'values')[7])
+          discou = (total*float(edit_estimates_disrate.get())/100)
+          extracs = (extracs+float(edit_estimates_excost.get()))
+          edit_estimate_costtt.config(text=edit_estimates_excost.get())
+          edit_estimate_discounttt1.config(text=discou)
+          edit_estpriceview.config(text=total)
+          edit_estimate_subbb1.config(text=total-discou)
+
+          tot = 0.0
+          totaltax1 = 0.0
+          for child in edit_estimate_tree.get_children():
+            checktax1 = list(edit_estimate_tree.item(child, 'values'))
+            if checktax1[6] == "yes":
+              totaltax1 =(totaltax1 + float(checktax1[7]))
+              edit_estimate_ttax1label.config(text=(float(totaltax1)*float(edit_estimates_tax1.get())/100))
+              tot = (float(totaltax1)*float(edit_estimates_tax1.get())/100)
+            else:
+              pass
+          edit_estimate_orderrr1.config(text=total+tot-discou+extracs)
+          edit_estimate_balancee1.config(text=total+tot-discou+extracs)
+            
+        elif create_maintree_insert[12] == "3":
+          edit_estimate_tree.insert(parent='', index='end',text='', values=(prosele[2],prosele[4],prosele[5],prosele[7],1,prosele[8],tax1,tax2,prosele[7]*1))
+          extracs = 0.0
+          discou = 0.0
+          total = 0.0
+          for child in edit_estimate_tree.get_children():
+            total += float(edit_estimate_tree.item(child, 'values')[8])
+          extracs = (extracs+float(edit_estimates_excost.get()))
+          edit_estimate_costtt.config(text=edit_estimates_excost.get())
+          discou = (total*float(edit_estimates_disrate.get())/100)
+          edit_estimate_discounttt1.config(text=discou)
+          edit_estpriceview.config(text=total)
+          edit_estimate_subbb1.config(text=total-discou)
+            
+          tot = 0.0
+          totaltax1 = 0.0
+          for child in edit_estimate_tree.get_children():
+            checktax1 = list(edit_estimate_tree.item(child, 'values'))
+            if checktax1[6] == "yes":
+              totaltax1 =(totaltax1 + float(checktax1[8]))
+              edit_estimate_ttax1label.config(text=(float(totaltax1)*float(edit_estimates_tax1.get())/100))
+              tot = (float(totaltax1)*float(edit_estimates_tax1.get())/100)
+            else:
+              pass
+          
+          tot2 = 0.0
+          totaltax2 = 0.0
+          for child in edit_estimate_tree.get_children():
+            checktax1 = list(edit_estimate_tree.item(child, 'values'))
+            if checktax1[7] == "yes":
+              totaltax2 =(totaltax2 + float(checktax1[8]))
+              edit_estimate_ttax2label.config(text=(float(totaltax2)*float(edit_estimates_tax2.get())/100))
+              
+              tot2 = (float(totaltax2)*float(edit_estimates_tax2.get())/100)
+            else:
+              pass
+
+          edit_estimate_orderrr1.config(text=total+tot+tot2-discou+extracs)
+          edit_estimate_balancee1.config(text=total+tot+tot2-discou+extracs)
+        
+        edit_estimate_newselection.destroy()
     
 
-      edit_estimate_btn11=Button(edit_estimate_newselection,compound = LEFT,image=tick ,text="ok", width=60).place(x=15, y=610)
+      edit_estimate_btn11=Button(edit_estimate_newselection,compound = LEFT,image=tick ,text="ok", width=60,command=edit_estselepro)
+      edit_estimate_btn11.place(x=15, y=610)
       edit_estimate_btn11=Button(edit_estimate_newselection,compound = LEFT,image=tick , text="Edit product/Service", width=150,command=product).place(x=250, y=610)
       edit_estimate_btn11=Button(edit_estimate_newselection,compound = LEFT,image=tick , text="Add product/Service", width=150,command=product).place(x=435, y=610)
       edit_estimate_btn11=Button(edit_estimate_newselection,compound = LEFT,image=cancel ,text="Cancel", width=60).place(x=740, y=610)
@@ -2584,10 +2709,17 @@ def mainpage():
     edit_estimate_w4 = Canvas(edit_estimate_firFrame, width=1, height=65, bg="#b3b3b3", bd=0)
     edit_estimate_w4.pack(side="left", padx=5)
 
-    edit_estimate_smss1= Button(edit_estimate_firFrame,compound="top", text="Set Status\nto Accepted",relief=RAISED, image=mark1,bg="#f5f3f2", fg="black", height=55, bd=1, width=55)
+    def edit_on_click():
+      text.set("Accepted")
+        
+
+    def edit_eston_click():
+      text.set("Declined")
+
+    edit_estimate_smss1= Button(edit_estimate_firFrame,compound="top", text="Set Status\nto Accepted",relief=RAISED, image=mark1,bg="#f5f3f2", fg="black", height=55, bd=1, width=55,command=edit_on_click)
     edit_estimate_smss1.pack(side="left", pady=3, ipadx=4)
 
-    edit_estimate_smss1= Button(edit_estimate_firFrame,compound="top", text="Set Status\nto Declined",relief=RAISED, image=mark1,bg="#f5f3f2", fg="black", height=55, bd=1, width=55)
+    edit_estimate_smss1= Button(edit_estimate_firFrame,compound="top", text="Set Status\nto Declined",relief=RAISED, image=mark1,bg="#f5f3f2", fg="black", height=55, bd=1, width=55,command=edit_eston_click)
     edit_estimate_smss1.pack(side="left", pady=3, ipadx=4)
 
     def edit_calcu():
@@ -2620,11 +2752,11 @@ def mainpage():
       edit_estimate_ee6.delete(0,END)
       edit_estimate_ee6.insert(0,edit_est_data[23])
     
-      edit_estimate_ee2["state"] = DISABLED
-      edit_estimate_ee3["state"] = DISABLED
-      edit_estimate_ee4["state"] = DISABLED
-      edit_estimate_ee5["state"] = DISABLED
-      edit_estimate_ee6["state"] = DISABLED
+      # edit_estimate_ee2["state"] = DISABLED
+      # edit_estimate_ee3["state"] = DISABLED
+      # edit_estimate_ee4["state"] = DISABLED
+      # edit_estimate_ee5["state"] = DISABLED
+      # edit_estimate_ee6["state"] = DISABLED
 
 
     sql = "select businessname from customer"
@@ -2720,6 +2852,8 @@ def mainpage():
     edit_estimate_ee04.place(x=100,y=92)
     edit_estimate_ee04['values'] = esttdata_1
     edit_estimate_ee04.bind("<<ComboboxSelected>>")
+    edit_estimate_ee04.delete(0, END)
+    edit_estimate_ee04.insert(0, edit_est_data[30])
 
     edit_estimate_reff=Label(edit_estimate_labelframe,text="Order ref#").place(x=5,y=118)
     edit_estimate_ee11=Entry(edit_estimate_labelframe,width=27)
@@ -2758,8 +2892,8 @@ def mainpage():
       edit_estimate_tree.column("3", width=190)
       edit_estimate_tree.column("4", width=80)
       edit_estimate_tree.column("5", width=60)
-      edit_estimate_tree.column("6", width=60)
-      edit_estimate_tree.column("7", width=60)
+      edit_estimate_tree.column("6", width=80)
+      edit_estimate_tree.column("7", width=80)
       #edit_estimate_tree.column("8", width=80)
       
       edit_estimate_tree.heading("#0")
@@ -2872,68 +3006,276 @@ def mainpage():
     edit_estimate_labelfram1.place(x=1,y=1,width=800,height=170)
 
     edit_estimates_cost1=Label(edit_estimate_labelfram1,text="Extra cost name").place(x=2,y=5)
-    edit_estimates_e1=ttk.Combobox(edit_estimate_labelfram1, value="",width=20).place(x=115,y=5)
+    edit_estimates_e1=ttk.Combobox(edit_estimate_labelfram1, value="",width=20)
+    edit_estimates_e1.place(x=115,y=5)
+    edit_estimates_e1.delete(0, END)
+    edit_estimates_e1.insert(0, edit_est_data[11])
+
+
+    def edit_est_recalc_dis(event):
+      sql = "select * from company"
+      fbcursor.execute(sql)
+      taxdata1 = fbcursor.fetchone()
+      if taxdata1[12] == "1":
+        price = 0.0
+        total_cost = 0.0
+        exc = float(edit_estimates_excost.get())
+        dis_rate = float(edit_estimates_disrate.get())
+        for i in edit_estimate_tree.get_children():
+          price += float(edit_estimate_tree.item(i,'values')[3])
+        discount_rate = (price*dis_rate)/100
+        total_cost += (price - discount_rate) + exc
+        edit_estimate_discounttt.config(text= str(dis_rate) + "" +"% Discount")
+        edit_estimate_totalll1.config(text="" +"0.00")
+        edit_estimate_ttax1label.config(text="" +"0.00")
+        edit_estimate_ttax2label.config(text="" +"0.00")
+        edit_estimate_discounttt1.config(text=round(discount_rate,2))
+        sub_tot = round((price - discount_rate),2)
+        edit_estimate_subbb1.config(text=sub_tot)
+        edit_estimate_costtt.config(text=round(exc,2))
+        edit_estimate_orderrr1.config(text=round(total_cost,2))
+        
+      elif taxdata1[12] == "2":
+        price = 0.0
+        p = 0.0
+        total_cost = 0.0
+        exc = float(edit_estimates_excost.get())
+        dis_rate = float(edit_estimates_disrate.get())
+        tx1 = float(edit_estimates_tax1.get())
+        for i in edit_estimate_tree.get_children():
+          if edit_estimate_tree.item(i,'values')[6] == "No":
+            p += float(edit_estimate_tree.item(i,'values')[3])
+          else:
+            price += float(edit_estimate_tree.item(i,'values')[3])
+        discount_rate = ((price + p) * dis_rate)/100
+        dis_price = (price * dis_rate)/100
+        dis_p = (p * dis_rate)/100
+        tax1_rate = ((price - dis_price)*tx1)/100
+        tx_calc = (price - dis_price) + tax1_rate
+        tx_calc1 = p - dis_p
+        total_cost += (tx_calc + tx_calc1) + exc 
+        edit_estimate_discounttt.config(text= str(dis_rate) + "" +"% Discount")
+        edit_estimate_totalll1.config(text="" +"0.00")
+        edit_estimate_ttax2label.config(text="" +"0.00")
+        edit_estimate_discounttt1.config(text=round(discount_rate,2))
+        sub_tot = round(((price + p) - discount_rate),2)
+        edit_estimate_subbb1.config(text=sub_tot)
+        edit_estimate_ttax1label.config(text=round(tax1_rate,2))
+        edit_estimate_costtt.config(text=round(exc,2))
+        edit_estimate_orderrr1.config(text=round(total_cost,2))
+        
+      elif taxdata1[12] == "3":
+        price = 0.0
+        p1 = 0.0
+        p2 = 0.0
+        p3 = 0.0
+        total_cost = 0.0
+        tx1 = float(edit_estimates_tax1.get())
+        tx2 = float(edit_estimates_tax2.get())
+        exc = float(edit_estimates_excost.get())
+        dis_rate = float(edit_estimates_disrate.get())
+        for i in edit_estimate_tree.get_children():
+          if edit_estimate_tree.item(i,'values')[6] == "No" and edit_estimate_tree.item(i,'values')[7] == "No":
+            p1 += float(edit_estimate_tree.item(i,'values')[3])
+          elif edit_estimate_tree.item(i,'values')[6] == "Yes" and edit_estimate_tree.item(i,'values')[7] == "No":
+            p2 += float(edit_estimate_tree.item(i,'values')[3])
+          elif edit_estimate_tree.item(i,'values')[6] == "No" and edit_estimate_tree.item(i,'values')[7] == "Yes":
+            p3 += float(edit_estimate_tree.item(i,'values')[3])
+          else:
+            price += float(edit_estimate_tree.item(i,'values')[3])
+        discount_rate = ((p1 + p2 + p3 + price) * dis_rate)/100
+        dis_p2 = (p2 * dis_rate)/100
+        tax1_rate = ((p2 - dis_p2) * tx1)/100
+        dis_price = (price * dis_rate)/100
+        tax2_rate = ((price - dis_price) * tx1)/100
+        tax3_rate = ((price - dis_price) * tx2)/100
+        dis_p3= (p3 * dis_rate)/100
+        tax4_rate = ((p3 - dis_p3) * tx2)/100
+        dis_p4 = (p1 * dis_rate)/100
+        tx_calc1 = (p2 - dis_p2) + tax1_rate
+        tx_calc2 = (price - dis_price) + tax2_rate + tax3_rate
+        tx_calc3 = (p3 - dis_p3) + tax4_rate
+        tx_calc4 = (p1 - dis_p4)
+        total_cost += (tx_calc1 + tx_calc2 + tx_calc3 + tx_calc4) + exc
+        edit_estimate_discounttt.config(text= str(dis_rate) + "" +"% Discount")
+        edit_estimate_totalll1.config(text="" +"0.00")
+        edit_estimate_discounttt1.config(text=round(discount_rate,2))
+        sub_tot = round(((price + p1 + p2 + p3) - discount_rate),2)
+        edit_estimate_subbb1.config(text="$" + "" + str(sub_tot))
+        edit_estimate_ttax1label.config(text=round((tax1_rate + tax2_rate),2))
+        edit_estimate_ttax2label.config(text=round((tax3_rate + tax4_rate),2))
+        edit_estimate_costtt.config(text=round(exc,2))
+        edit_estimate_orderrr1.config(text=round(total_cost,2))
 
     edit_estimates_rate=Label(edit_estimate_labelfram1,text="Discount rate").place(x=370,y=5)
     edit_estimates_disrate=Spinbox(edit_estimate_labelfram1,width=6,from_=0,to=10,justify=RIGHT)
     edit_estimates_disrate.place(x=460,y=5)
+    edit_estimates_disrate.bind('<Button-1>',edit_est_recalc_dis)
+    edit_estimates_disrate.delete(0,END)
+    edit_estimates_disrate.insert(0, edit_est_data[15])
+
+    def edit_est_recalc_exc(event):
+      sql = "select * from company"
+      fbcursor.execute(sql)
+      taxdata1 = fbcursor.fetchone()
+      if taxdata1[12] == "1":
+        price = 0.0
+        total_cost = 0.0
+        exc = float(edit_estimates_excost.get())
+        dis_rate = float(edit_estimates_disrate.get())
+        for i in edit_estimate_tree.get_children():
+          price += float(edit_estimate_tree.item(i,'values')[3])
+        discount_rate = (price*dis_rate)/100
+        total_cost += (price - discount_rate) + exc
+        edit_estimate_discounttt.config(text= str(dis_rate) + "" +"% Discount")
+        edit_estimate_totalll1.config(text="" +"0.00")
+        edit_estimate_ttax1label.config(text="" +"0.00")
+        edit_estimate_ttax2label.config(text="" +"0.00")
+        edit_estimate_discounttt1.config(text=round(discount_rate,2))
+        sub_tot = round((price - discount_rate),2)
+        edit_estimate_subbb1.config(text=sub_tot)
+        edit_estimate_costtt.config(text=round(exc,2))
+        edit_estimate_orderrr1.config(text=round(total_cost,2))
+        
+      elif taxdata1[12] == "2":
+        price = 0.0
+        p = 0.0
+        total_cost = 0.0
+        exc = float(edit_estimates_excost.get())
+        dis_rate = float(edit_estimates_disrate.get())
+        tx1 = float(edit_estimates_tax1.get())
+        for i in edit_estimate_tree.get_children():
+          if edit_estimate_tree.item(i,'values')[6] == "No":
+            p += float(edit_estimate_tree.item(i,'values')[3])
+          else:
+            price += float(edit_estimate_tree.item(i,'values')[3])
+        discount_rate = ((price + p) * dis_rate)/100
+        dis_price = (price * dis_rate)/100
+        dis_p = (p * dis_rate)/100
+        tax1_rate = ((price - dis_price)*tx1)/100
+        tx_calc = (price - dis_price) + tax1_rate
+        tx_calc1 = p - dis_p
+        total_cost += (tx_calc + tx_calc1) + exc 
+        edit_estimate_discounttt.config(text= str(dis_rate) + "" +"% Discount")
+        edit_estimate_totalll1.config(text="" +"0.00")
+        edit_estimate_ttax2label.config(text="" +"0.00")
+        edit_estimate_discounttt1.config(text=round(discount_rate,2))
+        sub_tot = round(((price + p) - discount_rate),2)
+        edit_estimate_subbb1.config(text=sub_tot)
+        edit_estimate_ttax1label.config(text=round(tax1_rate,2))
+        edit_estimate_costtt.config(text=round(exc,2))
+        edit_estimate_orderrr1.config(text=round(total_cost,2))
+        
+      elif taxdata1[12] == "3":
+        price = 0.0
+        p1 = 0.0
+        p2 = 0.0
+        p3 = 0.0
+        total_cost = 0.0
+        tx1 = float(edit_estimates_tax1.get())
+        tx2 = float(edit_estimates_tax2.get())
+        exc = float(edit_estimates_excost.get())
+        dis_rate = float(edit_estimates_disrate.get())
+        for i in edit_estimate_tree.get_children():
+          if edit_estimate_tree.item(i,'values')[6] == "No" and edit_estimate_tree.item(i,'values')[7] == "No":
+            p1 += float(edit_estimate_tree.item(i,'values')[3])
+          elif edit_estimate_tree.item(i,'values')[6] == "Yes" and edit_estimate_tree.item(i,'values')[7] == "No":
+            p2 += float(edit_estimate_tree.item(i,'values')[3])
+          elif edit_estimate_tree.item(i,'values')[6] == "No" and edit_estimate_tree.item(i,'values')[7] == "Yes":
+            p3 += float(edit_estimate_tree.item(i,'values')[3])
+          else:
+            price += float(edit_estimate_tree.item(i,'values')[3])
+        discount_rate = ((p1 + p2 + p3 + price) * dis_rate)/100
+        dis_p2 = (p2 * dis_rate)/100
+        tax1_rate = ((p2 - dis_p2) * tx1)/100
+        dis_price = (price * dis_rate)/100
+        tax2_rate = ((price - dis_price) * tx1)/100
+        tax3_rate = ((price - dis_price) * tx2)/100
+        dis_p3= (p3 * dis_rate)/100
+        tax4_rate = ((p3 - dis_p3) * tx2)/100
+        dis_p4 = (p1 * dis_rate)/100
+        tx_calc1 = (p2 - dis_p2) + tax1_rate
+        tx_calc2 = (price - dis_price) + tax2_rate + tax3_rate
+        tx_calc3 = (p3 - dis_p3) + tax4_rate
+        tx_calc4 = (p1 - dis_p4)
+        total_cost += (tx_calc1 + tx_calc2 + tx_calc3 + tx_calc4) + exc
+        edit_estimate_discounttt.config(text= str(dis_rate) + "" +"% Discount")
+        edit_estimate_totalll1.config(text="" +"0.00")
+        edit_estimate_discounttt1.config(text=round(discount_rate,2))
+        sub_tot = round(((price + p1 + p2 + p3) - discount_rate),2)
+        edit_estimate_subbb1.config(text="$" + "" + str(sub_tot))
+        edit_estimate_ttax1label.config(text=round((tax1_rate + tax2_rate),2))
+        edit_estimate_ttax2label.config(text=round((tax3_rate + tax4_rate),2))
+        edit_estimate_costtt.config(text=round(exc,2))
+        edit_estimate_orderrr1.config(text=round(total_cost,2))
 
     edit_estimates_cost2=Label(edit_estimate_labelfram1,text="Extra cost").place(x=35,y=35)
     edit_estimates_excost=Entry(edit_estimate_labelfram1,width=10)
     edit_estimates_excost.place(x=115,y=35)
+    edit_estimates_excost.bind('<KeyRelease>',edit_est_recalc_exc)
+    edit_estimates_excost.delete(0,END)
+    edit_estimates_excost.insert(0, edit_est_data[12])
 
-    # est_comp_sql1 = "SELECT * FROM company"
-    # fbcursor.execute(est_comp_sql1,)
-    # tax_data1 = fbcursor.fetchone()
-    # edit_estimates_ttax1=Label(edit_estimate_labelfram1,text="Tax1")
-    # edit_estimates_tax1=Entry(edit_estimate_labelfram1,width=7,justify=RIGHT)
-    # edit_estimates_ttax2=Label(edit_estimate_labelfram1,text="Tax2")
-    # edit_estimates_tax2=Entry(edit_estimate_labelfram1,width=7,justify=RIGHT)
-    # if tax_data1[12] == "1":
-    #   edit_estimates_tax1.insert(0, 0)
-    #   edit_estimates_tax2.insert(0, 0)
-    # elif tax_data1[12] == "2":
+    edit_est_comp_sql = "SELECT * FROM company"
+    fbcursor.execute(edit_est_comp_sql,)
+    taxdata2 = fbcursor.fetchone()
+    edit_estimates_ttax1=Label(edit_estimate_labelfram1,text="Tax1")
+    edit_estimates_tax1=Entry(edit_estimate_labelfram1,width=7,justify=RIGHT)
+    edit_estimates_ttax2=Label(edit_estimate_labelfram1,text="Tax2")
+    edit_estimates_tax2=Entry(edit_estimate_labelfram1,width=7,justify=RIGHT)
+    if taxdata2[12] == "1":
+      edit_estimates_tax1.insert(0, 0)
+      edit_estimates_tax2.insert(0, 0)
+    elif taxdata2[12] == "2":
       
-    #   edit_estimates_ttax1.place(x=420,y=35)
+      edit_estimates_ttax1.place(x=420,y=35)
       
-    #   edit_estimates_tax1.place(x=460,y=35)
-    #   def1_val = tax1ratee.get()
-    #   edit_estimates_tax1.delete(0, END)
-    #   edit_estimates_tax1.insert(0, def1_val)
-    #   edit_estimates_tax2.insert(0, 0)
-    # elif tax_data1[12] == "3":
+      edit_estimates_tax1.place(x=460,y=35)
+      def1_val = tax1ratee.get()
+      edit_estimates_tax1.delete(0, END)
+      edit_estimates_tax1.insert(0, edit_est_data[16])
+      edit_estimates_tax2.insert(0, 0)
+    elif taxdata2[12] == "3":
       
-    #   edit_estimates_ttax1.place(x=420,y=35)
+      edit_estimates_ttax1.place(x=420,y=35)
       
-    #   edit_estimates_tax1.place(x=460,y=35)
-    #   def1_val = tax1ratee.get()
-    #   edit_estimates_tax1.delete(0, END)
-    #   edit_estimates_tax1.insert(0, def1_val)
+      edit_estimates_tax1.place(x=460,y=35)
+      def1_val = tax1ratee.get()
+      edit_estimates_tax1.delete(0, END)
+      edit_estimates_tax1.insert(0, edit_est_data[16])
       
-    #   edit_estimates_ttax2.place(x=420,y=75)
+      edit_estimates_ttax2.place(x=420,y=65)
       
-    #   edit_estimates_tax2.place(x=460,y=75)
-    #   def2_val = tax2ratee.get()
-    #   edit_estimates_tax2.delete(0, END)
-    #   edit_estimates_tax2.insert(0, def2_val)
-
-
-    edit_estimates_ttax1=Label(edit_estimate_labelfram1,text="Tax1").place(x=420,y=35)
-    edit_estimates_tax1=Entry(edit_estimate_labelfram1,width=7)
-    edit_estimates_tax1.place(x=460,y=35)
-    edit_estimates_ttax2=Label(edit_estimate_labelfram1,text="Tax2").place(x=420,y=75)
-    edit_estimates_tax2=Entry(edit_estimate_labelfram1,width=7)
-    edit_estimates_tax2.place(x=460,y=75)
+      edit_estimates_tax2.place(x=460,y=65)
+      def2_val = tax2ratee.get()
+      edit_estimates_tax2.delete(0, END)
+      edit_estimates_tax2.insert(0, def2_val)
+  
+    
     edit_estimates_template=Label(edit_estimate_labelfram1,text="Template").place(x=37,y=70)
-    edit_estimates_e5=ttk.Combobox(edit_estimate_labelfram1, value="",width=25).place(x=115,y=70)
+    edit_estimates_e5=ttk.Combobox(edit_estimate_labelfram1, value="",width=25)
+    edit_estimates_e5.place(x=115,y=70)
+    edit_estimates_e5.delete(0, END)
+    edit_estimates_e5.insert(0, edit_est_data[13])
+
+
     edit_estimates_sales=Label(edit_estimate_labelfram1,text="Sales Person").place(x=25,y=100)
-    edit_estimates_e6=Entry(edit_estimate_labelfram1,width=18).place(x=115,y=100)
+    edit_estimates_e6=Entry(edit_estimate_labelfram1,width=18)
+    edit_estimates_e6.place(x=115,y=100)
+    edit_estimates_e6.delete(0, END)
+    edit_estimates_e6.insert(0, edit_est_data[14])
+
+
     edit_estimates_category=Label(edit_estimate_labelfram1,text="Category").place(x=300,y=100)
-    edit_estimates_e7=Entry(edit_estimate_labelfram1,width=22).place(x=370,y=100)
+    edit_estimates_e7=Entry(edit_estimate_labelfram1,width=22)
+    edit_estimates_e7.place(x=370,y=100)
+    edit_estimates_e7.delete(0, END)
+    edit_estimates_e7.insert(0, edit_est_data[17])
     
     edit_estimate_statusfrme = LabelFrame(edit_estimate_labelfram1,text="Status",font=("arial",15))
     edit_estimate_statusfrme.place(x=540,y=0,width=160,height=160)
-    edit_estimates_draft=Label(edit_estimate_statusfrme, text="Draft",font=("arial", 15, "bold"), fg="grey").place(x=50, y=3)
+    edit_estimates_draft=Label(edit_estimate_statusfrme, text=""+edit_est_data[4],font=("arial", 15, "bold"), fg="grey")
+    edit_estimates_draft.place(x=50, y=3)
     edit_estimates_on1=Label(edit_estimate_statusfrme, text="Emailed on:").place( y=50)
     edit_estimates_nev1=Label(edit_estimate_statusfrme, text="Never").place(x=100,y=50)
     edit_estimates_on2=Label(edit_estimate_statusfrme, text="Printed on:").place( y=90)
@@ -2964,8 +3306,12 @@ def mainpage():
 
     
     edit_estimates_texttt=Label(edit_estimate_noteFrame,text="Private notes(not shown on invoice/order/estemates)").place(x=10,y=10)
-    edit_estimates_e41=Text(edit_estimate_noteFrame,width=85,height=7)
+    edit_estimates_e41=scrolledtext.ScrolledText(edit_estimate_noteFrame,width=85,height=7)
     edit_estimates_e41.place(x=10,y=32)
+    try:
+      edit_estimates_e41.insert("1.0", edit_est_data[33])
+    except:
+      pass
     
     est_term_sql = "SELECT * FROM company"
     fbcursor.execute(est_term_sql,)
@@ -2982,22 +3328,34 @@ def mainpage():
 
     edit_estimates_e61=scrolledtext.ScrolledText(edit_estimate_commentFrame,width=85,height=7)
     edit_estimates_e61.place(x=10,y=10)
+    try:
+      edit_estimates_e61.insert("1.0", edit_est_data[32])
+    except:
+      pass
+
     
 
-    edit_estimates_btn1=Button(edit_estimate_documentFrame,height=2,width=3,text="+").place(x=5,y=10)
-    edit_estimates_btn2=Button(edit_estimate_documentFrame,height=2,width=3,text="-").place(x=5,y=50)
-    edit_estimates_texttt1=Label(edit_estimate_documentFrame,text="Attached documents or image files.If you attach large email then email taken long time to send").place(x=50,y=10)
-    edit_estimates_cusventtree=ttk.Treeview(edit_estimate_documentFrame, height=5)
-    edit_estimates_cusventtree["columns"]=["1","2","3"]
-    edit_estimates_cusventtree.column("#0", width=20)
-    edit_estimates_cusventtree.column("1", width=250)
-    edit_estimates_cusventtree.column("2", width=250)
-    edit_estimates_cusventtree.column("2", width=200)
-    edit_estimates_cusventtree.heading("#0",text="", anchor=W)
-    edit_estimates_cusventtree.heading("1",text="Attach to Email")
-    edit_estimates_cusventtree.heading("2",text="Filename")
-    edit_estimates_cusventtree.heading("3",text="Filesize")  
-    edit_estimates_cusventtree.place(x=50, y=45)
+    
+
+    edit_doc_plus_btn=Button(edit_estimate_documentFrame,text="+",width=2,height=2)
+    edit_doc_plus_btn.place(x=5,y=10)
+    edit_doc_minus_btn=Button(edit_estimate_documentFrame,height=2,width=2,text="-")
+    edit_doc_minus_btn.place(x=5,y=60)
+    # doc_txt_label=Label(estimate_documentFrame,text="Attached documents or image files.If you attach large email then email taken long time to send").place(x=50,y=10)
+    global edit_doc_tree
+    edit_doc_tree=ttk.Treeview(edit_estimate_documentFrame, height=5)
+    edit_doc_tree["columns"]=["1","2","3"]
+    edit_doc_tree.column("#0", width=20,anchor=CENTER)
+    edit_doc_tree.column("1", width=130,anchor=CENTER)
+    edit_doc_tree.column("2", width=380,anchor=CENTER)
+    edit_doc_tree.column("3", width=130,anchor=CENTER)
+    edit_doc_tree.heading("#0",text="", anchor=W)
+    edit_doc_tree.heading("1",text="Attach to Email")
+    edit_doc_tree.heading("2",text="Filename")
+    edit_doc_tree.heading("3",text="Filesize")  
+    edit_doc_tree.place(x=50, y=10)
+    #edit_doc_tree.bind('<Double-Button-1>',show_sel_file)
+
     
 
     edit_estimate_fir4Frame1=Frame(edit_estimate_pop,height=190,width=210,bg="#f5f3f2")
@@ -3008,33 +3366,35 @@ def mainpage():
     edit_estimate_discounttt.place(x=0 ,y=0)
     edit_estimate_discounttt1=Label(edit_estimate_summaryfrme, text="$0.00")
     edit_estimate_discounttt1.place(x=130 ,y=0)
-    edit_estimate_subbb=Label(edit_estimate_summaryfrme, text="Subtotal").place(x=0 ,y=21)
+    edit_estimate_subbb=Label(edit_estimate_summaryfrme, text="Subtotal").place(x=0 ,y=15)
     edit_estimate_subbb1=Label(edit_estimate_summaryfrme, text="$0.00")
-    edit_estimate_subbb1.place(x=130 ,y=21)
-    edit_estimate_txa1label=Label(edit_estimate_summaryfrme, text="Tax1").place(x=0 ,y=42)
+    edit_estimate_subbb1.place(x=130 ,y=15)
+    edit_estimate_txa1label=Label(edit_estimate_summaryfrme, text="Tax1").place(x=0 ,y=30)
     edit_estimate_ttax1label=Label(edit_estimate_summaryfrme, text="$0.00")
-    edit_estimate_ttax1label.place(x=130 ,y=42)
-    edit_estimate_txa2label=Label(edit_estimate_summaryfrme, text="Tax2").place(x=0 ,y=63)
+    edit_estimate_ttax1label.place(x=130 ,y=30)
+    edit_estimate_txa2label=Label(edit_estimate_summaryfrme, text="Tax2").place(x=0 ,y=45)
     edit_estimate_ttax2label=Label(edit_estimate_summaryfrme, text="$0.00")
-    edit_estimate_ttax2label.place(x=130 ,y=63)
-    edit_estimate_costt=Label(edit_estimate_summaryfrme, text="Extra cost").place(x=0 ,y=84)
+    edit_estimate_ttax2label.place(x=130 ,y=45)
+    edit_estimate_costt=Label(edit_estimate_summaryfrme, text="Extra cost").place(x=0 ,y=60)
     edit_estimate_costtt=Label(edit_estimate_summaryfrme, text="$0.00")
-    edit_estimate_costtt.place(x=130 ,y=84)
-    edit_estimate_orderrr=Label(edit_estimate_summaryfrme, text="Estimate total").place(x=0 ,y=105)
+    edit_estimate_costtt.place(x=130 ,y=60)
+    edit_estimate_orderrr=Label(edit_estimate_summaryfrme, text="Estimate total").place(x=0 ,y=75)
     edit_estimate_orderrr1=Label(edit_estimate_summaryfrme, text="$0.00")
-    edit_estimate_orderrr1.place(x=130 ,y=105)
-    edit_estimate_totalll=Label(edit_estimate_summaryfrme, text="Total paid").place(x=0 ,y=126)
-    edit_estimate_totalll1=Label(edit_estimate_summaryfrme, text="$0.00").place(x=130 ,y=126)
-    edit_estimate_balancee=Label(edit_estimate_summaryfrme, text="Balance").place(x=0 ,y=148)
-    edit_estimate_balancee1=Label(edit_estimate_summaryfrme, text="$0.00").place(x=130 ,y=148)
+    edit_estimate_orderrr1.place(x=130 ,y=75)
+    edit_estimate_totalll=Label(edit_estimate_summaryfrme, text="Total paid").place(x=0 ,y=90)
+    edit_estimate_totalll1=Label(edit_estimate_summaryfrme, text="$0.00")
+    edit_estimate_totalll1.place(x=130 ,y=90)
+    edit_estimate_balancee=Label(edit_estimate_summaryfrme, text="Balance").place(x=0 ,y=105)
+    edit_estimate_balancee1=Label(edit_estimate_summaryfrme, text="$0.00")
+    edit_estimate_balancee1.place(x=130 ,y=105)
 
-    newline_sql = "SELECT * FROM storingproduct WHERE estimate_number=%s"
-    newline_val = (edit_est_data[1],)
-    fbcursor.execute(newline_sql,newline_val)
-    product_details = fbcursor.fetchall()
+    edit_newline_sql = "SELECT * FROM storingproduct WHERE estimate_number=%s"
+    edit_newline_val = (edit_est_data[1],)
+    fbcursor.execute(edit_newline_sql,edit_newline_val)
+    edit_product_details = fbcursor.fetchall()
   
     if tax_data[12] == "1":
-      for i in product_details:
+      for i in edit_product_details:
         edit_estimate_tree.insert(parent='',index='end',iid=i,text='',values=(i[5], i[6], i[7],i[8],i[9],i[10],i[13]))
         price = 0.0
         total_cost = 0.0
@@ -3052,7 +3412,7 @@ def mainpage():
         edit_estimate_orderrr1.config(text=round(total_cost,2))
       
     elif tax_data[12] == "2":
-      for i in product_details:
+      for i in edit_product_details:
         if i[11] == "Yes":
           edit_estimate_tree.insert(parent='',index='end',text='',values=(i[5], i[6], i[7],i[8],i[9],i[10],'Yes',i[13]))
         else:
@@ -3084,7 +3444,7 @@ def mainpage():
         edit_estimate_orderrr1.config(text=round(total_cost,2))
         
     elif tax_data[12] == "3":
-      for i in product_details:
+      for i in edit_product_details:
         if i[11] == "Yes" and i[12] == "Yes":
           edit_estimate_tree.insert(parent='',index='end',text='',values=(i[5], i[6], i[7],i[8],i[9],i[10],'Yes','Yes',i[13]))
         elif i[11] == "Yes" and i[12] == "No":
@@ -3260,7 +3620,7 @@ def mainpage():
   def est_send_mail():
 
       sender_email = "infoxfbilling@gmail.com" #email_from.get()                                 
-      sender_password = "fbilling@2022"        #email_pswrd.get() 
+      sender_password = "xmdovhjmuxmoecdq"        #email_pswrd.get() 
 
       server = smtplib.SMTP('smtp.gmail.com', 587)
       print("Login successful1")
@@ -3353,33 +3713,6 @@ def mainpage():
     estimate_mailDetail.iconphoto(False, estimate_ep2)
     estimate_mailDetail.geometry("1030x550+150+120")
     
-    def estimate_my_SMTP():
-        if True:
-            #estimate_em_ser_conbtn.destroy()
-            estimate_mysmtpservercon=LabelFrame(estimate_account_Frame,text="SMTP server connection(ask your ISP for your SMTP settings)", height=165, width=380)
-            estimate_mysmtpservercon.place(x=610, y=110)
-            estimate_lbl_hostn=Label(estimate_mysmtpservercon, text="Hostname")
-            estimate_lbl_hostn.place(x=5, y=10)
-            estimate_hostnent=Entry(estimate_mysmtpservercon, width=30)
-            estimate_hostnent.place(x=80, y=10)
-            estimate_lbl_portn=Label(estimate_mysmtpservercon, text="Port")
-            estimate_lbl_portn.place(x=5, y=35)
-            estimate_portent=Entry(estimate_mysmtpservercon, width=30)
-            estimate_portent.place(x=80, y=35)
-            estimate_elbl_usn=Label(estimate_mysmtpservercon, text="Username")
-            estimate_elbl_usn.place(x=5, y=60)
-            estimate_unament=Entry(estimate_mysmtpservercon, width=30)
-            estimate_unament.place(x=80, y=60)
-            estimate_eelbl_pasn=Label(estimate_mysmtpservercon, text="Password")
-            estimate_eelbl_pasn.place(x=5, y=85)
-            estimate_pwdent=Entry(estimate_mysmtpservercon, width=30)
-            estimate_pwdent.place(x=80, y=85)
-            estimate_ssl_chkvar=IntVar()
-            estimate_ssl_chkbtn=Checkbutton(estimate_mysmtpservercon, variable=estimate_ssl_chkvar, text="This server requires a secure connection(SSL)", onvalue=1, offvalue=0)
-            estimate_ssl_chkbtn.place(x=50, y=110)
-            estimate_em_ser_conbtn1=Button(estimate_account_Frame, text="Test E-mail Server Connection").place(x=610, y=285)
-        else:
-            pass
       
     estimate_mystyle = ttk.Style()
     estimate_mystyle.theme_use('default')
@@ -4100,8 +4433,8 @@ def mainpage():
       esttree1 = ttk.Treeview(tab4, columns = (1,2,3), height = 15, show = "headings")
       esttree1.pack(side = 'top')
       esttree1.heading(1)
-      esttree1.heading(2, text="Attach to Email",)
-      esttree1.heading(3, text="Filename")
+      esttree1.heading(2, text="Filename",)
+      esttree1.heading(3, text="Filesize")
       esttree1.column(1, width = 70)
       esttree1.column(2, width = 600)
       esttree1.column(3, width = 600)
