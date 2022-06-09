@@ -50,7 +50,7 @@ from datetime import datetime, date
 fbilldb = mysql.connector.connect(
     host="localhost", user="root", password="", database="fbillingsintgrtd", port="3306"
 )
-fbcursor = fbilldb.cursor()
+fbcursor = fbilldb.cursor(buffered=True)
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
@@ -1080,6 +1080,9 @@ def mainpage():
           estimate_balancee1.config(text=total+tot+tot2-discou+extracs)
         
         estimate_newselection.destroy()
+      
+      
+        
 
       estimate_btn11=Button(estimate_newselection,compound = LEFT,image=tick ,text="ok", width=60, command=estselepro).place(x=15, y=610)
       estimate_btn11=Button(estimate_newselection,compound = LEFT,image=tick , text="Edit product/Service", width=150,command=product).place(x=250, y=610)
@@ -1089,10 +1092,7 @@ def mainpage():
 
 
 
-    #preview new line
-    def estimate_previewline():
-      messagebox.showerror("F-Billing Revolution","line is required,please select customer for this order before printing.")
-
+    
 
     
     #sms notification
@@ -1176,8 +1176,98 @@ def mainpage():
 
     
     #delete line item  
-    def estimate_delete1():
-      messagebox.showerror("F-Billing Revolution","Customer is required,please select customer before deleting line item .")
+    def delete_estimate_create():
+      try:
+        selected_item = estimate_tree.selection()[0]
+        estimate_tree.delete(selected_item)
+        sql = "select * from company"
+        fbcursor.execute(sql)
+        del_est = fbcursor.fetchone()
+        if del_est[12] == "1":
+        # estimate_tree.insert(parent='', index='end',text='', values=(prosele[2],prosele[4],prosele[5],prosele[7],1,prosele[8],prosele[7]*1))
+          extracs = 0.0
+          discou = 0.0
+          total = 0.0
+          for child in estimate_tree.get_children():
+            total += float(estimate_tree.item(child, 'values')[6])
+          discou = (total*float(estimates_discount2.get())/100)
+          extracs = (extracs+float(estimates_cost3.get()))
+          estimate_costtt.config(text=estimates_cost3.get())
+          estimate_discounttt1.config(text=discou)
+          estpriceview.config(text=total)
+          estimate_total1.config(text=total-discou+extracs)
+          estimate_balancee1.config(text=total-discou+extracs)
+          estimate_subbb1.config(text=total-discou)
+        elif del_est[12] == "2":
+          # estimate_tree.insert(parent='', index='end',text='', values=(prosele[2],prosele[4],prosele[5],prosele[7],1,prosele[8],tax1,prosele[7]*1))
+          extracs = 0.0
+          discou = 0.0
+          total = 0.0
+          for child in estimate_tree.get_children():
+            total += float(estimate_tree.item(child, 'values')[7])
+          discou = (total*float(estimates_discount2.get())/100)
+          extracs = (extracs+float(estimates_cost3.get()))
+          estimate_costtt.config(text=estimates_cost3.get())
+          estimate_discounttt1.config(text=discou)
+          estpriceview.config(text=total)
+          estimate_subbb1.config(text=total-discou)
+
+          tot = 0.0
+          totaltax1 = 0.0
+          for child in estimate_tree.get_children():
+            checktax1 = list(estimate_tree.item(child, 'values'))
+            if checktax1[6] == "yes":
+              totaltax1 =(totaltax1 + float(checktax1[7]))
+              estimate_ttax1.config(text=(float(totaltax1)*float(estimates_tax4.get())/100))
+              tot = (float(totaltax1)*float(estimates_tax4.get())/100)
+            else:
+              pass
+          estimate_total1.config(text=total+tot-discou+extracs)
+          estimate_balancee1.config(text=total+tot-discou+extracs)
+            
+        elif del_est[12] == "3":
+          # estimate_tree.insert(parent='', index='end',text='', values=(prosele[2],prosele[4],prosele[5],prosele[7],1,prosele[8],tax1,tax2,prosele[7]*1))
+          extracs = 0.0
+          discou = 0.0
+          total = 0.0
+          for child in estimate_tree.get_children():
+            total += float(estimate_tree.item(child, 'values')[8])
+          extracs = (extracs+float(estimates_cost3.get()))
+          estimate_costtt.config(text=estimates_cost3.get())
+          discou = (total*float(estimates_discount2.get())/100)
+          estimate_discounttt1.config(text=discou)
+          estpriceview.config(text=total)
+          estimate_subbb1.config(text=total-discou)
+            
+          tot = 0.0
+          totaltax1 = 0.0
+          for child in estimate_tree.get_children():
+            checktax1 = list(estimate_tree.item(child, 'values'))
+            if checktax1[6] == "yes":
+              totaltax1 =(totaltax1 + float(checktax1[8]))
+              estimate_ttax1.config(text=(float(totaltax1)*float(estimates_tax4.get())/100))
+              tot = (float(totaltax1)*float(estimates_tax4.get())/100)
+            else:
+              pass
+          
+          tot2 = 0.0
+          totaltax2 = 0.0
+          for child in estimate_tree.get_children():
+            checktax1 = list(estimate_tree.item(child, 'values'))
+            if checktax1[7] == "yes":
+              totaltax2 =(totaltax2 + float(checktax1[8]))
+              estimate_ttax2.config(text=(float(totaltax2)*float(estimates_tax5.get())/100))
+              
+              tot2 = (float(totaltax2)*float(estimates_tax5.get())/100)
+            else:
+              pass
+
+          estimate_total1.config(text=total+tot+tot2-discou+extracs)
+          estimate_balancee1.config(text=total+tot+tot2-discou+extracs)
+        #estimate_newselection.destroy()
+      except:
+        pass
+
       
       
 
@@ -1197,13 +1287,13 @@ def mainpage():
     estimate_addd= Button(estimate_firFrame,compound="top", text="Add new\nline item",relief=RAISED, image=photo,bg="#f5f3f2", fg="black", height=55, bd=1, width=55,command=estimate_newline)
     estimate_addd.pack(side="left", pady=3, ipadx=4)
 
-    estimate_dele= Button(estimate_firFrame,compound="top", text="Delete line\nitem",relief=RAISED, image=photo2,bg="#f5f3f2", fg="black", height=55, bd=1, width=55,command=estimate_delete1)
+    estimate_dele= Button(estimate_firFrame,compound="top", text="Delete line\nitem",relief=RAISED, image=photo2,bg="#f5f3f2", fg="black", height=55, bd=1, width=55,command=delete_estimate_create)
     estimate_dele.pack(side="left", pady=3, ipadx=4)
 
     estimate_w2 = Canvas(estimate_firFrame, width=1, height=65, bg="#b3b3b3", bd=0)
     estimate_w2.pack(side="left", padx=5)
 
-    estimate_prev= Button(estimate_firFrame,compound="top", text="Preview\nEstimate",relief=RAISED, image=photo4,bg="#f5f3f2", fg="black", height=55, bd=1, width=55,command=estimate_previewline)
+    estimate_prev= Button(estimate_firFrame,compound="top", text="Preview\nEstimate",relief=RAISED, image=photo4,bg="#f5f3f2", fg="black", height=55, bd=1, width=55)
     estimate_prev.pack(side="left", pady=3, ipadx=4)
 
     estimate_prin= Button(estimate_firFrame,compound="top", text="Print \nEstimate",relief=RAISED, image=photo5,bg="#f5f3f2", fg="black", height=55, bd=1, width=55,command=estimate_printsele)
@@ -1772,17 +1862,20 @@ def mainpage():
     
     estimates_template=Label(estimate_labelfram1,text="Template").place(x=37,y=70)
 
-    est_temp_sql1 = "SELECT Defaultestimatetemplate FROM company "
-    fbcursor.execute(est_temp_sql1,)
-    est_temp_data1 = fbcursor.fetchall()
-    tempdata = []
-    for i in est_temp_data1:
-      tempdata.append(i[0])
+    # est_temp_sql1 = "SELECT Defaultestimatetemplate FROM company "
+    # fbcursor.execute(est_temp_sql1,)
+    # est_temp_data1 = fbcursor.fetchall()
+    # tempdata = []
+    # for i in est_temp_data1:
+    #   tempdata.append(i[0])
 
     
 
-    estimates_etemplate=ttk.Combobox(estimate_labelfram1, value=tempdata,width=25)
+    estimates_etemplate=ttk.Combobox(estimate_labelfram1,width=30)
+    estimates_etemplate['values'] = ('Professional 1 (logo on left side)','Professional 2 (logo on right side)','Simplified 1 (logo on left side)','Simplified 2 (logo on right side)','Business Classic')
     estimates_etemplate.place(x=115,y=70)
+    estimates_etemplate.current(0)
+    
    
 
 
@@ -2665,8 +2758,117 @@ def mainpage():
     
     #delete line item  
     def edit_estimate_delete1():
-      messagebox.showerror("F-Billing Revolution","Customer is required,please select customer before deleting line item .")
-      
+      try:
+        selected_item = edit_estimate_tree.selection()[0]
+        edit_estimate_tree.delete(selected_item)
+        edit_newline_sql1 = "SELECT * FROM storingproduct WHERE estimate_number=%s"
+        edit_newline_val1 = (edit_est_data[1],)
+        fbcursor.execute(edit_newline_sql1,edit_newline_val1)
+        edit_del_product_details = fbcursor.fetchall()
+
+        if tax_data[12] == "1":
+          for i in edit_del_product_details:
+            # edit_estimate_tree.insert(parent='',index='end',iid=i,text='',values=(i[5], i[6], i[7],i[8],i[9],i[10],i[13]))
+            price = 0.0
+            total_cost = 0.0
+            exc = float(edit_estimates_excost.get())
+            dis_rate = float(edit_estimates_disrate.get())
+            for i in edit_estimate_tree.get_children():
+              price += float(edit_estimate_tree.item(i,'values')[3])
+            discount_rate = (price*dis_rate)/100
+            total_cost += (price - discount_rate) + exc
+            edit_estimate_discounttt.config(text= str(dis_rate) + "" +"% Discount")
+            edit_estimate_discounttt1.config(text=round(discount_rate,2))
+            sub_tot = round((price - discount_rate),2)
+            edit_estimate_subbb1.config(text=sub_tot)
+            edit_estimate_costtt.config(text=round(exc,2))
+            edit_estimate_orderrr1.config(text=round(total_cost,2))
+          
+        elif tax_data[12] == "2":
+          # for i in edit_del_product_details:
+          #   if i[11] == "yes":
+          #     edit_estimate_tree.insert(parent='',index='end',text='',values=(i[5], i[6], i[7],i[8],i[9],i[10],'yes',i[13]))
+          #   else:
+          #     edit_estimate_tree.insert(parent='',index='end',text='',values=(i[5], i[6], i[7],i[8],i[9],i[10],'No',i[13]))
+            price = 0.0
+            p = 0.0
+            total_cost = 0.0
+            exc = float(edit_estimates_excost.get())
+            dis_rate = float(edit_estimates_disrate.get())
+            tx1 = float(edit_estimates_tax1.get())
+            for i in edit_estimate_tree.get_children():
+              if edit_estimate_tree.item(i,'values')[6] == "No":
+                p += float(edit_estimate_tree.item(i,'values')[3])
+              else:
+                price += float(edit_estimate_tree.item(i,'values')[3])
+            discount_rate = ((price + p) * dis_rate)/100
+            dis_price = (price * dis_rate)/100
+            dis_p = (p * dis_rate)/100
+            tax1_rate = ((price - dis_price)*tx1)/100
+            tx_calc = (price - dis_price) + tax1_rate
+            tx_calc1 = p - dis_p
+            total_cost += (tx_calc + tx_calc1) + exc 
+            edit_estimate_discounttt.config(text= str(dis_rate) + "" +"% Discount")
+            edit_estimate_discounttt1.config(text=round(discount_rate,2))
+            sub_tot = round(((price + p) - discount_rate),2)
+            edit_estimate_subbb1.config(text=sub_tot)
+            edit_estimate_ttax1label.config(text=round(tax1_rate,2))
+            edit_estimate_costtt.config(text=round(exc,2))
+            edit_estimate_orderrr1.config(text=round(total_cost,2))
+            
+        elif tax_data[12] == "3":
+          for i in edit_del_product_details:
+            # if i[11] == "yes" and i[12] == "yes":
+            #   edit_estimate_tree.insert(parent='',index='end',text='',values=(i[5], i[6], i[7],i[8],i[9],i[10],'yes','yes',i[13]))
+            # elif i[11] == "yes" and i[12] == "No":
+            #   edit_estimate_tree.insert(parent='',index='end',text='',values=(i[5], i[6], i[7],i[8],i[9],i[10],'yes','No',i[13]))
+            # elif i[11] == "No" and i[12] == "yes":
+            #   edit_estimate_tree.insert(parent='',index='end',text='',values=(i[5], i[6], i[7],i[8],i[9],i[10],'No','yes',i[13]))
+            # else:
+            #   edit_estimate_tree.insert(parent='',index='end',text='',values=(i[5], i[6], i[7],i[8],i[9],i[10],'No','No',i[13]))
+            price = 0.0
+            p1 = 0.0
+            p2 = 0.0
+            p3 = 0.0
+            total_cost = 0.0
+            tx1 = float(edit_estimates_tax1.get())
+            tx2 = float(edit_estimates_tax2.get())
+            exc = float(edit_estimates_excost.get())
+            dis_rate = float(edit_estimates_disrate.get())
+            for i in edit_estimate_tree.get_children():
+              if edit_estimate_tree.item(i,'values')[6] == "No" and edit_estimate_tree.item(i,'values')[7] == "No":
+                p1 += float(edit_estimate_tree.item(i,'values')[3])
+              elif edit_estimate_tree.item(i,'values')[6] == "yes" and edit_estimate_tree.item(i,'values')[7] == "No":
+                p2 += float(edit_estimate_tree.item(i,'values')[3])
+              elif edit_estimate_tree.item(i,'values')[6] == "No" and edit_estimate_tree.item(i,'values')[7] == "yes":
+                p3 += float(edit_estimate_tree.item(i,'values')[3])
+              else:
+                price += float(edit_estimate_tree.item(i,'values')[3])
+            discount_rate = ((p1 + p2 + p3 + price) * dis_rate)/100
+            dis_p2 = (p2 * dis_rate)/100
+            tax1_rate = ((p2 - dis_p2) * tx1)/100
+            dis_price = (price * dis_rate)/100
+            tax2_rate = ((price - dis_price) * tx1)/100
+            tax3_rate = ((price - dis_price) * tx2)/100
+            dis_p3= (p3 * dis_rate)/100
+            tax4_rate = ((p3 - dis_p3) * tx2)/100
+            dis_p4 = (p1 * dis_rate)/100
+            tx_calc1 = (p2 - dis_p2) + tax1_rate
+            tx_calc2 = (price - dis_price) + tax2_rate + tax3_rate
+            tx_calc3 = (p3 - dis_p3) + tax4_rate
+            tx_calc4 = (p1 - dis_p4)
+            total_cost += (tx_calc1 + tx_calc2 + tx_calc3 + tx_calc4) + exc
+            edit_estimate_discounttt.config(text= str(dis_rate) + "" +"% Discount")
+            edit_estimate_discounttt1.config(text=round(discount_rate,2))
+            sub_tot = round(((price + p1 + p2 + p3) - discount_rate),2)
+            edit_estimate_subbb1.config(text="$" + "" + str(sub_tot))
+            edit_estimate_ttax1label.config(text=round((tax1_rate + tax2_rate),2))
+            edit_estimate_ttax2label.config(text=round((tax3_rate + tax4_rate),2))
+            edit_estimate_costtt.config(text=round(exc,2))
+            edit_estimate_orderrr1.config(text=round(total_cost,2))
+      except:
+        pass
+        
       
 
     edit_estimate_firFrame=Frame(edit_estimate_pop, bg="#f5f3f2", height=60)
@@ -2691,7 +2893,7 @@ def mainpage():
     edit_estimate_w2 = Canvas(edit_estimate_firFrame, width=1, height=65, bg="#b3b3b3", bd=0)
     edit_estimate_w2.pack(side="left", padx=5)
 
-    edit_estimate_prev= Button(edit_estimate_firFrame,compound="top", text="Preview\nEstimate",relief=RAISED, image=photo4,bg="#f5f3f2", fg="black", height=55, bd=1, width=55,command=edit_estimate_previewline)
+    edit_estimate_prev= Button(edit_estimate_firFrame,compound="top", text="Preview\nEstimate",relief=RAISED, image=photo4,bg="#f5f3f2", fg="black", height=55, bd=1, width=55)
     edit_estimate_prev.pack(side="left", pady=3, ipadx=4)
 
     edit_estimate_prin= Button(edit_estimate_firFrame,compound="top", text="Print \nEstimate",relief=RAISED, image=photo5,bg="#f5f3f2", fg="black", height=55, bd=1, width=55,command=estimate_printsele)
@@ -3413,8 +3615,8 @@ def mainpage():
       
     elif tax_data[12] == "2":
       for i in edit_product_details:
-        if i[11] == "Yes":
-          edit_estimate_tree.insert(parent='',index='end',text='',values=(i[5], i[6], i[7],i[8],i[9],i[10],'Yes',i[13]))
+        if i[11] == "yes":
+          edit_estimate_tree.insert(parent='',index='end',text='',values=(i[5], i[6], i[7],i[8],i[9],i[10],'yes',i[13]))
         else:
           edit_estimate_tree.insert(parent='',index='end',text='',values=(i[5], i[6], i[7],i[8],i[9],i[10],'No',i[13]))
         price = 0.0
@@ -3445,12 +3647,12 @@ def mainpage():
         
     elif tax_data[12] == "3":
       for i in edit_product_details:
-        if i[11] == "Yes" and i[12] == "Yes":
-          edit_estimate_tree.insert(parent='',index='end',text='',values=(i[5], i[6], i[7],i[8],i[9],i[10],'Yes','Yes',i[13]))
-        elif i[11] == "Yes" and i[12] == "No":
-          edit_estimate_tree.insert(parent='',index='end',text='',values=(i[5], i[6], i[7],i[8],i[9],i[10],'Yes','No',i[13]))
-        elif i[11] == "No" and i[12] == "Yes":
-          edit_estimate_tree.insert(parent='',index='end',text='',values=(i[5], i[6], i[7],i[8],i[9],i[10],'No','Yes',i[13]))
+        if i[11] == "yes" and i[12] == "yes":
+          edit_estimate_tree.insert(parent='',index='end',text='',values=(i[5], i[6], i[7],i[8],i[9],i[10],'yes','yes',i[13]))
+        elif i[11] == "yes" and i[12] == "No":
+          edit_estimate_tree.insert(parent='',index='end',text='',values=(i[5], i[6], i[7],i[8],i[9],i[10],'yes','No',i[13]))
+        elif i[11] == "No" and i[12] == "yes":
+          edit_estimate_tree.insert(parent='',index='end',text='',values=(i[5], i[6], i[7],i[8],i[9],i[10],'No','yes',i[13]))
         else:
           edit_estimate_tree.insert(parent='',index='end',text='',values=(i[5], i[6], i[7],i[8],i[9],i[10],'No','No',i[13]))
         price = 0.0
@@ -3465,9 +3667,9 @@ def mainpage():
         for i in edit_estimate_tree.get_children():
           if edit_estimate_tree.item(i,'values')[6] == "No" and edit_estimate_tree.item(i,'values')[7] == "No":
             p1 += float(edit_estimate_tree.item(i,'values')[3])
-          elif edit_estimate_tree.item(i,'values')[6] == "Yes" and edit_estimate_tree.item(i,'values')[7] == "No":
+          elif edit_estimate_tree.item(i,'values')[6] == "yes" and edit_estimate_tree.item(i,'values')[7] == "No":
             p2 += float(edit_estimate_tree.item(i,'values')[3])
-          elif edit_estimate_tree.item(i,'values')[6] == "No" and edit_estimate_tree.item(i,'values')[7] == "Yes":
+          elif edit_estimate_tree.item(i,'values')[6] == "No" and edit_estimate_tree.item(i,'values')[7] == "yes":
             p3 += float(edit_estimate_tree.item(i,'values')[3])
           else:
             price += float(edit_estimate_tree.item(i,'values')[3])
@@ -4046,9 +4248,195 @@ def mainpage():
 
 
 
-  #print preview order
+  ###############---------print preview estimate---------#########################
   def estimate_Myprintpreview():
-    messagebox.showerror("F-Billing Revolution","Customer is required,please select customer for this order before printing.")
+    # messagebox.showerror("F-Billing Revolution","Customer is required,please select customer for this order before printing.")
+    #preview new line
+    
+    global estimate_preview
+    estimate_preview=Toplevel()
+    estimate_preview.title("F-Billing Revolution 2022-Estimate")
+    estimate_preview.geometry("1300x670")
+    estimate_preview.resizable(False, False)
+
+    prev_est_fetch = est_tree.item(est_tree.focus())["values"][1]
+    #print(itemid)
+    sql_prev = "SELECT * FROM estimate WHERE estimate_number=%s"
+    val_prev = (prev_est_fetch,)
+    fbcursor.execute(sql_prev, val_prev)
+    global est_prev
+    est_prev = fbcursor.fetchone()
+    if not est_prev:
+      canvas=Canvas(estimate_preview, bg='grey', width=953, height=650, scrollregion=(0,0,850,850))
+            
+      vertibar=Scrollbar(estimate_preview, orient=VERTICAL)
+      vertibar.pack(side=RIGHT,fill=Y)
+      vertibar.config(command=canvas.yview)
+        
+      canvas.config(width=953,height=300)
+      canvas.config(yscrollcommand=vertibar.set)
+      canvas.pack(expand=True,side=LEFT,fill=BOTH)
+      canvas.create_rectangle(200, 8, 1050, 750 , outline='yellow',fill='white')
+      canvas.create_text(500, 25, text="Title text goes here...1", fill="black", font=('Helvetica 10'))
+    elif est_prev[13] == 'Professional 1 (logo on left side)':
+      canvas=Canvas(estimate_preview, bg='grey', width=953, height=400, scrollregion=(0,0,750,750))
+            
+      vertibar=Scrollbar(estimate_preview, orient=VERTICAL)
+      vertibar.pack(side=RIGHT,fill=Y)
+      vertibar.config(command=canvas.yview)
+        
+      canvas.config(width=953,height=300)
+      canvas.config(yscrollcommand=vertibar.set)
+      canvas.pack(expand=True,side=LEFT,fill=BOTH)
+      canvas.create_rectangle(200, 8, 1050, 738 , outline='yellow',fill='white')
+      # canvas.create_text(600, 25, text="Title text goes here...2", fill="black", font=('Helvetica 10'))
+      sql = "select * from company"
+      fbcursor.execute(sql)
+      est_img_data = fbcursor.fetchone()
+      try:
+        est_image = Image.open("images/"+est_img_data[13])
+        est_resize_image = est_image.resize((250,100))
+        est_image = ImageTk.PhotoImage(est_resize_image)
+
+        est_btlogo = Label(canvas,width=250,height=100,image = est_image) 
+        window_image = canvas.create_window(300, 50, anchor="nw", window=est_btlogo)
+        est_btlogo.photo = est_image
+      except:
+        pass 
+      canvas.create_text(322, 185, text="Estimate#", fill="black", font=('Helvetica 12')) 
+      canvas.create_text(335, 210, text="Estimate date", fill="black", font=('Helvetica 12')) 
+      canvas.create_text(320, 235, text="Due date", fill="black", font=('Helvetica 12')) 
+      canvas.create_text(521, 185, text=""+est_prev[1], fill="black", font=('Helvetica 12')) 
+      canvas.create_text(520, 210, text=est_prev[2], fill="black", font=('Helvetica 12')) 
+      canvas.create_text(520, 235, text=est_prev[3], fill="black", font=('Helvetica 12')) 
+      canvas.create_text(900, 60, text=" "+comname.get(), fill="black", font=('Helvetica 12 '))
+      T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0)
+      T_address.tag_configure('tag_name',justify='right')
+      T_address.insert('1.0', est_img_data[2])
+      T_address.tag_add('tag_name','1.0', 'end')
+      T_address_window = canvas.create_window(710, 80, anchor="nw", window=T_address)
+      canvas.create_text(950, 180, text=""+comsalestax.get(), fill="black", font=('Helvetica 10')) 
+      canvas.create_text(925, 215, text=" "+est_str1.get(), fill="black", font=('Helvetica 20 bold'))
+      canvas.create_text(330, 275, text="Estimate to", fill="black", font=('Helvetica 10 underline')) 
+      canvas.create_text(630, 275, text="Ship to", fill="black", font=('Helvetica 10 underline')) 
+      canvas.create_text(308, 300, text=""+est_prev[18], fill="black", font=('Helvetica 10')) 
+      canvas.create_text(314, 325, text=""+est_prev[19], fill="black", font=('Helvetica 10')) 
+      canvas.create_text(622, 300, text=""+est_prev[20], fill="black", font=('Helvetica 10')) 
+      canvas.create_text(628, 325, text=""+est_prev[21], fill="black", font=('Helvetica 10'))
+      s = ttk.Style()
+      s.configure('mystyle_prev_1.Treeview.Heading', background=''+win_menu1.get(),State='DISABLE')
+
+      tree=ttk.Treeview(canvas, column=("c1", "c2","c3", "c4", "c5"), show='headings',height= 0, style='mystyle_prev_1.Treeview')
+
+      tree.column("# 1", anchor=E, stretch=NO, width=100)
+      tree.heading("# 1", text="ID/SKU")
+      tree.column("# 2", anchor=E, stretch=NO, width=350)
+      tree.heading("# 2", text="Product/Service - Description")
+      tree.column("# 3", anchor=E, stretch=NO, width=80)
+      tree.heading("# 3", text="Quantity")
+      tree.column("# 4", anchor=E, stretch=NO, width=90)
+      tree.heading("# 4", text="Unit Price")
+      tree.column("# 5", anchor=E, stretch=NO, width=100)
+      tree.heading("# 5", text="Price")
+        
+      window = canvas.create_window(275, 340, anchor="nw", window=tree)
+      canvas.create_line(275, 390, 995, 390 )
+      canvas.create_line(275, 340, 275, 365 )
+      canvas.create_line(275, 365, 275, 390 ) 
+      canvas.create_line(995, 340, 995, 365 )
+      canvas.create_line(995, 365, 995, 390 ) 
+      canvas.create_line(375, 340, 375, 390 ) 
+      canvas.create_line(725, 340, 725, 390 )
+      canvas.create_line(805, 340, 805, 390 ) 
+      canvas.create_line(895, 340, 895, 390 )
+      canvas.create_line(725, 390, 725, 490 )
+      canvas.create_line(895, 390, 895, 490 )
+      canvas.create_line(995, 390, 995, 490 )
+      canvas.create_line(725, 415, 995, 415 ) 
+      canvas.create_line(725, 440, 995, 440 )
+      canvas.create_line(725, 465, 995, 465 )
+      canvas.create_line(725, 490, 995, 490 )
+      
+      sql = "select * from storingproduct where estimate_number=%s"
+      val = (est_prev[1],)
+      fbcursor.execute(sql,val)
+      est_pro_data = fbcursor.fetchone()
+      canvas.create_text(285, 375, text=""+est_pro_data[5], fill="black", font=('Helvetica 10'))
+      canvas.create_text(425, 375, text=""+est_pro_data[6]+"-"+""+est_pro_data[7], fill="black", font=('Helvetica 10'))
+      canvas.create_text(745, 375, text=est_pro_data[9], fill="black", font=('Helvetica 10'))
+      canvas.create_text(825, 375, text=est_pro_data[8], fill="black", font=('Helvetica 10'))
+      canvas.create_text(925, 375, text=est_pro_data[13], fill="black", font=('Helvetica 10'))
+      canvas.create_text(800, 405, text="Subtotal", fill="black", font=('Helvetica 10'))
+      canvas.create_text(800, 428, text="TAX1", fill="black", font=('Helvetica 10'))
+      canvas.create_text(800, 450, text="TAX2", fill="black", font=('Helvetica 10'))
+      canvas.create_text(800, 475, text="Estimate total", fill="black", font=('Helvetica 10 bold'))
+      canvas.create_text(925, 405, text=est_pro_data[13], fill="black", font=('Helvetica 10'))
+      canvas.create_text(925, 428, text=est_prev[16], fill="black", font=('Helvetica 10'))
+      canvas.create_text(925, 450, text=est_prev[34], fill="black", font=('Helvetica 10'))
+      canvas.create_text(925, 475, text=est_prev[8], fill="black", font=('Helvetica 10'))
+      canvas.create_text(650, 600, text="Terms and Conditions", fill="black", font=('Helvetica 10')) 
+      canvas.create_line(275, 620, 995, 620 )
+      T = Text(canvas, height=3, width=90, font=('Helvetica 10'),borderwidth=0)
+      T.insert(END, est_prev[31])
+      T_window = canvas.create_window(277, 630, anchor="nw", window=T)
+      canvas.create_text(320, 700, text="Sales Person:", fill="black", font=('Helvetica 10'))
+      canvas.create_text(400, 700, text=""+est_prev[14], fill="black", font=('Helvetica 10'))
+      canvas.create_text(945, 710, text="Page 1 of 1", fill="black", font=('Helvetica 10'))
+
+
+
+
+    elif est_prev[13] == 'Professional 2 (logo on right side)':
+      canvas=Canvas(estimate_preview, bg='grey', width=953, height=400, scrollregion=(0,0,750,750))
+            
+      vertibar=Scrollbar(estimate_preview, orient=VERTICAL)
+      vertibar.pack(side=RIGHT,fill=Y)
+      vertibar.config(command=canvas.yview)
+        
+      canvas.config(width=953,height=300)
+      canvas.config(yscrollcommand=vertibar.set)
+      canvas.pack(expand=True,side=LEFT,fill=BOTH)
+      canvas.create_rectangle(200, 8, 1050, 738 , outline='yellow',fill='white')
+      canvas.create_text(500, 25, text="Title text goes here...3", fill="black", font=('Helvetica 10'))
+    elif est_prev[13] == 'Simplified 1 (logo on left side)':
+      canvas=Canvas(estimate_preview, bg='grey', width=953, height=400, scrollregion=(0,0,750,750))
+            
+      vertibar=Scrollbar(estimate_preview, orient=VERTICAL)
+      vertibar.pack(side=RIGHT,fill=Y)
+      vertibar.config(command=canvas.yview)
+        
+      canvas.config(width=953,height=300)
+      canvas.config(yscrollcommand=vertibar.set)
+      canvas.pack(expand=True,side=LEFT,fill=BOTH)
+      canvas.create_rectangle(200, 8, 1050, 738 , outline='yellow',fill='white')
+      canvas.create_text(500, 25, text="Title text goes here...4", fill="black", font=('Helvetica 10'))
+    elif est_prev[13] == 'Simplified 2 (logo on right side)':
+      canvas=Canvas(estimate_preview, bg='grey', width=953, height=400, scrollregion=(0,0,750,750))
+            
+      vertibar=Scrollbar(estimate_preview, orient=VERTICAL)
+      vertibar.pack(side=RIGHT,fill=Y)
+      vertibar.config(command=canvas.yview)
+        
+      canvas.config(width=953,height=300)
+      canvas.config(yscrollcommand=vertibar.set)
+      canvas.pack(expand=True,side=LEFT,fill=BOTH)
+      canvas.create_rectangle(200, 8, 1050, 738 , outline='yellow',fill='white')
+      canvas.create_text(500, 25, text="Title text goes here...5", fill="black", font=('Helvetica 10'))
+    elif est_prev[13] == 'Business Classic':
+      canvas=Canvas(estimate_preview, bg='grey', width=953, height=400, scrollregion=(0,0,750,750))
+            
+      vertibar=Scrollbar(estimate_preview, orient=VERTICAL)
+      vertibar.pack(side=RIGHT,fill=Y)
+      vertibar.config(command=canvas.yview)
+        
+      canvas.config(width=953,height=300)
+      canvas.config(yscrollcommand=vertibar.set)
+      canvas.pack(expand=True,side=LEFT,fill=BOTH)
+      canvas.create_rectangle(200, 8, 1050, 738 , outline='yellow',fill='white')
+      canvas.create_text(500, 25, text="Title text goes here...6", fill="black", font=('Helvetica 10'))
+    else:
+      pass
+
 
 
 
