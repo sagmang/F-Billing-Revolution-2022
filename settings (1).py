@@ -1412,7 +1412,7 @@ def mainpage():
 
     
    
-    estimate_order0=Label(estimate_labelframe,text="Estimate#").place(x=5,y=5)
+    estimate_order0=Label(estimate_labelframe,text=""+est_str2.get()).place(x=5,y=5)
     estimate_number_entry=Entry(estimate_labelframe,width=25)
     estimate_number_entry.place(x=100,y=5,)
     estimate_number_entry.delete(0,'end')
@@ -1459,11 +1459,11 @@ def mainpage():
       tdata.append(i[0])
 
     
-    estimate_orderdate=Label(estimate_labelframe,text="Estimate date").place(x=5,y=33)
+    estimate_orderdate=Label(estimate_labelframe,text=""+est_str3.get()).place(x=5,y=33)
     estimate_date_entry=DateEntry(estimate_labelframe,width=20)
     estimate_date_entry.place(x=150,y=33)
     estimate1_checkvarStatus5=IntVar()
-    estimate_duedate=Checkbutton(estimate_labelframe,variable = estimate1_checkvarStatus5,text="Due date",onvalue =0 ,offvalue = 1, command=estimate_due_check)
+    estimate_duedate=Checkbutton(estimate_labelframe,variable = estimate1_checkvarStatus5,text=""+est_str4.get(),onvalue =0 ,offvalue = 1, command=estimate_due_check)
     estimate_duedate.place(x=5,y=62)
     estimate_duedate_entry=DateEntry(estimate_labelframe,width=20)
     estimate_duedate_entry.place(x=150,y=62)
@@ -1909,9 +1909,9 @@ def mainpage():
             canvas.create_window(425, 150,window=b2)
         except:
           pass
-        canvas.create_text(322, 245, text="Estimate#", fill="black", font=('Helvetica 12')) 
-        canvas.create_text(335, 270, text="Estimate date", fill="black", font=('Helvetica 12')) 
-        canvas.create_text(320, 295, text="Due date", fill="black", font=('Helvetica 12')) 
+        canvas.create_text(322, 245, text=""+est_str2.get(), fill="black", font=('Helvetica 12')) 
+        canvas.create_text(335, 270, text=""+est_str3.get(), fill="black", font=('Helvetica 12')) 
+        canvas.create_text(320, 295, text=""+est_str4.get(), fill="black", font=('Helvetica 12')) 
         canvas.create_text(521, 245, text=""+estimate_number_entry.get(), fill="black", font=('Helvetica 12')) 
         canvas.create_text(520, 270, text=estimate_date_entry.get_date(), fill="black", font=('Helvetica 12')) 
         canvas.create_text(520, 295, text=estimate_duedate_entry.get_date(), fill="black", font=('Helvetica 12')) 
@@ -1923,7 +1923,7 @@ def mainpage():
         T_address_window = canvas.create_window(694, 125, anchor="nw", window=T_address)
         canvas.create_text(935, 225, text=""+comsalestax.get(), fill="black", font=('Helvetica 10')) 
         canvas.create_text(909, 255, text=" "+est_str1.get(), fill="black", font=('Helvetica 20 bold'))
-        canvas.create_text(335, 345, text="Estimate to", fill="black", font=('Helvetica 10 underline')) 
+        canvas.create_text(335, 345, text=""+est_str5.get(), fill="black", font=('Helvetica 10 underline')) 
         canvas.create_text(680, 345, text="Ship to", fill="black", font=('Helvetica 10 underline'))
         canvas.create_text(315, 365, text=""+estimate_combo_name1.get(), fill="black", font=('Helvetica 10')) 
         canvas.create_text(673, 365, text=""+estimate_shipto3.get(), fill="black", font=('Helvetica 10'))  
@@ -1968,13 +1968,13 @@ def mainpage():
         for record in estimate_tree.get_children():
           previewdata1 = list(estimate_tree.item(record, 'values'))
           if not est_taxcheck:
-            est_prev_tree.insert(parent='', index='end',text='', values=(previewdata1[0],previewdata1[1],previewdata1[4],previewdata1[3],previewdata1[6]))
+            est_prev_tree.insert(parent='', index='end',text='', values=(previewdata1[0],previewdata1[1]+"-"+previewdata1[2],previewdata1[4],previewdata1[3],previewdata1[6]))
           elif est_taxcheck[12] == "1":
-            est_prev_tree.insert(parent='', index='end',text='', values=(previewdata1[0],previewdata1[1],previewdata1[4],previewdata1[3],previewdata1[6]))
+            est_prev_tree.insert(parent='', index='end',text='', values=(previewdata1[0],previewdata1[1]+"-"+previewdata1[2],previewdata1[4],previewdata1[3],previewdata1[6]))
           elif est_taxcheck[12] == "2":
-            est_prev_tree.insert(parent='', index='end',text='', values=(previewdata1[0],previewdata1[1],previewdata1[4],previewdata1[3],previewdata1[7]))
+            est_prev_tree.insert(parent='', index='end',text='', values=(previewdata1[0],previewdata1[1]+"-"+previewdata1[2],previewdata1[4],previewdata1[3],previewdata1[7]))
           elif est_taxcheck[12] == "3":
-            est_prev_tree.insert(parent='', index='end',text='', values=(previewdata1[0],previewdata1[1],previewdata1[4],previewdata1[3],previewdata1[8]))
+            est_prev_tree.insert(parent='', index='end',text='', values=(previewdata1[0],previewdata1[1]+"-"+previewdata1[2],previewdata1[4],previewdata1[3],previewdata1[8]))
       
         if est_taxcheck[12] == "1":
           canvas.create_line(980, 715, 980, 790 )
@@ -1997,41 +1997,41 @@ def mainpage():
 
           elif est_symbolcheck[0] == "before amount":
             canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-            canvas.create_text(900, 730, text=est_symbolcheck[1]+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=""+comcursign.get()+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
   
-            canvas.create_text(900, 755, text=est_symbolcheck[1]+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 755, text=""+comcursign.get()+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10'))
             canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10 '))
   
-            canvas.create_text(900, 780, text=est_symbolcheck[1]+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10 bold'))
-            canvas.create_text(780, 780, text="Estimate total", fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(900, 780, text=""+comcursign.get()+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(780, 780, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
           elif est_symbolcheck[0] == "before amount with space":
             canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-            canvas.create_text(900, 730, text=est_symbolcheck[1]+" "+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=""+comcursign.get()+" "+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
   
-            canvas.create_text(900, 755, text=est_symbolcheck[1]+" "+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 755, text=""+comcursign.get()+" "+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10'))
             canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10'))
   
-            canvas.create_text(900, 780, text=est_symbolcheck[1]+" "+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10 bold'))
-            canvas.create_text(780, 780, text="Estimate total", fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(900, 780, text=""+comcursign.get()+" "+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(780, 780, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
           elif est_symbolcheck[0] == "after amount":
             canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-            canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+est_symbolcheck[1], fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
   
-            canvas.create_text(900, 755, text=str(estimate_costtt.cget("text"))+est_symbolcheck[1], fill="black", font=('Helvetica 10 '))
+            canvas.create_text(900, 755, text=str(estimate_costtt.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10 '))
             canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10 '))
   
-            canvas.create_text(900, 780, text=str(estimate_total1.cget("text"))+est_symbolcheck[1], fill="black", font=('Helvetica 10 bold'))
-            canvas.create_text(780, 780, text="Estimate total", fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(900, 780, text=str(estimate_total1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(780, 780, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
 
           elif est_symbolcheck[0] == "after amount with space":
             canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-            canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+" "+est_symbolcheck[1], fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
   
-            canvas.create_text(900, 755, text=str(estimate_costtt.cget("text"))+" "+est_symbolcheck[1], fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 755, text=str(estimate_costtt.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
             canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10 '))
   
-            canvas.create_text(900, 780, text=str(estimate_total1.cget("text"))+" "+est_symbolcheck[1], fill="black", font=('Helvetica 10 bold'))
-            canvas.create_text(780, 780, text="Estimate total", fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(900, 780, text=str(estimate_total1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(780, 780, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
         elif est_taxcheck[12] == "2":
           canvas.create_line(980, 715, 980, 815 )
           canvas.create_line(720, 715, 720, 815 )
@@ -2054,58 +2054,58 @@ def mainpage():
             canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
   
             canvas.create_text(900, 805, text=str(estimate_total1.cget("text"))+"$", fill="black", font=('Helvetica 10 bold'))
-            canvas.create_text(780, 805, text="Estimate total", fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
           elif est_symbolcheck[0] == "before amount":
             canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-            canvas.create_text(900, 730, text=est_symbolcheck[1]+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=""+comcursign.get()+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
   
             canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
-            canvas.create_text(900, 755, text=est_symbolcheck[1]+str(estimate_ttax1.cget("text")), fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 755, text=""+comcursign.get()+str(estimate_ttax1.cget("text")), fill="black", font=('Helvetica 10'))
   
-            canvas.create_text(900, 780, text=est_symbolcheck[1]+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10 '))
+            canvas.create_text(900, 780, text=""+comcursign.get()+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10 '))
             canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
   
-            canvas.create_text(900, 805, text=est_symbolcheck[1]+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10 bold'))
-            canvas.create_text(780, 805, text="Estimate total", fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(900, 805, text=""+comcursign.get()+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
       
           elif est_symbolcheck[0] == "before amount with space":
             canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-            canvas.create_text(900, 730, text=est_symbolcheck[1]+" "+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=""+comcursign.get()+" "+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
   
             canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
-            canvas.create_text(900, 755, text=est_symbolcheck[1]+" "+str(estimate_ttax1.cget("text")), fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 755, text=""+comcursign.get()+" "+str(estimate_ttax1.cget("text")), fill="black", font=('Helvetica 10'))
   
-            canvas.create_text(900, 780, text=est_symbolcheck[1]+" "+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10 '))
+            canvas.create_text(900, 780, text=""+comcursign.get()+" "+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10 '))
             canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
   
-            canvas.create_text(900, 805, text=est_symbolcheck[1]+" "+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10 bold'))
-            canvas.create_text(780, 805, text="Estimate total", fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(900, 805, text=""+comcursign.get()+" "+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
           
           elif est_symbolcheck[0] == "after amount":
             canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-            canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+est_symbolcheck[1], fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
   
             canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
-            canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+est_symbolcheck[1], fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
   
-            canvas.create_text(900, 780, text=str(estimate_costtt.cget("text"))+est_symbolcheck[1], fill="black", font=('Helvetica 10 '))
+            canvas.create_text(900, 780, text=str(estimate_costtt.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10 '))
             canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
   
-            canvas.create_text(900, 805, text=str(estimate_total1.cget("text"))+est_symbolcheck[1], fill="black", font=('Helvetica 10 bold'))
-            canvas.create_text(780, 805, text="Estimate total", fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(900, 805, text=str(estimate_total1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
           
           elif est_symbolcheck[0] == "after amount with space":
             canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-            canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+" "+est_symbolcheck[1], fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
   
             canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
-            canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+" "+est_symbolcheck[1], fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
   
-            canvas.create_text(900, 780, text=str(estimate_costtt.cget("text"))+" "+est_symbolcheck[1], fill="black", font=('Helvetica 10 '))
+            canvas.create_text(900, 780, text=str(estimate_costtt.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10 '))
             canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
   
-            canvas.create_text(900, 805, text=str(estimate_total1.cget("text"))+" "+est_symbolcheck[1], fill="black", font=('Helvetica 10 bold'))
-            canvas.create_text(780, 805, text="Estimate total", fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(900, 805, text=str(estimate_total1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
         elif est_taxcheck[12] == "3":
           canvas.create_line(980, 715, 980, 840 )
           canvas.create_line(720, 715, 720, 840 )
@@ -2132,68 +2132,68 @@ def mainpage():
             canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
   
             canvas.create_text(900, 830, text=str(estimate_total1.cget("text"))+"$", fill="black", font=('Helvetica 10   bold'))
-            canvas.create_text(780, 830, text="Estimate total", fill="black", font=('Helvetica 10 bold'))  
+            canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))  
           elif est_symbolcheck[0] == "before amount":
             canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-            canvas.create_text(900, 730, text=est_symbolcheck[1]+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=""+comcursign.get()+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
   
             canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
-            canvas.create_text(900, 755, text=est_symbolcheck[1]+str(estimate_ttax1.cget("text")), fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 755, text=""+comcursign.get()+str(estimate_ttax1.cget("text")), fill="black", font=('Helvetica 10'))
   
             canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
-            canvas.create_text(900, 780, text=est_symbolcheck[1]+str(estimate_ttax2.cget("text")), fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 780, text=""+comcursign.get()+str(estimate_ttax2.cget("text")), fill="black", font=('Helvetica 10'))
   
-            canvas.create_text(900, 805, text=est_symbolcheck[1]+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 805, text=""+comcursign.get()+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10'))
             canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
   
-            canvas.create_text(900, 830, text=est_symbolcheck[1]+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10   bold'))
-            canvas.create_text(780, 830, text="Estimate total", fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(900, 830, text=""+comcursign.get()+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10   bold'))
+            canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
           
           elif est_symbolcheck[0] == "before amount with space":
             canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-            canvas.create_text(900, 730, text=est_symbolcheck[1]+" "+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=""+comcursign.get()+" "+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
 
             canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
-            canvas.create_text(900, 755, text=est_symbolcheck[1]+" "+str(estimate_ttax1.cget("text")), fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 755, text=""+comcursign.get()+" "+str(estimate_ttax1.cget("text")), fill="black", font=('Helvetica 10'))
 
             canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
-            canvas.create_text(900, 780, text=est_symbolcheck[1]+" "+str(estimate_ttax2.cget("text")), fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 780, text=""+comcursign.get()+" "+str(estimate_ttax2.cget("text")), fill="black", font=('Helvetica 10'))
 
-            canvas.create_text(900, 805, text=est_symbolcheck[1]+" "+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 805, text=""+comcursign.get()+" "+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10'))
             canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
 
-            canvas.create_text(900, 830, text=est_symbolcheck[1]+" "+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10    bold'))
-            canvas.create_text(780, 830, text="Estimate total", fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(900, 830, text=""+comcursign.get()+" "+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10    bold'))
+            canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
           elif est_symbolcheck[0] == "after amount":
             canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-            canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+est_symbolcheck[1], fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
   
             canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
-            canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+est_symbolcheck[1], fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
   
             canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
-            canvas.create_text(900, 780, text=str(estimate_ttax2.cget("text"))+est_symbolcheck[1], fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 780, text=str(estimate_ttax2.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
   
-            canvas.create_text(900, 805, text=str(estimate_costtt.cget("text"))+est_symbolcheck[1], fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 805, text=str(estimate_costtt.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
             canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
   
-            canvas.create_text(900, 830, text=str(estimate_total1.cget("text"))+est_symbolcheck[1], fill="black", font=('Helvetica 10   bold'))
-            canvas.create_text(780, 830, text="Estimate total", fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(900, 830, text=str(estimate_total1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10   bold'))
+            canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
           elif est_symbolcheck[0] == "after amount with space":
             canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-            canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+" "+est_symbolcheck[1], fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
   
             canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
-            canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+" "+est_symbolcheck[1], fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
   
             canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
-            canvas.create_text(900, 780, text=str(estimate_ttax2.cget("text"))+" "+est_symbolcheck[1], fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 780, text=str(estimate_ttax2.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
   
-            canvas.create_text(900, 805, text=str(estimate_costtt.cget("text"))+" "+est_symbolcheck[1], fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 805, text=str(estimate_costtt.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
             canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
   
-            canvas.create_text(900, 830, text=str(estimate_total1.cget("text"))+" "+est_symbolcheck[1], fill="black", font=('Helvetica 10   bold'))
-            canvas.create_text(780, 830, text="Estimate total", fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(900, 830, text=str(estimate_total1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10   bold'))
+            canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
         est_comments = Text(canvas,font=('Helvetica 10'),width=100,height=6,fg= "black",
         bg="white",cursor="arrow",bd=0)
         est_comments.insert("1.0",estimates_ecomments.get("1.0","end-1c"))
@@ -2234,9 +2234,9 @@ def mainpage():
             canvas.create_window(845, 150,window=b2)
         except:
           pass
-        canvas.create_text(722, 245, text="Estimate#", fill="black", font=('Helvetica 12')) 
-        canvas.create_text(735, 270, text="Estimate date", fill="black", font=('Helvetica 12')) 
-        canvas.create_text(720, 295, text="Due date", fill="black", font=('Helvetica 12')) 
+        canvas.create_text(722, 245, text=""+est_str2.get(), fill="black", font=('Helvetica 12')) 
+        canvas.create_text(735, 270, text=""+est_str3.get(), fill="black", font=('Helvetica 12')) 
+        canvas.create_text(720, 295, text=""+est_str4.get(), fill="black", font=('Helvetica 12')) 
         canvas.create_text(921, 245, text=""+estimate_number_entry.get(), fill="black", font=('Helvetica 12')) 
         canvas.create_text(920, 270, text=estimate_date_entry.get_date(), fill="black", font=('Helvetica 12')) 
         canvas.create_text(920, 295, text=estimate_duedate_entry.get_date(), fill="black", font=('Helvetica 12')) 
@@ -2248,7 +2248,7 @@ def mainpage():
         T_address_window = canvas.create_window(284, 125, anchor="nw", window=T_address)
         canvas.create_text(319, 225, text=""+comsalestax.get(), fill="black", font=('Helvetica 10')) 
         canvas.create_text(339, 255, text=" "+est_str1.get(), fill="black", font=('Helvetica 20 bold'))
-        canvas.create_text(335, 345, text="Estimate to", fill="black", font=('Helvetica 10 underline')) 
+        canvas.create_text(335, 345, text=""+est_str5.get(), fill="black", font=('Helvetica 10 underline')) 
         canvas.create_text(680, 345, text="Ship to", fill="black", font=('Helvetica 10 underline'))
         canvas.create_text(315, 365, text=""+estimate_combo_name1.get(), fill="black", font=('Helvetica 10')) 
         canvas.create_text(673, 365, text=""+estimate_shipto3.get(), fill="black", font=('Helvetica 10'))  
@@ -2293,13 +2293,13 @@ def mainpage():
         for record in estimate_tree.get_children():
           previewdata1 = list(estimate_tree.item(record, 'values'))
           if not est_taxcheck:
-            est_prev_tree.insert(parent='', index='end',text='', values=(previewdata1[0],previewdata1[1],previewdata1[4],previewdata1[3],previewdata1[6]))
+            est_prev_tree.insert(parent='', index='end',text='', values=(previewdata1[0],previewdata1[1]+"-"+previewdata1[2],previewdata1[4],previewdata1[3],previewdata1[6]))
           elif est_taxcheck[12] == "1":
-            est_prev_tree.insert(parent='', index='end',text='', values=(previewdata1[0],previewdata1[1],previewdata1[4],previewdata1[3],previewdata1[6]))
+            est_prev_tree.insert(parent='', index='end',text='', values=(previewdata1[0],previewdata1[1]+"-"+previewdata1[2],previewdata1[4],previewdata1[3],previewdata1[6]))
           elif est_taxcheck[12] == "2":
-            est_prev_tree.insert(parent='', index='end',text='', values=(previewdata1[0],previewdata1[1],previewdata1[4],previewdata1[3],previewdata1[7]))
+            est_prev_tree.insert(parent='', index='end',text='', values=(previewdata1[0],previewdata1[1]+"-"+previewdata1[2],previewdata1[4],previewdata1[3],previewdata1[7]))
           elif est_taxcheck[12] == "3":
-            est_prev_tree.insert(parent='', index='end',text='', values=(previewdata1[0],previewdata1[1],previewdata1[4],previewdata1[3],previewdata1[8]))
+            est_prev_tree.insert(parent='', index='end',text='', values=(previewdata1[0],previewdata1[1]+"-"+previewdata1[2],previewdata1[4],previewdata1[3],previewdata1[8]))
       
         if est_taxcheck[12] == "1":
           canvas.create_line(980, 715, 980, 790 )
@@ -2322,41 +2322,41 @@ def mainpage():
 
           elif est_symbolcheck[0] == "before amount":
             canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-            canvas.create_text(900, 730, text=est_symbolcheck[1]+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=""+comcursign.get()+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
   
-            canvas.create_text(900, 755, text=est_symbolcheck[1]+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 755, text=""+comcursign.get()+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10'))
             canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10 '))
   
-            canvas.create_text(900, 780, text=est_symbolcheck[1]+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10 bold'))
-            canvas.create_text(780, 780, text="Estimate total", fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(900, 780, text=""+comcursign.get()+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(780, 780, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
           elif est_symbolcheck[0] == "before amount with space":
             canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-            canvas.create_text(900, 730, text=est_symbolcheck[1]+" "+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=""+comcursign.get()+" "+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
   
-            canvas.create_text(900, 755, text=est_symbolcheck[1]+" "+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 755, text=""+comcursign.get()+" "+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10'))
             canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10'))
   
-            canvas.create_text(900, 780, text=est_symbolcheck[1]+" "+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10 bold'))
-            canvas.create_text(780, 780, text="Estimate total", fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(900, 780, text=""+comcursign.get()+" "+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(780, 780, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
           elif est_symbolcheck[0] == "after amount":
             canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-            canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+est_symbolcheck[1], fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
   
-            canvas.create_text(900, 755, text=str(estimate_costtt.cget("text"))+est_symbolcheck[1], fill="black", font=('Helvetica 10 '))
+            canvas.create_text(900, 755, text=str(estimate_costtt.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10 '))
             canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10 '))
   
-            canvas.create_text(900, 780, text=str(estimate_total1.cget("text"))+est_symbolcheck[1], fill="black", font=('Helvetica 10 bold'))
-            canvas.create_text(780, 780, text="Estimate total", fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(900, 780, text=str(estimate_total1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(780, 780, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
 
           elif est_symbolcheck[0] == "after amount with space":
             canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-            canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+" "+est_symbolcheck[1], fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
   
-            canvas.create_text(900, 755, text=str(estimate_costtt.cget("text"))+" "+est_symbolcheck[1], fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 755, text=str(estimate_costtt.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
             canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10 '))
   
-            canvas.create_text(900, 780, text=str(estimate_total1.cget("text"))+" "+est_symbolcheck[1], fill="black", font=('Helvetica 10 bold'))
-            canvas.create_text(780, 780, text="Estimate total", fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(900, 780, text=str(estimate_total1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(780, 780, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
         elif est_taxcheck[12] == "2":
           canvas.create_line(980, 715, 980, 815 )
           canvas.create_line(720, 715, 720, 815 )
@@ -2379,58 +2379,58 @@ def mainpage():
             canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
   
             canvas.create_text(900, 805, text=str(estimate_total1.cget("text"))+"$", fill="black", font=('Helvetica 10 bold'))
-            canvas.create_text(780, 805, text="Estimate total", fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
           elif est_symbolcheck[0] == "before amount":
             canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-            canvas.create_text(900, 730, text=est_symbolcheck[1]+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=""+comcursign.get()+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
   
             canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
-            canvas.create_text(900, 755, text=est_symbolcheck[1]+str(estimate_ttax1.cget("text")), fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 755, text=""+comcursign.get()+str(estimate_ttax1.cget("text")), fill="black", font=('Helvetica 10'))
   
-            canvas.create_text(900, 780, text=est_symbolcheck[1]+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10 '))
+            canvas.create_text(900, 780, text=""+comcursign.get()+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10 '))
             canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
   
-            canvas.create_text(900, 805, text=est_symbolcheck[1]+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10 bold'))
-            canvas.create_text(780, 805, text="Estimate total", fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(900, 805, text=""+comcursign.get()+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
       
           elif est_symbolcheck[0] == "before amount with space":
             canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-            canvas.create_text(900, 730, text=est_symbolcheck[1]+" "+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=""+comcursign.get()+" "+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
   
             canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
-            canvas.create_text(900, 755, text=est_symbolcheck[1]+" "+str(estimate_ttax1.cget("text")), fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 755, text=""+comcursign.get()+" "+str(estimate_ttax1.cget("text")), fill="black", font=('Helvetica 10'))
   
-            canvas.create_text(900, 780, text=est_symbolcheck[1]+" "+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10 '))
+            canvas.create_text(900, 780, text=""+comcursign.get()+" "+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10 '))
             canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
   
-            canvas.create_text(900, 805, text=est_symbolcheck[1]+" "+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10 bold'))
-            canvas.create_text(780, 805, text="Estimate total", fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(900, 805, text=""+comcursign.get()+" "+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
           
           elif est_symbolcheck[0] == "after amount":
             canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-            canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+est_symbolcheck[1], fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
   
             canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
-            canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+est_symbolcheck[1], fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
   
-            canvas.create_text(900, 780, text=str(estimate_costtt.cget("text"))+est_symbolcheck[1], fill="black", font=('Helvetica 10 '))
+            canvas.create_text(900, 780, text=str(estimate_costtt.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10 '))
             canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
   
-            canvas.create_text(900, 805, text=str(estimate_total1.cget("text"))+est_symbolcheck[1], fill="black", font=('Helvetica 10 bold'))
-            canvas.create_text(780, 805, text="Estimate total", fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(900, 805, text=str(estimate_total1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
           
           elif est_symbolcheck[0] == "after amount with space":
             canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-            canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+" "+est_symbolcheck[1], fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
   
             canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
-            canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+" "+est_symbolcheck[1], fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
   
-            canvas.create_text(900, 780, text=str(estimate_costtt.cget("text"))+" "+est_symbolcheck[1], fill="black", font=('Helvetica 10 '))
+            canvas.create_text(900, 780, text=str(estimate_costtt.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10 '))
             canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
   
-            canvas.create_text(900, 805, text=str(estimate_total1.cget("text"))+" "+est_symbolcheck[1], fill="black", font=('Helvetica 10 bold'))
-            canvas.create_text(780, 805, text="Estimate total", fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(900, 805, text=str(estimate_total1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
         elif est_taxcheck[12] == "3":
           canvas.create_line(980, 715, 980, 840 )
           canvas.create_line(720, 715, 720, 840 )
@@ -2457,68 +2457,68 @@ def mainpage():
             canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
   
             canvas.create_text(900, 830, text=str(estimate_total1.cget("text"))+"$", fill="black", font=('Helvetica 10   bold'))
-            canvas.create_text(780, 830, text="Estimate total", fill="black", font=('Helvetica 10 bold'))  
+            canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))  
           elif est_symbolcheck[0] == "before amount":
             canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-            canvas.create_text(900, 730, text=est_symbolcheck[1]+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=""+comcursign.get()+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
   
             canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
-            canvas.create_text(900, 755, text=est_symbolcheck[1]+str(estimate_ttax1.cget("text")), fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 755, text=""+comcursign.get()+str(estimate_ttax1.cget("text")), fill="black", font=('Helvetica 10'))
   
             canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
-            canvas.create_text(900, 780, text=est_symbolcheck[1]+str(estimate_ttax2.cget("text")), fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 780, text=""+comcursign.get()+str(estimate_ttax2.cget("text")), fill="black", font=('Helvetica 10'))
   
-            canvas.create_text(900, 805, text=est_symbolcheck[1]+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 805, text=""+comcursign.get()+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10'))
             canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
   
-            canvas.create_text(900, 830, text=est_symbolcheck[1]+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10   bold'))
-            canvas.create_text(780, 830, text="Estimate total", fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(900, 830, text=""+comcursign.get()+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10   bold'))
+            canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
           
           elif est_symbolcheck[0] == "before amount with space":
             canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-            canvas.create_text(900, 730, text=est_symbolcheck[1]+" "+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=""+comcursign.get()+" "+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
 
             canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
-            canvas.create_text(900, 755, text=est_symbolcheck[1]+" "+str(estimate_ttax1.cget("text")), fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 755, text=""+comcursign.get()+" "+str(estimate_ttax1.cget("text")), fill="black", font=('Helvetica 10'))
 
             canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
-            canvas.create_text(900, 780, text=est_symbolcheck[1]+" "+str(estimate_ttax2.cget("text")), fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 780, text=""+comcursign.get()+" "+str(estimate_ttax2.cget("text")), fill="black", font=('Helvetica 10'))
 
-            canvas.create_text(900, 805, text=est_symbolcheck[1]+" "+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 805, text=""+comcursign.get()+" "+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10'))
             canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
 
-            canvas.create_text(900, 830, text=est_symbolcheck[1]+" "+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10    bold'))
-            canvas.create_text(780, 830, text="Estimate total", fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(900, 830, text=""+comcursign.get()+" "+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10    bold'))
+            canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
           elif est_symbolcheck[0] == "after amount":
             canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-            canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+est_symbolcheck[1], fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
   
             canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
-            canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+est_symbolcheck[1], fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
   
             canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
-            canvas.create_text(900, 780, text=str(estimate_ttax2.cget("text"))+est_symbolcheck[1], fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 780, text=str(estimate_ttax2.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
   
-            canvas.create_text(900, 805, text=str(estimate_costtt.cget("text"))+est_symbolcheck[1], fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 805, text=str(estimate_costtt.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
             canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
   
-            canvas.create_text(900, 830, text=str(estimate_total1.cget("text"))+est_symbolcheck[1], fill="black", font=('Helvetica 10   bold'))
-            canvas.create_text(780, 830, text="Estimate total", fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(900, 830, text=str(estimate_total1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10   bold'))
+            canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
           elif est_symbolcheck[0] == "after amount with space":
             canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-            canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+" "+est_symbolcheck[1], fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
   
             canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
-            canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+" "+est_symbolcheck[1], fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
   
             canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
-            canvas.create_text(900, 780, text=str(estimate_ttax2.cget("text"))+" "+est_symbolcheck[1], fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 780, text=str(estimate_ttax2.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
   
-            canvas.create_text(900, 805, text=str(estimate_costtt.cget("text"))+" "+est_symbolcheck[1], fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 805, text=str(estimate_costtt.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
             canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
   
-            canvas.create_text(900, 830, text=str(estimate_total1.cget("text"))+" "+est_symbolcheck[1], fill="black", font=('Helvetica 10   bold'))
-            canvas.create_text(780, 830, text="Estimate total", fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(900, 830, text=str(estimate_total1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10   bold'))
+            canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
         est_comments = Text(canvas,font=('Helvetica 10'),width=100,height=6,fg= "black",
         bg="white",cursor="arrow",bd=0)
         est_comments.insert("1.0",estimates_ecomments.get("1.0","end-1c"))
@@ -2533,7 +2533,978 @@ def mainpage():
 
         canvas.create_text(315, 1150, text="Sales Person:", fill="black", font=('Helvetica 10'))
         canvas.create_text(395, 1150, text=""+estimates_sales6.get(), fill="black", font=('Helvetica 10'))
-        canvas.create_text(945, 1160, text="Page 1 of 1", fill="black", font=('Helvetica 10'))   
+        canvas.create_text(945, 1160, text="Page 1 of 1", fill="black", font=('Helvetica 10')) 
+      elif estimates_etemplate.get() == 'Simplified 1 (logo on left side)':
+        previewcreate = Toplevel()
+        previewcreate.geometry("1360x730")
+        frame = Frame(previewcreate, width=953, height=300)
+        frame.pack(expand=True, fill=BOTH)
+        frame.place(x=5,y=30)
+        canvas=Canvas(frame, bg='grey', width=953, height=300, scrollregion=(0,0,700,1200))
+        
+        vertibar=Scrollbar(frame, orient=VERTICAL)
+        vertibar.pack(side=RIGHT,fill=Y)
+        vertibar.config(command=canvas.yview)
+
+        canvas.config(width=1315,height=640)
+        canvas.config(yscrollcommand=vertibar.set)
+        canvas.pack(expand=True,side=LEFT,fill=BOTH)
+        canvas.create_rectangle(235, 25, 1035, 1175, outline='yellow',fill='white')
+        try:
+            image = Image.open("images/"+est_compdataord[13])
+            resize_image = image.resize((250, 125))
+            loimg = ImageTk.PhotoImage(resize_image)
+            b2 = Label(canvas,image=loimg, height=125, width=250,)
+            b2.photo = loimg
+            canvas.create_window(425, 150,window=b2)
+        except:
+          pass
+        canvas.create_text(322, 245, text=""+est_str2.get(), fill="black", font=('Helvetica 12')) 
+        canvas.create_text(335, 270, text=""+est_str3.get(), fill="black", font=('Helvetica 12')) 
+        canvas.create_text(320, 295, text=""+est_str4.get(), fill="black", font=('Helvetica 12')) 
+        canvas.create_text(521, 245, text=""+estimate_number_entry.get(), fill="black", font=('Helvetica 12')) 
+        canvas.create_text(520, 270, text=estimate_date_entry.get_date(), fill="black", font=('Helvetica 12')) 
+        canvas.create_text(520, 295, text=estimate_duedate_entry.get_date(), fill="black", font=('Helvetica 12')) 
+        canvas.create_text(885, 100, text=" "+comname.get(), fill="black", font=('Helvetica 12 '))
+        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0)
+        T_address.tag_configure('tag_name',justify='right')
+        T_address.insert('1.0', est_compdataord[2])
+        T_address.tag_add('tag_name','1.0', 'end')
+        T_address_window = canvas.create_window(694, 125, anchor="nw", window=T_address)
+        canvas.create_text(935, 225, text=""+comsalestax.get(), fill="black", font=('Helvetica 10')) 
+        canvas.create_text(909, 255, text=" "+est_str1.get(), fill="black", font=('Helvetica 20 bold'))
+        canvas.create_text(335, 345, text=""+est_str5.get(), fill="black", font=('Helvetica 10 underline')) 
+        canvas.create_text(680, 345, text="Ship to", fill="black", font=('Helvetica 10 underline'))
+        canvas.create_text(315, 365, text=""+estimate_combo_name1.get(), fill="black", font=('Helvetica 10')) 
+        canvas.create_text(673, 365, text=""+estimate_shipto3.get(), fill="black", font=('Helvetica 10'))  
+        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0)
+        T_address.tag_configure('tag_name',justify='left')
+        T_address.insert('1.0', estimate_addresstext2.get("1.0",END))
+        T_address.tag_add('tag_name','1.0', 'end')
+        T_address_window = canvas.create_window(306, 380, anchor="nw", window=T_address)
+        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0)
+        T_address.tag_configure('tag_name',justify='left')
+        T_address.insert('1.0', estimate_ship_address4.get("1.0",END))
+        T_address.tag_add('tag_name','1.0', 'end')
+        T_address_window = canvas.create_window(665, 380, anchor="nw", window=T_address)
+        s = ttk.Style()
+        s.configure('mystyle_prev_1.Treeview.Heading', background=''+win_menu1.get(),State='DISABLE')
+
+        est_prev_tree=ttk.Treeview(canvas, show='headings',height= 11, style='mystyle_prev_1.Treeview')
+        est_prev_tree["columns"] = ["1","2","3"]
+        est_prev_tree.column("# 0",width=1)
+        est_prev_tree.column("1", anchor=CENTER, width=530)
+        est_prev_tree.column("2", anchor=CENTER, width=80)
+        est_prev_tree.column("3", anchor=CENTER, width=95)
+        est_prev_tree.heading("#0", text="")
+        est_prev_tree.heading("1", text="Product/Service - Description")
+        est_prev_tree.heading("2", text="Quantity")
+        est_prev_tree.heading("3", text="Price")
+        window = canvas.create_window(275, 470, anchor="nw", window=est_prev_tree)
+        sql = "select * from company"
+        fbcursor.execute(sql)
+        est_taxcheck = fbcursor.fetchone()
+
+        sql = "select currsignplace,currencysign from company"
+        fbcursor.execute(sql)
+        est_symbolcheck = fbcursor.fetchone()
+        
+
+
+        for record in estimate_tree.get_children():
+          previewdata1 = list(estimate_tree.item(record, 'values'))
+          if not est_taxcheck:
+            est_prev_tree.insert(parent='', index='end',text='', values=(previewdata1[1]+"-"+previewdata1[2],previewdata1[4],previewdata1[6]))
+          elif est_taxcheck[12] == "1":
+            est_prev_tree.insert(parent='', index='end',text='', values=(previewdata1[1]+"-"+previewdata1[2],previewdata1[4],previewdata1[6]))
+          elif est_taxcheck[12] == "2":
+            est_prev_tree.insert(parent='', index='end',text='', values=(previewdata1[1]+"-"+previewdata1[2],previewdata1[4],previewdata1[7]))
+          elif est_taxcheck[12] == "3":
+            est_prev_tree.insert(parent='', index='end',text='', values=(previewdata1[1]+"-"+previewdata1[2],previewdata1[4],previewdata1[8]))
+      
+        if est_taxcheck[12] == "1":
+          canvas.create_line(980, 715, 980, 790 )
+          canvas.create_line(720, 715, 720, 790 )
+          canvas.create_line(860, 715, 860, 790 )#1st
+          canvas.create_line(980, 715, 720, 715 )
+          canvas.create_line(980, 740, 720, 740 )
+          canvas.create_line(980, 765, 720, 765 ) 
+          canvas.create_line(980, 790, 720, 790 )
+
+          if not est_symbolcheck:
+            canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(900, 755, text=str(estimate_costtt.cget("text"))+"$", fill="black", font=('Helvetica 10 '))
+            canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+  
+            canvas.create_text(900, 780, text=str(estimate_total1.cget("text"))+"$", fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(780, 780, text="Estimate total.", fill="black", font=('Helvetica 10 bold'))
+
+          elif est_symbolcheck[0] == "before amount":
+            canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=""+comcursign.get()+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(900, 755, text=""+comcursign.get()+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10'))
+            canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+  
+            canvas.create_text(900, 780, text=""+comcursign.get()+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(780, 780, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+          elif est_symbolcheck[0] == "before amount with space":
+            canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=""+comcursign.get()+" "+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(900, 755, text=""+comcursign.get()+" "+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10'))
+            canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(900, 780, text=""+comcursign.get()+" "+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(780, 780, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+          elif est_symbolcheck[0] == "after amount":
+            canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(900, 755, text=str(estimate_costtt.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10 '))
+            canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+  
+            canvas.create_text(900, 780, text=str(estimate_total1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(780, 780, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+
+          elif est_symbolcheck[0] == "after amount with space":
+            canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(900, 755, text=str(estimate_costtt.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+            canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+  
+            canvas.create_text(900, 780, text=str(estimate_total1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(780, 780, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+        elif est_taxcheck[12] == "2":
+          canvas.create_line(980, 715, 980, 815 )
+          canvas.create_line(720, 715, 720, 815 )
+          canvas.create_line(860, 715, 860, 815 )#1st
+          canvas.create_line(980, 815, 720, 815 )
+          canvas.create_line(980, 715, 720, 715 )
+          canvas.create_line(980, 740, 720, 740 )
+          canvas.create_line(980, 765, 720, 765 ) 
+          canvas.create_line(980, 790, 720, 790 )
+          canvas.create_line(980, 815, 720, 815 )
+
+          if not est_symbolcheck:
+            canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(900, 780, text=str(estimate_costtt.cget("text"))+"$", fill="black", font=('Helvetica 10 '))
+            canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(900, 805, text=str(estimate_total1.cget("text"))+"$", fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+          elif est_symbolcheck[0] == "before amount":
+            canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=""+comcursign.get()+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 755, text=""+comcursign.get()+str(estimate_ttax1.cget("text")), fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(900, 780, text=""+comcursign.get()+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10 '))
+            canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(900, 805, text=""+comcursign.get()+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+      
+          elif est_symbolcheck[0] == "before amount with space":
+            canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=""+comcursign.get()+" "+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 755, text=""+comcursign.get()+" "+str(estimate_ttax1.cget("text")), fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(900, 780, text=""+comcursign.get()+" "+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10 '))
+            canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(900, 805, text=""+comcursign.get()+" "+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+          
+          elif est_symbolcheck[0] == "after amount":
+            canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(900, 780, text=str(estimate_costtt.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10 '))
+            canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(900, 805, text=str(estimate_total1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+          
+          elif est_symbolcheck[0] == "after amount with space":
+            canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(900, 780, text=str(estimate_costtt.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10 '))
+            canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(900, 805, text=str(estimate_total1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+        elif est_taxcheck[12] == "3":
+          canvas.create_line(980, 715, 980, 840 )
+          canvas.create_line(720, 715, 720, 840 )
+          canvas.create_line(860, 715, 860, 840 )#1st
+          canvas.create_line(980, 815, 720, 815 )
+          canvas.create_line(980, 715, 720, 715 )
+          canvas.create_line(980, 740, 720, 740 )
+          canvas.create_line(980, 765, 720, 765 ) 
+          canvas.create_line(980, 790, 720, 790 )
+          canvas.create_line(980, 815, 720, 815 )
+          canvas.create_line(980, 840, 720, 840 )
+
+          if not est_symbolcheck:
+            canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 780, text=str(estimate_ttax2.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(900, 805, text=str(estimate_costtt.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+            canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+  
+            canvas.create_text(900, 830, text=str(estimate_total1.cget("text"))+"$", fill="black", font=('Helvetica 10   bold'))
+            canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))  
+          elif est_symbolcheck[0] == "before amount":
+            canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=""+comcursign.get()+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 755, text=""+comcursign.get()+str(estimate_ttax1.cget("text")), fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 780, text=""+comcursign.get()+str(estimate_ttax2.cget("text")), fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(900, 805, text=""+comcursign.get()+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10'))
+            canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+  
+            canvas.create_text(900, 830, text=""+comcursign.get()+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10   bold'))
+            canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+          
+          elif est_symbolcheck[0] == "before amount with space":
+            canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=""+comcursign.get()+" "+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+
+            canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 755, text=""+comcursign.get()+" "+str(estimate_ttax1.cget("text")), fill="black", font=('Helvetica 10'))
+
+            canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 780, text=""+comcursign.get()+" "+str(estimate_ttax2.cget("text")), fill="black", font=('Helvetica 10'))
+
+            canvas.create_text(900, 805, text=""+comcursign.get()+" "+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10'))
+            canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+
+            canvas.create_text(900, 830, text=""+comcursign.get()+" "+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10    bold'))
+            canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+          elif est_symbolcheck[0] == "after amount":
+            canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 780, text=str(estimate_ttax2.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(900, 805, text=str(estimate_costtt.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+            canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+  
+            canvas.create_text(900, 830, text=str(estimate_total1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10   bold'))
+            canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+          elif est_symbolcheck[0] == "after amount with space":
+            canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 780, text=str(estimate_ttax2.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(900, 805, text=str(estimate_costtt.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+            canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+  
+            canvas.create_text(900, 830, text=str(estimate_total1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10   bold'))
+            canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+        est_comments = Text(canvas,font=('Helvetica 10'),width=100,height=6,fg= "black",
+        bg="white",cursor="arrow",bd=0)
+        est_comments.insert("1.0",estimates_ecomments.get("1.0","end-1c"))
+        est_comments.config(state=DISABLED)
+        canvas.create_window(630, 900,window=est_comments)
+        canvas.create_text(620, 1020, text="Terms and Conditions", fill="black", font=('Helvetica 10'))
+        canvas.create_line(265, 1040, 1000, 1040)
+
+        T = Text(canvas, height=3, width=90, font=('Helvetica 10'),borderwidth=0)
+        T.insert(END, estimates_eterm_text.get("1.0","end-1c"))
+        T_window = canvas.create_window(270, 1055, anchor="nw", window=T)
+
+        canvas.create_text(315, 1150, text="Sales Person:", fill="black", font=('Helvetica 10'))
+        canvas.create_text(395, 1150, text=""+estimates_sales6.get(), fill="black", font=('Helvetica 10'))
+        canvas.create_text(945, 1160, text="Page 1 of 1", fill="black", font=('Helvetica 10'))  
+      elif estimates_etemplate.get() == 'Simplified 2 (logo on right side)': 
+        previewcreate = Toplevel()
+        previewcreate.geometry("1360x730")
+        frame = Frame(previewcreate, width=953, height=300)
+        frame.pack(expand=True, fill=BOTH)
+        frame.place(x=5,y=30)
+        canvas=Canvas(frame, bg='grey', width=953, height=300, scrollregion=(0,0,700,1200))
+        
+        vertibar=Scrollbar(frame, orient=VERTICAL)
+        vertibar.pack(side=RIGHT,fill=Y)
+        vertibar.config(command=canvas.yview)
+
+        canvas.config(width=1315,height=640)
+        canvas.config(yscrollcommand=vertibar.set)
+        canvas.pack(expand=True,side=LEFT,fill=BOTH)
+        canvas.create_rectangle(235, 25, 1035, 1175, outline='yellow',fill='white')
+        try:
+            image = Image.open("images/"+est_compdataord[13])
+            resize_image = image.resize((250, 125))
+            loimg = ImageTk.PhotoImage(resize_image)
+            b2 = Label(canvas,image=loimg, height=125, width=250,)
+            b2.photo = loimg
+            canvas.create_window(845, 150,window=b2)
+        except:
+          pass
+        canvas.create_text(722, 245, text=""+est_str2.get(), fill="black", font=('Helvetica 12')) 
+        canvas.create_text(735, 270, text=""+est_str3.get(), fill="black", font=('Helvetica 12')) 
+        canvas.create_text(720, 295, text=""+est_str4.get(), fill="black", font=('Helvetica 12')) 
+        canvas.create_text(921, 245, text=""+estimate_number_entry.get(), fill="black", font=('Helvetica 12')) 
+        canvas.create_text(920, 270, text=estimate_date_entry.get_date(), fill="black", font=('Helvetica 12')) 
+        canvas.create_text(920, 295, text=estimate_duedate_entry.get_date(), fill="black", font=('Helvetica 12')) 
+        canvas.create_text(375, 100, text=" "+comname.get(), fill="black", font=('Helvetica 12 '))
+        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0)
+        T_address.tag_configure('tag_name',justify='left')
+        T_address.insert('1.0', est_compdataord[2])
+        T_address.tag_add('tag_name','1.0', 'end')
+        T_address_window = canvas.create_window(284, 125, anchor="nw", window=T_address)
+        canvas.create_text(319, 225, text=""+comsalestax.get(), fill="black", font=('Helvetica 10')) 
+        canvas.create_text(339, 255, text=" "+est_str1.get(), fill="black", font=('Helvetica 20 bold'))
+        canvas.create_text(335, 345, text=""+est_str5.get(), fill="black", font=('Helvetica 10 underline')) 
+        canvas.create_text(680, 345, text="Ship to", fill="black", font=('Helvetica 10 underline'))
+        canvas.create_text(315, 365, text=""+estimate_combo_name1.get(), fill="black", font=('Helvetica 10')) 
+        canvas.create_text(673, 365, text=""+estimate_shipto3.get(), fill="black", font=('Helvetica 10'))  
+        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0)
+        T_address.tag_configure('tag_name',justify='left')
+        T_address.insert('1.0', estimate_addresstext2.get("1.0",END))
+        T_address.tag_add('tag_name','1.0', 'end')
+        T_address_window = canvas.create_window(306, 380, anchor="nw", window=T_address)
+        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0)
+        T_address.tag_configure('tag_name',justify='left')
+        T_address.insert('1.0', estimate_ship_address4.get("1.0",END))
+        T_address.tag_add('tag_name','1.0', 'end')
+        T_address_window = canvas.create_window(665, 380, anchor="nw", window=T_address)
+
+        
+
+        s = ttk.Style()
+        s.configure('mystyle_prev_1.Treeview.Heading', background=''+win_menu1.get(),State='DISABLE')
+
+        est_prev_tree=ttk.Treeview(canvas, show='headings',height= 11, style='mystyle_prev_1.Treeview')
+        est_prev_tree["columns"] = ["1","2","3"]
+        est_prev_tree.column("# 0",width=1)
+        est_prev_tree.column("1", anchor=CENTER, width=530)
+        est_prev_tree.column("2", anchor=CENTER, width=80)
+        est_prev_tree.column("3", anchor=CENTER, width=95)
+        est_prev_tree.heading("#0", text="")
+        est_prev_tree.heading("1", text="Product/Service - Description")
+        est_prev_tree.heading("2", text="Quantity")
+        est_prev_tree.heading("3", text="Price")
+        window = canvas.create_window(275, 470, anchor="nw", window=est_prev_tree)
+        sql = "select * from company"
+        fbcursor.execute(sql)
+        est_taxcheck = fbcursor.fetchone()
+
+        sql = "select currsignplace,currencysign from company"
+        fbcursor.execute(sql)
+        est_symbolcheck = fbcursor.fetchone()
+        
+
+
+        for record in estimate_tree.get_children():
+          previewdata1 = list(estimate_tree.item(record, 'values'))
+          if not est_taxcheck:
+            est_prev_tree.insert(parent='', index='end',text='', values=(previewdata1[1]+"-"+previewdata1[2],previewdata1[4],previewdata1[6]))
+          elif est_taxcheck[12] == "1":
+            est_prev_tree.insert(parent='', index='end',text='', values=(previewdata1[1]+"-"+previewdata1[2],previewdata1[4],previewdata1[6]))
+          elif est_taxcheck[12] == "2":
+            est_prev_tree.insert(parent='', index='end',text='', values=(previewdata1[1]+"-"+previewdata1[2],previewdata1[4],previewdata1[7]))
+          elif est_taxcheck[12] == "3":
+            est_prev_tree.insert(parent='', index='end',text='', values=(previewdata1[1]+"-"+previewdata1[2],previewdata1[4],previewdata1[8]))
+      
+        if est_taxcheck[12] == "1":
+          canvas.create_line(980, 715, 980, 790 )
+          canvas.create_line(720, 715, 720, 790 )
+          canvas.create_line(860, 715, 860, 790 )#1st
+          canvas.create_line(980, 715, 720, 715 )
+          canvas.create_line(980, 740, 720, 740 )
+          canvas.create_line(980, 765, 720, 765 ) 
+          canvas.create_line(980, 790, 720, 790 )
+
+          if not est_symbolcheck:
+            canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(900, 755, text=str(estimate_costtt.cget("text"))+"$", fill="black", font=('Helvetica 10 '))
+            canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+  
+            canvas.create_text(900, 780, text=str(estimate_total1.cget("text"))+"$", fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(780, 780, text="Estimate total.", fill="black", font=('Helvetica 10 bold'))
+
+          elif est_symbolcheck[0] == "before amount":
+            canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=""+comcursign.get()+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(900, 755, text=""+comcursign.get()+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10'))
+            canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+  
+            canvas.create_text(900, 780, text=""+comcursign.get()+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(780, 780, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+          elif est_symbolcheck[0] == "before amount with space":
+            canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=""+comcursign.get()+" "+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(900, 755, text=""+comcursign.get()+" "+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10'))
+            canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(900, 780, text=""+comcursign.get()+" "+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(780, 780, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+          elif est_symbolcheck[0] == "after amount":
+            canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(900, 755, text=str(estimate_costtt.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10 '))
+            canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+  
+            canvas.create_text(900, 780, text=str(estimate_total1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(780, 780, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+
+          elif est_symbolcheck[0] == "after amount with space":
+            canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(900, 755, text=str(estimate_costtt.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+            canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+  
+            canvas.create_text(900, 780, text=str(estimate_total1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(780, 780, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+        elif est_taxcheck[12] == "2":
+          canvas.create_line(980, 715, 980, 815 )
+          canvas.create_line(720, 715, 720, 815 )
+          canvas.create_line(860, 715, 860, 815 )#1st
+          canvas.create_line(980, 815, 720, 815 )
+          canvas.create_line(980, 715, 720, 715 )
+          canvas.create_line(980, 740, 720, 740 )
+          canvas.create_line(980, 765, 720, 765 ) 
+          canvas.create_line(980, 790, 720, 790 )
+          canvas.create_line(980, 815, 720, 815 )
+
+          if not est_symbolcheck:
+            canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(900, 780, text=str(estimate_costtt.cget("text"))+"$", fill="black", font=('Helvetica 10 '))
+            canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(900, 805, text=str(estimate_total1.cget("text"))+"$", fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+          elif est_symbolcheck[0] == "before amount":
+            canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=""+comcursign.get()+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 755, text=""+comcursign.get()+str(estimate_ttax1.cget("text")), fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(900, 780, text=""+comcursign.get()+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10 '))
+            canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(900, 805, text=""+comcursign.get()+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+      
+          elif est_symbolcheck[0] == "before amount with space":
+            canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=""+comcursign.get()+" "+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 755, text=""+comcursign.get()+" "+str(estimate_ttax1.cget("text")), fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(900, 780, text=""+comcursign.get()+" "+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10 '))
+            canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(900, 805, text=""+comcursign.get()+" "+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+          
+          elif est_symbolcheck[0] == "after amount":
+            canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(900, 780, text=str(estimate_costtt.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10 '))
+            canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(900, 805, text=str(estimate_total1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+          
+          elif est_symbolcheck[0] == "after amount with space":
+            canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(900, 780, text=str(estimate_costtt.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10 '))
+            canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(900, 805, text=str(estimate_total1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+        elif est_taxcheck[12] == "3":
+          canvas.create_line(980, 715, 980, 840 )
+          canvas.create_line(720, 715, 720, 840 )
+          canvas.create_line(860, 715, 860, 840 )#1st
+          canvas.create_line(980, 815, 720, 815 )
+          canvas.create_line(980, 715, 720, 715 )
+          canvas.create_line(980, 740, 720, 740 )
+          canvas.create_line(980, 765, 720, 765 ) 
+          canvas.create_line(980, 790, 720, 790 )
+          canvas.create_line(980, 815, 720, 815 )
+          canvas.create_line(980, 840, 720, 840 )
+
+          if not est_symbolcheck:
+            canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 780, text=str(estimate_ttax2.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(900, 805, text=str(estimate_costtt.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+            canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+  
+            canvas.create_text(900, 830, text=str(estimate_total1.cget("text"))+"$", fill="black", font=('Helvetica 10   bold'))
+            canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))  
+          elif est_symbolcheck[0] == "before amount":
+            canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=""+comcursign.get()+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 755, text=""+comcursign.get()+str(estimate_ttax1.cget("text")), fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 780, text=""+comcursign.get()+str(estimate_ttax2.cget("text")), fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(900, 805, text=""+comcursign.get()+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10'))
+            canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+  
+            canvas.create_text(900, 830, text=""+comcursign.get()+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10   bold'))
+            canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+          
+          elif est_symbolcheck[0] == "before amount with space":
+            canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=""+comcursign.get()+" "+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+
+            canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 755, text=""+comcursign.get()+" "+str(estimate_ttax1.cget("text")), fill="black", font=('Helvetica 10'))
+
+            canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 780, text=""+comcursign.get()+" "+str(estimate_ttax2.cget("text")), fill="black", font=('Helvetica 10'))
+
+            canvas.create_text(900, 805, text=""+comcursign.get()+" "+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10'))
+            canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+
+            canvas.create_text(900, 830, text=""+comcursign.get()+" "+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10    bold'))
+            canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+          elif est_symbolcheck[0] == "after amount":
+            canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 780, text=str(estimate_ttax2.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(900, 805, text=str(estimate_costtt.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+            canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+  
+            canvas.create_text(900, 830, text=str(estimate_total1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10   bold'))
+            canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+          elif est_symbolcheck[0] == "after amount with space":
+            canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 780, text=str(estimate_ttax2.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(900, 805, text=str(estimate_costtt.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+            canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+  
+            canvas.create_text(900, 830, text=str(estimate_total1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10   bold'))
+            canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+        est_comments = Text(canvas,font=('Helvetica 10'),width=100,height=6,fg= "black",
+        bg="white",cursor="arrow",bd=0)
+        est_comments.insert("1.0",estimates_ecomments.get("1.0","end-1c"))
+        est_comments.config(state=DISABLED)
+        canvas.create_window(630, 900,window=est_comments)
+        canvas.create_text(620, 1020, text="Terms and Conditions", fill="black", font=('Helvetica 10'))
+        canvas.create_line(265, 1040, 1000, 1040)
+
+        T = Text(canvas, height=3, width=90, font=('Helvetica 10'),borderwidth=0)
+        T.insert(END, estimates_eterm_text.get("1.0","end-1c"))
+        T_window = canvas.create_window(270, 1055, anchor="nw", window=T)
+
+        canvas.create_text(315, 1150, text="Sales Person:", fill="black", font=('Helvetica 10'))
+        canvas.create_text(395, 1150, text=""+estimates_sales6.get(), fill="black", font=('Helvetica 10'))
+        canvas.create_text(945, 1160, text="Page 1 of 1", fill="black", font=('Helvetica 10')) 
+      elif estimates_etemplate.get() == 'Business Classic': 
+        previewcreate = Toplevel()
+        previewcreate.geometry("1360x730")
+        frame = Frame(previewcreate, width=953, height=300)
+        frame.pack(expand=True, fill=BOTH)
+        frame.place(x=5,y=30)
+        canvas=Canvas(frame, bg='grey', width=953, height=300, scrollregion=(0,0,700,1200))
+        
+        vertibar=Scrollbar(frame, orient=VERTICAL)
+        vertibar.pack(side=RIGHT,fill=Y)
+        vertibar.config(command=canvas.yview)
+
+        canvas.config(width=1315,height=640)
+        canvas.config(yscrollcommand=vertibar.set)
+        canvas.pack(expand=True,side=LEFT,fill=BOTH)
+        canvas.create_rectangle(235, 25, 1035, 1175, outline='yellow',fill='white')
+        canvas.create_line(265, 100, 750, 100,fill='orange',width=3)
+        canvas.create_line(750, 100, 1000, 100,fill='grey',width=3)
+        try:
+          image = Image.open("images/"+est_compdataord[13])
+          resize_image = image.resize((250, 125))
+          loimg = ImageTk.PhotoImage(resize_image)
+          b2 = Label(canvas,image=loimg, height=125, width=250,)
+          b2.photo = loimg
+          canvas.create_window(425, 225,window=b2)
+        except:
+          pass
+        canvas.create_text(665, 150, text=" "+comname.get(), fill="black", font=('Helvetica 12 '))
+        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0)
+        T_address.tag_configure('tag_name',justify='left')
+        T_address.insert('1.0', est_compdataord[2])
+        T_address.tag_add('tag_name','1.0', 'end')
+        T_address_window = canvas.create_window(576, 175, anchor="nw", window=T_address)
+        canvas.create_text(612, 275, text=""+comsalestax.get(), fill="black", font=('Helvetica 10')) 
+        canvas.create_text(793, 150, text=""+estimate_shipto3.get(), fill="black", font=('Helvetica 10')) 
+        T_address = Text(canvas, height=5, width=35, font=('Helvetica 10'),borderwidth=0)
+        T_address.tag_configure('tag_name',justify='left')
+        T_address.insert('1.0', estimate_ship_address4.get("1.0",END))
+        T_address.tag_add('tag_name','1.0', 'end')
+        T_address_window = canvas.create_window(784, 170, anchor="nw", window=T_address) 
+
+        canvas.create_text(812, 270, text=""+est_str2.get(), fill="black", font=('Helvetica 10')) 
+        canvas.create_text(825, 295, text=""+est_str3.get(), fill="black", font=('Helvetica 10')) 
+        canvas.create_text(810, 320, text=""+est_str4.get(), fill="black", font=('Helvetica 10')) 
+        canvas.create_text(921, 270, text=""+estimate_number_entry.get(), fill="black", font=('Helvetica 10')) 
+        canvas.create_text(920, 295, text=estimate_date_entry.get_date(), fill="black", font=('Helvetica 10')) 
+        canvas.create_text(920, 320, text=estimate_duedate_entry.get_date(), fill="black", font=('Helvetica 10')) 
+
+        s = ttk.Style()
+        s.configure('mystyle_prev_1.Treeview.Heading', background=''+win_menu1.get(),State='DISABLE')
+
+        est_prev_tree=ttk.Treeview(canvas, show='headings',height= 11, style='mystyle_prev_1.Treeview')
+        est_prev_tree["columns"] = ["1","2","3","4","5"]
+        est_prev_tree.column("# 0",width=1)
+        est_prev_tree.column("1", anchor=CENTER, width=225)
+        est_prev_tree.column("2", anchor=CENTER, width=225)
+        est_prev_tree.column("3", anchor=CENTER, width=90)
+        est_prev_tree.column("4", anchor=CENTER, width=80)
+        est_prev_tree.column("5", anchor=CENTER, width=85)
+        est_prev_tree.heading("#0", text="")
+        est_prev_tree.heading("1", text="Product/Service")
+        est_prev_tree.heading("2", text="Description")
+        est_prev_tree.heading("3", text="Unit Price")
+        est_prev_tree.heading("4", text="Quantity")
+        est_prev_tree.heading("5", text="Price")
+        window = canvas.create_window(275, 470, anchor="nw", window=est_prev_tree)
+
+        sql = "select * from company"
+        fbcursor.execute(sql)
+        est_taxcheck = fbcursor.fetchone()
+
+        sql = "select currsignplace,currencysign from company"
+        fbcursor.execute(sql)
+        est_symbolcheck = fbcursor.fetchone()
+        
+
+
+        for record in estimate_tree.get_children():
+          previewdata1 = list(estimate_tree.item(record, 'values'))
+          if not est_taxcheck:
+            est_prev_tree.insert(parent='', index='end',text='', values=(previewdata1[1],previewdata1[2],previewdata1[3],previewdata1[4],previewdata1[6]))
+          elif est_taxcheck[12] == "1":
+            est_prev_tree.insert(parent='', index='end',text='', values=(previewdata1[1],previewdata1[2],previewdata1[3],previewdata1[4],previewdata1[6]))
+          elif est_taxcheck[12] == "2":
+            est_prev_tree.insert(parent='', index='end',text='', values=(previewdata1[1],previewdata1[2],previewdata1[3],previewdata1[4],previewdata1[7]))
+          elif est_taxcheck[12] == "3":
+            est_prev_tree.insert(parent='', index='end',text='', values=(previewdata1[1],previewdata1[2],previewdata1[3],previewdata1[4],previewdata1[8]))
+        
+        if est_taxcheck[12] == "1":
+          canvas.create_line(980, 715, 980, 790 )
+          canvas.create_line(720, 715, 720, 790 )
+          canvas.create_line(860, 715, 860, 790 )#1st
+          canvas.create_line(980, 715, 720, 715 )
+          canvas.create_line(980, 740, 720, 740 )
+          canvas.create_line(980, 765, 720, 765 ) 
+          canvas.create_line(980, 790, 720, 790 )
+
+          if not est_symbolcheck:
+            canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(900, 755, text=str(estimate_costtt.cget("text"))+"$", fill="black", font=('Helvetica 10 '))
+            canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+  
+            canvas.create_text(900, 780, text=str(estimate_total1.cget("text"))+"$", fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(780, 780, text="Estimate total.", fill="black", font=('Helvetica 10 bold'))
+
+          elif est_symbolcheck[0] == "before amount":
+            canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=""+comcursign.get()+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(900, 755, text=""+comcursign.get()+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10'))
+            canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+  
+            canvas.create_text(900, 780, text=""+comcursign.get()+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(780, 780, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+          elif est_symbolcheck[0] == "before amount with space":
+            canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=""+comcursign.get()+" "+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(900, 755, text=""+comcursign.get()+" "+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10'))
+            canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(900, 780, text=""+comcursign.get()+" "+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(780, 780, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+          elif est_symbolcheck[0] == "after amount":
+            canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(900, 755, text=str(estimate_costtt.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10 '))
+            canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+  
+            canvas.create_text(900, 780, text=str(estimate_total1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(780, 780, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+
+          elif est_symbolcheck[0] == "after amount with space":
+            canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(900, 755, text=str(estimate_costtt.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+            canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+  
+            canvas.create_text(900, 780, text=str(estimate_total1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(780, 780, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+        elif est_taxcheck[12] == "2":
+          canvas.create_line(980, 715, 980, 815 )
+          canvas.create_line(720, 715, 720, 815 )
+          canvas.create_line(860, 715, 860, 815 )#1st
+          canvas.create_line(980, 815, 720, 815 )
+          canvas.create_line(980, 715, 720, 715 )
+          canvas.create_line(980, 740, 720, 740 )
+          canvas.create_line(980, 765, 720, 765 ) 
+          canvas.create_line(980, 790, 720, 790 )
+          canvas.create_line(980, 815, 720, 815 )
+
+          if not est_symbolcheck:
+            canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(900, 780, text=str(estimate_costtt.cget("text"))+"$", fill="black", font=('Helvetica 10 '))
+            canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(900, 805, text=str(estimate_total1.cget("text"))+"$", fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+          elif est_symbolcheck[0] == "before amount":
+            canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=""+comcursign.get()+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 755, text=""+comcursign.get()+str(estimate_ttax1.cget("text")), fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(900, 780, text=""+comcursign.get()+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10 '))
+            canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(900, 805, text=""+comcursign.get()+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+      
+          elif est_symbolcheck[0] == "before amount with space":
+            canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=""+comcursign.get()+" "+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 755, text=""+comcursign.get()+" "+str(estimate_ttax1.cget("text")), fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(900, 780, text=""+comcursign.get()+" "+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10 '))
+            canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(900, 805, text=""+comcursign.get()+" "+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+          
+          elif est_symbolcheck[0] == "after amount":
+            canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(900, 780, text=str(estimate_costtt.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10 '))
+            canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(900, 805, text=str(estimate_total1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+          
+          elif est_symbolcheck[0] == "after amount with space":
+            canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(900, 780, text=str(estimate_costtt.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10 '))
+            canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(900, 805, text=str(estimate_total1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+        elif est_taxcheck[12] == "3":
+          canvas.create_line(980, 715, 980, 840 )
+          canvas.create_line(720, 715, 720, 840 )
+          canvas.create_line(860, 715, 860, 840 )#1st
+          canvas.create_line(980, 815, 720, 815 )
+          canvas.create_line(980, 715, 720, 715 )
+          canvas.create_line(980, 740, 720, 740 )
+          canvas.create_line(980, 765, 720, 765 ) 
+          canvas.create_line(980, 790, 720, 790 )
+          canvas.create_line(980, 815, 720, 815 )
+          canvas.create_line(980, 840, 720, 840 )
+
+          if not est_symbolcheck:
+            canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 780, text=str(estimate_ttax2.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(900, 805, text=str(estimate_costtt.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+            canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+  
+            canvas.create_text(900, 830, text=str(estimate_total1.cget("text"))+"$", fill="black", font=('Helvetica 10   bold'))
+            canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))  
+          elif est_symbolcheck[0] == "before amount":
+            canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=""+comcursign.get()+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 755, text=""+comcursign.get()+str(estimate_ttax1.cget("text")), fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 780, text=""+comcursign.get()+str(estimate_ttax2.cget("text")), fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(900, 805, text=""+comcursign.get()+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10'))
+            canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+  
+            canvas.create_text(900, 830, text=""+comcursign.get()+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10   bold'))
+            canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+          
+          elif est_symbolcheck[0] == "before amount with space":
+            canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=""+comcursign.get()+" "+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+
+            canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 755, text=""+comcursign.get()+" "+str(estimate_ttax1.cget("text")), fill="black", font=('Helvetica 10'))
+
+            canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 780, text=""+comcursign.get()+" "+str(estimate_ttax2.cget("text")), fill="black", font=('Helvetica 10'))
+
+            canvas.create_text(900, 805, text=""+comcursign.get()+" "+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10'))
+            canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+
+            canvas.create_text(900, 830, text=""+comcursign.get()+" "+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10    bold'))
+            canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+          elif est_symbolcheck[0] == "after amount":
+            canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 780, text=str(estimate_ttax2.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(900, 805, text=str(estimate_costtt.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+            canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+  
+            canvas.create_text(900, 830, text=str(estimate_total1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10   bold'))
+            canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+          elif est_symbolcheck[0] == "after amount with space":
+            canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
+            canvas.create_text(900, 780, text=str(estimate_ttax2.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+            canvas.create_text(900, 805, text=str(estimate_costtt.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+            canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+  
+            canvas.create_text(900, 830, text=str(estimate_total1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10   bold'))
+            canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+        canvas.create_line(265, 850, 750, 850,fill='orange',width=3)
+        canvas.create_line(750, 850, 1000, 850,fill='grey',width=3)
+
+        est_comments = Text(canvas,font=('Helvetica 10'),width=100,height=6,fg= "black",
+        bg="white",cursor="arrow",bd=0)
+        est_comments.insert("1.0",estimates_ecomments.get("1.0","end-1c"))
+        est_comments.config(state=DISABLED)
+        canvas.create_window(630, 920,window=est_comments)
+
+        canvas.create_text(620, 1020, text="Terms and Conditions", fill="black", font=('Helvetica 10'))
+        canvas.create_line(265, 1040, 750, 1040,fill='orange',width=3)
+        canvas.create_line(750, 1040, 1000, 1040,fill='grey',width=3)
+
+        T = Text(canvas, height=3, width=90, font=('Helvetica 10'),borderwidth=0)
+        T.insert(END, estimates_eterm_text.get("1.0","end-1c"))
+        T_window = canvas.create_window(270, 1055, anchor="nw", window=T)
+
+        canvas.create_text(315, 1150, text="Sales Person:", fill="black", font=('Helvetica 10'))
+        canvas.create_text(395, 1150, text=""+estimates_sales6.get(), fill="black", font=('Helvetica 10'))
+        canvas.create_text(945, 1160, text="Page 1 of 1", fill="black", font=('Helvetica 10')) 
       else:
         pass
     
@@ -3557,8 +4528,7 @@ def mainpage():
     edit_estimate_w2 = Canvas(edit_estimate_firFrame, width=1, height=65, bg="#b3b3b3", bd=0)
     edit_estimate_w2.pack(side="left", padx=5)
 
-    edit_estimate_prev= Button(edit_estimate_firFrame,compound="top", text="Preview\nEstimate",relief=RAISED, image=photo4,bg="#f5f3f2", fg="black", height=55, bd=1, width=55)
-    edit_estimate_prev.pack(side="left", pady=3, ipadx=4)
+    
 
     edit_estimate_prin= Button(edit_estimate_firFrame,compound="top", text="Print \nEstimate",relief=RAISED, image=photo5,bg="#f5f3f2", fg="black", height=55, bd=1, width=55,command=estimate_printsele)
     edit_estimate_prin.pack(side="left", pady=3, ipadx=4)
@@ -3681,7 +4651,7 @@ def mainpage():
       
     edit_estimate_labelframe = LabelFrame(edit_estimate_fir1Frame,text="Estimate",font=("arial",15))
     edit_estimate_labelframe.place(x=652,y=5,width=290,height=170)
-    edit_estimate_order0=Label(edit_estimate_labelframe,text="Estimate#").place(x=5,y=5)
+    edit_estimate_order0=Label(edit_estimate_labelframe,text=""+est_str2.get()).place(x=5,y=5)
 
     edit_estimate_ee01=Entry(edit_estimate_labelframe,width=25)
     edit_estimate_ee01.place(x=100,y=5,)
@@ -3695,12 +4665,12 @@ def mainpage():
         edit_estimate_ee03['state'] = NORMAL
 
 
-    edit_estimate_orderdate=Label(edit_estimate_labelframe,text="Estimate date").place(x=5,y=33)
+    edit_estimate_orderdate=Label(edit_estimate_labelframe,text=""+est_str3.get()).place(x=5,y=33)
     edit_estimate_ee02=DateEntry(edit_estimate_labelframe,width=20)
     edit_estimate_ee02.place(x=150,y=33)
 
     edit_estimate_checkvarStatus5=IntVar()
-    edit_estimate_duedate=Checkbutton(edit_estimate_labelframe,variable = edit_estimate_checkvarStatus5,text="Due date",onvalue =0 ,offvalue = 1,command=est_due_check_1)
+    edit_estimate_duedate=Checkbutton(edit_estimate_labelframe,variable = edit_estimate_checkvarStatus5,text=""+est_str4.get(),onvalue =0 ,offvalue = 1,command=est_due_check_1)
     edit_estimate_duedate.place(x=5,y=62)
     edit_estimate_ee03=DateEntry(edit_estimate_labelframe,width=20)
     edit_estimate_ee03.place(x=150,y=62)
@@ -4119,10 +5089,1643 @@ def mainpage():
   
     
     edit_estimates_template=Label(edit_estimate_labelfram1,text="Template").place(x=37,y=70)
-    edit_estimates_e5=ttk.Combobox(edit_estimate_labelfram1, value="",width=25)
+    edit_estimates_e5=ttk.Combobox(edit_estimate_labelfram1,width=30)
+    edit_estimates_e5['values'] = ('Professional 1 (logo on left side)','Professional 2 (logo on right side)','Simplified 1 (logo on left side)','Simplified 2 (logo on right side)','Business Classic')
     edit_estimates_e5.place(x=115,y=70)
     edit_estimates_e5.delete(0, END)
     edit_estimates_e5.insert(0, edit_est_data[13])
+
+    #Edit Preview estimate
+    global edit_prev_estimate
+    def edit_prev_estimate():
+      sql = 'select * from company'
+      fbcursor.execute(sql)
+      est_compdataord = fbcursor.fetchone()
+      if edit_est_data[13] == 'Professional 1 (logo on left side)':
+        previewcreate = Toplevel()
+        previewcreate.geometry("1360x730")
+        frame = Frame(previewcreate, width=953, height=300)
+        frame.pack(expand=True, fill=BOTH)
+        frame.place(x=5,y=30)
+        canvas=Canvas(frame, bg='grey', width=953, height=300, scrollregion=(0,0,700,1200))
+        
+        vertibar=Scrollbar(frame, orient=VERTICAL)
+        vertibar.pack(side=RIGHT,fill=Y)
+        vertibar.config(command=canvas.yview)
+
+        canvas.config(width=1315,height=640)
+        canvas.config(yscrollcommand=vertibar.set)
+        canvas.pack(expand=True,side=LEFT,fill=BOTH)
+        canvas.create_rectangle(235, 25, 1035, 1175, outline='yellow',fill='white')
+        try:
+            image = Image.open("images/"+est_compdataord[13])
+            resize_image = image.resize((250, 125))
+            loimg = ImageTk.PhotoImage(resize_image)
+            b2 = Label(canvas,image=loimg, height=125, width=250,)
+            b2.photo = loimg
+            canvas.create_window(425, 150,window=b2)
+        except:
+          pass
+        canvas.create_text(322, 245, text=""+est_str2.get(), fill="black", font=('Helvetica 12')) 
+        canvas.create_text(335, 270, text=""+est_str3.get(), fill="black", font=('Helvetica 12')) 
+        canvas.create_text(320, 295, text=""+est_str4.get(), fill="black", font=('Helvetica 12')) 
+        canvas.create_text(521, 245, text=""+edit_est_data[1], fill="black", font=('Helvetica 12')) 
+        canvas.create_text(520, 270, text=edit_est_data[2], fill="black", font=('Helvetica 12')) 
+        canvas.create_text(520, 295, text=edit_est_data[3], fill="black", font=('Helvetica 12')) 
+        canvas.create_text(885, 100, text=" "+comname.get(), fill="black", font=('Helvetica 12 '))
+        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0)
+        T_address.tag_configure('tag_name',justify='right')
+        T_address.insert('1.0', est_compdataord[2])
+        T_address.tag_add('tag_name','1.0', 'end')
+        T_address_window = canvas.create_window(694, 125, anchor="nw", window=T_address)
+        canvas.create_text(935, 225, text=""+comsalestax.get(), fill="black", font=('Helvetica 10')) 
+        canvas.create_text(909, 255, text=" "+est_str1.get(), fill="black", font=('Helvetica 20 bold'))
+        canvas.create_text(335, 345, text=""+est_str5.get(), fill="black", font=('Helvetica 10 underline')) 
+        canvas.create_text(680, 345, text="Ship to", fill="black", font=('Helvetica 10 underline'))
+        canvas.create_text(315, 365, text=""+edit_est_data[18], fill="black", font=('Helvetica 10')) 
+        canvas.create_text(673, 365, text=""+edit_est_data[20], fill="black", font=('Helvetica 10'))  
+        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0)
+        T_address.tag_configure('tag_name',justify='left')
+        T_address.insert('1.0', edit_est_data[19])
+        T_address.tag_add('tag_name','1.0', 'end')
+        T_address_window = canvas.create_window(306, 380, anchor="nw", window=T_address)
+        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0)
+        T_address.tag_configure('tag_name',justify='left')
+        T_address.insert('1.0', edit_est_data[21])
+        T_address.tag_add('tag_name','1.0', 'end')
+        T_address_window = canvas.create_window(665, 380, anchor="nw", window=T_address)
+        s = ttk.Style()
+        s.configure('mystyle_prev_1.Treeview.Heading', background=''+win_menu1.get(),State='DISABLE')
+
+        est_prev_tree=ttk.Treeview(canvas, show='headings',height= 11, style='mystyle_prev_1.Treeview')
+        est_prev_tree["columns"] = ["1","2","3","4","5"]
+        est_prev_tree.column("# 0",width=1)
+        est_prev_tree.column("1", anchor=CENTER, width=100)
+        est_prev_tree.column("2", anchor=CENTER, width=350)
+        est_prev_tree.column("3", anchor=CENTER, width=80)
+        est_prev_tree.column("4", anchor=CENTER, width=90)
+        est_prev_tree.column("5", anchor=CENTER, width=85)
+        est_prev_tree.heading("#0", text="")
+        est_prev_tree.heading("1", text="ID/SKU")
+        est_prev_tree.heading("2", text="Product/Service - Description")
+        est_prev_tree.heading("3", text="Quantity")
+        est_prev_tree.heading("4", text="Unit Price")
+        est_prev_tree.heading("5", text="Price")
+        window = canvas.create_window(275, 470, anchor="nw", window=est_prev_tree)
+        sql = "select * from company"
+        fbcursor.execute(sql)
+        est_taxcheck = fbcursor.fetchone()
+
+        sql = "select currsignplace,currencysign from company"
+        fbcursor.execute(sql)
+        est_symbolcheck = fbcursor.fetchone()
+        
+
+
+        for record in edit_estimate_tree.get_children():
+          previewdata1 = list(edit_estimate_tree.item(record, 'values'))
+          if not est_taxcheck:
+            est_prev_tree.insert(parent='', index='end',text='', values=(previewdata1[0],previewdata1[1]+"-"+previewdata1[2],previewdata1[4],previewdata1[3],previewdata1[6]))
+          elif est_taxcheck[12] == "1":
+            est_prev_tree.insert(parent='', index='end',text='', values=(previewdata1[0],previewdata1[1]+"-"+previewdata1[2],previewdata1[4],previewdata1[3],previewdata1[6]))
+          elif est_taxcheck[12] == "2":
+            est_prev_tree.insert(parent='', index='end',text='', values=(previewdata1[0],previewdata1[1]+"-"+previewdata1[2],previewdata1[4],previewdata1[3],previewdata1[7]))
+          elif est_taxcheck[12] == "3":
+            est_prev_tree.insert(parent='', index='end',text='', values=(previewdata1[0],previewdata1[1]+"-"+previewdata1[2],previewdata1[4],previewdata1[3],previewdata1[8]))
+      
+        if est_taxcheck[12] == "1":
+          canvas.create_line(980, 715, 980, 790 )
+          canvas.create_line(720, 715, 720, 790 )
+          canvas.create_line(860, 715, 860, 790 )#1st
+          canvas.create_line(980, 715, 720, 715 )
+          canvas.create_line(980, 740, 720, 740 )
+          canvas.create_line(980, 765, 720, 765 ) 
+          canvas.create_line(980, 790, 720, 790 )
+
+        #   if not est_symbolcheck:
+        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(900, 755, text=str(estimate_costtt.cget("text"))+"$", fill="black", font=('Helvetica 10 '))
+        #     canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+  
+        #     canvas.create_text(900, 780, text=str(estimate_total1.cget("text"))+"$", fill="black", font=('Helvetica 10 bold'))
+        #     canvas.create_text(780, 780, text="Estimate total.", fill="black", font=('Helvetica 10 bold'))
+
+        #   elif est_symbolcheck[0] == "before amount":
+        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 730, text=""+comcursign.get()+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(900, 755, text=""+comcursign.get()+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+  
+        #     canvas.create_text(900, 780, text=""+comcursign.get()+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10 bold'))
+        #     canvas.create_text(780, 780, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+        #   elif est_symbolcheck[0] == "before amount with space":
+        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 730, text=""+comcursign.get()+" "+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(900, 755, text=""+comcursign.get()+" "+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(900, 780, text=""+comcursign.get()+" "+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10 bold'))
+        #     canvas.create_text(780, 780, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+        #   elif est_symbolcheck[0] == "after amount":
+        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(900, 755, text=str(estimate_costtt.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10 '))
+        #     canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+  
+        #     canvas.create_text(900, 780, text=str(estimate_total1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
+        #     canvas.create_text(780, 780, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+
+        #   elif est_symbolcheck[0] == "after amount with space":
+        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(900, 755, text=str(estimate_costtt.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+  
+        #     canvas.create_text(900, 780, text=str(estimate_total1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
+        #     canvas.create_text(780, 780, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+        elif est_taxcheck[12] == "2":
+          canvas.create_line(980, 715, 980, 815 )
+          canvas.create_line(720, 715, 720, 815 )
+          canvas.create_line(860, 715, 860, 815 )#1st
+          canvas.create_line(980, 815, 720, 815 )
+          canvas.create_line(980, 715, 720, 715 )
+          canvas.create_line(980, 740, 720, 740 )
+          canvas.create_line(980, 765, 720, 765 ) 
+          canvas.create_line(980, 790, 720, 790 )
+          canvas.create_line(980, 815, 720, 815 )
+
+        #   if not est_symbolcheck:
+        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(900, 780, text=str(estimate_costtt.cget("text"))+"$", fill="black", font=('Helvetica 10 '))
+        #     canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(900, 805, text=str(estimate_total1.cget("text"))+"$", fill="black", font=('Helvetica 10 bold'))
+        #     canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+        #   elif est_symbolcheck[0] == "before amount":
+        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 730, text=""+comcursign.get()+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 755, text=""+comcursign.get()+str(estimate_ttax1.cget("text")), fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(900, 780, text=""+comcursign.get()+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10 '))
+        #     canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(900, 805, text=""+comcursign.get()+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10 bold'))
+        #     canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+      
+        #   elif est_symbolcheck[0] == "before amount with space":
+        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 730, text=""+comcursign.get()+" "+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 755, text=""+comcursign.get()+" "+str(estimate_ttax1.cget("text")), fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(900, 780, text=""+comcursign.get()+" "+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10 '))
+        #     canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(900, 805, text=""+comcursign.get()+" "+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10 bold'))
+        #     canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+          
+        #   elif est_symbolcheck[0] == "after amount":
+        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(900, 780, text=str(estimate_costtt.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10 '))
+        #     canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(900, 805, text=str(estimate_total1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
+        #     canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+          
+        #   elif est_symbolcheck[0] == "after amount with space":
+        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(900, 780, text=str(estimate_costtt.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10 '))
+        #     canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(900, 805, text=str(estimate_total1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
+        #     canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+        elif est_taxcheck[12] == "3":
+          canvas.create_line(980, 715, 980, 840 )
+          canvas.create_line(720, 715, 720, 840 )
+          canvas.create_line(860, 715, 860, 840 )#1st
+          canvas.create_line(980, 815, 720, 815 )
+          canvas.create_line(980, 715, 720, 715 )
+          canvas.create_line(980, 740, 720, 740 )
+          canvas.create_line(980, 765, 720, 765 ) 
+          canvas.create_line(980, 790, 720, 790 )
+          canvas.create_line(980, 815, 720, 815 )
+          canvas.create_line(980, 840, 720, 840 )
+
+        #   if not est_symbolcheck:
+        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 780, text=str(estimate_ttax2.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(900, 805, text=str(estimate_costtt.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+  
+        #     canvas.create_text(900, 830, text=str(estimate_total1.cget("text"))+"$", fill="black", font=('Helvetica 10   bold'))
+        #     canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))  
+        #   elif est_symbolcheck[0] == "before amount":
+        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 730, text=""+comcursign.get()+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 755, text=""+comcursign.get()+str(estimate_ttax1.cget("text")), fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 780, text=""+comcursign.get()+str(estimate_ttax2.cget("text")), fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(900, 805, text=""+comcursign.get()+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+  
+        #     canvas.create_text(900, 830, text=""+comcursign.get()+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10   bold'))
+        #     canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+          
+        #   elif est_symbolcheck[0] == "before amount with space":
+        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 730, text=""+comcursign.get()+" "+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+
+        #     canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 755, text=""+comcursign.get()+" "+str(estimate_ttax1.cget("text")), fill="black", font=('Helvetica 10'))
+
+        #     canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 780, text=""+comcursign.get()+" "+str(estimate_ttax2.cget("text")), fill="black", font=('Helvetica 10'))
+
+        #     canvas.create_text(900, 805, text=""+comcursign.get()+" "+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+
+        #     canvas.create_text(900, 830, text=""+comcursign.get()+" "+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10    bold'))
+        #     canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+        #   elif est_symbolcheck[0] == "after amount":
+        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 780, text=str(estimate_ttax2.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(900, 805, text=str(estimate_costtt.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+  
+        #     canvas.create_text(900, 830, text=str(estimate_total1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10   bold'))
+        #     canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+        #   elif est_symbolcheck[0] == "after amount with space":
+        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 780, text=str(estimate_ttax2.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(900, 805, text=str(estimate_costtt.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+  
+        #     canvas.create_text(900, 830, text=str(estimate_total1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10   bold'))
+        #     canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+        est_comments = Text(canvas,font=('Helvetica 10'),width=100,height=6,fg= "black",
+        bg="white",cursor="arrow",bd=0)
+        est_comments.insert("1.0",edit_est_data[32])
+        est_comments.config(state=DISABLED)
+        canvas.create_window(630, 900,window=est_comments)
+        canvas.create_text(620, 1020, text="Terms and Conditions", fill="black", font=('Helvetica 10'))
+        canvas.create_line(265, 1040, 1000, 1040)
+
+        T = Text(canvas, height=3, width=90, font=('Helvetica 10'),borderwidth=0)
+        T.insert(END, edit_est_data[31])
+        T_window = canvas.create_window(270, 1055, anchor="nw", window=T)
+
+        canvas.create_text(315, 1150, text="Sales Person:", fill="black", font=('Helvetica 10'))
+        canvas.create_text(395, 1150, text=""+edit_est_data[14], fill="black", font=('Helvetica 10'))
+        canvas.create_text(945, 1160, text="Page 1 of 1", fill="black", font=('Helvetica 10'))
+      elif edit_est_data[13] == 'Professional 2 (logo on right side)': 
+        previewcreate = Toplevel()
+        previewcreate.geometry("1360x730")
+        frame = Frame(previewcreate, width=953, height=300)
+        frame.pack(expand=True, fill=BOTH)
+        frame.place(x=5,y=30)
+        canvas=Canvas(frame, bg='grey', width=953, height=300, scrollregion=(0,0,700,1200))
+        
+        vertibar=Scrollbar(frame, orient=VERTICAL)
+        vertibar.pack(side=RIGHT,fill=Y)
+        vertibar.config(command=canvas.yview)
+
+        canvas.config(width=1315,height=640)
+        canvas.config(yscrollcommand=vertibar.set)
+        canvas.pack(expand=True,side=LEFT,fill=BOTH)
+        canvas.create_rectangle(235, 25, 1035, 1175, outline='yellow',fill='white')
+        try:
+            image = Image.open("images/"+est_compdataord[13])
+            resize_image = image.resize((250, 125))
+            loimg = ImageTk.PhotoImage(resize_image)
+            b2 = Label(canvas,image=loimg, height=125, width=250,)
+            b2.photo = loimg
+            canvas.create_window(845, 150,window=b2)
+        except:
+          pass
+        canvas.create_text(722, 245, text=""+est_str2.get(), fill="black", font=('Helvetica 12')) 
+        canvas.create_text(735, 270, text=""+est_str3.get(), fill="black", font=('Helvetica 12')) 
+        canvas.create_text(720, 295, text=""+est_str4.get(), fill="black", font=('Helvetica 12')) 
+        canvas.create_text(921, 245, text=""+edit_est_data[1], fill="black", font=('Helvetica 12')) 
+        canvas.create_text(920, 270, text=edit_est_data[2], fill="black", font=('Helvetica 12')) 
+        canvas.create_text(920, 295, text=edit_est_data[3], fill="black", font=('Helvetica 12')) 
+        canvas.create_text(375, 100, text=" "+comname.get(), fill="black", font=('Helvetica 12 '))
+        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0)
+        T_address.tag_configure('tag_name',justify='left')
+        T_address.insert('1.0', est_compdataord[2])
+        T_address.tag_add('tag_name','1.0', 'end')
+        T_address_window = canvas.create_window(284, 125, anchor="nw", window=T_address)
+        canvas.create_text(319, 225, text=""+comsalestax.get(), fill="black", font=('Helvetica 10')) 
+        canvas.create_text(339, 255, text=" "+est_str1.get(), fill="black", font=('Helvetica 20 bold'))
+        canvas.create_text(335, 345, text=""+est_str5.get(), fill="black", font=('Helvetica 10 underline')) 
+        canvas.create_text(680, 345, text="Ship to", fill="black", font=('Helvetica 10 underline'))
+        canvas.create_text(315, 365, text=""+edit_est_data[18], fill="black", font=('Helvetica 10')) 
+        canvas.create_text(673, 365, text=""+edit_est_data[20], fill="black", font=('Helvetica 10'))  
+        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0)
+        T_address.tag_configure('tag_name',justify='left')
+        T_address.insert('1.0', edit_est_data[19])
+        T_address.tag_add('tag_name','1.0', 'end')
+        T_address_window = canvas.create_window(306, 380, anchor="nw", window=T_address)
+        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0)
+        T_address.tag_configure('tag_name',justify='left')
+        T_address.insert('1.0', edit_est_data[21])
+        T_address.tag_add('tag_name','1.0', 'end')
+        T_address_window = canvas.create_window(665, 380, anchor="nw", window=T_address)
+        s = ttk.Style()
+        s.configure('mystyle_prev_1.Treeview.Heading', background=''+win_menu1.get(),State='DISABLE')
+
+        est_prev_tree=ttk.Treeview(canvas, show='headings',height= 11, style='mystyle_prev_1.Treeview')
+        est_prev_tree["columns"] = ["1","2","3","4","5"]
+        est_prev_tree.column("# 0",width=1)
+        est_prev_tree.column("1", anchor=CENTER, width=100)
+        est_prev_tree.column("2", anchor=CENTER, width=350)
+        est_prev_tree.column("3", anchor=CENTER, width=80)
+        est_prev_tree.column("4", anchor=CENTER, width=90)
+        est_prev_tree.column("5", anchor=CENTER, width=85)
+        est_prev_tree.heading("#0", text="")
+        est_prev_tree.heading("1", text="ID/SKU")
+        est_prev_tree.heading("2", text="Product/Service - Description")
+        est_prev_tree.heading("3", text="Quantity")
+        est_prev_tree.heading("4", text="Unit Price")
+        est_prev_tree.heading("5", text="Price")
+        window = canvas.create_window(275, 470, anchor="nw", window=est_prev_tree)
+        sql = "select * from company"
+        fbcursor.execute(sql)
+        est_taxcheck = fbcursor.fetchone()
+
+        sql = "select currsignplace,currencysign from company"
+        fbcursor.execute(sql)
+        est_symbolcheck = fbcursor.fetchone()
+        
+
+
+        for record in edit_estimate_tree.get_children():
+          previewdata1 = list(edit_estimate_tree.item(record, 'values'))
+          if not est_taxcheck:
+            est_prev_tree.insert(parent='', index='end',text='', values=(previewdata1[0],previewdata1[1]+"-"+previewdata1[2],previewdata1[4],previewdata1[3],previewdata1[6]))
+          elif est_taxcheck[12] == "1":
+            est_prev_tree.insert(parent='', index='end',text='', values=(previewdata1[0],previewdata1[1]+"-"+previewdata1[2],previewdata1[4],previewdata1[3],previewdata1[6]))
+          elif est_taxcheck[12] == "2":
+            est_prev_tree.insert(parent='', index='end',text='', values=(previewdata1[0],previewdata1[1]+"-"+previewdata1[2],previewdata1[4],previewdata1[3],previewdata1[7]))
+          elif est_taxcheck[12] == "3":
+            est_prev_tree.insert(parent='', index='end',text='', values=(previewdata1[0],previewdata1[1]+"-"+previewdata1[2],previewdata1[4],previewdata1[3],previewdata1[8]))
+      
+        if est_taxcheck[12] == "1":
+          canvas.create_line(980, 715, 980, 790 )
+          canvas.create_line(720, 715, 720, 790 )
+          canvas.create_line(860, 715, 860, 790 )#1st
+          canvas.create_line(980, 715, 720, 715 )
+          canvas.create_line(980, 740, 720, 740 )
+          canvas.create_line(980, 765, 720, 765 ) 
+          canvas.create_line(980, 790, 720, 790 )
+
+        #   if not est_symbolcheck:
+        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(900, 755, text=str(estimate_costtt.cget("text"))+"$", fill="black", font=('Helvetica 10 '))
+        #     canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+  
+        #     canvas.create_text(900, 780, text=str(estimate_total1.cget("text"))+"$", fill="black", font=('Helvetica 10 bold'))
+        #     canvas.create_text(780, 780, text="Estimate total.", fill="black", font=('Helvetica 10 bold'))
+
+        #   elif est_symbolcheck[0] == "before amount":
+        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 730, text=""+comcursign.get()+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(900, 755, text=""+comcursign.get()+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+  
+        #     canvas.create_text(900, 780, text=""+comcursign.get()+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10 bold'))
+        #     canvas.create_text(780, 780, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+        #   elif est_symbolcheck[0] == "before amount with space":
+        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 730, text=""+comcursign.get()+" "+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(900, 755, text=""+comcursign.get()+" "+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(900, 780, text=""+comcursign.get()+" "+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10 bold'))
+        #     canvas.create_text(780, 780, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+        #   elif est_symbolcheck[0] == "after amount":
+        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(900, 755, text=str(estimate_costtt.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10 '))
+        #     canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+  
+        #     canvas.create_text(900, 780, text=str(estimate_total1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
+        #     canvas.create_text(780, 780, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+
+        #   elif est_symbolcheck[0] == "after amount with space":
+        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(900, 755, text=str(estimate_costtt.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+  
+        #     canvas.create_text(900, 780, text=str(estimate_total1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
+        #     canvas.create_text(780, 780, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+        elif est_taxcheck[12] == "2":
+          canvas.create_line(980, 715, 980, 815 )
+          canvas.create_line(720, 715, 720, 815 )
+          canvas.create_line(860, 715, 860, 815 )#1st
+          canvas.create_line(980, 815, 720, 815 )
+          canvas.create_line(980, 715, 720, 715 )
+          canvas.create_line(980, 740, 720, 740 )
+          canvas.create_line(980, 765, 720, 765 ) 
+          canvas.create_line(980, 790, 720, 790 )
+          canvas.create_line(980, 815, 720, 815 )
+
+        #   if not est_symbolcheck:
+        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(900, 780, text=str(estimate_costtt.cget("text"))+"$", fill="black", font=('Helvetica 10 '))
+        #     canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(900, 805, text=str(estimate_total1.cget("text"))+"$", fill="black", font=('Helvetica 10 bold'))
+        #     canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+        #   elif est_symbolcheck[0] == "before amount":
+        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 730, text=""+comcursign.get()+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 755, text=""+comcursign.get()+str(estimate_ttax1.cget("text")), fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(900, 780, text=""+comcursign.get()+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10 '))
+        #     canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(900, 805, text=""+comcursign.get()+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10 bold'))
+        #     canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+      
+        #   elif est_symbolcheck[0] == "before amount with space":
+        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 730, text=""+comcursign.get()+" "+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 755, text=""+comcursign.get()+" "+str(estimate_ttax1.cget("text")), fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(900, 780, text=""+comcursign.get()+" "+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10 '))
+        #     canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(900, 805, text=""+comcursign.get()+" "+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10 bold'))
+        #     canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+          
+        #   elif est_symbolcheck[0] == "after amount":
+        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(900, 780, text=str(estimate_costtt.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10 '))
+        #     canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(900, 805, text=str(estimate_total1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
+        #     canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+          
+        #   elif est_symbolcheck[0] == "after amount with space":
+        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(900, 780, text=str(estimate_costtt.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10 '))
+        #     canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(900, 805, text=str(estimate_total1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
+        #     canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+        elif est_taxcheck[12] == "3":
+          canvas.create_line(980, 715, 980, 840 )
+          canvas.create_line(720, 715, 720, 840 )
+          canvas.create_line(860, 715, 860, 840 )#1st
+          canvas.create_line(980, 815, 720, 815 )
+          canvas.create_line(980, 715, 720, 715 )
+          canvas.create_line(980, 740, 720, 740 )
+          canvas.create_line(980, 765, 720, 765 ) 
+          canvas.create_line(980, 790, 720, 790 )
+          canvas.create_line(980, 815, 720, 815 )
+          canvas.create_line(980, 840, 720, 840 )
+
+        #   if not est_symbolcheck:
+        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 780, text=str(estimate_ttax2.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(900, 805, text=str(estimate_costtt.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+  
+        #     canvas.create_text(900, 830, text=str(estimate_total1.cget("text"))+"$", fill="black", font=('Helvetica 10   bold'))
+        #     canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))  
+        #   elif est_symbolcheck[0] == "before amount":
+        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 730, text=""+comcursign.get()+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 755, text=""+comcursign.get()+str(estimate_ttax1.cget("text")), fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 780, text=""+comcursign.get()+str(estimate_ttax2.cget("text")), fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(900, 805, text=""+comcursign.get()+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+  
+        #     canvas.create_text(900, 830, text=""+comcursign.get()+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10   bold'))
+        #     canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+          
+        #   elif est_symbolcheck[0] == "before amount with space":
+        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 730, text=""+comcursign.get()+" "+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+
+        #     canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 755, text=""+comcursign.get()+" "+str(estimate_ttax1.cget("text")), fill="black", font=('Helvetica 10'))
+
+        #     canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 780, text=""+comcursign.get()+" "+str(estimate_ttax2.cget("text")), fill="black", font=('Helvetica 10'))
+
+        #     canvas.create_text(900, 805, text=""+comcursign.get()+" "+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+
+        #     canvas.create_text(900, 830, text=""+comcursign.get()+" "+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10    bold'))
+        #     canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+        #   elif est_symbolcheck[0] == "after amount":
+        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 780, text=str(estimate_ttax2.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(900, 805, text=str(estimate_costtt.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+  
+        #     canvas.create_text(900, 830, text=str(estimate_total1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10   bold'))
+        #     canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+        #   elif est_symbolcheck[0] == "after amount with space":
+        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 780, text=str(estimate_ttax2.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(900, 805, text=str(estimate_costtt.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+  
+        #     canvas.create_text(900, 830, text=str(estimate_total1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10   bold'))
+        #     canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+        est_comments = Text(canvas,font=('Helvetica 10'),width=100,height=6,fg= "black",
+        bg="white",cursor="arrow",bd=0)
+        est_comments.insert("1.0",edit_est_data[32])
+        est_comments.config(state=DISABLED)
+        canvas.create_window(630, 900,window=est_comments)
+        canvas.create_text(620, 1020, text="Terms and Conditions", fill="black", font=('Helvetica 10'))
+        canvas.create_line(265, 1040, 1000, 1040)
+
+        T = Text(canvas, height=3, width=90, font=('Helvetica 10'),borderwidth=0)
+        T.insert(END, edit_est_data[31])
+        T_window = canvas.create_window(270, 1055, anchor="nw", window=T)
+
+        canvas.create_text(315, 1150, text="Sales Person:", fill="black", font=('Helvetica 10'))
+        canvas.create_text(395, 1150, text=""+edit_est_data[14], fill="black", font=('Helvetica 10'))
+        canvas.create_text(945, 1160, text="Page 1 of 1", fill="black", font=('Helvetica 10')) 
+      elif edit_est_data[13] == 'Simplified 1 (logo on left side)':
+        previewcreate = Toplevel()
+        previewcreate.geometry("1360x730")
+        frame = Frame(previewcreate, width=953, height=300)
+        frame.pack(expand=True, fill=BOTH)
+        frame.place(x=5,y=30)
+        canvas=Canvas(frame, bg='grey', width=953, height=300, scrollregion=(0,0,700,1200))
+        
+        vertibar=Scrollbar(frame, orient=VERTICAL)
+        vertibar.pack(side=RIGHT,fill=Y)
+        vertibar.config(command=canvas.yview)
+
+        canvas.config(width=1315,height=640)
+        canvas.config(yscrollcommand=vertibar.set)
+        canvas.pack(expand=True,side=LEFT,fill=BOTH)
+        canvas.create_rectangle(235, 25, 1035, 1175, outline='yellow',fill='white')
+        try:
+            image = Image.open("images/"+est_compdataord[13])
+            resize_image = image.resize((250, 125))
+            loimg = ImageTk.PhotoImage(resize_image)
+            b2 = Label(canvas,image=loimg, height=125, width=250,)
+            b2.photo = loimg
+            canvas.create_window(425, 150,window=b2)
+        except:
+          pass
+        canvas.create_text(322, 245, text=""+est_str2.get(), fill="black", font=('Helvetica 12')) 
+        canvas.create_text(335, 270, text=""+est_str3.get(), fill="black", font=('Helvetica 12')) 
+        canvas.create_text(320, 295, text=""+est_str4.get(), fill="black", font=('Helvetica 12')) 
+        canvas.create_text(521, 245, text=""+edit_est_data[1], fill="black", font=('Helvetica 12')) 
+        canvas.create_text(520, 270, text=edit_est_data[2], fill="black", font=('Helvetica 12')) 
+        canvas.create_text(520, 295, text=edit_est_data[3], fill="black", font=('Helvetica 12')) 
+        canvas.create_text(885, 100, text=" "+comname.get(), fill="black", font=('Helvetica 12 '))
+        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0)
+        T_address.tag_configure('tag_name',justify='right')
+        T_address.insert('1.0', est_compdataord[2])
+        T_address.tag_add('tag_name','1.0', 'end')
+        T_address_window = canvas.create_window(694, 125, anchor="nw", window=T_address)
+        canvas.create_text(935, 225, text=""+comsalestax.get(), fill="black", font=('Helvetica 10')) 
+        canvas.create_text(909, 255, text=" "+est_str1.get(), fill="black", font=('Helvetica 20 bold'))
+        canvas.create_text(335, 345, text=""+est_str5.get(), fill="black", font=('Helvetica 10 underline')) 
+        canvas.create_text(680, 345, text="Ship to", fill="black", font=('Helvetica 10 underline'))
+        canvas.create_text(315, 365, text=""+edit_est_data[18], fill="black", font=('Helvetica 10')) 
+        canvas.create_text(673, 365, text=""+edit_est_data[20], fill="black", font=('Helvetica 10'))  
+        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0)
+        T_address.tag_configure('tag_name',justify='left')
+        T_address.insert('1.0', edit_est_data[19])
+        T_address.tag_add('tag_name','1.0', 'end')
+        T_address_window = canvas.create_window(306, 380, anchor="nw", window=T_address)
+        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0)
+        T_address.tag_configure('tag_name',justify='left')
+        T_address.insert('1.0', edit_est_data[21])
+        T_address.tag_add('tag_name','1.0', 'end')
+        T_address_window = canvas.create_window(665, 380, anchor="nw", window=T_address)
+        s = ttk.Style()
+        s.configure('mystyle_prev_1.Treeview.Heading', background=''+win_menu1.get(),State='DISABLE')
+
+        est_prev_tree=ttk.Treeview(canvas, show='headings',height= 11, style='mystyle_prev_1.Treeview')
+        est_prev_tree["columns"] = ["1","2","3"]
+        est_prev_tree.column("# 0",width=1)
+        est_prev_tree.column("1", anchor=CENTER, width=530)
+        est_prev_tree.column("2", anchor=CENTER, width=80)
+        est_prev_tree.column("3", anchor=CENTER, width=95)
+        est_prev_tree.heading("#0", text="")
+        est_prev_tree.heading("1", text="Product/Service - Description")
+        est_prev_tree.heading("2", text="Quantity")
+        est_prev_tree.heading("3", text="Price")
+        window = canvas.create_window(275, 470, anchor="nw", window=est_prev_tree)
+        sql = "select * from company"
+        fbcursor.execute(sql)
+        est_taxcheck = fbcursor.fetchone()
+
+        sql = "select currsignplace,currencysign from company"
+        fbcursor.execute(sql)
+        est_symbolcheck = fbcursor.fetchone()
+        
+
+
+        for record in edit_estimate_tree.get_children():
+          previewdata1 = list(edit_estimate_tree.item(record, 'values'))
+          if not est_taxcheck:
+            est_prev_tree.insert(parent='', index='end',text='', values=(previewdata1[1]+"-"+previewdata1[2],previewdata1[4],previewdata1[6]))
+          elif est_taxcheck[12] == "1":
+            est_prev_tree.insert(parent='', index='end',text='', values=(previewdata1[1]+"-"+previewdata1[2],previewdata1[4],previewdata1[6]))
+          elif est_taxcheck[12] == "2":
+            est_prev_tree.insert(parent='', index='end',text='', values=(previewdata1[1]+"-"+previewdata1[2],previewdata1[4],previewdata1[7]))
+          elif est_taxcheck[12] == "3":
+            est_prev_tree.insert(parent='', index='end',text='', values=(previewdata1[1]+"-"+previewdata1[2],previewdata1[4],previewdata1[8]))
+      
+        if est_taxcheck[12] == "1":
+          canvas.create_line(980, 715, 980, 790 )
+          canvas.create_line(720, 715, 720, 790 )
+          canvas.create_line(860, 715, 860, 790 )#1st
+          canvas.create_line(980, 715, 720, 715 )
+          canvas.create_line(980, 740, 720, 740 )
+          canvas.create_line(980, 765, 720, 765 ) 
+          canvas.create_line(980, 790, 720, 790 )
+
+        #   if not est_symbolcheck:
+        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(900, 755, text=str(estimate_costtt.cget("text"))+"$", fill="black", font=('Helvetica 10 '))
+        #     canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+  
+        #     canvas.create_text(900, 780, text=str(estimate_total1.cget("text"))+"$", fill="black", font=('Helvetica 10 bold'))
+        #     canvas.create_text(780, 780, text="Estimate total.", fill="black", font=('Helvetica 10 bold'))
+
+        #   elif est_symbolcheck[0] == "before amount":
+        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 730, text=""+comcursign.get()+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(900, 755, text=""+comcursign.get()+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+  
+        #     canvas.create_text(900, 780, text=""+comcursign.get()+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10 bold'))
+        #     canvas.create_text(780, 780, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+        #   elif est_symbolcheck[0] == "before amount with space":
+        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 730, text=""+comcursign.get()+" "+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(900, 755, text=""+comcursign.get()+" "+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(900, 780, text=""+comcursign.get()+" "+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10 bold'))
+        #     canvas.create_text(780, 780, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+        #   elif est_symbolcheck[0] == "after amount":
+        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(900, 755, text=str(estimate_costtt.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10 '))
+        #     canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+  
+        #     canvas.create_text(900, 780, text=str(estimate_total1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
+        #     canvas.create_text(780, 780, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+
+        #   elif est_symbolcheck[0] == "after amount with space":
+        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(900, 755, text=str(estimate_costtt.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+  
+        #     canvas.create_text(900, 780, text=str(estimate_total1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
+        #     canvas.create_text(780, 780, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+        elif est_taxcheck[12] == "2":
+          canvas.create_line(980, 715, 980, 815 )
+          canvas.create_line(720, 715, 720, 815 )
+          canvas.create_line(860, 715, 860, 815 )#1st
+          canvas.create_line(980, 815, 720, 815 )
+          canvas.create_line(980, 715, 720, 715 )
+          canvas.create_line(980, 740, 720, 740 )
+          canvas.create_line(980, 765, 720, 765 ) 
+          canvas.create_line(980, 790, 720, 790 )
+          canvas.create_line(980, 815, 720, 815 )
+
+        #   if not est_symbolcheck:
+        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(900, 780, text=str(estimate_costtt.cget("text"))+"$", fill="black", font=('Helvetica 10 '))
+        #     canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(900, 805, text=str(estimate_total1.cget("text"))+"$", fill="black", font=('Helvetica 10 bold'))
+        #     canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+        #   elif est_symbolcheck[0] == "before amount":
+        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 730, text=""+comcursign.get()+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 755, text=""+comcursign.get()+str(estimate_ttax1.cget("text")), fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(900, 780, text=""+comcursign.get()+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10 '))
+        #     canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(900, 805, text=""+comcursign.get()+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10 bold'))
+        #     canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+      
+        #   elif est_symbolcheck[0] == "before amount with space":
+        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 730, text=""+comcursign.get()+" "+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 755, text=""+comcursign.get()+" "+str(estimate_ttax1.cget("text")), fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(900, 780, text=""+comcursign.get()+" "+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10 '))
+        #     canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(900, 805, text=""+comcursign.get()+" "+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10 bold'))
+        #     canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+          
+        #   elif est_symbolcheck[0] == "after amount":
+        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(900, 780, text=str(estimate_costtt.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10 '))
+        #     canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(900, 805, text=str(estimate_total1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
+        #     canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+          
+        #   elif est_symbolcheck[0] == "after amount with space":
+        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(900, 780, text=str(estimate_costtt.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10 '))
+        #     canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(900, 805, text=str(estimate_total1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
+        #     canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+        elif est_taxcheck[12] == "3":
+          canvas.create_line(980, 715, 980, 840 )
+          canvas.create_line(720, 715, 720, 840 )
+          canvas.create_line(860, 715, 860, 840 )#1st
+          canvas.create_line(980, 815, 720, 815 )
+          canvas.create_line(980, 715, 720, 715 )
+          canvas.create_line(980, 740, 720, 740 )
+          canvas.create_line(980, 765, 720, 765 ) 
+          canvas.create_line(980, 790, 720, 790 )
+          canvas.create_line(980, 815, 720, 815 )
+          canvas.create_line(980, 840, 720, 840 )
+
+        #   if not est_symbolcheck:
+        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 780, text=str(estimate_ttax2.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(900, 805, text=str(estimate_costtt.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+  
+        #     canvas.create_text(900, 830, text=str(estimate_total1.cget("text"))+"$", fill="black", font=('Helvetica 10   bold'))
+        #     canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))  
+        #   elif est_symbolcheck[0] == "before amount":
+        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 730, text=""+comcursign.get()+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 755, text=""+comcursign.get()+str(estimate_ttax1.cget("text")), fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 780, text=""+comcursign.get()+str(estimate_ttax2.cget("text")), fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(900, 805, text=""+comcursign.get()+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+  
+        #     canvas.create_text(900, 830, text=""+comcursign.get()+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10   bold'))
+        #     canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+          
+        #   elif est_symbolcheck[0] == "before amount with space":
+        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 730, text=""+comcursign.get()+" "+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+
+        #     canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 755, text=""+comcursign.get()+" "+str(estimate_ttax1.cget("text")), fill="black", font=('Helvetica 10'))
+
+        #     canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 780, text=""+comcursign.get()+" "+str(estimate_ttax2.cget("text")), fill="black", font=('Helvetica 10'))
+
+        #     canvas.create_text(900, 805, text=""+comcursign.get()+" "+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+
+        #     canvas.create_text(900, 830, text=""+comcursign.get()+" "+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10    bold'))
+        #     canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+        #   elif est_symbolcheck[0] == "after amount":
+        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 780, text=str(estimate_ttax2.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(900, 805, text=str(estimate_costtt.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+  
+        #     canvas.create_text(900, 830, text=str(estimate_total1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10   bold'))
+        #     canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+        #   elif est_symbolcheck[0] == "after amount with space":
+        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(900, 780, text=str(estimate_ttax2.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+        #     canvas.create_text(900, 805, text=str(estimate_costtt.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+        #     canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+  
+        #     canvas.create_text(900, 830, text=str(estimate_total1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10   bold'))
+        #     canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+        est_comments = Text(canvas,font=('Helvetica 10'),width=100,height=6,fg= "black",
+        bg="white",cursor="arrow",bd=0)
+        est_comments.insert("1.0",edit_est_data[32])
+        est_comments.config(state=DISABLED)
+        canvas.create_window(630, 900,window=est_comments)
+        canvas.create_text(620, 1020, text="Terms and Conditions", fill="black", font=('Helvetica 10'))
+        canvas.create_line(265, 1040, 1000, 1040)
+
+        T = Text(canvas, height=3, width=90, font=('Helvetica 10'),borderwidth=0)
+        T.insert(END, edit_est_data[31])
+        T_window = canvas.create_window(270, 1055, anchor="nw", window=T)
+
+        canvas.create_text(315, 1150, text="Sales Person:", fill="black", font=('Helvetica 10'))
+        canvas.create_text(395, 1150, text=""+edit_est_data[14], fill="black", font=('Helvetica 10'))
+        canvas.create_text(945, 1160, text="Page 1 of 1", fill="black", font=('Helvetica 10'))  
+      elif edit_est_data[13] == 'Simplified 2 (logo on right side)': 
+        previewcreate = Toplevel()
+        previewcreate.geometry("1360x730")
+        frame = Frame(previewcreate, width=953, height=300)
+        frame.pack(expand=True, fill=BOTH)
+        frame.place(x=5,y=30)
+        canvas=Canvas(frame, bg='grey', width=953, height=300, scrollregion=(0,0,700,1200))
+        
+        vertibar=Scrollbar(frame, orient=VERTICAL)
+        vertibar.pack(side=RIGHT,fill=Y)
+        vertibar.config(command=canvas.yview)
+
+        canvas.config(width=1315,height=640)
+        canvas.config(yscrollcommand=vertibar.set)
+        canvas.pack(expand=True,side=LEFT,fill=BOTH)
+        canvas.create_rectangle(235, 25, 1035, 1175, outline='yellow',fill='white')
+        try:
+            image = Image.open("images/"+est_compdataord[13])
+            resize_image = image.resize((250, 125))
+            loimg = ImageTk.PhotoImage(resize_image)
+            b2 = Label(canvas,image=loimg, height=125, width=250,)
+            b2.photo = loimg
+            canvas.create_window(845, 150,window=b2)
+        except:
+          pass
+        canvas.create_text(722, 245, text=""+est_str2.get(), fill="black", font=('Helvetica 12')) 
+        canvas.create_text(735, 270, text=""+est_str3.get(), fill="black", font=('Helvetica 12')) 
+        canvas.create_text(720, 295, text=""+est_str4.get(), fill="black", font=('Helvetica 12')) 
+        canvas.create_text(921, 245, text=""+edit_est_data[1], fill="black", font=('Helvetica 12')) 
+        canvas.create_text(920, 270, text=edit_est_data[2], fill="black", font=('Helvetica 12')) 
+        canvas.create_text(920, 295, text=edit_est_data[3], fill="black", font=('Helvetica 12')) 
+        canvas.create_text(375, 100, text=" "+comname.get(), fill="black", font=('Helvetica 12 '))
+        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0)
+        T_address.tag_configure('tag_name',justify='left')
+        T_address.insert('1.0', est_compdataord[2])
+        T_address.tag_add('tag_name','1.0', 'end')
+        T_address_window = canvas.create_window(284, 125, anchor="nw", window=T_address)
+        canvas.create_text(319, 225, text=""+comsalestax.get(), fill="black", font=('Helvetica 10')) 
+        canvas.create_text(339, 255, text=" "+est_str1.get(), fill="black", font=('Helvetica 20 bold'))
+        canvas.create_text(335, 345, text=""+est_str5.get(), fill="black", font=('Helvetica 10 underline')) 
+        canvas.create_text(680, 345, text="Ship to", fill="black", font=('Helvetica 10 underline'))
+        canvas.create_text(315, 365, text=""+edit_est_data[18], fill="black", font=('Helvetica 10')) 
+        canvas.create_text(673, 365, text=""+edit_est_data[20], fill="black", font=('Helvetica 10'))  
+        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0)
+        T_address.tag_configure('tag_name',justify='left')
+        T_address.insert('1.0', edit_est_data[19])
+        T_address.tag_add('tag_name','1.0', 'end')
+        T_address_window = canvas.create_window(306, 380, anchor="nw", window=T_address)
+        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0)
+        T_address.tag_configure('tag_name',justify='left')
+        T_address.insert('1.0', edit_est_data[21])
+        T_address.tag_add('tag_name','1.0', 'end')
+        T_address_window = canvas.create_window(665, 380, anchor="nw", window=T_address)
+
+        
+
+        s = ttk.Style()
+        s.configure('mystyle_prev_1.Treeview.Heading', background=''+win_menu1.get(),State='DISABLE')
+
+        est_prev_tree=ttk.Treeview(canvas, show='headings',height= 11, style='mystyle_prev_1.Treeview')
+        est_prev_tree["columns"] = ["1","2","3"]
+        est_prev_tree.column("# 0",width=1)
+        est_prev_tree.column("1", anchor=CENTER, width=530)
+        est_prev_tree.column("2", anchor=CENTER, width=80)
+        est_prev_tree.column("3", anchor=CENTER, width=95)
+        est_prev_tree.heading("#0", text="")
+        est_prev_tree.heading("1", text="Product/Service - Description")
+        est_prev_tree.heading("2", text="Quantity")
+        est_prev_tree.heading("3", text="Price")
+        window = canvas.create_window(275, 470, anchor="nw", window=est_prev_tree)
+        sql = "select * from company"
+        fbcursor.execute(sql)
+        est_taxcheck = fbcursor.fetchone()
+
+        sql = "select currsignplace,currencysign from company"
+        fbcursor.execute(sql)
+        est_symbolcheck = fbcursor.fetchone()
+        
+
+
+        for record in edit_estimate_tree.get_children():
+          previewdata1 = list(edit_estimate_tree.item(record, 'values'))
+          if not est_taxcheck:
+            est_prev_tree.insert(parent='', index='end',text='', values=(previewdata1[1]+"-"+previewdata1[2],previewdata1[4],previewdata1[6]))
+          elif est_taxcheck[12] == "1":
+            est_prev_tree.insert(parent='', index='end',text='', values=(previewdata1[1]+"-"+previewdata1[2],previewdata1[4],previewdata1[6]))
+          elif est_taxcheck[12] == "2":
+            est_prev_tree.insert(parent='', index='end',text='', values=(previewdata1[1]+"-"+previewdata1[2],previewdata1[4],previewdata1[7]))
+          elif est_taxcheck[12] == "3":
+            est_prev_tree.insert(parent='', index='end',text='', values=(previewdata1[1]+"-"+previewdata1[2],previewdata1[4],previewdata1[8]))
+      
+        if est_taxcheck[12] == "1":
+          canvas.create_line(980, 715, 980, 790 )
+          canvas.create_line(720, 715, 720, 790 )
+          canvas.create_line(860, 715, 860, 790 )#1st
+          canvas.create_line(980, 715, 720, 715 )
+          canvas.create_line(980, 740, 720, 740 )
+          canvas.create_line(980, 765, 720, 765 ) 
+          canvas.create_line(980, 790, 720, 790 )
+
+      #     if not est_symbolcheck:
+      #       canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+  
+      #       canvas.create_text(900, 755, text=str(estimate_costtt.cget("text"))+"$", fill="black", font=('Helvetica 10 '))
+      #       canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+  
+      #       canvas.create_text(900, 780, text=str(estimate_total1.cget("text"))+"$", fill="black", font=('Helvetica 10 bold'))
+      #       canvas.create_text(780, 780, text="Estimate total.", fill="black", font=('Helvetica 10 bold'))
+
+      #     elif est_symbolcheck[0] == "before amount":
+      #       canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(900, 730, text=""+comcursign.get()+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+  
+      #       canvas.create_text(900, 755, text=""+comcursign.get()+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+  
+      #       canvas.create_text(900, 780, text=""+comcursign.get()+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10 bold'))
+      #       canvas.create_text(780, 780, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+      #     elif est_symbolcheck[0] == "before amount with space":
+      #       canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(900, 730, text=""+comcursign.get()+" "+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+  
+      #       canvas.create_text(900, 755, text=""+comcursign.get()+" "+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10'))
+  
+      #       canvas.create_text(900, 780, text=""+comcursign.get()+" "+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10 bold'))
+      #       canvas.create_text(780, 780, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+      #     elif est_symbolcheck[0] == "after amount":
+      #       canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+      #       canvas.create_text(900, 755, text=str(estimate_costtt.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10 '))
+      #       canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+  
+      #       canvas.create_text(900, 780, text=str(estimate_total1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
+      #       canvas.create_text(780, 780, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+
+      #     elif est_symbolcheck[0] == "after amount with space":
+      #       canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+      #       canvas.create_text(900, 755, text=str(estimate_costtt.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+  
+      #       canvas.create_text(900, 780, text=str(estimate_total1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
+      #       canvas.create_text(780, 780, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+        elif est_taxcheck[12] == "2":
+          canvas.create_line(980, 715, 980, 815 )
+          canvas.create_line(720, 715, 720, 815 )
+          canvas.create_line(860, 715, 860, 815 )#1st
+          canvas.create_line(980, 815, 720, 815 )
+          canvas.create_line(980, 715, 720, 715 )
+          canvas.create_line(980, 740, 720, 740 )
+          canvas.create_line(980, 765, 720, 765 ) 
+          canvas.create_line(980, 790, 720, 790 )
+          canvas.create_line(980, 815, 720, 815 )
+
+      #     if not est_symbolcheck:
+      #       canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+  
+      #       canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+  
+      #       canvas.create_text(900, 780, text=str(estimate_costtt.cget("text"))+"$", fill="black", font=('Helvetica 10 '))
+      #       canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
+  
+      #       canvas.create_text(900, 805, text=str(estimate_total1.cget("text"))+"$", fill="black", font=('Helvetica 10 bold'))
+      #       canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+      #     elif est_symbolcheck[0] == "before amount":
+      #       canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(900, 730, text=""+comcursign.get()+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+  
+      #       canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(900, 755, text=""+comcursign.get()+str(estimate_ttax1.cget("text")), fill="black", font=('Helvetica 10'))
+  
+      #       canvas.create_text(900, 780, text=""+comcursign.get()+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10 '))
+      #       canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
+  
+      #       canvas.create_text(900, 805, text=""+comcursign.get()+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10 bold'))
+      #       canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+      
+      #     elif est_symbolcheck[0] == "before amount with space":
+      #       canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(900, 730, text=""+comcursign.get()+" "+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+  
+      #       canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(900, 755, text=""+comcursign.get()+" "+str(estimate_ttax1.cget("text")), fill="black", font=('Helvetica 10'))
+  
+      #       canvas.create_text(900, 780, text=""+comcursign.get()+" "+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10 '))
+      #       canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
+  
+      #       canvas.create_text(900, 805, text=""+comcursign.get()+" "+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10 bold'))
+      #       canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+          
+      #     elif est_symbolcheck[0] == "after amount":
+      #       canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+      #       canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+      #       canvas.create_text(900, 780, text=str(estimate_costtt.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10 '))
+      #       canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
+  
+      #       canvas.create_text(900, 805, text=str(estimate_total1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
+      #       canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+          
+      #     elif est_symbolcheck[0] == "after amount with space":
+      #       canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+      #       canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+      #       canvas.create_text(900, 780, text=str(estimate_costtt.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10 '))
+      #       canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
+  
+      #       canvas.create_text(900, 805, text=str(estimate_total1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
+      #       canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+        elif est_taxcheck[12] == "3":
+          canvas.create_line(980, 715, 980, 840 )
+          canvas.create_line(720, 715, 720, 840 )
+          canvas.create_line(860, 715, 860, 840 )#1st
+          canvas.create_line(980, 815, 720, 815 )
+          canvas.create_line(980, 715, 720, 715 )
+          canvas.create_line(980, 740, 720, 740 )
+          canvas.create_line(980, 765, 720, 765 ) 
+          canvas.create_line(980, 790, 720, 790 )
+          canvas.create_line(980, 815, 720, 815 )
+          canvas.create_line(980, 840, 720, 840 )
+
+      #     if not est_symbolcheck:
+      #       canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+  
+      #       canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+  
+      #       canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(900, 780, text=str(estimate_ttax2.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+  
+      #       canvas.create_text(900, 805, text=str(estimate_costtt.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+  
+      #       canvas.create_text(900, 830, text=str(estimate_total1.cget("text"))+"$", fill="black", font=('Helvetica 10   bold'))
+      #       canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))  
+      #     elif est_symbolcheck[0] == "before amount":
+      #       canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(900, 730, text=""+comcursign.get()+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+  
+      #       canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(900, 755, text=""+comcursign.get()+str(estimate_ttax1.cget("text")), fill="black", font=('Helvetica 10'))
+  
+      #       canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(900, 780, text=""+comcursign.get()+str(estimate_ttax2.cget("text")), fill="black", font=('Helvetica 10'))
+  
+      #       canvas.create_text(900, 805, text=""+comcursign.get()+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+  
+      #       canvas.create_text(900, 830, text=""+comcursign.get()+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10   bold'))
+      #       canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+          
+      #     elif est_symbolcheck[0] == "before amount with space":
+      #       canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(900, 730, text=""+comcursign.get()+" "+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+
+      #       canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(900, 755, text=""+comcursign.get()+" "+str(estimate_ttax1.cget("text")), fill="black", font=('Helvetica 10'))
+
+      #       canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(900, 780, text=""+comcursign.get()+" "+str(estimate_ttax2.cget("text")), fill="black", font=('Helvetica 10'))
+
+      #       canvas.create_text(900, 805, text=""+comcursign.get()+" "+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+
+      #       canvas.create_text(900, 830, text=""+comcursign.get()+" "+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10    bold'))
+      #       canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+      #     elif est_symbolcheck[0] == "after amount":
+      #       canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+      #       canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+      #       canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(900, 780, text=str(estimate_ttax2.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+      #       canvas.create_text(900, 805, text=str(estimate_costtt.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+  
+      #       canvas.create_text(900, 830, text=str(estimate_total1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10   bold'))
+      #       canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+      #     elif est_symbolcheck[0] == "after amount with space":
+      #       canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+      #       canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+      #       canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(900, 780, text=str(estimate_ttax2.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+      #       canvas.create_text(900, 805, text=str(estimate_costtt.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+  
+      #       canvas.create_text(900, 830, text=str(estimate_total1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10   bold'))
+      #       canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+        est_comments = Text(canvas,font=('Helvetica 10'),width=100,height=6,fg= "black",
+        bg="white",cursor="arrow",bd=0)
+        est_comments.insert("1.0",edit_est_data[32])
+        est_comments.config(state=DISABLED)
+        canvas.create_window(630, 900,window=est_comments)
+        canvas.create_text(620, 1020, text="Terms and Conditions", fill="black", font=('Helvetica 10'))
+        canvas.create_line(265, 1040, 1000, 1040)
+
+        T = Text(canvas, height=3, width=90, font=('Helvetica 10'),borderwidth=0)
+        T.insert(END, edit_est_data[31])
+        T_window = canvas.create_window(270, 1055, anchor="nw", window=T)
+
+        canvas.create_text(315, 1150, text="Sales Person:", fill="black", font=('Helvetica 10'))
+        canvas.create_text(395, 1150, text=""+edit_est_data[14], fill="black", font=('Helvetica 10'))
+        canvas.create_text(945, 1160, text="Page 1 of 1", fill="black", font=('Helvetica 10')) 
+      elif edit_est_data[13] == 'Business Classic': 
+        previewcreate = Toplevel()
+        previewcreate.geometry("1360x730")
+        frame = Frame(previewcreate, width=953, height=300)
+        frame.pack(expand=True, fill=BOTH)
+        frame.place(x=5,y=30)
+        canvas=Canvas(frame, bg='grey', width=953, height=300, scrollregion=(0,0,700,1200))
+        
+        vertibar=Scrollbar(frame, orient=VERTICAL)
+        vertibar.pack(side=RIGHT,fill=Y)
+        vertibar.config(command=canvas.yview)
+
+        canvas.config(width=1315,height=640)
+        canvas.config(yscrollcommand=vertibar.set)
+        canvas.pack(expand=True,side=LEFT,fill=BOTH)
+        canvas.create_rectangle(235, 25, 1035, 1175, outline='yellow',fill='white')
+        canvas.create_line(265, 100, 750, 100,fill='orange',width=3)
+        canvas.create_line(750, 100, 1000, 100,fill='grey',width=3)
+        try:
+          image = Image.open("images/"+est_compdataord[13])
+          resize_image = image.resize((250, 125))
+          loimg = ImageTk.PhotoImage(resize_image)
+          b2 = Label(canvas,image=loimg, height=125, width=250,)
+          b2.photo = loimg
+          canvas.create_window(425, 225,window=b2)
+        except:
+          pass
+        canvas.create_text(665, 150, text=" "+comname.get(), fill="black", font=('Helvetica 12 '))
+        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0)
+        T_address.tag_configure('tag_name',justify='left')
+        T_address.insert('1.0', est_compdataord[2])
+        T_address.tag_add('tag_name','1.0', 'end')
+        T_address_window = canvas.create_window(576, 175, anchor="nw", window=T_address)
+        canvas.create_text(612, 275, text=""+comsalestax.get(), fill="black", font=('Helvetica 10')) 
+        canvas.create_text(793, 150, text=""+edit_est_data[20], fill="black", font=('Helvetica 10')) 
+        T_address = Text(canvas, height=5, width=35, font=('Helvetica 10'),borderwidth=0)
+        T_address.tag_configure('tag_name',justify='left')
+        T_address.insert('1.0', edit_est_data[21])
+        T_address.tag_add('tag_name','1.0', 'end')
+        T_address_window = canvas.create_window(784, 170, anchor="nw", window=T_address) 
+
+        canvas.create_text(812, 270, text=""+est_str2.get(), fill="black", font=('Helvetica 10')) 
+        canvas.create_text(825, 295, text=""+est_str3.get(), fill="black", font=('Helvetica 10')) 
+        canvas.create_text(810, 320, text=""+est_str4.get(), fill="black", font=('Helvetica 10')) 
+        canvas.create_text(921, 270, text=""+edit_est_data[1], fill="black", font=('Helvetica 10')) 
+        canvas.create_text(920, 295, text=edit_est_data[2], fill="black", font=('Helvetica 10')) 
+        canvas.create_text(920, 320, text=edit_est_data[3], fill="black", font=('Helvetica 10')) 
+
+        s = ttk.Style()
+        s.configure('mystyle_prev_1.Treeview.Heading', background=''+win_menu1.get(),State='DISABLE')
+
+        est_prev_tree=ttk.Treeview(canvas, show='headings',height= 11, style='mystyle_prev_1.Treeview')
+        est_prev_tree["columns"] = ["1","2","3","4","5"]
+        est_prev_tree.column("# 0",width=1)
+        est_prev_tree.column("1", anchor=CENTER, width=225)
+        est_prev_tree.column("2", anchor=CENTER, width=225)
+        est_prev_tree.column("3", anchor=CENTER, width=90)
+        est_prev_tree.column("4", anchor=CENTER, width=80)
+        est_prev_tree.column("5", anchor=CENTER, width=85)
+        est_prev_tree.heading("#0", text="")
+        est_prev_tree.heading("1", text="Product/Service")
+        est_prev_tree.heading("2", text="Description")
+        est_prev_tree.heading("3", text="Unit Price")
+        est_prev_tree.heading("4", text="Quantity")
+        est_prev_tree.heading("5", text="Price")
+        window = canvas.create_window(275, 470, anchor="nw", window=est_prev_tree)
+
+        sql = "select * from company"
+        fbcursor.execute(sql)
+        est_taxcheck = fbcursor.fetchone()
+
+        sql = "select currsignplace,currencysign from company"
+        fbcursor.execute(sql)
+        est_symbolcheck = fbcursor.fetchone()
+        
+
+
+        for record in edit_estimate_tree.get_children():
+          previewdata1 = list(edit_estimate_tree.item(record, 'values'))
+          if not est_taxcheck:
+            est_prev_tree.insert(parent='', index='end',text='', values=(previewdata1[1],previewdata1[2],previewdata1[3],previewdata1[4],previewdata1[6]))
+          elif est_taxcheck[12] == "1":
+            est_prev_tree.insert(parent='', index='end',text='', values=(previewdata1[1],previewdata1[2],previewdata1[3],previewdata1[4],previewdata1[6]))
+          elif est_taxcheck[12] == "2":
+            est_prev_tree.insert(parent='', index='end',text='', values=(previewdata1[1],previewdata1[2],previewdata1[3],previewdata1[4],previewdata1[7]))
+          elif est_taxcheck[12] == "3":
+            est_prev_tree.insert(parent='', index='end',text='', values=(previewdata1[1],previewdata1[2],previewdata1[3],previewdata1[4],previewdata1[8]))
+        
+        if est_taxcheck[12] == "1":
+          canvas.create_line(980, 715, 980, 790 )
+          canvas.create_line(720, 715, 720, 790 )
+          canvas.create_line(860, 715, 860, 790 )#1st
+          canvas.create_line(980, 715, 720, 715 )
+          canvas.create_line(980, 740, 720, 740 )
+          canvas.create_line(980, 765, 720, 765 ) 
+          canvas.create_line(980, 790, 720, 790 )
+
+      #     if not est_symbolcheck:
+      #       canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+  
+      #       canvas.create_text(900, 755, text=str(estimate_costtt.cget("text"))+"$", fill="black", font=('Helvetica 10 '))
+      #       canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+  
+      #       canvas.create_text(900, 780, text=str(estimate_total1.cget("text"))+"$", fill="black", font=('Helvetica 10 bold'))
+      #       canvas.create_text(780, 780, text="Estimate total.", fill="black", font=('Helvetica 10 bold'))
+
+      #     elif est_symbolcheck[0] == "before amount":
+      #       canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(900, 730, text=""+comcursign.get()+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+  
+      #       canvas.create_text(900, 755, text=""+comcursign.get()+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+  
+      #       canvas.create_text(900, 780, text=""+comcursign.get()+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10 bold'))
+      #       canvas.create_text(780, 780, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+      #     elif est_symbolcheck[0] == "before amount with space":
+      #       canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(900, 730, text=""+comcursign.get()+" "+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+  
+      #       canvas.create_text(900, 755, text=""+comcursign.get()+" "+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10'))
+  
+      #       canvas.create_text(900, 780, text=""+comcursign.get()+" "+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10 bold'))
+      #       canvas.create_text(780, 780, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+      #     elif est_symbolcheck[0] == "after amount":
+      #       canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+      #       canvas.create_text(900, 755, text=str(estimate_costtt.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10 '))
+      #       canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+  
+      #       canvas.create_text(900, 780, text=str(estimate_total1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
+      #       canvas.create_text(780, 780, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+
+      #     elif est_symbolcheck[0] == "after amount with space":
+      #       canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+      #       canvas.create_text(900, 755, text=str(estimate_costtt.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+  
+      #       canvas.create_text(900, 780, text=str(estimate_total1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
+      #       canvas.create_text(780, 780, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+        elif est_taxcheck[12] == "2":
+          canvas.create_line(980, 715, 980, 815 )
+          canvas.create_line(720, 715, 720, 815 )
+          canvas.create_line(860, 715, 860, 815 )#1st
+          canvas.create_line(980, 815, 720, 815 )
+          canvas.create_line(980, 715, 720, 715 )
+          canvas.create_line(980, 740, 720, 740 )
+          canvas.create_line(980, 765, 720, 765 ) 
+          canvas.create_line(980, 790, 720, 790 )
+          canvas.create_line(980, 815, 720, 815 )
+
+      #     if not est_symbolcheck:
+      #       canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+  
+      #       canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+  
+      #       canvas.create_text(900, 780, text=str(estimate_costtt.cget("text"))+"$", fill="black", font=('Helvetica 10 '))
+      #       canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
+  
+      #       canvas.create_text(900, 805, text=str(estimate_total1.cget("text"))+"$", fill="black", font=('Helvetica 10 bold'))
+      #       canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+      #     elif est_symbolcheck[0] == "before amount":
+      #       canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(900, 730, text=""+comcursign.get()+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+  
+      #       canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(900, 755, text=""+comcursign.get()+str(estimate_ttax1.cget("text")), fill="black", font=('Helvetica 10'))
+  
+      #       canvas.create_text(900, 780, text=""+comcursign.get()+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10 '))
+      #       canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
+  
+      #       canvas.create_text(900, 805, text=""+comcursign.get()+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10 bold'))
+      #       canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+      
+      #     elif est_symbolcheck[0] == "before amount with space":
+      #       canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(900, 730, text=""+comcursign.get()+" "+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+  
+      #       canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(900, 755, text=""+comcursign.get()+" "+str(estimate_ttax1.cget("text")), fill="black", font=('Helvetica 10'))
+  
+      #       canvas.create_text(900, 780, text=""+comcursign.get()+" "+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10 '))
+      #       canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
+  
+      #       canvas.create_text(900, 805, text=""+comcursign.get()+" "+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10 bold'))
+      #       canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+          
+      #     elif est_symbolcheck[0] == "after amount":
+      #       canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+      #       canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+      #       canvas.create_text(900, 780, text=str(estimate_costtt.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10 '))
+      #       canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
+  
+      #       canvas.create_text(900, 805, text=str(estimate_total1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
+      #       canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+          
+      #     elif est_symbolcheck[0] == "after amount with space":
+      #       canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+      #       canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+      #       canvas.create_text(900, 780, text=str(estimate_costtt.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10 '))
+      #       canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
+  
+      #       canvas.create_text(900, 805, text=str(estimate_total1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
+      #       canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+        elif est_taxcheck[12] == "3":
+          canvas.create_line(980, 715, 980, 840 )
+          canvas.create_line(720, 715, 720, 840 )
+          canvas.create_line(860, 715, 860, 840 )#1st
+          canvas.create_line(980, 815, 720, 815 )
+          canvas.create_line(980, 715, 720, 715 )
+          canvas.create_line(980, 740, 720, 740 )
+          canvas.create_line(980, 765, 720, 765 ) 
+          canvas.create_line(980, 790, 720, 790 )
+          canvas.create_line(980, 815, 720, 815 )
+          canvas.create_line(980, 840, 720, 840 )
+
+      #     if not est_symbolcheck:
+      #       canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+  
+      #       canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+  
+      #       canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(900, 780, text=str(estimate_ttax2.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+  
+      #       canvas.create_text(900, 805, text=str(estimate_costtt.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+  
+      #       canvas.create_text(900, 830, text=str(estimate_total1.cget("text"))+"$", fill="black", font=('Helvetica 10   bold'))
+      #       canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))  
+      #     elif est_symbolcheck[0] == "before amount":
+      #       canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(900, 730, text=""+comcursign.get()+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+  
+      #       canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(900, 755, text=""+comcursign.get()+str(estimate_ttax1.cget("text")), fill="black", font=('Helvetica 10'))
+  
+      #       canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(900, 780, text=""+comcursign.get()+str(estimate_ttax2.cget("text")), fill="black", font=('Helvetica 10'))
+  
+      #       canvas.create_text(900, 805, text=""+comcursign.get()+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+  
+      #       canvas.create_text(900, 830, text=""+comcursign.get()+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10   bold'))
+      #       canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+          
+      #     elif est_symbolcheck[0] == "before amount with space":
+      #       canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(900, 730, text=""+comcursign.get()+" "+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+
+      #       canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(900, 755, text=""+comcursign.get()+" "+str(estimate_ttax1.cget("text")), fill="black", font=('Helvetica 10'))
+
+      #       canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(900, 780, text=""+comcursign.get()+" "+str(estimate_ttax2.cget("text")), fill="black", font=('Helvetica 10'))
+
+      #       canvas.create_text(900, 805, text=""+comcursign.get()+" "+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+
+      #       canvas.create_text(900, 830, text=""+comcursign.get()+" "+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10    bold'))
+      #       canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+      #     elif est_symbolcheck[0] == "after amount":
+      #       canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+      #       canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+      #       canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(900, 780, text=str(estimate_ttax2.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+      #       canvas.create_text(900, 805, text=str(estimate_costtt.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+  
+      #       canvas.create_text(900, 830, text=str(estimate_total1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10   bold'))
+      #       canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+      #     elif est_symbolcheck[0] == "after amount with space":
+      #       canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+      #       canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+      #       canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(900, 780, text=str(estimate_ttax2.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+  
+      #       canvas.create_text(900, 805, text=str(estimate_costtt.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+      #       canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+  
+      #       canvas.create_text(900, 830, text=str(estimate_total1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10   bold'))
+      #       canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+        canvas.create_line(265, 850, 750, 850,fill='orange',width=3)
+        canvas.create_line(750, 850, 1000, 850,fill='grey',width=3)
+
+        est_comments = Text(canvas,font=('Helvetica 10'),width=100,height=6,fg= "black",
+        bg="white",cursor="arrow",bd=0)
+        est_comments.insert("1.0",edit_est_data[32])
+        est_comments.config(state=DISABLED)
+        canvas.create_window(630, 920,window=est_comments)
+
+        canvas.create_text(620, 1020, text="Terms and Conditions", fill="black", font=('Helvetica 10'))
+        canvas.create_line(265, 1040, 750, 1040,fill='orange',width=3)
+        canvas.create_line(750, 1040, 1000, 1040,fill='grey',width=3)
+
+        T = Text(canvas, height=3, width=90, font=('Helvetica 10'),borderwidth=0)
+        T.insert(END, edit_est_data[31])
+        T_window = canvas.create_window(270, 1055, anchor="nw", window=T)
+
+        canvas.create_text(315, 1150, text="Sales Person:", fill="black", font=('Helvetica 10'))
+        canvas.create_text(395, 1150, text=""+edit_est_data[14], fill="black", font=('Helvetica 10'))
+        canvas.create_text(945, 1160, text="Page 1 of 1", fill="black", font=('Helvetica 10')) 
+      else:
+        pass
+    edit_estimate_prev= Button(edit_estimate_firFrame,compound="top", text="Preview\nEstimate",relief=RAISED, image=photo4,bg="#f5f3f2", fg="black", height=55, bd=1, width=55,command=edit_prev_estimate)
+    edit_estimate_prev.pack(side="left", pady=3, ipadx=4)
 
 
     edit_estimates_sales=Label(edit_estimate_labelfram1,text="Sales Person").place(x=25,y=100)
@@ -5089,9 +7692,9 @@ def mainpage():
         est_btlogo.photo = est_image
       except:
         pass 
-      canvas.create_text(322, 185, text="Estimate#", fill="black", font=('Helvetica 12')) 
-      canvas.create_text(335, 210, text="Estimate date", fill="black", font=('Helvetica 12')) 
-      canvas.create_text(320, 235, text="Due date", fill="black", font=('Helvetica 12')) 
+      canvas.create_text(322, 185, text=""+est_str2.get(), fill="black", font=('Helvetica 12')) 
+      canvas.create_text(335, 210, text=""+est_str3.get(), fill="black", font=('Helvetica 12')) 
+      canvas.create_text(320, 235, text=""+est_str4.get(), fill="black", font=('Helvetica 12')) 
       canvas.create_text(521, 185, text=""+est_prev[1], fill="black", font=('Helvetica 12')) 
       canvas.create_text(520, 210, text=est_prev[2], fill="black", font=('Helvetica 12')) 
       canvas.create_text(520, 235, text=est_prev[3], fill="black", font=('Helvetica 12')) 
@@ -5103,7 +7706,7 @@ def mainpage():
       T_address_window = canvas.create_window(710, 80, anchor="nw", window=T_address)
       canvas.create_text(950, 180, text=""+comsalestax.get(), fill="black", font=('Helvetica 10')) 
       canvas.create_text(925, 215, text=" "+est_str1.get(), fill="black", font=('Helvetica 20 bold'))
-      canvas.create_text(330, 275, text="Estimate to", fill="black", font=('Helvetica 10 underline')) 
+      canvas.create_text(330, 275, text=""+est_str5.get(), fill="black", font=('Helvetica 10 underline')) 
       canvas.create_text(630, 275, text="Ship to", fill="black", font=('Helvetica 10 underline')) 
       canvas.create_text(308, 300, text=""+est_prev[18], fill="black", font=('Helvetica 10')) 
       canvas.create_text(314, 325, text=""+est_prev[19], fill="black", font=('Helvetica 10')) 
@@ -5155,7 +7758,7 @@ def mainpage():
       canvas.create_text(800, 405, text="Subtotal", fill="black", font=('Helvetica 10'))
       canvas.create_text(800, 428, text="TAX1", fill="black", font=('Helvetica 10'))
       canvas.create_text(800, 450, text="TAX2", fill="black", font=('Helvetica 10'))
-      canvas.create_text(800, 475, text="Estimate total", fill="black", font=('Helvetica 10 bold'))
+      canvas.create_text(800, 475, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
       canvas.create_text(925, 405, text=est_pro_data[13], fill="black", font=('Helvetica 10'))
       canvas.create_text(925, 428, text=est_prev[16], fill="black", font=('Helvetica 10'))
       canvas.create_text(925, 450, text=est_prev[34], fill="black", font=('Helvetica 10'))
@@ -8573,7 +11176,8 @@ def mainpage():
         canvas.pack(expand=True,side=LEFT,fill=BOTH)
         canvas.create_rectangle(100, 10, 850, 687 , outline='yellow',fill='white')
         canvas.create_text(500, 50, text="Title text goes here...", fill="black", font=('Helvetica 10'))
-        canvas.create_line(150, 70, 800, 70, fill='orange')
+        canvas.create_line(150, 70, 600, 70, fill='orange',width=3)
+        canvas.create_line(600, 70, 800, 70, fill='grey',width=3)
         
         try:
           est_image = Image.open("images/"+estdata1[13])
@@ -8741,14 +11345,16 @@ def mainpage():
         canvas.create_text(600, 410, text="Total Paid", fill="black", font=('Helvetica 10'))
         canvas.create_text(595, 435, text="Balance", fill="black", font=('Helvetica 10'))
 
-        canvas.create_line(150, 470, 800, 470, fill='orange')
+        canvas.create_line(150, 470, 600, 470, fill='orange',width=3)
+        canvas.create_line(600, 470, 800, 470, fill='grey',width=3)
         canvas.create_text(275, 500, text="Multiline comment text goes here..", fill="black", font=('Helvetica 10'))
         canvas.create_text(182, 510, text="...", fill="black", font=('Helvetica 10'))
         canvas.create_text(182, 520, text="...", fill="black", font=('Helvetica 10'))
         canvas.create_text(182, 530, text="...", fill="black", font=('Helvetica 10'))
           
         canvas.create_text(500, 600, text="Terms and Conditions", fill="black", font=('Helvetica 10'))
-        canvas.create_line(150, 608, 795, 608, fill='orange')
+        canvas.create_line(150, 608, 600, 608, fill='orange',width=3)
+        canvas.create_line(600, 608, 800, 608, fill='grey',width=3)
         # canvas.create_text(280, 640, text= ""+est_str7.get(), fill="black", font=('Helvetica 10'))
         T = Text(canvas, height=3, width=90, font=('Helvetica 10'),borderwidth=0)
         T.insert(END, estdata1[39])
@@ -9844,7 +12450,8 @@ def mainpage():
     canvas.pack(expand=True,side=LEFT,fill=BOTH)
     canvas.create_rectangle(100, 10, 850, 687 , outline='yellow',fill='white')
     canvas.create_text(500, 50, text="Title text goes here...", fill="black", font=('Helvetica 10'))
-    canvas.create_line(150, 70, 800, 70, fill='orange')
+    canvas.create_line(150, 70, 600, 70, fill='orange',width=3)
+    canvas.create_line(600, 70, 800, 70, fill='grey',width=3)
     
     try:
       est_image = Image.open("images/"+estdata[13])
@@ -10013,14 +12620,16 @@ def mainpage():
     canvas.create_text(600, 410, text="Total Paid", fill="black", font=('Helvetica 10'))
     canvas.create_text(595, 435, text="Balance", fill="black", font=('Helvetica 10'))
 
-    canvas.create_line(150, 470, 800, 470, fill='orange')
+    canvas.create_line(150, 470, 600, 470, fill='orange',width=3)
+    canvas.create_line(600, 470, 800, 470, fill='grey',width=3)
     canvas.create_text(275, 500, text="Multiline comment text goes here..", fill="black", font=('Helvetica 10'))
     canvas.create_text(182, 510, text="...", fill="black", font=('Helvetica 10'))
     canvas.create_text(182, 520, text="...", fill="black", font=('Helvetica 10'))
     canvas.create_text(182, 530, text="...", fill="black", font=('Helvetica 10'))
       
     canvas.create_text(500, 600, text="Terms and Conditions", fill="black", font=('Helvetica 10'))
-    canvas.create_line(150, 608, 795, 608, fill='orange')
+    canvas.create_line(150, 608, 600, 608, fill='orange',width=3)
+    canvas.create_line(600, 608, 800, 608, fill='grey',width=3)
     # canvas.create_text(280, 640, text= ""+est_str7.get(), fill="black", font=('Helvetica 10'))
     T = Text(canvas, height=3, width=90, font=('Helvetica 10'),borderwidth=0)
     T.insert(END, estdata[39])
@@ -11048,8 +13657,10 @@ def mainpage():
           canvas.pack(expand=True,side=LEFT,fill=BOTH)
           canvas.create_rectangle(10, 10, 1190, 690 , outline='yellow',fill='white')
           canvas.create_text(600, 45, text="Title text goes here...", fill="black", font=('Helvetica 10'))
-          canvas.create_line(100, 60, 1120, 60, fill="orange")
-          #canvas.create_line(1000, 60, 600, 60, fill="grey")
+          # canvas.create_line(100, 60, 1120, 60, fill="orange")
+          # #canvas.create_line(1000, 60, 600, 60, fill="grey")
+          canvas.create_line(100, 60, 800, 60, fill='orange',width=3)
+          canvas.create_line(800, 60, 1120, 60, fill='grey',width=3)
 
           try:
             adv_image = Image.open("images/"+advdata1[13])
@@ -11227,14 +13838,18 @@ def mainpage():
           #canvas.create_text(1080, 410, text="$138.00", fill="black", font=('Helvetica 10'))
           canvas.create_text(700, 410, text="Balance", fill="black", font=('Helvetica 10'))
 
-          canvas.create_line(100, 480, 1120, 480, fill="orange")
+          #canvas.create_line(100, 480, 1120, 480, fill="orange")
+          canvas.create_line(100, 480, 800, 480, fill='orange',width=3)
+          canvas.create_line(800, 480, 1120, 480, fill='grey',width=3)
           canvas.create_text(200, 500, text="Multiline comment text goes here..", fill="black", font=('Helvetica 10'))
           canvas.create_text(106, 510, text="...", fill="black", font=('Helvetica 10'))
           canvas.create_text(106, 520, text="...", fill="black", font=('Helvetica 10'))
           canvas.create_text(106, 530, text="...", fill="black", font=('Helvetica 10'))
 
           canvas.create_text(600, 580, text="Terms and Conditions", fill="black", font=('Helvetica 10'))
-          canvas.create_line(100, 600, 1120, 600, fill="orange")
+          #canvas.create_line(100, 600, 1120, 600, fill="orange")
+          canvas.create_line(100, 600, 800, 600, fill='orange',width=3)
+          canvas.create_line(800, 600, 1120, 600, fill='grey',width=3)
           canvas.create_text(620, 620, text="Invoices are payable on receipt unless other terms, negotiated and noted on the invoice. By accepting delivery of goods, Buyer agrees to pay the invoiced cost for those goods,\nand agrees to be bound to thses contract terms. No acceptance may vary these terms unless specifically agreed in writing by Seller ", fill="black", font=('Helvetica 10'))
           canvas.create_text(196, 650, text="Page footer text goes here...", fill="black", font=('Helvetica 10'))
           canvas.create_text(1090, 650, text="Page 1 of 1", fill="black", font=('Helvetica 10'))
@@ -12271,8 +14886,10 @@ def mainpage():
     canvas.pack(expand=True,side=LEFT,fill=BOTH)
     canvas.create_rectangle(10, 10, 1190, 690 , outline='yellow',fill='white')
     canvas.create_text(600, 45, text="Title text goes here...", fill="black", font=('Helvetica 10'))
-    canvas.create_line(100, 60, 1120, 60, fill="orange")
+    # canvas.create_line(100, 60, 1120, 60, fill="orange")
     #canvas.create_line(1000, 60, 600, 60, fill="grey")
+    canvas.create_line(100, 60, 800, 60, fill='orange',width=3)
+    canvas.create_line(800, 60, 1120, 60, fill='grey',width=3)
 
     try:
       adv_image = Image.open("images/"+advdata[13])
@@ -12450,14 +15067,18 @@ def mainpage():
     #canvas.create_text(1080, 410, text="$138.00", fill="black", font=('Helvetica 10'))
     canvas.create_text(700, 410, text="Balance", fill="black", font=('Helvetica 10'))
 
-    canvas.create_line(100, 480, 1120, 480, fill="orange")
+    #canvas.create_line(100, 480, 1120, 480, fill="orange")
+    canvas.create_line(100, 480, 800, 480, fill='orange',width=3)
+    canvas.create_line(800, 480, 1120, 480, fill='grey',width=3)
     canvas.create_text(200, 500, text="Multiline comment text goes here..", fill="black", font=('Helvetica 10'))
     canvas.create_text(106, 510, text="...", fill="black", font=('Helvetica 10'))
     canvas.create_text(106, 520, text="...", fill="black", font=('Helvetica 10'))
     canvas.create_text(106, 530, text="...", fill="black", font=('Helvetica 10'))
 
     canvas.create_text(600, 580, text="Terms and Conditions", fill="black", font=('Helvetica 10'))
-    canvas.create_line(100, 600, 1120, 600, fill="orange")
+    #canvas.create_line(100, 600, 1120, 600, fill="orange")
+    canvas.create_line(100, 600, 800, 600, fill='orange',width=3)
+    canvas.create_line(800, 600, 1120, 600, fill='grey',width=3)
     canvas.create_text(620, 620, text="Invoices are payable on receipt unless other terms, negotiated and noted on the invoice. By accepting delivery of goods, Buyer agrees to pay the invoiced cost for those goods,\nand agrees to be bound to thses contract terms. No acceptance may vary these terms unless specifically agreed in writing by Seller ", fill="black", font=('Helvetica 10'))
     canvas.create_text(196, 650, text="Page footer text goes here...", fill="black", font=('Helvetica 10'))
     canvas.create_text(1090, 650, text="Page 1 of 1", fill="black", font=('Helvetica 10'))
