@@ -47,6 +47,15 @@ import datetime as dt
 from datetime import datetime, date
 from tkinter import font,colorchooser
 
+from reportlab.lib import colors
+from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.pdfbase import pdfmetrics
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
+from reportlab.lib.pagesizes import letter  #inch
+import win32api
+from textwrap import wrap
+
+
 
 fbilldb = mysql.connector.connect(
     host="localhost", user="root", password="", database="fbillingsintgrtd", port="3306"
@@ -262,13 +271,15 @@ def mainpage():
       terms = estimates_eterm_text.get("1.0","end-1c")
       comments = estimates_ecomments.get("1.0","end-1c")
       private_notes = estimates_pvt_notes.get("1.0","end-1c")
+      tax2 = estimates_tax5.get()
       orderref = estimate_ee11.get()
+      subtotal = estimate_subbb1.cget("text")
 
 
       
 
-      estimate_sql="INSERT INTO estimate (estimate_number,estdate,duedate,status,emailon,printon,esttot,totpaid,balance,extracostname,extracost,template, salesper,discourate,tax1, category,businessname,businessaddress,shipname, shipaddress,cpemail,cpmobileforsms,title_text, header_text,footer_text,term_of_payment,terms,comments,private_notes,orderref ) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)" #adding values into db
-      estimate_val=(estimate_number,estdate,duedate,status,emailon,printon,esttot,totpaid,balance,extracostname,extracost,template, salesper,discourate,tax1, category,businessname,businessaddress,shipname, shipaddress,cpemail,cpmobileforsms,title_text, header_text, footer_text,term_of_payment,terms,comments,private_notes,orderref )
+      estimate_sql="INSERT INTO estimate (estimate_number,estdate,duedate,status,emailon,printon,esttot,totpaid,balance,extracostname,extracost,template, salesper,discourate,tax1, category,businessname,businessaddress,shipname, shipaddress,cpemail,cpmobileforsms,title_text, header_text,footer_text,term_of_payment,terms,comments,private_notes,tax2,orderref,subtotal ) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)" #adding values into db
+      estimate_val=(estimate_number,estdate,duedate,status,emailon,printon,esttot,totpaid,balance,extracostname,extracost,template, salesper,discourate,tax1, category,businessname,businessaddress,shipname, shipaddress,cpemail,cpmobileforsms,title_text, header_text, footer_text,term_of_payment,terms,comments,private_notes,tax2,orderref,subtotal )
       fbcursor.execute(estimate_sql,estimate_val)
       fbilldb.commit()
       #messagebox.showinfo("F-Billing Revolution","Estimate saved")
@@ -852,18 +863,20 @@ def mainpage():
         estimate_removeButton.place(x=400,y=450)
 
 
-
+              
       
-                      
       estimate_enter10=Label(estimate_newselection, text="Enter filter text").place(x=5, y=10)
-      estimate_e10=Entry(estimate_newselection, width=20).place(x=110, y=10)
-      estimate_text10=Label(estimate_newselection, text="Filtered column").place(x=340, y=10)
-      estimate_e20=Entry(estimate_newselection, width=20).place(x=450, y=10)
+      estimate_e10=Entry(estimate_newselection, width=20)
+      estimate_e10.place(x=110, y=10)
+      # estimate_text10=Label(estimate_newselection, text="Filtered column").place(x=340, y=10)
+      # estimate_e20=Entry(estimate_newselection, width=20).place(x=450, y=10)
+      estimate_pro_filter_button=Button(estimate_newselection, text='Click Here')
+      estimate_pro_filter_button.place(x=240, y=9,height=20,width=60)
 
       
       
       global estimate_cusventtree1
-      estimate_cusventtree1=ttk.Treeview(estimate_newselection, height=27)
+      estimate_cusventtree1=ttk.Treeview(estimate_newselection, height=25)
       estimate_cusventtree1["columns"]=["1","2","3", "4","5"]
       estimate_cusventtree1.column("#0", width=35)
       estimate_cusventtree1.column("1", width=160)
@@ -877,11 +890,9 @@ def mainpage():
       estimate_cusventtree1.heading("3",text="Unit price")
       estimate_cusventtree1.heading("4",text="Service")
       estimate_cusventtree1.heading("5",text="Stock")
-      estimate_cusventtree1.place(x=5, y=45)
       estimate_cusventtree1.tag_configure('green', foreground='green')
       estimate_cusventtree1.tag_configure('red', foreground='red')
       estimate_cusventtree1.tag_configure('blue', foreground='blue')
-
     
       countp = 0
       sql = 'select * from Productservice'
@@ -949,33 +960,247 @@ def mainpage():
           else:
             estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('red',))
             countp += 1
-
-      
-        
-
-     
+      estimate_cusventtree1.place(x=5, y=45)
       
 
-      estimate_ctegorytree1=ttk.Treeview(estimate_newselection, height=27)
+      estimate_ctegorytree1=ttk.Treeview(estimate_newselection, height=25)
       estimate_ctegorytree1["columns"]=["1"]
       estimate_ctegorytree1.column("#0", width=35, minwidth=20)
       estimate_ctegorytree1.column("1", width=205, minwidth=25, anchor=CENTER)    
       estimate_ctegorytree1.heading("#0",text="", anchor=W)
       estimate_ctegorytree1.heading("1",text="View filter by category", anchor=CENTER)
       estimate_ctegorytree1.place(x=660, y=45)
+      def est_items_selected(event):
+        selected_indices = est_fil_cat_list.curselection()
+        selected_filter = ",".join([est_fil_cat_list.get(i) for i in selected_indices])
+
+        sql = 'select * from Productservice'
+        fbcursor.execute(sql)
+        pandsdata = fbcursor.fetchall()
+        psql = "select * from Productservice where serviceornot=%s"
+        val = ('0', )
+        fbcursor.execute(psql, val)
+        pdata = fbcursor.fetchall()
+
+        ssql = "select * from Productservice where serviceornot=%s"
+        val = ('1', )
+        fbcursor.execute(ssql, val)
+        sdata = fbcursor.fetchall()
+
+        if selected_filter == "View all records":
+          for record in estimate_cusventtree1.get_children():
+            estimate_cusventtree1.delete(record)
+          countp = 0
+          for i in pandsdata:
+            if i[12] == '1':
+              servi = '🗹'                     #'Active'
+            else:
+              servi = ' '                         #'Inactive'
+            sql = "select currencysign,currsignplace from company"
+            fbcursor.execute(sql)
+            estcurrsymb = fbcursor.fetchone()
+            if not estcurrsymb: 
+              if i[13] > i[14]:
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('green',))
+                countp += 1              
+              elif i[12] == '1':
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('blue',))
+                countp += 1
+              else:
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('red',))
+                countp += 1
+                      
+            elif estcurrsymb[1] == "before amount":
+              if (i[13]) > (i[14]):
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('green',))
+                countp += 1
+              elif i[12] == '1':
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('blue',))
+                countp += 1
+              else:
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('red',))
+                countp += 1
+
+            elif estcurrsymb[1] == "before amount with space":
+              if (i[13]) > (i[14]):
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('green',))
+                countp += 1
+              elif i[12] == '1':
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('blue',))
+                countp += 1
+              else:
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('red',))
+                countp += 1
+
+            elif estcurrsymb[1] == "after amount":
+              if (i[13]) > (i[14]):
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('green',))
+                countp += 1
+              elif i[12] == '1':
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('blue',))
+                countp += 1
+              else:
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('red',))
+                countp += 1
+
+            elif estcurrsymb[1] == "after amount with space":
+              if (i[13]) > (i[14]):
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('green',))
+                countp += 1
+              elif i[12] == '1':
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('blue',))
+                countp += 1
+              else:
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('red',))
+                countp += 1
+
+        elif selected_filter == "View all products":
+          for record in estimate_cusventtree1.get_children():
+            estimate_cusventtree1.delete(record)
+          countp = 0
+          for i in pdata:
+            if i[12] == '1':
+              servi = '🗹'                   #'Active'
+            else:
+              servi = ' '                    #'Inactive'
+            sql = "select currencysign,currsignplace from company"
+            fbcursor.execute(sql)
+            estcurrsymb = fbcursor.fetchone()
+            if not estcurrsymb: 
+              if i[13] > i[14]:
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('green',))
+                countp += 1              
+              elif i[12] == '1':
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('blue',))
+                countp += 1
+              else:
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('red',))
+                countp += 1
+                      
+            elif estcurrsymb[1] == "before amount":
+              if (i[13]) > (i[14]):
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('green',))
+                countp += 1
+              elif i[12] == '1':
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('blue',))
+                countp += 1
+              else:
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('red',))
+                countp += 1
+
+            elif estcurrsymb[1] == "before amount with space":
+              if (i[13]) > (i[14]):
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('green',))
+                countp += 1
+              elif i[12] == '1':
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('blue',))
+                countp += 1
+              else:
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('red',))
+                countp += 1
+
+            elif estcurrsymb[1] == "after amount":
+              if (i[13]) > (i[14]):
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('green',))
+                countp += 1
+              elif i[12] == '1':
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('blue',))
+                countp += 1
+              else:
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('red',))
+                countp += 1
+
+            elif estcurrsymb[1] == "after amount with space":
+              if (i[13]) > (i[14]):
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('green',))
+                countp += 1
+              elif i[12] == '1':
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('blue',))
+                countp += 1
+              else:
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('red',))
+                countp += 1
+        elif selected_filter == "View all services":
+          for record in estimate_cusventtree1.get_children():
+            estimate_cusventtree1.delete(record)
+          countp = 0
+          for i in sdata:
+            if i[12] == '1':
+              servi = '🗹'             #'Active'
+            else:
+              servi = ' '              #'Inactive'
+            sql = "select currencysign,currsignplace from company"
+            fbcursor.execute(sql)
+            estcurrsymb = fbcursor.fetchone()
+            if not estcurrsymb: 
+              if i[13] > i[14]:
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('green',))
+                countp += 1              
+              elif i[12] == '1':
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('blue',))
+                countp += 1
+              else:
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('red',))
+                countp += 1
+                      
+            elif estcurrsymb[1] == "before amount":
+              if (i[13]) > (i[14]):
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('green',))
+                countp += 1
+              elif i[12] == '1':
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('blue',))
+                countp += 1
+              else:
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('red',))
+                countp += 1
+
+            elif estcurrsymb[1] == "before amount with space":
+              if (i[13]) > (i[14]):
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('green',))
+                countp += 1
+              elif i[12] == '1':
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('blue',))
+                countp += 1
+              else:
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('red',))
+                countp += 1
+
+            elif estcurrsymb[1] == "after amount":
+              if (i[13]) > (i[14]):
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('green',))
+                countp += 1
+              elif i[12] == '1':
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('blue',))
+                countp += 1
+              else:
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('red',))
+                countp += 1
+
+            elif estcurrsymb[1] == "after amount with space":
+              if (i[13]) > (i[14]):
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('green',))
+                countp += 1
+              elif i[12] == '1':
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('blue',))
+                countp += 1
+              else:
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('red',))
+                countp += 1
 
       est_fil_cat_list = Listbox(estimate_newselection,height=34,width=40,bg="white",activestyle="dotbox",fg="black",highlightbackground="white")
-      est_fil_cat_list.insert(0,"               View all Products/Services")
-      est_fil_cat_list.insert(1,"               View all Products")
-      est_fil_cat_list.insert(2,"               View all Services")
-      est_fil_cat_list.insert(3,"               Default")
+      est_fil_cat_list.insert(0,"View all records")
+      est_fil_cat_list.insert(1,"View all products")
+      est_fil_cat_list.insert(2,"View all services")
       est_fil_cat_list.place(x=660,y=63)
-      est_fil_cat_list.bind('<<ListboxSelect>>')
+      est_fil_cat_list.bind('<<ListboxSelect>>',est_items_selected)
+      est_stockok = Label(estimate_newselection,text="Green: Stock is Ok",foreground="green").place(x =15,y =580)
+      est_stocko = Label(estimate_newselection,text="Red: Limit <= Low Stock Limit",foreground="red").place(x =136,y=580)
+      est_stock = Label(estimate_newselection,text="Blue: Service,no Stock Control",foreground="blue").place(x =335,y =580)
 
 
       estimate_scrollbar10 = Scrollbar(estimate_newselection)
-      estimate_scrollbar10.place(x=640, y=45, height=560)
-      estimate_scrollbar10.config( command=tree.yview )
+      estimate_scrollbar10.place(x=640, y=45, height=520)
+      estimate_scrollbar10.config( command=estimate_cusventtree1.yview )
 
       def estselepro():
         global estpriceview
@@ -1863,6 +2088,10 @@ def mainpage():
         canvas.config(yscrollcommand=vertibar.set)
         canvas.pack(expand=True,side=LEFT,fill=BOTH)
         canvas.create_rectangle(235, 25, 1035, 1175, outline='yellow',fill='white')
+
+        com_label = Label(canvas,text=" "+estimates_etitletext.get(),font=('Helvetica 10 '),background='white')
+        com_label_window = canvas.create_window(550, 65, anchor="w", window=com_label)
+
         try:
             image = Image.open("images/"+est_compdataord[13])
             resize_image = image.resize((250, 125))
@@ -1904,7 +2133,7 @@ def mainpage():
         com_label = Label(canvas,text=" "+comname.get(),font=('Helvetica 12 '),background='white')
         com_label_window = canvas.create_window(976, 100, anchor="e", window=com_label)
 
-        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0)
+        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0,cursor="arrow")
         T_address.tag_configure('tag_name',justify='right')
         T_address.insert('1.0', est_compdataord[2])
         T_address.tag_add('tag_name','1.0', 'end')
@@ -1929,19 +2158,23 @@ def mainpage():
         com_label = Label(canvas,text=""+estimate_shipto3.get(),font=('Helvetica 10'),background='white')
         com_label_window = canvas.create_window(662, 365, anchor="w", window=com_label)
 
-        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0)
+        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0,cursor="arrow")
         T_address.tag_configure('tag_name',justify='left')
         T_address.insert('1.0', estimate_addresstext2.get("1.0",END))
         T_address.tag_add('tag_name','1.0', 'end')
         T_address.config(state=DISABLED)
         T_address_window = canvas.create_window(306, 380, anchor="nw", window=T_address)
 
-        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0)
+        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0,cursor="arrow")
         T_address.tag_configure('tag_name',justify='left')
         T_address.insert('1.0', estimate_ship_address4.get("1.0",END))
         T_address.tag_add('tag_name','1.0', 'end')
         T_address.config(state=DISABLED)
         T_address_window = canvas.create_window(665, 380, anchor="nw", window=T_address)
+
+        com_label = Label(canvas,text=" "+estimates_eheader_text.get(),font=('Helvetica 10 '),background='white')
+        com_label_window = canvas.create_window(550, 455, anchor="w", window=com_label)
+
         s = ttk.Style()
         s.configure('mystyle_prev_1.Treeview.Heading', background=''+win_menu1.get(),State='DISABLE')
 
@@ -2116,7 +2349,7 @@ def mainpage():
         elif est_taxcheck[12] == "2":
           canvas.create_line(980, 715, 980, 840 )
           canvas.create_line(720, 715, 720, 840 )
-          canvas.create_line(860, 715, 860, 850 )#1st
+          canvas.create_line(860, 715, 860, 840 )#1st
           canvas.create_line(980, 815, 720, 815 )
           canvas.create_line(980, 715, 720, 715 )
           canvas.create_line(980, 740, 720, 740 )
@@ -2455,7 +2688,7 @@ def mainpage():
         
   
             
-        est_comments = Text(canvas,font=('Helvetica 10'),width=100,height=6,fg= "black",
+        est_comments = Text(canvas,font=('Helvetica 10'),width=105,height=6,fg= "black",
         bg="white",cursor="arrow",bd=0)
         est_comments.insert("1.0",estimates_ecomments.get("1.0","end-1c"))
         est_comments.config(state=DISABLED)
@@ -2463,13 +2696,19 @@ def mainpage():
         canvas.create_text(620, 1020, text="Terms and Conditions", fill="black", font=('Helvetica 10'))
         canvas.create_line(265, 1040, 1000, 1040)
 
-        T = Text(canvas, height=3, width=90, font=('Helvetica 10'),borderwidth=0)
+        T = Text(canvas, height=3, width=105, font=('Helvetica 10'),borderwidth=0,cursor="arrow")
         T.insert(END, estimates_eterm_text.get("1.0","end-1c"))
+        T.config(state=DISABLED)
         T_window = canvas.create_window(270, 1055, anchor="nw", window=T)
 
-        canvas.create_text(315, 1150, text="Sales Person:", fill="black", font=('Helvetica 10'))
-        canvas.create_text(395, 1150, text=""+estimates_sales6.get(), fill="black", font=('Helvetica 10'))
-        #canvas.create_text(945, 1160, text="Page 1 of 1", fill="black", font=('Helvetica 10'))
+        canvas.create_text(315, 1140, text="Sales Person:", fill="black", font=('Helvetica 10'))
+        canvas.create_text(395, 1140, text=""+estimates_sales6.get(), fill="black", font=('Helvetica 10'))
+
+        com_label = Label(canvas,text=" "+estimates_efooter_text.get(),font=('Helvetica 10 '),background='white')
+        com_label_window = canvas.create_window(268, 1160, anchor="w", window=com_label)
+
+        canvas.create_text(960, 1160, text="Page 1 of 1", fill="black", font=('Helvetica 10'))
+
       elif estimates_etemplate.get() == 'Professional 2 (logo on right side)': 
         previewcreate = Toplevel()
         previewcreate.geometry("1360x730")
@@ -2486,6 +2725,8 @@ def mainpage():
         canvas.config(yscrollcommand=vertibar.set)
         canvas.pack(expand=True,side=LEFT,fill=BOTH)
         canvas.create_rectangle(235, 25, 1035, 1175, outline='yellow',fill='white')
+        com_label = Label(canvas,text=" "+estimates_etitletext.get(),font=('Helvetica 10 '),background='white')
+        com_label_window = canvas.create_window(550, 65, anchor="w", window=com_label)
         try:
             image = Image.open("images/"+est_compdataord[13])
             resize_image = image.resize((250, 125))
@@ -2505,7 +2746,6 @@ def mainpage():
         com_label = Label(canvas,text=" "+est_str4.get(),font=('Helvetica 12 '),background='white')
         com_label_window = canvas.create_window(722, 280, anchor="w", window=com_label)
 
-        # canvas.create_text(921, 240, text=""+estimate_number_entry.get(), fill="black", font=('Helvetica 12')) 
         com_label = Label(canvas,text=" "+estimate_number_entry.get(),font=('Helvetica 12 '),background='white')
         com_label_window = canvas.create_window(870, 240, anchor="w", window=com_label)
 
@@ -2529,7 +2769,7 @@ def mainpage():
         com_label = Label(canvas,text=" "+comname.get(),font=('Helvetica 12 '),background='white')
         com_label_window = canvas.create_window(280, 100, anchor="w", window=com_label)
 
-        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0)
+        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0,cursor="arrow")
         T_address.tag_configure('tag_name',justify='left')
         T_address.insert('1.0', est_compdataord[2])
         T_address.tag_add('tag_name','1.0', 'end')
@@ -2539,7 +2779,6 @@ def mainpage():
         com_label = Label(canvas,text=" "+comsalestax.get(),font=('Helvetica 10 '),background='white')
         com_label_window = canvas.create_window(280, 225, anchor="w", window=com_label)
 
-        #canvas.create_text(339, 255, text=" "+est_str1.get(), fill="black", font=('Helvetica 20 bold'))
         com_label = Label(canvas,text=" "+est_str1.get(),font=('Helvetica 20 bold '),background='white')
         com_label_window = canvas.create_window(278, 255, anchor="w", window=com_label)
 
@@ -2555,19 +2794,21 @@ def mainpage():
         com_label = Label(canvas,text=""+estimate_shipto3.get(),font=('Helvetica 10'),background='white')
         com_label_window = canvas.create_window(662, 365, anchor="w", window=com_label)
 
-        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0)
+        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0,cursor="arrow")
         T_address.tag_configure('tag_name',justify='left')
         T_address.insert('1.0', estimate_addresstext2.get("1.0",END))
         T_address.tag_add('tag_name','1.0', 'end')
         T_address.config(state=DISABLED)
         T_address_window = canvas.create_window(306, 380, anchor="nw", window=T_address)
 
-        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0)
+        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0,cursor="arrow")
         T_address.tag_configure('tag_name',justify='left')
         T_address.insert('1.0', estimate_ship_address4.get("1.0",END))
         T_address.tag_add('tag_name','1.0', 'end')
         T_address.config(state=DISABLED)
         T_address_window = canvas.create_window(665, 380, anchor="nw", window=T_address)
+        com_label = Label(canvas,text=" "+estimates_eheader_text.get(),font=('Helvetica 10 '),background='white')
+        com_label_window = canvas.create_window(550, 455, anchor="w", window=com_label)
         s = ttk.Style()
         s.configure('mystyle_prev_1.Treeview.Heading', background=''+win_menu1.get(),State='DISABLE')
 
@@ -2578,7 +2819,7 @@ def mainpage():
         est_prev_tree.column("2", anchor=CENTER, width=350)
         est_prev_tree.column("3", anchor=CENTER, width=80)
         est_prev_tree.column("4", anchor=CENTER, width=90)
-        est_prev_tree.column("5", anchor=CENTER, width=85)
+        est_prev_tree.column("5", anchor=E, width=85)
         est_prev_tree.heading("#0", text="")
         est_prev_tree.heading("1", text="ID/SKU")
         est_prev_tree.heading("2", text="Product/Service - Description")
@@ -2742,7 +2983,7 @@ def mainpage():
         elif est_taxcheck[12] == "2":
           canvas.create_line(980, 715, 980, 840 )
           canvas.create_line(720, 715, 720, 840 )
-          canvas.create_line(860, 715, 860, 850 )#1st
+          canvas.create_line(860, 715, 860, 840 )#1st
           canvas.create_line(980, 815, 720, 815 )
           canvas.create_line(980, 715, 720, 715 )
           canvas.create_line(980, 740, 720, 740 )
@@ -3079,7 +3320,7 @@ def mainpage():
             com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
             com_label_window = canvas.create_window(731, 854, anchor="w", window=com_label)
         
-        est_comments = Text(canvas,font=('Helvetica 10'),width=100,height=6,fg= "black",
+        est_comments = Text(canvas,font=('Helvetica 10'),width=105,height=6,fg= "black",
         bg="white",cursor="arrow",bd=0)
         est_comments.insert("1.0",estimates_ecomments.get("1.0","end-1c"))
         est_comments.config(state=DISABLED)
@@ -3087,13 +3328,19 @@ def mainpage():
         canvas.create_text(620, 1020, text="Terms and Conditions", fill="black", font=('Helvetica 10'))
         canvas.create_line(265, 1040, 1000, 1040)
 
-        T = Text(canvas, height=3, width=90, font=('Helvetica 10'),borderwidth=0)
+        T = Text(canvas, height=3, width=105, font=('Helvetica 10'),borderwidth=0,cursor="arrow")
         T.insert(END, estimates_eterm_text.get("1.0","end-1c"))
+        T.config(state=DISABLED)
         T_window = canvas.create_window(270, 1055, anchor="nw", window=T)
 
-        canvas.create_text(315, 1150, text="Sales Person:", fill="black", font=('Helvetica 10'))
-        canvas.create_text(395, 1150, text=""+estimates_sales6.get(), fill="black", font=('Helvetica 10'))
-        #canvas.create_text(945, 1160, text="Page 1 of 1", fill="black", font=('Helvetica 10')) 
+        canvas.create_text(315, 1140, text="Sales Person:", fill="black", font=('Helvetica 10'))
+        canvas.create_text(395, 1140, text=""+estimates_sales6.get(), fill="black", font=('Helvetica 10'))
+
+        com_label = Label(canvas,text=" "+estimates_efooter_text.get(),font=('Helvetica 10 '),background='white')
+        com_label_window = canvas.create_window(268, 1160, anchor="w", window=com_label)
+
+        canvas.create_text(960, 1160, text="Page 1 of 1", fill="black", font=('Helvetica 10')) 
+
       elif estimates_etemplate.get() == 'Simplified 1 (logo on left side)':
         previewcreate = Toplevel()
         previewcreate.geometry("1360x730")
@@ -3110,6 +3357,8 @@ def mainpage():
         canvas.config(yscrollcommand=vertibar.set)
         canvas.pack(expand=True,side=LEFT,fill=BOTH)
         canvas.create_rectangle(235, 25, 1035, 1175, outline='yellow',fill='white')
+        com_label = Label(canvas,text=" "+estimates_etitletext.get(),font=('Helvetica 10 '),background='white')
+        com_label_window = canvas.create_window(550, 65, anchor="w", window=com_label)
         try:
             image = Image.open("images/"+est_compdataord[13])
             resize_image = image.resize((250, 125))
@@ -3149,7 +3398,7 @@ def mainpage():
         com_label = Label(canvas,text=" "+comname.get(),font=('Helvetica 12 '),background='white')
         com_label_window = canvas.create_window(976, 100, anchor="e", window=com_label)
 
-        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0)
+        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0,cursor="arrow")
         T_address.tag_configure('tag_name',justify='right')
         T_address.insert('1.0', est_compdataord[2])
         T_address.tag_add('tag_name','1.0', 'end')
@@ -3174,19 +3423,21 @@ def mainpage():
         com_label = Label(canvas,text=""+estimate_shipto3.get(),font=('Helvetica 10'),background='white')
         com_label_window = canvas.create_window(662, 365, anchor="w", window=com_label)
 
-        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0)
+        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0,cursor="arrow")
         T_address.tag_configure('tag_name',justify='left')
         T_address.insert('1.0', estimate_addresstext2.get("1.0",END))
         T_address.tag_add('tag_name','1.0', 'end')
         T_address.config(state=DISABLED)
         T_address_window = canvas.create_window(306, 380, anchor="nw", window=T_address)
 
-        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0)
+        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0,cursor="arrow")
         T_address.tag_configure('tag_name',justify='left')
         T_address.insert('1.0', estimate_ship_address4.get("1.0",END))
         T_address.tag_add('tag_name','1.0', 'end')
         T_address.config(state=DISABLED)
         T_address_window = canvas.create_window(665, 380, anchor="nw", window=T_address)
+        com_label = Label(canvas,text=" "+estimates_eheader_text.get(),font=('Helvetica 10 '),background='white')
+        com_label_window = canvas.create_window(550, 455, anchor="w", window=com_label)
         s = ttk.Style()
         s.configure('mystyle_prev_1.Treeview.Heading', background=''+win_menu1.get(),State='DISABLE')
 
@@ -3195,7 +3446,7 @@ def mainpage():
         est_prev_tree.column("# 0",width=1)
         est_prev_tree.column("1", anchor=CENTER, width=530)
         est_prev_tree.column("2", anchor=CENTER, width=80)
-        est_prev_tree.column("3", anchor=CENTER, width=95)
+        est_prev_tree.column("3", anchor=E, width=95)
         est_prev_tree.heading("#0", text="")
         est_prev_tree.heading("1", text="Product/Service - Description")
         est_prev_tree.heading("2", text="Quantity")
@@ -3357,7 +3608,7 @@ def mainpage():
         elif est_taxcheck[12] == "2":
           canvas.create_line(980, 715, 980, 840 )
           canvas.create_line(720, 715, 720, 840 )
-          canvas.create_line(860, 715, 860, 850 )#1st
+          canvas.create_line(860, 715, 860, 840 )#1st
           canvas.create_line(980, 815, 720, 815 )
           canvas.create_line(980, 715, 720, 715 )
           canvas.create_line(980, 740, 720, 740 )
@@ -3695,7 +3946,7 @@ def mainpage():
             com_label_window = canvas.create_window(731, 854, anchor="w", window=com_label)
       
         
-        est_comments = Text(canvas,font=('Helvetica 10'),width=100,height=6,fg= "black",
+        est_comments = Text(canvas,font=('Helvetica 10'),width=105,height=6,fg= "black",
         bg="white",cursor="arrow",bd=0)
         est_comments.insert("1.0",estimates_ecomments.get("1.0","end-1c"))
         est_comments.config(state=DISABLED)
@@ -3703,13 +3954,19 @@ def mainpage():
         canvas.create_text(620, 1020, text="Terms and Conditions", fill="black", font=('Helvetica 10'))
         canvas.create_line(265, 1040, 1000, 1040)
 
-        T = Text(canvas, height=3, width=90, font=('Helvetica 10'),borderwidth=0)
+        T = Text(canvas, height=3, width=105, font=('Helvetica 10'),borderwidth=0,cursor="arrow")
         T.insert(END, estimates_eterm_text.get("1.0","end-1c"))
+        T.config(state=DISABLED)
         T_window = canvas.create_window(270, 1055, anchor="nw", window=T)
 
-        canvas.create_text(315, 1150, text="Sales Person:", fill="black", font=('Helvetica 10'))
-        canvas.create_text(395, 1150, text=""+estimates_sales6.get(), fill="black", font=('Helvetica 10'))
-        #canvas.create_text(945, 1160, text="Page 1 of 1", fill="black", font=('Helvetica 10'))  
+        canvas.create_text(315, 1140, text="Sales Person:", fill="black", font=('Helvetica 10'))
+        canvas.create_text(395, 1140, text=""+estimates_sales6.get(), fill="black", font=('Helvetica 10'))
+
+        com_label = Label(canvas,text=" "+estimates_efooter_text.get(),font=('Helvetica 10 '),background='white')
+        com_label_window = canvas.create_window(268, 1160, anchor="w", window=com_label)
+
+        canvas.create_text(960, 1160, text="Page 1 of 1", fill="black", font=('Helvetica 10'))
+
       elif estimates_etemplate.get() == 'Simplified 2 (logo on right side)': 
         previewcreate = Toplevel()
         previewcreate.geometry("1360x730")
@@ -3726,6 +3983,8 @@ def mainpage():
         canvas.config(yscrollcommand=vertibar.set)
         canvas.pack(expand=True,side=LEFT,fill=BOTH)
         canvas.create_rectangle(235, 25, 1035, 1175, outline='yellow',fill='white')
+        com_label = Label(canvas,text=" "+estimates_etitletext.get(),font=('Helvetica 10 '),background='white')
+        com_label_window = canvas.create_window(550, 65, anchor="w", window=com_label)
         try:
             image = Image.open("images/"+est_compdataord[13])
             resize_image = image.resize((250, 125))
@@ -3768,7 +4027,7 @@ def mainpage():
         com_label = Label(canvas,text=" "+comname.get(),font=('Helvetica 12 '),background='white')
         com_label_window = canvas.create_window(280, 100, anchor="w", window=com_label)
 
-        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0)
+        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0,cursor="arrow")
         T_address.tag_configure('tag_name',justify='left')
         T_address.insert('1.0', est_compdataord[2])
         T_address.tag_add('tag_name','1.0', 'end')
@@ -3794,21 +4053,22 @@ def mainpage():
         com_label = Label(canvas,text=""+estimate_shipto3.get(),font=('Helvetica 10'),background='white')
         com_label_window = canvas.create_window(662, 365, anchor="w", window=com_label)
 
-        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0)
+        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0,cursor="arrow")
         T_address.tag_configure('tag_name',justify='left')
         T_address.insert('1.0', estimate_addresstext2.get("1.0",END))
         T_address.tag_add('tag_name','1.0', 'end')
         T_address.config(state=DISABLED)
         T_address_window = canvas.create_window(306, 380, anchor="nw", window=T_address)
 
-        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0)
+        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0,cursor="arrow")
         T_address.tag_configure('tag_name',justify='left')
         T_address.insert('1.0', estimate_ship_address4.get("1.0",END))
         T_address.tag_add('tag_name','1.0', 'end')
         T_address.config(state=DISABLED)
         T_address_window = canvas.create_window(665, 380, anchor="nw", window=T_address)
 
-        
+        com_label = Label(canvas,text=" "+estimates_eheader_text.get(),font=('Helvetica 10 '),background='white')
+        com_label_window = canvas.create_window(550, 455, anchor="w", window=com_label)
 
         s = ttk.Style()
         s.configure('mystyle_prev_1.Treeview.Heading', background=''+win_menu1.get(),State='DISABLE')
@@ -3818,7 +4078,7 @@ def mainpage():
         est_prev_tree.column("# 0",width=1)
         est_prev_tree.column("1", anchor=CENTER, width=530)
         est_prev_tree.column("2", anchor=CENTER, width=80)
-        est_prev_tree.column("3", anchor=CENTER, width=95)
+        est_prev_tree.column("3", anchor=E, width=95)
         est_prev_tree.heading("#0", text="")
         est_prev_tree.heading("1", text="Product/Service - Description")
         est_prev_tree.heading("2", text="Quantity")
@@ -3980,7 +4240,7 @@ def mainpage():
         elif est_taxcheck[12] == "2":
           canvas.create_line(980, 715, 980, 840 )
           canvas.create_line(720, 715, 720, 840 )
-          canvas.create_line(860, 715, 860, 850 )#1st
+          canvas.create_line(860, 715, 860, 840 )#1st
           canvas.create_line(980, 815, 720, 815 )
           canvas.create_line(980, 715, 720, 715 )
           canvas.create_line(980, 740, 720, 740 )
@@ -4319,7 +4579,7 @@ def mainpage():
         
       
         
-        est_comments = Text(canvas,font=('Helvetica 10'),width=100,height=6,fg= "black",
+        est_comments = Text(canvas,font=('Helvetica 10'),width=105,height=6,fg= "black",
         bg="white",cursor="arrow",bd=0)
         est_comments.insert("1.0",estimates_ecomments.get("1.0","end-1c"))
         est_comments.config(state=DISABLED)
@@ -4327,13 +4587,19 @@ def mainpage():
         canvas.create_text(620, 1020, text="Terms and Conditions", fill="black", font=('Helvetica 10'))
         canvas.create_line(265, 1040, 1000, 1040)
 
-        T = Text(canvas, height=3, width=90, font=('Helvetica 10'),borderwidth=0)
+        T = Text(canvas, height=3, width=105, font=('Helvetica 10'),borderwidth=0,cursor="arrow")
         T.insert(END, estimates_eterm_text.get("1.0","end-1c"))
+        T.config(state=DISABLED)
         T_window = canvas.create_window(270, 1055, anchor="nw", window=T)
 
-        canvas.create_text(315, 1150, text="Sales Person:", fill="black", font=('Helvetica 10'))
-        canvas.create_text(395, 1150, text=""+estimates_sales6.get(), fill="black", font=('Helvetica 10'))
-        #canvas.create_text(945, 1160, text="Page 1 of 1", fill="black", font=('Helvetica 10')) 
+        canvas.create_text(315, 1140, text="Sales Person:", fill="black", font=('Helvetica 10'))
+        canvas.create_text(395, 1140, text=""+estimates_sales6.get(), fill="black", font=('Helvetica 10'))
+
+        com_label = Label(canvas,text=" "+estimates_efooter_text.get(),font=('Helvetica 10 '),background='white')
+        com_label_window = canvas.create_window(268, 1160, anchor="w", window=com_label)
+
+        canvas.create_text(960, 1160, text="Page 1 of 1", fill="black", font=('Helvetica 10'))
+
       elif estimates_etemplate.get() == 'Business Classic': 
         previewcreate = Toplevel()
         previewcreate.geometry("1360x730")
@@ -4350,6 +4616,8 @@ def mainpage():
         canvas.config(yscrollcommand=vertibar.set)
         canvas.pack(expand=True,side=LEFT,fill=BOTH)
         canvas.create_rectangle(235, 25, 1035, 1175, outline='yellow',fill='white')
+        com_label = Label(canvas,text=" "+estimates_etitletext.get(),font=('Helvetica 10 '),background='white')
+        com_label_window = canvas.create_window(550, 65, anchor="w", window=com_label)
         canvas.create_line(265, 100, 750, 100,fill='orange',width=3)
         canvas.create_line(750, 100, 1000, 100,fill='grey',width=3)
         try:
@@ -4365,7 +4633,7 @@ def mainpage():
         com_label = Label(canvas,text=" "+comname.get(),font=('Helvetica 12 '),background='white')
         com_label_window = canvas.create_window(573, 150, anchor="w", window=com_label)
 
-        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0)
+        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0,cursor="arrow")
         T_address.tag_configure('tag_name',justify='left')
         T_address.insert('1.0', est_compdataord[2])
         T_address.tag_add('tag_name','1.0', 'end')
@@ -4378,7 +4646,7 @@ def mainpage():
         com_label = Label(canvas,text=" "+estimate_shipto3.get(),font=('Helvetica 10 '),background='white')
         com_label_window = canvas.create_window(777, 150, anchor="w", window=com_label)
 
-        T_address = Text(canvas, height=5, width=35, font=('Helvetica 10'),borderwidth=0)
+        T_address = Text(canvas, height=5, width=35, font=('Helvetica 10'),borderwidth=0,cursor="arrow")
         T_address.tag_configure('tag_name',justify='left')
         T_address.insert('1.0', estimate_ship_address4.get("1.0",END))
         T_address.tag_add('tag_name','1.0', 'end')
@@ -4387,18 +4655,20 @@ def mainpage():
 
     
         com_label = Label(canvas,text=" "+est_str2.get(),font=('Helvetica 10 '),background='white')
-        com_label_window = canvas.create_window(777, 270, anchor="w", window=com_label)
+        com_label_window = canvas.create_window(777, 300, anchor="w", window=com_label)
         
         com_label = Label(canvas,text=" "+est_str3.get(),font=('Helvetica 10 '),background='white')
-        com_label_window = canvas.create_window(777, 295, anchor="w", window=com_label)
+        com_label_window = canvas.create_window(777, 325, anchor="w", window=com_label)
         
         com_label = Label(canvas,text=" "+est_str4.get(),font=('Helvetica 10 '),background='white')
-        com_label_window = canvas.create_window(779, 320, anchor="w", window=com_label)
+        com_label_window = canvas.create_window(779, 350, anchor="w", window=com_label)
 
         com_label = Label(canvas,text=" "+estimate_number_entry.get(),font=('Helvetica 10 '),background='white')
-        com_label_window = canvas.create_window(900, 270, anchor="w", window=com_label)
-        canvas.create_text(940, 295, text=estimate_date_entry.get_date(), fill="black", font=('Helvetica 10')) 
-        canvas.create_text(940, 320, text=estimate_duedate_entry.get_date(), fill="black", font=('Helvetica 10')) 
+        com_label_window = canvas.create_window(900, 300, anchor="w", window=com_label)
+        canvas.create_text(940, 325, text=estimate_date_entry.get_date(), fill="black", font=('Helvetica 10')) 
+        canvas.create_text(940, 350, text=estimate_duedate_entry.get_date(), fill="black", font=('Helvetica 10')) 
+        com_label = Label(canvas,text=" "+estimates_eheader_text.get(),font=('Helvetica 10 '),background='white')
+        com_label_window = canvas.create_window(550, 455, anchor="w", window=com_label)
 
         s = ttk.Style()
         s.configure('mystyle_prev_1.Treeview.Heading', background=''+win_menu1.get(),State='DISABLE')
@@ -4410,7 +4680,7 @@ def mainpage():
         est_prev_tree.column("2", anchor=CENTER, width=225)
         est_prev_tree.column("3", anchor=CENTER, width=90)
         est_prev_tree.column("4", anchor=CENTER, width=80)
-        est_prev_tree.column("5", anchor=CENTER, width=85)
+        est_prev_tree.column("5", anchor=E, width=85)
         est_prev_tree.heading("#0", text="")
         est_prev_tree.heading("1", text="Product/Service")
         est_prev_tree.heading("2", text="Description")
@@ -4915,7 +5185,7 @@ def mainpage():
         canvas.create_line(265, 900, 750, 900,fill='orange',width=3)
         canvas.create_line(750, 900, 1000, 900,fill='grey',width=3)
 
-        est_comments = Text(canvas,font=('Helvetica 10'),width=100,height=6,fg= "black",
+        est_comments = Text(canvas,font=('Helvetica 10'),width=105,height=6,fg= "black",
         bg="white",cursor="arrow",bd=0)
         est_comments.insert("1.0",estimates_ecomments.get("1.0","end-1c"))
         est_comments.config(state=DISABLED)
@@ -4925,20 +5195,73 @@ def mainpage():
         canvas.create_line(265, 1040, 750, 1040,fill='orange',width=3)
         canvas.create_line(750, 1040, 1000, 1040,fill='grey',width=3)
 
-        T = Text(canvas, height=3, width=90, font=('Helvetica 10'),borderwidth=0)
+        T = Text(canvas, height=3, width=105, font=('Helvetica 10'),borderwidth=0,cursor="arrow")
         T.insert(END, estimates_eterm_text.get("1.0","end-1c"))
+        T.config(state=DISABLED)
         T_window = canvas.create_window(270, 1055, anchor="nw", window=T)
 
-        canvas.create_text(315, 1150, text="Sales Person:", fill="black", font=('Helvetica 10'))
-        canvas.create_text(395, 1150, text=""+estimates_sales6.get(), fill="black", font=('Helvetica 10'))
-        #canvas.create_text(945, 1160, text="Page 1 of 1", fill="black", font=('Helvetica 10')) 
+        canvas.create_text(315, 1140, text="Sales Person:", fill="black", font=('Helvetica 10'))
+        canvas.create_text(395, 1140, text=""+estimates_sales6.get(), fill="black", font=('Helvetica 10'))
+
+        com_label = Label(canvas,text=" "+estimates_efooter_text.get(),font=('Helvetica 10 '),background='white')
+        com_label_window = canvas.create_window(268, 1160, anchor="w", window=com_label)
+
+        canvas.create_text(960, 1160, text="Page 1 of 1", fill="black", font=('Helvetica 10'))
+
       else:
         pass
     
     estimate_prev= Button(estimate_firFrame,compound="top", text="Preview\nEstimate",relief=RAISED, image=photo4,bg="#f5f3f2", fg="black", height=55, bd=1, width=55,command=prev_estimate)
     estimate_prev.pack(side="left", pady=3, ipadx=4)
+    #----------Print-----------#
+    def estimate_print_sele(): 
+      from reportlab.pdfgen import canvas 
+      pdf = canvas.Canvas("estimate/Estimate_Report.pdf", pagesize=letter)
+      
 
-    estimate_prin= Button(estimate_firFrame,compound="top", text="Print \nEstimate",relief=RAISED, image=photo5,bg="#f5f3f2", fg="black", height=55, bd=1, width=55,command=estimate_printsele)
+      sql_company = "SELECT * from company"
+      fbcursor.execute(sql_company)
+      company= fbcursor.fetchone()
+      print(company)
+      
+      pdf.setFont('Helvetica',12)
+      pdf.drawString(350,760, company[1])
+      text=company[2]
+      wraped_text="\n".join(wrap(text,30))
+      print(wraped_text)
+      htg=wraped_text.split('\n')
+          
+      vg=len(htg)
+      if vg>0:
+            pdf.drawString(350,752,htg[0])
+            print("1")
+            if vg>1:
+              pdf.drawString(350,738,htg[1])
+              print("2")
+              if vg>2:
+                  pdf.drawString(350,725,htg[2])
+                  print("3")
+                  if vg>3:
+                      pdf.drawString(350,712,htg[3])
+                      print("4")
+                  else:
+                      pass
+              else:
+                  pass
+            else:
+                pass
+            
+      else:
+            pass
+
+      pdf.drawString(350,700, "Sales tax reg No:"+company[4])
+      
+  
+      pdf.save()
+      win32api.ShellExecute(0,"","estimate\Estimate_Report.pdf",None,".",0) 
+
+
+    estimate_prin= Button(estimate_firFrame,compound="top", text="Print \nEstimate",relief=RAISED, image=photo5,bg="#f5f3f2", fg="black", height=55, bd=1, width=55,command=estimate_print_sele)
     estimate_prin.pack(side="left", pady=3, ipadx=4)
 
     estimate_w3 = Canvas(estimate_firFrame, width=1, height=65, bg="#b3b3b3", bd=0)
@@ -5620,19 +5943,78 @@ def mainpage():
       edit_estimate_cusventtree1.heading("3",text="Unit price")
       edit_estimate_cusventtree1.heading("4",text="Service")
       edit_estimate_cusventtree1.heading("5",text="Stock")
+      edit_estimate_cusventtree1.tag_configure('green', foreground='green')
+      edit_estimate_cusventtree1.tag_configure('red', foreground='red')
+      edit_estimate_cusventtree1.tag_configure('blue', foreground='blue')
       edit_estimate_cusventtree1.place(x=5, y=45)
+      
 
-      sql = "SELECT * FROM Productservice"
+      countp = 0
+      sql = 'select * from Productservice'
       fbcursor.execute(sql)
-      edit_product_detail = fbcursor.fetchall()
-
-      count = 0
-      for p in edit_product_detail:
-        if True:
-          edit_estimate_cusventtree1.insert(parent='',index='end',iid=p,text='',values=(p[0],p[4],p[7],p[12],p[13]))
+      estprodata = fbcursor.fetchall()
+      for i in estprodata:
+        if i[12] == '1':
+          servi = '🗹'
         else:
-          pass
-      count += 1
+          servi = ''
+        sql = "select currencysign,currsignplace from company"
+        fbcursor.execute(sql)
+        estcurrsymb = fbcursor.fetchone()
+        if not estcurrsymb: 
+          if i[13] > i[14]:
+            edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('green',))
+            countp += 1              
+          elif i[12] == '1':
+            edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('blue',))
+            countp += 1
+          else:
+            edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('red',))
+            countp += 1
+                  
+        elif estcurrsymb[1] == "before amount":
+          if (i[13]) > (i[14]):
+            edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('green',))
+            countp += 1
+          elif i[12] == '1':
+            edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('blue',))
+            countp += 1
+          else:
+            edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('red',))
+            countp += 1
+
+        elif estcurrsymb[1] == "before amount with space":
+          if (i[13]) > (i[14]):
+            edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('green',))
+            countp += 1
+          elif i[12] == '1':
+            edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('blue',))
+            countp += 1
+          else:
+            edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('red',))
+            countp += 1
+
+        elif estcurrsymb[1] == "after amount":
+          if (i[13]) > (i[14]):
+            edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('green',))
+            countp += 1
+          elif i[12] == '1':
+            edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('blue',))
+            countp += 1
+          else:
+            edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('red',))
+            countp += 1
+
+        elif estcurrsymb[1] == "after amount with space":
+          if (i[13]) > (i[14]):
+            edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('green',))
+            countp += 1
+          elif i[12] == '1':
+            edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('blue',))
+            countp += 1
+          else:
+            edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('red',))
+            countp += 1
 
 
 
@@ -9424,19 +9806,111 @@ def mainpage():
   estimate_productLabel = Button(estimate_midFrame,compound="top", text="Search\nEstimate",relief=RAISED, image=photo7,bg="#f8f8f2", fg="black", height=55, bd=1, width=55,command=estimate_search)
   estimate_productLabel.pack(side="left")
 
+  def est_filterby_date():
+    for record in est_tree.get_children():
+      est_tree.delete(record)
+    if estimate_checkvarr1.get() == 1:
+      date_sql = "SELECT * FROM estimate"
+      fbcursor.execute(date_sql,)
+      date_data = fbcursor.fetchall()
+      
+      for date in date_data:
+        start_date = estimate_invdt1.get_date()
+        end_date = estimate_invdtt1.get_date()
+        if date[2] >= start_date and date[2] <= end_date:
+          print(date[2])
+          est_tree.insert(parent='',index='end',text='',values=('',date[1], date[2], date[3], '', date[4], date[5], date[6], date[7], date[8]))
+        else:
+          for record in est_tree.get_children():
+            est_tree.delete(record)
+            comp_sql = "SELECT * FROM company"
+            fbcursor.execute(comp_sql,)
+            comp_data = fbcursor.fetchall()
+          
+                
+            if comp_data[10] == "mm-dd-yyyy":
+              s = datetime.strftime(start_date,"%m-%d-%Y")
+              e = datetime.strftime(end_date,"%m-%d-%Y")
+              estimate_labelall.config(text="Estimates(Fitered list - Estimate date period: " + "" + str(s) + " - " + str(e) + ")")
+            elif comp_data[10] == "dd-mm-yyyy":
+              s = datetime.strftime(start_date,"%d-%m-%Y")
+              e = datetime.strftime(end_date,"%d-%m-%Y")
+              estimate_labelall.config(text="Estimates(Fitered list - Estimate date period: " + "" + str(s) + " - " + str(e) + ")")
+            elif comp_data[10] == "yyyy.mm.dd":
+              sd = datetime.strptime(str(start_date),"%Y-%m-%d")
+              std = '{0}.{1:02}.{2:02}'.format(sd.year,sd.month,sd.day)
+              ed = datetime.strptime(str(end_date),"%Y-%m-%d")
+              end = '{0}.{1:02}.{2:02}'.format(ed.year,ed.month,ed.day)
+              estimate_labelall.config(text="Estimates(Fitered list - Estimate date period: " + "" + str(std) + " - " + str(end) + ")")
+            elif comp_data[10] == "mm/dd/yyyy":
+              s = datetime.strftime(start_date,"%m/%d/%Y")
+              e = datetime.strftime(end_date,"%m/%d/%Y")
+              estimate_labelall.config(text="Estimates(Fitered list - Estimate date period: " + "" + str(s) + " - " + str(e) + ")")
+            elif comp_data[10] == "dd/mm/yyyy":
+              s = datetime.strftime(start_date,"%d/%m/%Y")
+              e = datetime.strftime(end_date,"%d/%m/%Y")
+              estimate_labelall.config(text="Estimates(Fitered list - Estimate date period: " + "" + str(s) + " - " + str(e) + ")")
+            elif comp_data[10] == "dd.mm.yyyy":
+              sd = datetime.strptime(str(start_date),"%Y-%m-%d")
+              std = '{0:02}.{1:02}.{2:02}'.format(sd.day,sd.month,sd.year)
+              ed = datetime.strptime(str(end_date),"%Y-%m-%d")
+              end = '{0:02}.{1:02}.{2:02}'.format(ed.day,ed.month,ed.year)
+              estimate_labelall.config(text="Estimates(Fitered list - Estimate date period: " + "" + str(std) + " - " + str(end) + ")")
+            elif comp_data[10] == "yyyy/mm/dd":
+              s = datetime.strftime(start_date,"%Y/%m/%d")
+              e = datetime.strftime(end_date,"%Y/%m/%d")
+              estimate_labelall.config(text="Estimates(Fitered list - Estimate date period: " + "" + str(s) + " - " + str(e) + ")")
+            else:
+              sd = datetime.strptime(str(start_date),"%Y-%m-%d")
+              std = '{0}/{1}/{2:02}'.format(sd.month,sd.day,sd.year % 100)
+              ed = datetime.strptime(str(end_date),"%Y-%m-%d")
+              end = '{0}/{1}/{2:02}'.format(ed.month,ed.day,ed.year % 100)
+              estimate_labelall.config(text="Estimates(Fitered list - Estimate date period: " + "" + str(std) + " - " + str(end) + ")")
+    else:
+      pass
+
   estimate_lbframe = LabelFrame(estimate_midFrame, height=60, width=200, bg="#f8f8f2")
   estimate_lbframe.pack(side="left", padx=10, pady=0)
   estimate_lbl_invdt = Label(estimate_lbframe, text="Estimate date from : ", bg="#f8f8f2")
   estimate_lbl_invdt.grid(row=0, column=0, pady=5, padx=(5, 0))
   estimate_lbl_invdtt = Label(estimate_lbframe, text="Estimate date to  :  ", bg="#f8f8f2")
   estimate_lbl_invdtt.grid(row=1, column=0, pady=5, padx=(5, 0))
-  estimate_invdt = DateEntry(estimate_lbframe, width=15)
-  estimate_invdt.grid(row=0, column=1)
-  estimate_invdtt = DateEntry(estimate_lbframe, width=15)
-  estimate_invdtt.grid(row=1, column=1)
+  comp_sql1 = "SELECT * FROM company"
+  fbcursor.execute(comp_sql1,)
+  comp_data1 = fbcursor.fetchone()
+  if comp_data1[10] == "mm-dd-yyyy":
+    estimate_invdt1 = DateEntry(estimate_lbframe, width=15,date_pattern="mm-dd-yyyy")
+    estimate_invdtt1 = DateEntry(estimate_lbframe, width=15,date_pattern="mm-dd-yyyy")
+  elif comp_data1[10] == "dd-mm-yyyy":
+    estimate_invdt1 = DateEntry(estimate_lbframe, width=15,date_pattern="dd-mm-yyyy")
+    estimate_invdtt1 = DateEntry(estimate_lbframe, width=15,date_pattern="dd-mm-yyyy")
+  elif comp_data1[10] == "yyyy-mm-dd":
+    estimate_invdt1 = DateEntry(estimate_lbframe, width=15,date_pattern="yyyy.mm.dd")
+    estimate_invdtt1 = DateEntry(estimate_lbframe, width=15,date_pattern="yyyy.mm.dd")
+  elif comp_data1[10] == "mm/dd/yyyy":
+    estimate_invdt1 = DateEntry(estimate_lbframe, width=15,date_pattern="mm/dd/yyyy")
+    estimate_invdtt1 = DateEntry(estimate_lbframe, width=15,date_pattern="mm/dd/yyyy")
+  elif comp_data1[10] == "dd/mm/yyyy":
+    estimate_invdt1 = DateEntry(estimate_lbframe, width=15,date_pattern="dd/mm/yyyy")
+    estimate_invdtt1 = DateEntry(estimate_lbframe, width=15,date_pattern="dd/mm/yyyy")
+  elif comp_data1[10] == "dd.mm.yyyy":
+    estimate_invdt1 = DateEntry(estimate_lbframe, width=15,date_pattern="dd.mm.yyyy")
+    estimate_invdtt1 = DateEntry(estimate_lbframe, width=15,date_pattern="dd.mm.yyyy")
+  elif comp_data1[10] == "yyyy/mm/dd":
+    estimate_invdt1 = DateEntry(estimate_lbframe, width=15,date_pattern="yyyy/mm/dd")
+    estimate_invdtt1 = DateEntry(estimate_lbframe, width=15,date_pattern="yyyy/mm/dd")
+  else:
+    estimate_invdt1 = DateEntry(estimate_lbframe, width=15)
+    estimate_invdtt1 = DateEntry(estimate_lbframe, width=15) 
+  estimate_invdt1.grid(row=0, column=1)
+  
+  estimate_invdtt1.grid(row=1, column=1)
+  
   estimate_checkvarr1 = IntVar()
-  estimate_chkbtnn1 = Checkbutton(estimate_lbframe, text = "Apply filter", variable = estimate_checkvarr1, onvalue = 1, offvalue = 0, height = 2, width = 8, bg="#f8f8f2")
+  estimate_chkbtnn1 = Checkbutton(estimate_lbframe, text = "Apply filter", variable = estimate_checkvarr1, onvalue = 1, offvalue = 0, height = 2, width = 8, bg="#f8f8f2",command=est_filterby_date)
   estimate_chkbtnn1.grid(row=0, column=2, rowspan=2, padx=(5,5))
+
+ 
 
   
    
@@ -9450,8 +9924,8 @@ def mainpage():
   estimate_productLabell = Button(estimate_midFrame,compound="top", text="Hide totals\nSum",relief=RAISED, image=photo9,bg="#f8f8f2", fg="black", height=55, bd=1, width=55)
   estimate_productLabell.pack(side="left")
 
-  estimate_invoilabell = Label(estimate_mainFrame, text="Estimate(All)", font=("arial", 18), bg="#f8f8f2")
-  estimate_invoilabell.pack(side="left", padx=(20,0))
+  estimate_labelall = Label(estimate_mainFrame, text="Estimate(All)", font=("arial", 18), bg="#f8f8f2")
+  estimate_labelall.pack(side="left", padx=(20,0))
   estimate_drop = ttk.Combobox(estimate_mainFrame, value="Hello")
   estimate_drop.pack(side="right", padx=(0,10))
   estimate_invoilabell1 = Label(estimate_mainFrame, text="Category filter", font=("arial", 15), bg="#f8f8f2")
@@ -10827,11 +11301,11 @@ def mainpage():
       exd._set_text(exd._date.strftime('%m-%d-%Y'))
     elif dafget == "dd-mm-yyyy":
       exd._set_text(exd._date.strftime('%d-%m-%Y'))
-    elif dafget == "yyy.mm.dd":
+    elif dafget == "yyyy.mm.dd":
       exd._set_text(exd._date.strftime('%Y.%m.%d'))
     elif dafget == "mm/dd/yyyy":
       exd._set_text(exd._date.strftime('%m/%d/%Y'))
-    elif dafget == "dd/mm/yyy":
+    elif dafget == "dd/mm/yyyy":
       exd._set_text(exd._date.strftime('%d/%m/%Y'))
     elif dafget == "dd.mm.yyyy":
       exd._set_text(exd._date.strftime('%d.%m.%Y'))
@@ -10841,7 +11315,7 @@ def mainpage():
   
   comdaf = StringVar()
   daf = ttk.Combobox(secondtab,textvariable=comdaf)
-  daf["values"] = ("Default",'mm-dd-yyyy','dd-mm-yyyy','yyy.mm.dd','mm/dd/yyyy','dd/mm/yyy','dd.mm.yyyy','yyyy/  mm/dd')
+  daf["values"] = ("Default",'mm-dd-yyyy','dd-mm-yyyy','yyyy.mm.dd','mm/dd/yyyy','dd/mm/yyyy','dd.mm.yyyy','yyyy/mm/dd')
   daf.bind("<<ComboboxSelected>>",daffun)
   if not sectab:
     pass
@@ -11741,24 +12215,18 @@ def mainpage():
 
 
 
-  messagelbframe=LabelFrame(fifthtab,text="Predefined terms and conditions text for estimates", height=70, width=980)
+  messagelbframe=LabelFrame(fifthtab,text="Predefined terms and conditions text for estimates", height=100, width=980)
   messagelbframe.place(x=248, y=396)
 
   
-  # est_str7 = StringVar() 
-  # entry1=Entry(fifthtab, width=155,textvariable=est_str7)
-  # if not estdata:
-  #   pass
-  # else:
-  #   entry1.insert(0, estdata[39])
-  # entry1.place(x=260, y=415, height=36)
+
   
   est_str7 = scrolledtext.ScrolledText(fifthtab)
   if  not estdata:
     pass
   else:
     est_str7.insert('1.0', estdata[39])
-  est_str7.place(x=260,y=415,height=38,width=950)
+  est_str7.place(x=260,y=415,height=63,width=950)
 
 
   def restore_defaulttt1():
