@@ -683,7 +683,7 @@ def mainpage():
         estimate_p2 = PhotoImage(file = 'images/fbicon.png')
         estimate_top.iconphoto(False, estimate_p2)
       
-        estimate_top.geometry("700x550+390+15")
+        estimate_top.geometry("600x550+390+15")
         estimate_tabControl = ttk.Notebook(estimate_top)
         estimate_s = ttk.Style()
         estimate_s.theme_use('default')
@@ -701,7 +701,7 @@ def mainpage():
         global filename
         filename = ""
 
-        def upload_file():
+        def este_upload_file():
           global filename,img, b2
           f_types =[('Png files','*.png'),('Jpg Files', '*.jpg'),('PDF', '*.pdf',)]
           filename = filedialog.askopenfilename(filetypes=f_types)
@@ -711,13 +711,131 @@ def mainpage():
           img = ImageTk.PhotoImage(resize_image)
           b2 = Button(estimate_imageFrame,image=img)
           b2.place(x=130, y=80)
+        
+        def est_addproducts():
+          global img , filename 
+          sku = estimate_codeentry.get()
+          status = estimate_checkvarStatus.get()
+          catgory = estimate_n.get()
+          name = estimate_nameentry.get()
+          description = estimate_desentry.get()
+          unitprice = estimate_uval.get()
+          peices = estimate_pcsentry.get()
+          cost = estimate_costval.get()
+          price_cost = estimate_priceval.get()
+          taxable = estimate_checkvarStatus2.get()
+          tax2 = estimate_checkvarStatus_2.get()
+          nostockcontrol = estimate_checkvarStatus3.get()
+          stock = estimate_stockentry.get()
+          lowstock = estimate_lowentry.get()
+          warehouse = estimate_wareentry.get()
+          pnotes = estimate_txt.get("1.0",'end-1c')
+          entries = [sku,name, unitprice, cost]
+          entri = []
+          for i in entries:
+            if i == '':
+              entri.append(i)
+          if len(entri) == 0:
+            sql = 'select * from Productservice where sku = %s or name = %s'
+            val  = (sku, name)
+            fbcursor.execute(sql, val)
+            fbcursor.fetchall()
+            row_count = fbcursor.rowcount
+            if row_count == 0:
+              if filename == "":
+                sql = 'insert into Productservice(sku, category, name, description, status, unitprice, peices, cost, taxable, priceminuscost, serviceornot, stock, stocklimit, warehouse, privatenote,tax2) values(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s)'
+                val = (sku, catgory, name, description, status, unitprice, peices, cost, taxable, price_cost, nostockcontrol, stock, lowstock, warehouse, pnotes,tax2)
+                fbcursor.execute(sql, val)
+                fbilldb.commit()
+              else:
+                file = shutil.copyfile(filename, os.getcwd()+'/images/'+filename.split('/')[-1])
+                sql = 'insert into Productservice(sku, category, name, description, status, unitprice, peices, cost, taxable, priceminuscost, serviceornot, stock, stocklimit, warehouse, image, privatenote,tax2) values(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s)'
+                val = (sku, catgory, name, description, status, unitprice, peices, cost, taxable, price_cost, nostockcontrol, stock, lowstock, warehouse, filename.split('/')[-1], pnotes,tax2)
+                fbcursor.execute(sql, val)
+                fbilldb.commit()
+            else:
+              messagebox.showinfo("Alert", "Entry with same name or SKU already exists.\nTry again.")
+              estimate_top.destroy()
+
+            for record in estimate_cusventtree1.get_children():
+              estimate_cusventtree1.delete(record)
+            fbcursor.execute("select *  from Productservice")
+            est_pandsdata = fbcursor.fetchall()
+            countp = 0
+            for i in est_pandsdata:
+              if i[12] == '1':
+                servi = '🗹'
+              else:
+                servi = ''
+              sql = "select currencysign,currsignplace from company"
+              fbcursor.execute(sql)
+              estcurrsymb = fbcursor.fetchone()
+              if not estcurrsymb: 
+                if i[13] > i[14]:
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('green',))
+                  countp += 1              
+                elif i[12] == '1':
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('blue',))
+                  countp += 1
+                else:
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('red',))
+                  countp += 1
+                        
+              elif estcurrsymb[1] == "before amount":
+                if (i[13]) > (i[14]):
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('green',))
+                  countp += 1
+                elif i[12] == '1':
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('blue',))
+                  countp += 1
+                else:
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('red',))
+                  countp += 1
+
+              elif estcurrsymb[1] == "before amount with space":
+                if (i[13]) > (i[14]):
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('green',))
+                  countp += 1
+                elif i[12] == '1':
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('blue',))
+                  countp += 1
+                else:
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('red',))
+                  countp += 1
+
+              elif estcurrsymb[1] == "after amount":
+                if (i[13]) > (i[14]):
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('green',))
+                  countp += 1
+                elif i[12] == '1':
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('blue',))
+                  countp += 1
+                else:
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('red',))
+                  countp += 1
+
+              elif estcurrsymb[1] == "after amount with space":
+                if (i[13]) > (i[14]):
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('green',))
+                  countp += 1
+                elif i[12] == '1':
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('blue',))
+                  countp += 1
+                else:
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('red',))
+                  countp += 1
+
+            estimate_top.destroy()
+  
     
-      
         estimate_innerFrame = Frame(estimate_tab1,bg="#f5f3f2", relief=GROOVE)
         estimate_innerFrame.pack(side="top",fill=BOTH)
 
-        estimate_Customerlabelframe = LabelFrame(estimate_innerFrame,text="Product/Service",width=580,height=485)
-        estimate_Customerlabelframe.pack(side="top",fill=BOTH,padx=10)
+        estimate_Customerlabelframe = LabelFrame(estimate_innerFrame,text="Product/Service",width=580,height=455)
+        estimate_Customerlabelframe.pack(side="top",fill=BOTH,padx=10,pady=(10,45))
+
+        fbcursor.execute("SELECT * FROM Productservice ORDER BY sku DESC LIMIT 1")
+        skuin = fbcursor.fetchone()
 
         estimate_code1=Label(estimate_Customerlabelframe,text="Code or SKU:",fg="blue",pady=10,padx=10)
         estimate_code1.place(x=20,y=0)
@@ -726,25 +844,23 @@ def mainpage():
 
         estimate_checkvarStatus=IntVar()
         estimate_status1=Label(estimate_Customerlabelframe,text="Status:")
-        estimate_status1.place(x=500,y=8)
+        estimate_status1.place(x=400,y=8)
         estimate_Button1 = Checkbutton(estimate_Customerlabelframe,
                           variable = estimate_checkvarStatus,text="Active",compound="right",
-                          onvalue =0 ,
-                          offvalue = 1,
+                          onvalue =1,
+                          offvalue = 0,
                         
                           width = 10)
 
-        estimate_Button1.place(x=550,y=5)
+        estimate_Button1.place(x=450,y=5)
 
         estimate_category1=Label(estimate_Customerlabelframe,text="Category:",pady=5,padx=10)
         estimate_category1.place(x=20,y=40)
         estimate_n = StringVar()
         estimate_country0 = ttk.Combobox(estimate_Customerlabelframe, width = 40, textvariable = estimate_n )
-        
-        estimate_country0['values'] = ('Default',' India',' China',' Australia',' Nigeria',' Malaysia',' Italy',' Turkey',)
-        
+        estimate_country0['values'] = ('Default')
         estimate_country0.place(x=120,y=45)
-        estimate_country0.current(0)
+        estimate_country0.insert(0, 'Default')
 
 
         estimate_name81=Label(estimate_Customerlabelframe,text="Name :",fg="blue",pady=5,padx=10)
@@ -756,78 +872,133 @@ def mainpage():
         estimate_des1.place(x=20,y=100)
         estimate_desentry = Entry(estimate_Customerlabelframe,width=60)
         estimate_desentry.place(x=120,y=105)
+        def est_prdoucts_cal(S,d):
+          if d == '1': #insert
+            if not S in ['.','0','1','2','3','4','5','6','7','8','9']:
+              return False
+            return True
+          if d.isdigit():
+            return True
 
-        estimate_uval = IntVar(estimate_Customerlabelframe, value='$0.00')
+
+        estimate_uval = StringVar()
         estimate_unit1=Label(estimate_Customerlabelframe,text="Unit Price:",fg="blue",pady=5,padx=10)
         estimate_unit1.place(x=20,y=130)
         estimate_unitentry = Entry(estimate_Customerlabelframe,width=20,textvariable=estimate_uval)
         estimate_unitentry.place(x=120,y=135)
+        est_cal_unit = (estimate_Customerlabelframe.register(est_prdoucts_cal),'%S','%d')
+        estimate_unitentry.config(validate='key',validatecommand=(est_cal_unit),justify='right')
 
-        estimate_pcsval = IntVar(estimate_Customerlabelframe, value='$0.00')
+        # estimate_pcsval = IntVar(estimate_Customerlabelframe, value='$0.00')
         estimate_pcs1=Label(estimate_Customerlabelframe,text="Pcs/Weight:",fg="blue",pady=5,padx=10)
-        estimate_pcs1.place(x=320,y=140)
-        estimate_pcsentry = Entry(estimate_Customerlabelframe,width=20,textvariable=estimate_pcsval)
-        estimate_pcsentry.place(x=410,y=140)
+        estimate_pcs1.place(x=330,y=135)
+        estimate_pcsentry = Entry(estimate_Customerlabelframe,width=20)
+        estimate_pcsentry.place(x=420,y=140)
 
-        estimate_costval = IntVar(estimate_Customerlabelframe, value='$0.00')
+        estimate_costval = StringVar(value="0")
         estimate_cost1=Label(estimate_Customerlabelframe,text="Cost:",pady=5,padx=10)
         estimate_cost1.place(x=20,y=160)
         estimate_costentry = Entry(estimate_Customerlabelframe,width=20,textvariable=estimate_costval)
         estimate_costentry.place(x=120,y=165)
+        est_cal_cost = (estimate_Customerlabelframe.register(est_prdoucts_cal),'%S','%d')
+        estimate_costentry.config(validate='key',validatecommand=(est_cal_cost),justify='right')
 
-        estimate_priceval = IntVar(estimate_Customerlabelframe, value='$0.00')
+
+        def est_set_label(name, index, mode):
+          est_copr = float(estimate_uval.get()) - float(estimate_costval.get())
+          estimate_priceval.set(str(est_copr))
+
+
+        estimate_priceval = StringVar()
         estimate_price1=Label(estimate_Customerlabelframe,text="(Price Cost):",pady=5,padx=10)
         estimate_price1.place(x=20,y=190)
-        estimate_priceentry = Entry(estimate_Customerlabelframe,width=20,textvariable=estimate_priceval)
+        estimate_priceentry = Entry(estimate_Customerlabelframe,width=20,textvariable=estimate_priceval,state=DISABLED,disabledbackground="white",disabledforeground="black")
+        estimate_priceentry.config(justify="right")
         estimate_priceentry.place(x=120,y=195)
+
+
+        estimate_uval.trace('w', est_set_label)
+        estimate_costval.trace('w', est_set_label)
+
+        sql = "select taxtype from company"
+        fbcursor.execute(sql)
+        est_taxchoose = fbcursor.fetchone()
 
         estimate_checkvarStatus2=IntVar()
       
         estimate_Button92 = Checkbutton(estimate_Customerlabelframe,variable = estimate_checkvarStatus2,
                           text="Taxable Tax1rate",compound="right",
-                          onvalue =0 ,
-                          offvalue = 1,
+                          onvalue =1 ,
+                          offvalue = 0,
                           height=2,
                           width = 12)
 
-        estimate_Button92.place(x=415,y=170)
+        #estimate_Button92.place(x=415,y=170)
 
         estimate_checkvarStatus_2=IntVar()
       
         estimate_Button_92 = Checkbutton(estimate_Customerlabelframe,variable = estimate_checkvarStatus_2,
                           text="Taxable Tax2rate",compound="right",
-                          onvalue =0 ,
-                          offvalue = 1,
+                          onvalue =1,
+                          offvalue =0,
                           height=2,
                           width = 12)
 
-        estimate_Button_92.place(x=415,y=210)
+        #estimate_Button_92.place(x=415,y=210)
+        if not est_taxchoose:
+          pass
+        elif est_taxchoose[0] == '1':
+          estimate_Button92.place_forget()
+          estimate_Button_92.place_forget()
+        elif est_taxchoose[0] == '2':
+          estimate_Button92.place(x=415,y=170)
+          estimate_Button_92.place_forget()
+        elif est_taxchoose[0] == '3':
+          estimate_Button92.place(x=415,y=170)
+          estimate_Button_92.place(x=415,y=210)
 
-
-
-        estimate_checkvarStatus3=IntVar()
-      
-        estimate_Button93 = Checkbutton(estimate_Customerlabelframe,variable = estimate_checkvarStatus3,
-                          text="No stock Control",
+        def est_switch():
+          if estimate_checkvarStatus3.get():
+            estimate_stockentry["state"] = DISABLED
+            estimate_lowentry["state"] = DISABLED
+            estimate_wareentry["state"] = DISABLED
+          else:
+            estimate_stockentry["state"] = NORMAL
+            estimate_lowentry["state"] = NORMAL
+            estimate_wareentry["state"] = NORMAL
+        
+        estimate_checkvarStatus3=BooleanVar()
+        estimate_Button93 = Checkbutton(estimate_Customerlabelframe,variable = estimate_checkvarStatus3,command=est_switch, 
+                          text="This is a service(no stock control)",
                           onvalue =1 ,
-                          offvalue = 0,
-                          height=3,
-                          width = 15)
-
+                          offvalue =0,
+                          height=3)
         estimate_Button93.place(x=40,y=220)
 
+        def est_stocknum(input):
+          if input.isdigit():
+            return True
+          elif input is "":
+            return True
+          else:
+            return False
 
-        estimate_stockval = IntVar(estimate_Customerlabelframe, value='0')
+
+        
         estimate_stock1=Label(estimate_Customerlabelframe,text="Stock:",pady=5,padx=10)
         estimate_stock1.place(x=90,y=260)
-        estimate_stockentry = Entry(estimate_Customerlabelframe,width=15,textvariable=estimate_stockval)
+        estimate_stockentry = Entry(estimate_Customerlabelframe,width=15)
         estimate_stockentry.place(x=150,y=265)
+        est_sto = estimate_Customerlabelframe.register(est_stocknum)
+        estimate_stockentry.config(validate="key",validatecommand=(est_sto, '%S'))
 
-        estimate_lowval = IntVar(estimate_Customerlabelframe, value='0')
+        
         estimate_low1=Label(estimate_Customerlabelframe,text="Low Stock Warning Limit:",pady=5,padx=10)
-        estimate_low1.place(x=300,y=260)
-        estimate_lowentry = Entry(estimate_Customerlabelframe,width=10,textvariable=estimate_lowval)
-        estimate_lowentry.place(x=495,y=265)
+        estimate_low1.place(x=270,y=260)
+        estimate_lowentry = Entry(estimate_Customerlabelframe,width=10)
+        estimate_lowentry.place(x=432,y=265)
+        est_lowsto = estimate_Customerlabelframe.register(est_stocknum)
+        estimate_lowentry.config(validate="key",validatecommand=(est_lowsto, '%S'))
 
       
         estimate_ware1=Label(estimate_Customerlabelframe,text="Warehouse:",pady=5,padx=10)
@@ -844,11 +1015,15 @@ def mainpage():
 
 
 
-        estimate_okButton = Button(estimate_innerFrame,compound = LEFT,image=tick , text ="Ok",width=60)
-        estimate_okButton.pack(side=LEFT)
+        estimate_okButton = Button(estimate_innerFrame,compound = LEFT,image=tick , text ="Ok",width=60,command=est_addproducts)
+        estimate_okButton.place(x=10,y=475)
 
-        estimate_cancelButton = Button(estimate_innerFrame,compound = LEFT,image=cancel ,text="Cancel",width=60)
-        estimate_cancelButton.pack(side=RIGHT)
+        def est_closetab():
+          top.destroy()
+
+
+        estimate_cancelButton = Button(estimate_innerFrame,compound = LEFT,image=cancel ,text="Cancel",width=60,command=est_closetab)
+        estimate_cancelButton.place(x=519,y=475)
 
         estimate_imageFrame = Frame(estimate_tab2, relief=GROOVE,height=580)
         estimate_imageFrame.pack(side="top",fill=BOTH)
@@ -856,11 +1031,432 @@ def mainpage():
         estimate_browseimg=Label(estimate_imageFrame,text=" Browse for product image file(recommended image type:JPG,size 480x320 pixels) ",bg='#f5f3f2')
         estimate_browseimg.place(x=15,y=35)
 
-        estimate_browsebutton=Button(estimate_imageFrame,text = 'Browse',command=upload_file)
-        estimate_browsebutton.place(x=580,y=30,height=30,width=50)
+        estimate_browsebutton=Button(estimate_imageFrame,text = 'Browse',command=este_upload_file)
+        estimate_browsebutton.place(x=520,y=30,height=30,width=50)
         
         estimate_removeButton = Button(estimate_imageFrame,compound = LEFT,image=cancel, text ="Remove Product Image",width=150, command=lambda: b2.destroy())
         estimate_removeButton.place(x=400,y=450)
+      
+      # ###---------------Edit product-----------------###    
+      def est_edit_product(): 
+        edit_est_itemid = estimate_cusventtree1.item(estimate_cusventtree1.focus())["values"][0]  
+        global filename
+        filename = ""
+      
+        def edit_estupload_file():
+          global filename,img, b2
+          f_types =[('Png files','*.png'),('Jpg Files', '*.jpg')]
+          filename = filedialog.askopenfilename(filetypes=f_types)
+          shutil.copyfile(filename, os.getcwd()+'/images/'+filename.split('/')[-1])
+          image = Image.open(filename)
+          resize_image = image.resize((350, 350))
+          img = ImageTk.PhotoImage(resize_image)
+          edit_est_b2 = Button(edit_est_imageFrame,image=img)
+          edit_est_b2.place(x=130, y=80)
+        
+        def edit_est_updateproducts():
+          global img , filename 
+          sku = edit_est_codeentry.get()
+          status = edit_est_checkvarStatus.get()
+          catgory = edit_est_n.get()
+          name = edit_est_nameentry.get()
+          description = edit_est_desentry.get()
+          unitprice = edit_est_uval.get()
+          peices = edit_est_pcsentry.get()
+          cost = edit_est_costval.get()
+          price_cost = edit_est_priceval.get()
+          taxable = edit_est_checkvarStatus2.get()
+          tax2 = edit_est_checkvarStatustax2.get()
+          nostockcontrol = edit_est_checkvarStatus3.get()
+          stock = edit_est_stockval.get()
+          lowstock = edit_est_lowval.get()
+          warehouse = edit_est_wareentry.get()
+          pnotes = edit_est_sctxt.get("1.0", 'end-1c')
+          entries = [sku, name, unitprice, cost]
+          entri = []
+          for i in entries:
+            if i == '':
+              entri.append(i)
+          if len(entri) == 0:
+            if filename == "":
+              print("hello")
+              sql = "update Productservice set sku=%s, category=%s, name=%s, description=%s, status=%s, unitprice=%s, peices=%s, cost=%s, taxable=%s, priceminuscost=%s, serviceornot=%s, stock=%s, stocklimit=%s, warehouse=%s, privatenote=%s,tax2=%s where sku = %s"
+              val = (sku, catgory, name, description, status, unitprice, peices, cost, taxable, price_cost, nostockcontrol, stock, lowstock, warehouse, pnotes,tax2, edit_est_itemid)
+              fbcursor.execute(sql, val)
+              fbilldb.commit()
+            else:
+              print("hai")
+              file = shutil.copyfile(filename, os.getcwd()+'/images/'+filename.split('/')[-1])
+              sql = "update Productservice set category=%s, name=%s, description=%s, status=%s, unitprice=%s, peices=%s, cost=%s, taxable=%s, priceminuscost=%s, serviceornot=%s, stock=%s, stocklimit=%s, warehouse=%s, image=%s, privatenote=%s,tax2=%s where sku = %s"
+              val = (catgory, name, description, status, unitprice, peices, cost, taxable, price_cost, nostockcontrol, stock, lowstock, warehouse,filename.split('/')[-1], pnotes,tax2, edit_est_itemid)
+              fbcursor.execute(sql, val)
+              fbilldb.commit()
+            for record in estimate_cusventtree1.get_children():
+              estimate_cusventtree1.delete(record)
+            fbcursor.execute("select *  from Productservice")
+            edit_est_pandsdata = fbcursor.fetchall()
+            countp = 0
+            for i in edit_est_pandsdata:
+              if i[12] == '1':
+                servi = '🗹'
+              else:
+                servi = ''
+              sql = "select currencysign,currsignplace from company"
+              fbcursor.execute(sql)
+              estcurrsymb = fbcursor.fetchone()
+              if not estcurrsymb: 
+                if i[13] > i[14]:
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('green',))
+                  countp += 1              
+                elif i[12] == '1':
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('blue',))
+                  countp += 1
+                else:
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('red',))
+                  countp += 1
+                        
+              elif estcurrsymb[1] == "before amount":
+                if (i[13]) > (i[14]):
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('green',))
+                  countp += 1
+                elif i[12] == '1':
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('blue',))
+                  countp += 1
+                else:
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('red',))
+                  countp += 1
+
+              elif estcurrsymb[1] == "before amount with space":
+                if (i[13]) > (i[14]):
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('green',))
+                  countp += 1
+                elif i[12] == '1':
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('blue',))
+                  countp += 1
+                else:
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('red',))
+                  countp += 1
+
+              elif estcurrsymb[1] == "after amount":
+                if (i[13]) > (i[14]):
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('green',))
+                  countp += 1
+                elif i[12] == '1':
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('blue',))
+                  countp += 1
+                else:
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('red',))
+                  countp += 1
+
+              elif estcurrsymb[1] == "after amount with space":
+                if (i[13]) > (i[14]):
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('green',))
+                  countp += 1
+                elif i[12] == '1':
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('blue',))
+                  countp += 1
+                else:
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('red',))
+                  countp += 1
+            edit_est_top.destroy()
+          else:
+            messagebox.showinfo("F-Billing Revolution", "Fields name or SKU entered is already in database.")
+            edit_est_top.destroy()
+            
+
+        sql = "select * from Productservice where sku = %s"
+        val = (edit_est_itemid, )
+        fbcursor.execute(sql, val)
+        edit_est_psdata = fbcursor.fetchone()
+        print(edit_est_itemid)
+        edit_est_top = Toplevel()  
+        edit_est_top.title("Edit Product/Service details")
+        p3 = PhotoImage(file = 'images/fbicon.png')
+        edit_est_top.iconphoto(False, p3)
+        edit_est_top.geometry("600x550+350+15")
+        tabControl = ttk.Notebook(edit_est_top)
+        s = ttk.Style()
+        s.theme_use('default')
+        s.configure('TNotebook.Tab', background="#999999", width=50, padding=10,bd=0)
+
+        edit_est_taba = ttk.Frame(tabControl)
+        edit_est_tabb = ttk.Frame(tabControl)
+        
+        tabControl.add(edit_est_taba,compound = LEFT, text ='Product/Service')
+        tabControl.add(edit_est_tabb,compound = LEFT, text ='Product Image')
+        
+        tabControl.pack(expand = 1, fill ="both")
+        
+        edit_est_innerFrame = Frame(edit_est_taba,bg="#f5f3f2", relief=GROOVE)
+        edit_est_innerFrame.pack(side="top",fill=BOTH)
+
+        edit_est_updateframe = LabelFrame(edit_est_innerFrame,text="Product/Service",width=580,height=455)
+        edit_est_updateframe.pack(side="top",fill=BOTH,padx=10,pady=(10,45))
+
+        edit_est_code1=Label(edit_est_updateframe,text="Code or SKU:",fg="blue",pady=10,padx=10)
+        edit_est_code1.place(x=20,y=0)
+        edit_est_codeentry = Entry(edit_est_updateframe,width=35)
+        edit_est_codeentry.place(x=120,y=8)
+        edit_est_codeentry.insert(0, edit_est_psdata[2])
+
+        edit_est_checkvarStatus=IntVar()
+        edit_est_status1=Label(edit_est_updateframe,text="Status:")
+        edit_est_status1.place(x=400,y=8)
+        edit_est_Button1 = Checkbutton(edit_est_updateframe, 
+                          variable = edit_est_checkvarStatus,text="Active",compound="right",
+                          onvalue =1,
+                          offvalue =0,
+                          width = 10)
+        edit_est_Button1.place(x=450,y=5)
+        edit_est_sta = edit_est_psdata[6]
+        if edit_est_sta == '1':
+          edit_est_Button1.select()
+        else:
+          edit_est_Button1.deselect()
+
+
+
+        edit_est_category1=Label(edit_est_updateframe,text="Category:",pady=5,padx=10)
+        edit_est_category1.place(x=20,y=40)
+        edit_est_n = StringVar() 
+        edit_est_category = Entry(edit_est_updateframe,width=40,textvariable=edit_est_n) 
+        edit_est_category.insert(0, edit_est_psdata[3])
+        edit_est_category = ttk.Combobox(edit_est_updateframe, width = 40, textvariable = edit_est_n )
+        edit_est_category['values'] = ('Default')
+        edit_est_category.place(x=120,y=45)
+        #edit_est_category.insert(0, 'Default')
+
+
+
+        edit_est_name1=Label(edit_est_updateframe,text="Name :",fg="blue",pady=5,padx=10)
+        edit_est_name1.place(x=20,y=70)
+        edit_est_nameentry = Entry(edit_est_updateframe,width=70)
+        edit_est_nameentry.place(x=120,y=75)
+        edit_est_nameentry.insert(0, edit_est_psdata[4])
+
+        edit_est_des1=Label(edit_est_updateframe,text="Description :",pady=5,padx=10)
+        edit_est_des1.place(x=20,y=100)
+        edit_est_desentry = Entry(edit_est_updateframe,width=70)
+        edit_est_desentry.place(x=120,y=105)
+        edit_est_desentry.insert(0, edit_est_psdata[5])
+
+        def edit_est_set_label(name, index, mode):
+          edit_est_priceval.set(float(edit_est_uval.get()) - float(edit_est_costval.get()))
+
+        def edit_est_prdoucts_cal(S,d):
+          if d == '1': #insert
+            if not S in ['.','0','1','2','3','4','5','6','7','8','9']:
+              return False
+            return True
+          if d.isdigit():
+            return True
+        
+        edit_est_unit1=Label(edit_est_updateframe,text="Unit Price:",fg="blue",pady=5,padx=10)
+        edit_est_unit1.place(x=20,y=130)
+        
+        edit_est_uval = StringVar()
+        edit_est_unitentry = Entry(edit_est_updateframe,width=20,textvariable=edit_est_uval)
+        edit_est_unitentry.place(x=120,y=135)
+        edit_est_unitentry.delete(0,'end')
+        edit_est_unitentry.insert(0, edit_est_psdata[7])
+        edit_est_cal_unit = (edit_est_updateframe.register(edit_est_prdoucts_cal),'%S','%d')
+        edit_est_unitentry.config(validate='key',validatecommand=(edit_est_cal_unit),justify='right')
+        
+
+        edit_est_pcsval = IntVar()
+        edit_est_pcs1=Label(edit_est_updateframe,text="Pcs/Weight:",fg="blue",pady=5,padx=10)
+        edit_est_pcs1.place(x=330,y=135)
+        edit_est_pcsentry = Entry(edit_est_updateframe,width=20,textvariable=edit_est_pcsval)
+        edit_est_pcsentry.place(x=420,y=140)
+        edit_est_pcsentry.delete(0,'end')
+        edit_est_pcsentry.insert(0, edit_est_psdata[8])
+        
+
+        edit_est_costval = StringVar()
+        edit_est_cost1=Label(edit_est_updateframe,text="Cost:",pady=5,padx=10)
+        edit_est_cost1.place(x=20,y=160)
+        edit_est_costentry = Entry(edit_est_updateframe,width=20,textvariable=edit_est_costval)
+        edit_est_costentry.place(x=120,y=165)
+        edit_est_costentry.delete(0, END)
+        edit_est_costentry.insert(0, edit_est_psdata[9])
+        edit_est_cal_cost = (edit_est_updateframe.register(edit_est_prdoucts_cal),'%S','%d')
+        edit_est_costentry.config(validate='key',validatecommand=(edit_est_cal_cost),justify='right')
+        
+
+        edit_est_priceval = StringVar()
+        edit_est_price1=Label(edit_est_updateframe,text="(Price-Cost):",pady=5,padx=10)
+        edit_est_price1.place(x=20,y=190)
+        edit_est_priceentry = Entry(edit_est_updateframe,width=20,textvariable=edit_est_priceval)
+        edit_est_priceentry.place(x=120,y=195)
+        edit_est_priceentry.delete(0,'end')
+        edit_est_priceentry.insert(0, edit_est_psdata[11])
+
+        edit_est_uval.trace('w', edit_est_set_label)
+        edit_est_costval.trace('w', edit_est_set_label)
+        
+
+        edit_est_checkvarStatus2=IntVar()
+      
+        edit_est_Button2 = Checkbutton(edit_est_updateframe,variable = edit_est_checkvarStatus2, 
+                          text="Taxable Tax1rate",compound="right",
+                          onvalue =1 ,
+                          offvalue =0,
+                          height=2,
+                          width = 12)
+        
+        edit_est_checkvarStatustax2=IntVar()
+        edit_est_Buttontax2 = Checkbutton(edit_est_updateframe,variable = edit_est_checkvarStatustax2, 
+                        text="Taxable Tax2rate",compound="right",
+                        onvalue =1 ,
+                        offvalue = 0,
+                        height=2,
+                        width = 12)
+        
+        sql = "select taxtype from company"
+        fbcursor.execute(sql)
+        edit_est_taxchoose = fbcursor.fetchone()
+        if not edit_est_taxchoose:
+          pass
+        elif edit_est_taxchoose[0] == '1':
+          edit_est_Button2.place_forget()
+          edit_est_Buttontax2.place_forget()
+        elif edit_est_taxchoose[0] == '2':
+          edit_est_Button2.place(x=415,y=170)
+          edit_est_Buttontax2.place_forget()
+        elif edit_est_taxchoose[0] == '3':
+          edit_est_Button2.place(x=415,y=170)
+          edit_est_Buttontax2.place(x=415,y=210)
+
+    
+        edit_est_tax = edit_est_psdata[10]
+        if edit_est_tax == '1':
+          edit_est_Button2.select()
+        else:
+          edit_est_Button2.deselect()
+
+        if edit_est_psdata[19] == '1':
+          edit_est_Buttontax2.select()
+        else:
+          edit_est_Buttontax2.deselect()
+
+        def edit_est_switch():
+          if edit_est_checkvarStatus3.get():
+            edit_est_stockentry["state"] = DISABLED
+            edit_est_lowentry["state"] = DISABLED
+            edit_est_wareentry["state"] = DISABLED
+          else:
+            edit_est_stockentry["state"] = NORMAL
+            edit_est_lowentry["state"] = NORMAL
+            edit_est_wareentry["state"] = NORMAL
+        edit_est_checkvarStatus3=BooleanVar()
+      
+        edit_est_Button3 = Checkbutton(edit_est_updateframe,variable = edit_est_checkvarStatus3,command=edit_est_switch, 
+                          text="This is a service(no stock control)", 
+                          onvalue =1 ,
+                          offvalue = 0,
+                          height=3)
+
+        edit_est_Button3.place(x=40,y=220)
+
+        
+
+        def edit_est_stocknum(input):
+          if input.isdigit():
+            return True
+          elif input is "":
+            return True
+          else:
+            return False
+        edit_est_stockval = IntVar(edit_est_updateframe)
+        edit_est_stock1=Label(edit_est_updateframe,text="Stock:",pady=5,padx=10)
+        edit_est_stock1.place(x=90,y=260)
+        edit_est_stockentry = Entry(edit_est_updateframe,width=15,textvariable=edit_est_stockval)
+        edit_est_stockentry.place(x=150,y=265)
+        edit_est_stockentry.delete(0,'end')
+        edit_est_stockentry.insert(0, edit_est_psdata[13])
+        edit_est_sto = edit_est_updateframe.register(edit_est_stocknum)
+        edit_est_stockentry.config(validate="key",validatecommand=(edit_est_sto, '%S'))
+        
+
+        edit_est_lowval = IntVar(edit_est_updateframe)
+        edit_est_low1=Label(edit_est_updateframe,text="Low Stock Warning Limit:",pady=5,padx=10)
+        edit_est_low1.place(x=270,y=260)
+        edit_est_lowentry = Entry(edit_est_updateframe,width=15,textvariable=edit_est_lowval)
+        edit_est_lowentry.place(x=432,y=265)
+        edit_est_lowentry.delete(0,'end')
+        edit_est_lowentry.insert(0, edit_est_psdata[14])
+        edit_est_lowsto = edit_est_updateframe.register(edit_est_stocknum)
+        edit_est_lowentry.config(validate="key",validatecommand=(edit_est_lowsto, '%S'))
+        
+
+      
+        edit_est_ware1=Label(edit_est_updateframe,text="Warehouse:",pady=5,padx=10)
+        edit_est_ware1.place(x=60,y=290)
+        edit_est_wareentry = Entry(edit_est_updateframe,width=64)
+        edit_est_wareentry.place(x=150,y=295)
+        edit_est_wareentry.insert(0, edit_est_psdata[15])
+
+        edit_est_scr = edit_est_psdata[12]
+        if edit_est_scr == '1':
+          edit_est_Button3.select()
+          edit_est_stockentry["state"] = DISABLED
+          edit_est_lowentry["state"] = DISABLED
+          edit_est_wareentry["state"] = DISABLED
+        else:
+          edit_est_Button3.deselect()
+          edit_est_stockentry["state"] = NORMAL
+          edit_est_lowentry["state"] = NORMAL
+          edit_est_wareentry["state"] = NORMAL
+        
+        
+
+        
+
+        edit_est_text1=Label(edit_est_updateframe,text="Private notes(not appears on invoice):",pady=5,padx=10)
+        edit_est_text1.place(x=20,y=320)
+        edit_est_sctxt = scrolledtext.ScrolledText(edit_est_updateframe, undo=True,width=62,height=4)
+        edit_est_sctxt.place(x=32,y=358)
+        try:
+          edit_est_sctxt.insert("1.0", edit_est_psdata[16])
+        except:
+          pass
+
+        edit_est_okButton = Button(edit_est_innerFrame, text ="Ok",image=tick,width=70,compound = LEFT,command=edit_est_updateproducts)
+        edit_est_okButton.place(x=10, y=475)
+
+        edit_est_cancelButton = Button(edit_est_innerFrame,image=cancel,text="Cancel",width=70,compound = LEFT, command=lambda : edit_est_top.destroy())
+        edit_est_cancelButton.place(x=519, y=475)
+        
+        
+        edit_est_imageFrame = Frame(edit_est_tabb, relief=GROOVE,height=580)
+        edit_est_imageFrame.pack(side="top",fill=BOTH)
+
+        edit_est_browseimg=Label(edit_est_imageFrame,text=" Browse for product image file(recommended image type:JPG,size 480x320 pixels) ",bg='#f5f3f2')
+        edit_est_browseimg.place(x=15,y=35)
+
+        edit_est_browsebutton=Button(edit_est_imageFrame,text = 'Browse',command=edit_estupload_file)
+        edit_est_browsebutton.place(x=530,y=30,height=30,width=50)
+
+        try:
+          image = Image.open("images/"+edit_est_psdata[17])
+          resize_image = image.resize((350, 350))
+          image = ImageTk.PhotoImage(resize_image)
+          edit_est_b2 = Label(edit_est_imageFrame,image=image,width=350,height=350)
+          edit_est_b2.photo = image
+          edit_est_b2.place(x=130, y=80)
+          print(image)
+        except:
+          pass
+
+        edit_est_removeButton = Button(edit_est_imageFrame,image=cancel,text="Remove Product Image",width=150,compound = LEFT)
+        edit_est_removeButton.place(x=410,y=460)
+      # except:
+      #   try:
+      #     edit_est_top.destroy()
+      #   except:
+      #     pass
+        #messagebox.showerror('F-Billing Revolution', 'Select a record to edit.')
+  
 
 
               
@@ -1313,7 +1909,7 @@ def mainpage():
         
 
       estimate_btn11=Button(estimate_newselection,compound = LEFT,image=tick ,text="ok", width=60, command=estselepro).place(x=15, y=610)
-      estimate_btn11=Button(estimate_newselection,compound = LEFT,image=tick , text="Edit product/Service", width=150,command=product).place(x=250, y=610)
+      estimate_btn11=Button(estimate_newselection,compound = LEFT,image=tick , text="Edit product/Service", width=150,command=est_edit_product).place(x=250, y=610)
       estimate_btnadd=Button(estimate_newselection,compound = LEFT,image=tick , text="Add product/Service", width=150,command=estimate_product)
       estimate_btnadd.place(x=435, y=610)
       estimate_btn11=Button(estimate_newselection,compound = LEFT,image=cancel ,text="Cancel", width=60).place(x=740, y=610)
@@ -5215,50 +5811,73 @@ def mainpage():
     estimate_prev.pack(side="left", pady=3, ipadx=4)
     #----------Print-----------#
     def estimate_print_sele(): 
-      from reportlab.pdfgen import canvas 
-      pdf = canvas.Canvas("estimate/Estimate_Report.pdf", pagesize=letter)
-      
+      if estimates_etemplate.get() == 'Professional 1 (logo on left side)':
+        from reportlab.pdfgen import canvas 
+        pdf = canvas.Canvas("estimate/Estimate_Report.pdf", pagesize=letter)
+        
 
-      sql_company = "SELECT * from company"
-      fbcursor.execute(sql_company)
-      company= fbcursor.fetchone()
-      print(company)
-      
-      pdf.setFont('Helvetica',12)
-      pdf.drawString(350,760, company[1])
-      text=company[2]
-      wraped_text="\n".join(wrap(text,30))
-      print(wraped_text)
-      htg=wraped_text.split('\n')
-          
-      vg=len(htg)
-      if vg>0:
-            pdf.drawString(350,752,htg[0])
-            print("1")
-            if vg>1:
-              pdf.drawString(350,738,htg[1])
-              print("2")
-              if vg>2:
-                  pdf.drawString(350,725,htg[2])
-                  print("3")
-                  if vg>3:
-                      pdf.drawString(350,712,htg[3])
-                      print("4")
-                  else:
-                      pass
+        sql_company = "SELECT * from company"
+        fbcursor.execute(sql_company)
+        company= fbcursor.fetchone()
+        print(company)
+        
+        pdf.setFont('Helvetica',12)
+        pdf.drawString(375,740, company[1])
+        text=company[2]
+        wraped_text="\n".join(wrap(text,30))
+        print(wraped_text)
+        htg=wraped_text.split('\n')
+            
+        vg=len(htg)
+        if vg>0:
+              pdf.drawString(375,720,htg[0])
+              print("1")
+              if vg>1:
+                pdf.drawString(375,700,htg[1])
+                print("2")
+                if vg>2:
+                    pdf.drawString(375,680,htg[2])
+                    print("3")
+                    if vg>3:
+                        pdf.drawString(375,660,htg[3])
+                        print("4")
+                    else:
+                        pass
+                else:
+                    pass
               else:
                   pass
-            else:
-                pass
-            
-      else:
-            pass
+              
+        else:
+              pass
 
-      pdf.drawString(350,700, "Sales tax reg No:"+company[4])
-      
-  
-      pdf.save()
-      win32api.ShellExecute(0,"","estimate\Estimate_Report.pdf",None,".",0) 
+        pdf.drawString(375,680, "Sales tax reg No:"+company[4])
+        pdf.drawString(375,660, " "+est_str1.get())
+
+        pdf.drawString(50,660, " "+est_str2.get())
+        pdf.drawString(50,640, " "+est_str3.get())
+        pdf.drawString(50,620, " "+est_str4.get())
+        pdf.drawString(51,600, "Terms")
+        pdf.drawString(51,580, "Order ref.#")
+
+        pdf.drawString(150,660, " "+estimate_number_entry.get())
+        # pdf.drawString(150,640, " "+estimate_date_entry.get_date())
+        # pdf.drawString(150,620, " "+estimate_duedate_entry.get_date())
+        pdf.drawString(150,600, " "+estimate_eterms.get())
+        pdf.drawString(150,580, " "+estimate_ee11.get())
+
+        # pdf.setFont('Helvetica-underline',12)
+        pdf.drawString(60,530, " "+est_str5.get())
+        pdf.drawString(260,530, "Ship to")
+
+        pdf.drawString(60,515, " "+estimate_combo_name1.get())
+        pdf.drawString(260,515, " "+estimate_shipto3.get())
+
+        pdf.drawString(60,500, " "+estimate_addresstext2.get("1.0",END))
+        #pdf.drawString(260,500, " "+estimate_shipto3.get())
+
+        pdf.save()
+        win32api.ShellExecute(0,"","estimate\Estimate_Report.pdf",None,".",0) 
 
 
     estimate_prin= Button(estimate_firFrame,compound="top", text="Print \nEstimate",relief=RAISED, image=photo5,bg="#f5f3f2", fg="black", height=55, bd=1, width=55,command=estimate_print_sele)
@@ -5657,26 +6276,6 @@ def mainpage():
           pass
       count += 1
 
-      # def edit_cust_tree_fetch_1():
-      #   edit_cust_tree_item_1 = edit_estimate_cusventtree.item(edit_estimate_cusventtree.focus())["values"][0]
-      #   sql = "SELECT * FROM Customer WHERE customerid=%s"
-      #   val = (edit_cust_tree_item_1,)
-      #   fbcursor.execute(sql,val)
-      #   edit_sel_cust_str_1 = fbcursor.fetchone()
-      #   edit_estimate_combo.delete(0, END)
-      #   edit_estimate_combo.insert(0,edit_sel_cust_str_1[18])
-      #   edit_estimate_ee2.delete('1.0',END)
-      #   edit_estimate_ee2.insert('1.0',edit_sel_cust_str_1[19])
-      #   edit_estimate_ee3.delete(0, END)
-      #   edit_estimate_ee3.insert(0, edit_sel_cust_str_1[20])
-      #   edit_estimate_ee4.delete('1.0',END)
-      #   edit_estimate_ee4.insert('1.0',edit_sel_cust_str_1[21])
-      #   edit_estimate_ee5.delete(0,END)
-      #   edit_estimate_ee5.insert(0,edit_sel_cust_str_1[22])
-      #   edit_estimate_ee6.delete(0,END)
-      #   edit_estimate_ee6.insert(0,edit_sel_cust_str_1[23])
-
-      #   edit_estimate_cuselection.destroy()
 
 
 
@@ -5779,8 +6378,11 @@ def mainpage():
         edit_estimate_innerFrame = Frame(edit_estimate_tab1,bg="#f5f3f2", relief=GROOVE)
         edit_estimate_innerFrame.pack(side="top",fill=BOTH)
 
-        edit_estimate_Customerlabelframe = LabelFrame(edit_estimate_innerFrame,text="Product/Service",width=580,height=485)
-        edit_estimate_Customerlabelframe.pack(side="top",fill=BOTH,padx=10)
+        edit_estimate_Customerlabelframe = LabelFrame(edit_estimate_innerFrame,text="Product/Service",width=580,height=455)
+        edit_estimate_Customerlabelframe.pack(side="top",fill=BOTH,padx=10,pady=(10,45))
+
+        fbcursor.execute("SELECT * FROM Productservice ORDER BY sku DESC LIMIT 1")
+        skuin = fbcursor.fetchone()
 
         edit_estimate_code1=Label(edit_estimate_Customerlabelframe,text="Code or SKU:",fg="blue",pady=10,padx=10)
         edit_estimate_code1.place(x=20,y=0)
@@ -5789,25 +6391,25 @@ def mainpage():
 
         edit_estimate_checkvarStatus=IntVar()
         edit_estimate_status1=Label(edit_estimate_Customerlabelframe,text="Status:")
-        edit_estimate_status1.place(x=500,y=8)
+        edit_estimate_status1.place(x=400,y=8)
         edit_estimate_Button1 = Checkbutton(edit_estimate_Customerlabelframe,
                           variable = edit_estimate_checkvarStatus,text="Active",compound="right",
-                          onvalue =0 ,
-                          offvalue = 1,
+                          onvalue =1,
+                          offvalue =0,
                         
                           width = 10)
 
-        edit_estimate_Button1.place(x=550,y=5)
+        edit_estimate_Button1.place(x=450,y=5)
 
         edit_estimate_category1=Label(edit_estimate_Customerlabelframe,text="Category:",pady=5,padx=10)
         edit_estimate_category1.place(x=20,y=40)
         edit_estimate_n = StringVar()
         edit_estimate_country0 = ttk.Combobox(edit_estimate_Customerlabelframe, width = 40, textvariable = edit_estimate_n )
         
-        edit_estimate_country0['values'] = ('Default',' India',' China',' Australia',' Nigeria',' Malaysia',' Italy',' Turkey',)
+        edit_estimate_country0['values'] = ('Default')
         
         edit_estimate_country0.place(x=120,y=45)
-        edit_estimate_country0.current(0)
+        edit_estimate_country0.insert(0,'Default')
 
 
         edit_estimate_name81=Label(edit_estimate_Customerlabelframe,text="Name :",fg="blue",pady=5,padx=10)
@@ -5820,23 +6422,42 @@ def mainpage():
         edit_estimate_desentry = Entry(edit_estimate_Customerlabelframe,width=60)
         edit_estimate_desentry.place(x=120,y=105)
 
-        edit_estimate_uval = IntVar(edit_estimate_Customerlabelframe, value='$0.00')
+        def editt_est_prdoucts_cal(S,d):
+          if d == '1': #insert
+            if not S in ['.','0','1','2','3','4','5','6','7','8','9']:
+              return False
+            return True
+          if d.isdigit():
+            return True
+            
+        edit_estimate_uval = StringVar()
         edit_estimate_unit1=Label(edit_estimate_Customerlabelframe,text="Unit Price:",fg="blue",pady=5,padx=10)
         edit_estimate_unit1.place(x=20,y=130)
         edit_estimate_unitentry = Entry(edit_estimate_Customerlabelframe,width=20,textvariable=edit_estimate_uval)
         edit_estimate_unitentry.place(x=120,y=135)
+        editt_est_cal_unit = (edit_estimate_Customerlabelframe.register(editt_est_prdoucts_cal),'%S','%d')
+        edit_estimate_unitentry.config(validate='key',validatecommand=(editt_est_cal_unit),justify='right')
 
-        edit_estimate_pcsval = IntVar(edit_estimate_Customerlabelframe, value='$0.00')
+        #edit_estimate_pcsval = StringVar(value="0")
         edit_estimate_pcs1=Label(edit_estimate_Customerlabelframe,text="Pcs/Weight:",fg="blue",pady=5,padx=10)
-        edit_estimate_pcs1.place(x=320,y=140)
-        edit_estimate_pcsentry = Entry(edit_estimate_Customerlabelframe,width=20,textvariable=edit_estimate_pcsval)
-        edit_estimate_pcsentry.place(x=410,y=140)
+        edit_estimate_pcs1.place(x=330,y=135)
+        edit_estimate_pcsentry = Entry(edit_estimate_Customerlabelframe,width=20)
+        edit_estimate_pcsentry.place(x=420,y=140)
 
-        edit_estimate_costval = IntVar(edit_estimate_Customerlabelframe, value='$0.00')
+        edit_estimate_costval = StringVar(value="0")
         edit_estimate_cost1=Label(edit_estimate_Customerlabelframe,text="Cost:",pady=5,padx=10)
         edit_estimate_cost1.place(x=20,y=160)
         edit_estimate_costentry = Entry(edit_estimate_Customerlabelframe,width=20,textvariable=edit_estimate_costval)
         edit_estimate_costentry.place(x=120,y=165)
+        editt_est_cal_cost = (edit_estimate_Customerlabelframe.register(editt_est_prdoucts_cal),'%S','%d')
+        edit_estimate_costentry.config(validate='key',validatecommand=(editt_est_cal_cost),justify='right')
+
+        # def est_set_label(name, index, mode):
+        #   est_copr = float(estimate_uval.get()) - float(estimate_costval.get())
+        #   estimate_priceval.set(str(est_copr))
+
+
+
 
         edit_estimate_priceval = IntVar(edit_estimate_Customerlabelframe, value='$0.00')
         edit_estimate_price1=Label(edit_estimate_Customerlabelframe,text="(Price Cost):",pady=5,padx=10)
@@ -5926,10 +6547,12 @@ def mainpage():
                       
       edit_estimate_enter10=Label(edit_estimate_newselection, text="Enter filter text").place(x=5, y=10)
       edit_estimate_e10=Entry(edit_estimate_newselection, width=20).place(x=110, y=10)
-      edit_estimate_text10=Label(edit_estimate_newselection, text="Filtered column").place(x=340, y=10)
-      edit_estimate_e20=Entry(edit_estimate_newselection, width=20).place(x=450, y=10)
+      # edit_estimate_text10=Label(edit_estimate_newselection, text="Filtered column").place(x=340, y=10)
+      # edit_estimate_e20=Entry(edit_estimate_newselection, width=20).place(x=450, y=10)
+      edit_estimate_cust_filter_button=Button(edit_estimate_newselection, text='Click Here')
+      edit_estimate_cust_filter_button.place(x=240, y=9,height=20,width=60)
 
-      edit_estimate_cusventtree1=ttk.Treeview(edit_estimate_newselection, height=27)
+      edit_estimate_cusventtree1=ttk.Treeview(edit_estimate_newselection, height=25)
       edit_estimate_cusventtree1["columns"]=["1","2","3", "4","5"]
       edit_estimate_cusventtree1.column("#0", width=35)
       edit_estimate_cusventtree1.column("1", width=160)
@@ -6025,19 +6648,236 @@ def mainpage():
       edit_estimate_ctegorytree1.heading("#0",text="", anchor=W)
       edit_estimate_ctegorytree1.heading("1",text="View filter by category", anchor=CENTER)
       edit_estimate_ctegorytree1.place(x=660, y=45)
+      def edit_est_items_selected(event):
+        selected_indices = edit_cust_fil_cat_list_1.curselection()
+        selected_filter = ",".join([edit_cust_fil_cat_list_1.get(i) for i in selected_indices])
+
+        sql = 'select * from Productservice'
+        fbcursor.execute(sql)
+        pandsdata1 = fbcursor.fetchall()
+        psql = "select * from Productservice where serviceornot=%s"
+        val = ('0', )
+        fbcursor.execute(psql, val)
+        pdata1 = fbcursor.fetchall()
+
+        ssql = "select * from Productservice where serviceornot=%s"
+        val = ('1', )
+        fbcursor.execute(ssql, val)
+        sdata1 = fbcursor.fetchall()
+
+        if selected_filter == "View all records":
+          for record in edit_estimate_cusventtree1.get_children():
+            edit_estimate_cusventtree1.delete(record)
+          countp = 0
+          for i in pandsdata1:
+            if i[12] == '1':
+              servi = '🗹'                     #'Active'
+            else:
+              servi = ' '                         #'Inactive'
+            sql = "select currencysign,currsignplace from company"
+            fbcursor.execute(sql)
+            estcurrsymb = fbcursor.fetchone()
+            if not estcurrsymb: 
+              if i[13] > i[14]:
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('green',))
+                countp += 1              
+              elif i[12] == '1':
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('blue',))
+                countp += 1
+              else:
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('red',))
+                countp += 1
+                      
+            elif estcurrsymb[1] == "before amount":
+              if (i[13]) > (i[14]):
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('green',))
+                countp += 1
+              elif i[12] == '1':
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('blue',))
+                countp += 1
+              else:
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('red',))
+                countp += 1
+
+            elif estcurrsymb[1] == "before amount with space":
+              if (i[13]) > (i[14]):
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('green',))
+                countp += 1
+              elif i[12] == '1':
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('blue',))
+                countp += 1
+              else:
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('red',))
+                countp += 1
+
+            elif estcurrsymb[1] == "after amount":
+              if (i[13]) > (i[14]):
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('green',))
+                countp += 1
+              elif i[12] == '1':
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('blue',))
+                countp += 1
+              else:
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('red',))
+                countp += 1
+
+            elif estcurrsymb[1] == "after amount with space":
+              if (i[13]) > (i[14]):
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('green',))
+                countp += 1
+              elif i[12] == '1':
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('blue',))
+                countp += 1
+              else:
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('red',))
+                countp += 1
+
+        elif selected_filter == "View all products":
+          for record in edit_estimate_cusventtree1.get_children():
+            edit_estimate_cusventtree1.delete(record)
+          countp = 0
+          for i in pdata1:
+            if i[12] == '1':
+              servi = '🗹'                   #'Active'
+            else:
+              servi = ' '                    #'Inactive'
+            sql = "select currencysign,currsignplace from company"
+            fbcursor.execute(sql)
+            estcurrsymb = fbcursor.fetchone()
+            if not estcurrsymb: 
+              if i[13] > i[14]:
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('green',))
+                countp += 1              
+              elif i[12] == '1':
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('blue',))
+                countp += 1
+              else:
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('red',))
+                countp += 1
+                      
+            elif estcurrsymb[1] == "before amount":
+              if (i[13]) > (i[14]):
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('green',))
+                countp += 1
+              elif i[12] == '1':
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('blue',))
+                countp += 1
+              else:
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('red',))
+                countp += 1
+
+            elif estcurrsymb[1] == "before amount with space":
+              if (i[13]) > (i[14]):
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('green',))
+                countp += 1
+              elif i[12] == '1':
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('blue',))
+                countp += 1
+              else:
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('red',))
+                countp += 1
+
+            elif estcurrsymb[1] == "after amount":
+              if (i[13]) > (i[14]):
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('green',))
+                countp += 1
+              elif i[12] == '1':
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('blue',))
+                countp += 1
+              else:
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('red',))
+                countp += 1
+
+            elif estcurrsymb[1] == "after amount with space":
+              if (i[13]) > (i[14]):
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('green',))
+                countp += 1
+              elif i[12] == '1':
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('blue',))
+                countp += 1
+              else:
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('red',))
+                countp += 1
+        elif selected_filter == "View all services":
+          for record in edit_estimate_cusventtree1.get_children():
+            edit_estimate_cusventtree1.delete(record)
+          countp = 0
+          for i in sdata1:
+            if i[12] == '1':
+              servi = '🗹'             #'Active'
+            else:
+              servi = ' '              #'Inactive'
+            sql = "select currencysign,currsignplace from company"
+            fbcursor.execute(sql)
+            estcurrsymb = fbcursor.fetchone()
+            if not estcurrsymb: 
+              if i[13] > i[14]:
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('green',))
+                countp += 1              
+              elif i[12] == '1':
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('blue',))
+                countp += 1
+              else:
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('red',))
+                countp += 1
+                      
+            elif estcurrsymb[1] == "before amount":
+              if (i[13]) > (i[14]):
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('green',))
+                countp += 1
+              elif i[12] == '1':
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('blue',))
+                countp += 1
+              else:
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('red',))
+                countp += 1
+
+            elif estcurrsymb[1] == "before amount with space":
+              if (i[13]) > (i[14]):
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('green',))
+                countp += 1
+              elif i[12] == '1':
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('blue',))
+                countp += 1
+              else:
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('red',))
+                countp += 1
+
+            elif estcurrsymb[1] == "after amount":
+              if (i[13]) > (i[14]):
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('green',))
+                countp += 1
+              elif i[12] == '1':
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('blue',))
+                countp += 1
+              else:
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('red',))
+                countp += 1
+
+            elif estcurrsymb[1] == "after amount with space":
+              if (i[13]) > (i[14]):
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('green',))
+                countp += 1
+              elif i[12] == '1':
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('blue',))
+                countp += 1
+              else:
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('red',))
+                countp += 1
 
       edit_cust_fil_cat_list_1 = Listbox(edit_estimate_newselection,height=34,width=40,bg="white",activestyle="dotbox",fg="black",highlightbackground="white")
-      edit_cust_fil_cat_list_1.insert(0,"               View all records")
-      edit_cust_fil_cat_list_1.insert(1,"               View only Client/Vendor")
-      edit_cust_fil_cat_list_1.insert(2,"               View only Client type")
-      edit_cust_fil_cat_list_1.insert(3,"               View only Vendor type")
-      edit_cust_fil_cat_list_1.insert(4,"               Default")
+      edit_cust_fil_cat_list_1.insert(0,"View all records")
+      edit_cust_fil_cat_list_1.insert(1,"View all products")
+      edit_cust_fil_cat_list_1.insert(2,"View all services")
       edit_cust_fil_cat_list_1.place(x=660,y=63)
-      edit_cust_fil_cat_list_1.bind('<<ListboxSelect>>')
+      edit_cust_fil_cat_list_1.bind('<<ListboxSelect>>',edit_est_items_selected)
+      edit_est_stockok = Label(edit_estimate_newselection,text="Green: Stock is Ok",foreground="green").place(x =15,y =580)
+      edit_est_stocko = Label(edit_estimate_newselection,text="Red: Limit <= Low Stock Limit",foreground="red").place(x =136,y=580)
+      edit_est_stock = Label(edit_estimate_newselection,text="Blue: Service,no Stock Control",foreground="blue").place(x =335,y =580)
 
       edit_estimate_scrollbar10 = Scrollbar(edit_estimate_newselection)
-      edit_estimate_scrollbar10.place(x=640, y=45, height=560)
-      edit_estimate_scrollbar10.config( command=tree.yview )
+      edit_estimate_scrollbar10.place(x=640, y=45, height=520)
+      edit_estimate_scrollbar10.config( command=edit_estimate_cusventtree1.yview )
 
       def edit_estselepro():
         global estpriceview
@@ -6150,14 +6990,8 @@ def mainpage():
       edit_estimate_btn11=Button(edit_estimate_newselection,compound = LEFT,image=tick ,text="ok", width=60,command=edit_estselepro)
       edit_estimate_btn11.place(x=15, y=610)
       edit_estimate_btn11=Button(edit_estimate_newselection,compound = LEFT,image=tick , text="Edit product/Service", width=150,command=product).place(x=250, y=610)
-      edit_estimate_btn11=Button(edit_estimate_newselection,compound = LEFT,image=tick , text="Add product/Service", width=150,command=product).place(x=435, y=610)
+      edit_estimate_btn11=Button(edit_estimate_newselection,compound = LEFT,image=tick , text="Add product/Service", width=150,command=edit_estimate_product).place(x=435, y=610)
       edit_estimate_btn11=Button(edit_estimate_newselection,compound = LEFT,image=cancel ,text="Cancel", width=60).place(x=740, y=610)
-
-
-
-    #preview new line
-    def edit_estimate_previewline():
-      messagebox.showerror("F-Billing Revolution","line is required,please select customer for this order before printing.")
 
 
     
@@ -6377,45 +7211,6 @@ def mainpage():
     edit_estimate_w2.pack(side="left", padx=5)
 
     
-
-    edit_estimate_prin= Button(edit_estimate_firFrame,compound="top", text="Print \nEstimate",relief=RAISED, image=photo5,bg="#f5f3f2", fg="black", height=55, bd=1, width=55,command=estimate_printsele)
-    edit_estimate_prin.pack(side="left", pady=3, ipadx=4)
-
-    edit_estimate_w3 = Canvas(edit_estimate_firFrame, width=1, height=65, bg="#b3b3b3", bd=0)
-    edit_estimate_w3.pack(side="left", padx=5)
-
-    edit_estimate_mail= Button(edit_estimate_firFrame,compound="top", text="Email\nEstimate",relief=RAISED, image=photo6,bg="#f5f3f2", fg="black", height=55, bd=1, width=55,command=estimate_emailord)
-    edit_estimate_mail.pack(side="left", pady=3, ipadx=4)
-
-    edit_estimate_smss1= Button(edit_estimate_firFrame,compound="top", text="Send SMS\nnotification",relief=RAISED, image=photo10,bg="#f5f3f2", fg="black", height=55, bd=1, width=55,command=edit_estimate_sms1)
-    edit_estimate_smss1.pack(side="left", pady=3, ipadx=4)
-
-    edit_estimate_w4 = Canvas(edit_estimate_firFrame, width=1, height=65, bg="#b3b3b3", bd=0)
-    edit_estimate_w4.pack(side="left", padx=5)
-
-    def edit_on_click():
-      text.set("Accepted")
-        
-
-    def edit_eston_click():
-      text.set("Declined")
-
-    edit_estimate_smss1= Button(edit_estimate_firFrame,compound="top", text="Set Status\nto Accepted",relief=RAISED, image=mark1,bg="#f5f3f2", fg="black", height=55, bd=1, width=55,command=edit_on_click)
-    edit_estimate_smss1.pack(side="left", pady=3, ipadx=4)
-
-    edit_estimate_smss1= Button(edit_estimate_firFrame,compound="top", text="Set Status\nto Declined",relief=RAISED, image=mark1,bg="#f5f3f2", fg="black", height=55, bd=1, width=55,command=edit_eston_click)
-    edit_estimate_smss1.pack(side="left", pady=3, ipadx=4)
-
-    def edit_calcu():
-      subprocess.Popen('C:\\Windows\\System32\\calc.exe')
-
-    edit_estimate_calc= Button(edit_estimate_firFrame,compound="top", text="Open\nCalculator",relief=RAISED, image=photo9,bg="#f5f3f2", fg="black", height=55, bd=1, width=55, command=edit_calcu)
-    edit_estimate_calc.pack(side="left", pady=3, ipadx=4)
-
-    edit_estimate_save= Button(edit_estimate_firFrame,compound="top", text="Save",relief=RAISED, image=tick,bg="#f5f3f2", fg="black", height=55, bd=1, width=55)
-    edit_estimate_save.pack(side="right", pady=3, ipadx=4)
-
-
     edit_estimate_fir1Frame=Frame(edit_estimate_pop, height=180,bg="#f5f3f2")
     edit_estimate_fir1Frame.pack(side="top", fill=X)
 
@@ -6516,12 +7311,16 @@ def mainpage():
     edit_estimate_orderdate=Label(edit_estimate_labelframe,text=""+est_str3.get()).place(x=5,y=33)
     edit_estimate_ee02=DateEntry(edit_estimate_labelframe,width=20)
     edit_estimate_ee02.place(x=150,y=33)
+    # edit_estimate_ee02.delete(0,'end')
+    # edit_estimate_ee02.insert(0, edit_est_data[2])
 
     edit_estimate_checkvarStatus5=IntVar()
     edit_estimate_duedate=Checkbutton(edit_estimate_labelframe,variable = edit_estimate_checkvarStatus5,text=""+est_str4.get(),onvalue =0 ,offvalue = 1,command=est_due_check_1)
     edit_estimate_duedate.place(x=5,y=62)
     edit_estimate_ee03=DateEntry(edit_estimate_labelframe,width=20)
     edit_estimate_ee03.place(x=150,y=62)
+    # edit_estimate_ee03.delete(0,'end')
+    # edit_estimate_ee03.insert(0, edit_est_data[3])
 
     est_term_sql_1 = "SELECT terms_of_payment FROM terms_of_payment"
     fbcursor.execute(est_term_sql_1,)
@@ -6542,6 +7341,8 @@ def mainpage():
     edit_estimate_reff=Label(edit_estimate_labelframe,text="Order ref#").place(x=5,y=118)
     edit_estimate_ee11=Entry(edit_estimate_labelframe,width=27)
     edit_estimate_ee11.place(x=100,y=118)
+    edit_estimate_ee11.delete(0, END)
+    edit_estimate_ee11.insert(0, edit_est_data[35])
 
     edit_estimate_ee02.delete(0, END)
     edit_estimate_ee02.insert(0, edit_est_data[2])
@@ -6933,7 +7734,7 @@ def mainpage():
       edit_estimates_tax2.place(x=460,y=65)
       def2_val = tax2ratee.get()
       edit_estimates_tax2.delete(0, END)
-      edit_estimates_tax2.insert(0, def2_val)
+      edit_estimates_tax2.insert(0, edit_est_data[34])
   
     
     edit_estimates_template=Label(edit_estimate_labelfram1,text="Template").place(x=37,y=70)
@@ -6943,13 +7744,13 @@ def mainpage():
     edit_estimates_e5.delete(0, END)
     edit_estimates_e5.insert(0, edit_est_data[13])
 
-    #Edit Preview estimate
-    global edit_prev_estimate
-    def edit_prev_estimate():
+    #preview new line
+    global edit_estimate_previewline
+    def edit_estimate_previewline():
       sql = 'select * from company'
       fbcursor.execute(sql)
       est_compdataord = fbcursor.fetchone()
-      if edit_est_data[13] == 'Professional 1 (logo on left side)':
+      if edit_estimates_e5.get() == 'Professional 1 (logo on left side)':
         previewcreate = Toplevel()
         previewcreate.geometry("1360x730")
         frame = Frame(previewcreate, width=953, height=300)
@@ -6965,6 +7766,10 @@ def mainpage():
         canvas.config(yscrollcommand=vertibar.set)
         canvas.pack(expand=True,side=LEFT,fill=BOTH)
         canvas.create_rectangle(235, 25, 1035, 1175, outline='yellow',fill='white')
+
+        com_label = Label(canvas,text=" "+edit_estimates_e01.get(),font=('Helvetica 10 '),background='white')
+        com_label_window = canvas.create_window(550, 65, anchor="w", window=com_label)
+
         try:
             image = Image.open("images/"+est_compdataord[13])
             resize_image = image.resize((250, 125))
@@ -6974,36 +7779,80 @@ def mainpage():
             canvas.create_window(425, 150,window=b2)
         except:
           pass
-        canvas.create_text(322, 245, text=""+est_str2.get(), fill="black", font=('Helvetica 12')) 
-        canvas.create_text(335, 270, text=""+est_str3.get(), fill="black", font=('Helvetica 12')) 
-        canvas.create_text(320, 295, text=""+est_str4.get(), fill="black", font=('Helvetica 12')) 
-        canvas.create_text(521, 245, text=""+edit_est_data[1], fill="black", font=('Helvetica 12')) 
-        canvas.create_text(520, 270, text=edit_est_data[2], fill="black", font=('Helvetica 12')) 
-        canvas.create_text(520, 295, text=edit_est_data[3], fill="black", font=('Helvetica 12')) 
-        #canvas.create_text(885, 100, text=" "+comname.get(), fill="black", font=('Helvetica 12 '))
+        
+        com_label = Label(canvas,text=" "+est_str2.get(),font=('Helvetica 12 '),background='white')
+        com_label_window = canvas.create_window(300, 240, anchor="w", window=com_label)
+        
+        com_label = Label(canvas,text=" "+est_str3.get(),font=('Helvetica 12 '),background='white')
+        com_label_window = canvas.create_window(300, 260, anchor="w", window=com_label)
+        
+        com_label = Label(canvas,text=" "+est_str4.get(),font=('Helvetica 12 '),background='white')
+        com_label_window = canvas.create_window(301, 280, anchor="w", window=com_label)
+
+        com_label = Label(canvas,text=" "+edit_estimate_ee01.get(),font=('Helvetica 12 '),background='white')
+        com_label_window = canvas.create_window(471, 240, anchor="w", window=com_label)
+
+        canvas.create_text(520, 260, text=edit_estimate_ee02.get_date(), fill="black", font=('Helvetica 12')) 
+        canvas.create_text(520, 280, text=edit_estimate_ee03.get_date(), fill="black", font=('Helvetica 12'))
+
+        com_label = Label(canvas,text="Terms",font=('Helvetica 12 '),background='white')
+        com_label_window = canvas.create_window(303, 300, anchor="w", window=com_label)
+
+        com_label = Label(canvas,text="Order ref.#",font=('Helvetica 12 '),background='white')
+        com_label_window = canvas.create_window(303, 320, anchor="w", window=com_label)
+
+        com_label = Label(canvas,text=" "+edit_estimate_ee04.get(),font=('Helvetica 12 '),background='white')
+        com_label_window = canvas.create_window(470, 300, anchor="w", window=com_label)
+      
+        com_label = Label(canvas,text=" "+edit_estimate_ee11.get(),font=('Helvetica 12 '),background='white')
+        com_label_window = canvas.create_window(470, 320, anchor="w", window=com_label)
+
+        
         com_label = Label(canvas,text=" "+comname.get(),font=('Helvetica 12 '),background='white')
         com_label_window = canvas.create_window(976, 100, anchor="e", window=com_label)
-        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0)
+
+        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0,cursor="arrow")
         T_address.tag_configure('tag_name',justify='right')
         T_address.insert('1.0', est_compdataord[2])
         T_address.tag_add('tag_name','1.0', 'end')
+        T_address.config(state=DISABLED)
         T_address_window = canvas.create_window(694, 125, anchor="nw", window=T_address)
-        canvas.create_text(935, 225, text=""+comsalestax.get(), fill="black", font=('Helvetica 10')) 
-        canvas.create_text(909, 255, text=" "+est_str1.get(), fill="black", font=('Helvetica 20 bold'))
-        canvas.create_text(335, 345, text=""+est_str5.get(), fill="black", font=('Helvetica 10 underline')) 
-        canvas.create_text(680, 345, text="Ship to", fill="black", font=('Helvetica 10 underline'))
-        canvas.create_text(315, 365, text=""+edit_est_data[18], fill="black", font=('Helvetica 10')) 
-        canvas.create_text(673, 365, text=""+edit_est_data[20], fill="black", font=('Helvetica 10'))  
-        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0)
+
+        com_label = Label(canvas,text=" "+comsalestax.get(),font=('Helvetica 10 '),background='white')
+        com_label_window = canvas.create_window(976, 225, anchor="e", window=com_label)
+
+        com_label = Label(canvas,text=" "+est_str1.get(),font=('Helvetica 20 bold '),background='white')
+        com_label_window = canvas.create_window(976, 255, anchor="e", window=com_label)
+
+        com_label = Label(canvas,text=""+est_str5.get(),font=('Helvetica 10 underline'),background='white')
+        com_label_window = canvas.create_window(301, 345, anchor="w", window=com_label)
+
+        com_label = Label(canvas,text="Ship to",font=('Helvetica 10 underline'),background='white')
+        com_label_window = canvas.create_window(660, 345, anchor="w", window=com_label)
+
+        com_label = Label(canvas,text=" "+edit_estimate_combo.get(),font=('Helvetica 10'),background='white')
+        com_label_window = canvas.create_window(302, 365, anchor="w", window=com_label)
+
+        com_label = Label(canvas,text=""+edit_estimate_ee3.get(),font=('Helvetica 10'),background='white')
+        com_label_window = canvas.create_window(662, 365, anchor="w", window=com_label)
+
+        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0,cursor="arrow")
         T_address.tag_configure('tag_name',justify='left')
-        T_address.insert('1.0', edit_est_data[19])
+        T_address.insert('1.0', edit_estimate_ee2.get("1.0",END))
         T_address.tag_add('tag_name','1.0', 'end')
+        T_address.config(state=DISABLED)
         T_address_window = canvas.create_window(306, 380, anchor="nw", window=T_address)
-        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0)
+
+        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0,cursor="arrow")
         T_address.tag_configure('tag_name',justify='left')
-        T_address.insert('1.0', edit_est_data[21])
+        T_address.insert('1.0', edit_estimate_ee4.get("1.0",END))
         T_address.tag_add('tag_name','1.0', 'end')
+        T_address.config(state=DISABLED)
         T_address_window = canvas.create_window(665, 380, anchor="nw", window=T_address)
+
+        com_label = Label(canvas,text=" "+edit_estimates_e11.get(),font=('Helvetica 10 '),background='white')
+        com_label_window = canvas.create_window(550, 455, anchor="w", window=com_label)
+
         s = ttk.Style()
         s.configure('mystyle_prev_1.Treeview.Heading', background=''+win_menu1.get(),State='DISABLE')
 
@@ -7014,7 +7863,7 @@ def mainpage():
         est_prev_tree.column("2", anchor=CENTER, width=350)
         est_prev_tree.column("3", anchor=CENTER, width=80)
         est_prev_tree.column("4", anchor=CENTER, width=90)
-        est_prev_tree.column("5", anchor=CENTER, width=85)
+        est_prev_tree.column("5", anchor=E, width=85)
         est_prev_tree.heading("#0", text="")
         est_prev_tree.heading("1", text="ID/SKU")
         est_prev_tree.heading("2", text="Product/Service - Description")
@@ -7054,128 +7903,128 @@ def mainpage():
           canvas.create_line(980, 790, 720, 790 )
           canvas.create_line(980, 815, 720, 815 )
 
-        #   if not est_symbolcheck:
-        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+          if not est_symbolcheck:
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_discounttt1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)  
   
-        #     canvas.create_text(900, 755, text=str(estimate_costtt.cget("text"))+"$", fill="black", font=('Helvetica 10 '))
-        #     canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_subbb1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)  
   
-        #     canvas.create_text(900, 780, text=str(estimate_total1.cget("text"))+"$", fill="black", font=('Helvetica 10 bold'))
-        #     canvas.create_text(780, 780, text="Estimate total.", fill="black", font=('Helvetica 10 bold'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_costtt.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)  
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 779, anchor="w", window=com_label)  
+  
+            com_label = Label(canvas,text=str(edit_estimate_orderrr1.cget("text")),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 805, anchor="e", window=com_label)  
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 804, anchor="w", window=com_label)
+        
 
-        #   elif est_symbolcheck[0] == "before amount":
-        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 730, text=""+comcursign.get()+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+          elif est_symbolcheck[0] == "before amount":
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_discounttt1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)  
   
-        #     canvas.create_text(900, 755, text=""+comcursign.get()+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10 '))
   
-        #     canvas.create_text(900, 780, text=""+comcursign.get()+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10 bold'))
-        #     canvas.create_text(780, 780, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
-        #   elif est_symbolcheck[0] == "before amount with space":
-        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 730, text=""+comcursign.get()+" "+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_subbb1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)  
+   
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_costtt.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)  
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 779, anchor="w", window=com_label)  
   
-        #     canvas.create_text(900, 755, text=""+comcursign.get()+" "+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10'))
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_orderrr1.cget("text")),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 804, anchor="e", window=com_label)  
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 804, anchor="w", window=com_label)
+        
+          elif est_symbolcheck[0] == "before amount with space":
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_discounttt1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)  
   
-        #     canvas.create_text(900, 780, text=""+comcursign.get()+" "+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10 bold'))
-        #     canvas.create_text(780, 780, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
-        #   elif est_symbolcheck[0] == "after amount":
-        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_subbb1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)  
   
-        #     canvas.create_text(900, 755, text=str(estimate_costtt.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10 '))
-        #     canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_costtt.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)  
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 779, anchor="w", window=com_label)  
   
-        #     canvas.create_text(900, 780, text=str(estimate_total1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
-        #     canvas.create_text(780, 780, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
-
-        #   elif est_symbolcheck[0] == "after amount with space":
-        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_orderrr1.cget("text")),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 804, anchor="e", window=com_label)  
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 804, anchor="w", window=com_label)
+        
+          elif est_symbolcheck[0] == "after amount":
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_discounttt1.cget("text"))+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)  
   
-        #     canvas.create_text(900, 755, text=str(estimate_costtt.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_subbb1.cget("text"))+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)
   
-        #     canvas.create_text(900, 780, text=str(estimate_total1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
-        #     canvas.create_text(780, 780, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+            com_label = Label(canvas,text=str(edit_estimate_costtt.cget("text"))+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 779, anchor="w", window=com_label)  
+  
+            com_label = Label(canvas,text=str(edit_estimate_orderrr1.cget("text"))+""+comcursign.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 804, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 804, anchor="w", window=com_label)
+        
+          elif est_symbolcheck[0] == "after amount with space":
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_discounttt1.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)  
+            
+  
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_subbb1.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)
+    
+            com_label = Label(canvas,text=str(edit_estimate_costtt.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 779, anchor="w", window=com_label)  
+  
+            com_label = Label(canvas,text=str(edit_estimate_orderrr1.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 804, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 804, anchor="w", window=com_label)
+        
         elif est_taxcheck[12] == "2":
-          canvas.create_line(980, 715, 980, 815 )
-          canvas.create_line(720, 715, 720, 815 )
-          canvas.create_line(860, 715, 860, 815 )#1st
-          canvas.create_line(980, 815, 720, 815 )
-          canvas.create_line(980, 715, 720, 715 )
-          canvas.create_line(980, 740, 720, 740 )
-          canvas.create_line(980, 765, 720, 765 ) 
-          canvas.create_line(980, 790, 720, 790 )
-          canvas.create_line(980, 815, 720, 815 )
-
-        #   if not est_symbolcheck:
-        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+"$", fill="black", font=('Helvetica 10'))
-  
-        #     canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+"$", fill="black", font=('Helvetica 10'))
-  
-        #     canvas.create_text(900, 780, text=str(estimate_costtt.cget("text"))+"$", fill="black", font=('Helvetica 10 '))
-        #     canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
-  
-        #     canvas.create_text(900, 805, text=str(estimate_total1.cget("text"))+"$", fill="black", font=('Helvetica 10 bold'))
-        #     canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
-        #   elif est_symbolcheck[0] == "before amount":
-        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 730, text=""+comcursign.get()+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
-  
-        #     canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 755, text=""+comcursign.get()+str(estimate_ttax1.cget("text")), fill="black", font=('Helvetica 10'))
-  
-        #     canvas.create_text(900, 780, text=""+comcursign.get()+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10 '))
-        #     canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
-  
-        #     canvas.create_text(900, 805, text=""+comcursign.get()+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10 bold'))
-        #     canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
-      
-        #   elif est_symbolcheck[0] == "before amount with space":
-        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 730, text=""+comcursign.get()+" "+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
-  
-        #     canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 755, text=""+comcursign.get()+" "+str(estimate_ttax1.cget("text")), fill="black", font=('Helvetica 10'))
-  
-        #     canvas.create_text(900, 780, text=""+comcursign.get()+" "+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10 '))
-        #     canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
-  
-        #     canvas.create_text(900, 805, text=""+comcursign.get()+" "+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10 bold'))
-        #     canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
-          
-        #   elif est_symbolcheck[0] == "after amount":
-        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
-  
-        #     canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
-  
-        #     canvas.create_text(900, 780, text=str(estimate_costtt.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10 '))
-        #     canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
-  
-        #     canvas.create_text(900, 805, text=str(estimate_total1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
-        #     canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
-          
-        #   elif est_symbolcheck[0] == "after amount with space":
-        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
-  
-        #     canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
-  
-        #     canvas.create_text(900, 780, text=str(estimate_costtt.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10 '))
-        #     canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
-  
-        #     canvas.create_text(900, 805, text=str(estimate_total1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
-        #     canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
-        elif est_taxcheck[12] == "3":
           canvas.create_line(980, 715, 980, 840 )
           canvas.create_line(720, 715, 720, 840 )
           canvas.create_line(860, 715, 860, 840 )#1st
@@ -7187,98 +8036,358 @@ def mainpage():
           canvas.create_line(980, 815, 720, 815 )
           canvas.create_line(980, 840, 720, 840 )
 
-        #   if not est_symbolcheck:
-        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+          if not est_symbolcheck:
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_discounttt1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)  
   
-        #     canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+"$", fill="black", font=('Helvetica 10'))
   
-        #     canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 780, text=str(estimate_ttax2.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_subbb1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)
   
-        #     canvas.create_text(900, 805, text=str(estimate_costtt.cget("text"))+"$", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+            canvas.create_text(780, 780, text="TAX1", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_ttax1label.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)
   
-        #     canvas.create_text(900, 830, text=str(estimate_total1.cget("text"))+"$", fill="black", font=('Helvetica 10   bold'))
-        #     canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))  
-        #   elif est_symbolcheck[0] == "before amount":
-        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 730, text=""+comcursign.get()+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+            com_label = Label(canvas,text=str(edit_estimate_costtt.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 804, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 804, anchor="w", window=com_label)  
   
-        #     canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 755, text=""+comcursign.get()+str(estimate_ttax1.cget("text")), fill="black", font=('Helvetica 10'))
+            com_label = Label(canvas,text=str(edit_estimate_orderrr1.cget("text")),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 829, anchor="e", window=com_label)
+             
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 829, anchor="w", window=com_label)
+        
+          elif est_symbolcheck[0] == "before amount":
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_discounttt1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)  
   
-        #     canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 780, text=""+comcursign.get()+str(estimate_ttax2.cget("text")), fill="black", font=('Helvetica 10'))
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_subbb1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)  
   
-        #     canvas.create_text(900, 805, text=""+comcursign.get()+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+            canvas.create_text(780, 780, text="TAX1", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_ttax1label.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)  
   
-        #     canvas.create_text(900, 830, text=""+comcursign.get()+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10   bold'))
-        #     canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_costtt.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 804, anchor="e", window=com_label)  
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 804, anchor="w", window=com_label)  
+  
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_orderrr1.cget("text")),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 830, anchor="e", window=com_label)  
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 829, anchor="w", window=com_label)
+        
+      
+          elif est_symbolcheck[0] == "before amount with space":
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_discounttt1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)  
+
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_subbb1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)
+
+            canvas.create_text(780, 780, text="TAX1", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_ttax1label.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)
+
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_costtt.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 804, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 804, anchor="w", window=com_label)  
+
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_orderrr1.cget("text")),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 829, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 829, anchor="w", window=com_label)
+        
           
-        #   elif est_symbolcheck[0] == "before amount with space":
-        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 730, text=""+comcursign.get()+" "+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+          elif est_symbolcheck[0] == "after amount":
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_discounttt1.cget("text"))+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)  
+  
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_subbb1.cget("text"))+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)
+  
+            canvas.create_text(780, 780, text="TAX1", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_ttax1label.cget("text"))+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)
+  
+            com_label = Label(canvas,text=str(edit_estimate_costtt.cget("text"))+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 804, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 804, anchor="w", window=com_label)  
+  
+            com_label = Label(canvas,text=str(edit_estimate_orderrr1.cget("text"))+""+comcursign.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 829, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 829, anchor="w", window=com_label)
+        
+          
+          elif est_symbolcheck[0] == "after amount with space":
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_discounttt1.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label) 
+  
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_subbb1.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label) 
+  
+            canvas.create_text(780, 780, text="TAX1", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_ttax1label.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label) 
+  
+            com_label = Label(canvas,text=str(edit_estimate_costtt.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 804, anchor="e", window=com_label) 
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 804, anchor="w", window=com_label)  
+  
+            com_label = Label(canvas,text=str(edit_estimate_orderrr1.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 829, anchor="e", window=com_label) 
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 829, anchor="w", window=com_label)
+        
+        elif est_taxcheck[12] == "3":
+          canvas.create_line(980, 715, 980, 865 )
+          canvas.create_line(720, 715, 720, 865 )
+          canvas.create_line(860, 715, 860, 865 )#1st
+          canvas.create_line(980, 815, 720, 815 )
+          canvas.create_line(980, 715, 720, 715 )
+          canvas.create_line(980, 740, 720, 740 )
+          canvas.create_line(980, 765, 720, 765 ) 
+          canvas.create_line(980, 790, 720, 790 )
+          canvas.create_line(980, 815, 720, 815 )
+          canvas.create_line(980, 840, 720, 840 )
+          canvas.create_line(980, 865, 720, 865 )
 
-        #     canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 755, text=""+comcursign.get()+" "+str(estimate_ttax1.cget("text")), fill="black", font=('Helvetica 10'))
 
-        #     canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 780, text=""+comcursign.get()+" "+str(estimate_ttax2.cget("text")), fill="black", font=('Helvetica 10'))
+          if not est_symbolcheck:
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_discounttt1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)
+  
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_subbb1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)
+  
+            canvas.create_text(780, 780, text="TAX1", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_ttax1label.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)
+  
+            
+            com_label = Label(canvas,text=str(edit_estimate_ttax2label.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 804, anchor="e", window=com_label)
+            canvas.create_text(780, 805, text="TAX2", fill="black", font=('Helvetica 10 '))
+  
+            
+            com_label = Label(canvas,text=str(edit_estimate_costtt.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 829, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 829, anchor="w", window=com_label)  
+            
+            com_label = Label(canvas,text=str(edit_estimate_orderrr1.cget("text")),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 854, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 854, anchor="w", window=com_label)
+        
+          elif est_symbolcheck[0] == "before amount":
+            
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_discounttt1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)
+  
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_subbb1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)
+  
+            canvas.create_text(780, 780, text="TAX1", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_ttax1label.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)
+    
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_ttax2label.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 804, anchor="e", window=com_label)
+            canvas.create_text(780, 805, text="TAX2", fill="black", font=('Helvetica 10 '))
+  
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_costtt.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 829, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 829, anchor="w", window=com_label)  
+            
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_orderrr1.cget("text")),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 854, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 854, anchor="w", window=com_label)
+            
+          
+          elif est_symbolcheck[0] == "before amount with space":
+            
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_discounttt1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)
+  
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_subbb1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)
+  
+            canvas.create_text(780, 780, text="TAX1", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_ttax1label.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)
+  
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_ttax2label.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 804, anchor="e", window=com_label)
+            canvas.create_text(780, 805, text="TAX2", fill="black", font=('Helvetica 10 '))
+  
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_costtt.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 829, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 829, anchor="w", window=com_label)  
+           
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_orderrr1.cget("text")),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 854, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 854, anchor="w", window=com_label)
+            
+          elif est_symbolcheck[0] == "after amount":
+            
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_discounttt1.cget("text"))+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)
+  
+  
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_subbb1.cget("text"))+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)
+  
+            canvas.create_text(780, 780, text="TAX1", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_ttax1label.cget("text"))+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)
+  
+            com_label = Label(canvas,text=str(edit_estimate_ttax2label.cget("text"))+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 804, anchor="e", window=com_label)
+            canvas.create_text(780, 805, text="TAX2", fill="black", font=('Helvetica 10 '))
+  
+            com_label = Label(canvas,text=str(edit_estimate_costtt.cget("text"))+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 829, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 829, anchor="w", window=com_label)  
+            
+            com_label = Label(canvas,text=str(edit_estimate_orderrr1.cget("text"))+""+comcursign.get(),font=('Helvetica 10  bold'),background='white')
+            com_label_window = canvas.create_window(975, 854, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 854, anchor="w", window=com_label)
+            
+          elif est_symbolcheck[0] == "after amount with space":
+            
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
 
-        #     canvas.create_text(900, 805, text=""+comcursign.get()+" "+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
-
-        #     canvas.create_text(900, 830, text=""+comcursign.get()+" "+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10    bold'))
-        #     canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
-        #   elif est_symbolcheck[0] == "after amount":
-        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+            com_label = Label(canvas,text=str(edit_estimate_discounttt1.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)  
   
-        #     canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_subbb1.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)  
   
-        #     canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 780, text=str(estimate_ttax2.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+            canvas.create_text(780, 780, text="TAX1", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_ttax1label.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)  
   
-        #     canvas.create_text(900, 805, text=str(estimate_costtt.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+            
+            com_label = Label(canvas,text=str(edit_estimate_ttax2label.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 805, anchor="e", window=com_label)  
+            canvas.create_text(780, 805, text="TAX2", fill="black", font=('Helvetica 10 '))
   
-        #     canvas.create_text(900, 830, text=str(estimate_total1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10   bold'))
-        #     canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
-        #   elif est_symbolcheck[0] == "after amount with space":
-        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_costtt.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 829, anchor="e", window=com_label)  
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 829, anchor="w", window=com_label)  
+           
+            com_label = Label(canvas,text=str(edit_estimate_orderrr1.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 854, anchor="e", window=com_label)  
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 854, anchor="w", window=com_label)
+        
   
-        #     canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
-  
-        #     canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 780, text=str(estimate_ttax2.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
-  
-        #     canvas.create_text(900, 805, text=str(estimate_costtt.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
-  
-        #     canvas.create_text(900, 830, text=str(estimate_total1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10   bold'))
-        #     canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
-        est_comments = Text(canvas,font=('Helvetica 10'),width=100,height=6,fg= "black",
+            
+        est_comments = Text(canvas,font=('Helvetica 10'),width=105,height=6,fg= "black",
         bg="white",cursor="arrow",bd=0)
-        est_comments.insert("1.0",edit_est_data[32])
+        est_comments.insert("1.0",edit_estimates_e61.get("1.0","end-1c"))
         est_comments.config(state=DISABLED)
-        canvas.create_window(630, 900,window=est_comments)
+        canvas.create_window(630, 950,window=est_comments)
         canvas.create_text(620, 1020, text="Terms and Conditions", fill="black", font=('Helvetica 10'))
         canvas.create_line(265, 1040, 1000, 1040)
 
-        T = Text(canvas, height=3, width=90, font=('Helvetica 10'),borderwidth=0)
-        T.insert(END, edit_est_data[31])
+        T = Text(canvas, height=3, width=105, font=('Helvetica 10'),borderwidth=0,cursor="arrow")
+        T.insert(END, edit_estimates_e51.get("1.0","end-1c"))
+        T.config(state=DISABLED)
         T_window = canvas.create_window(270, 1055, anchor="nw", window=T)
 
-        canvas.create_text(315, 1150, text="Sales Person:", fill="black", font=('Helvetica 10'))
-        canvas.create_text(395, 1150, text=""+edit_est_data[14], fill="black", font=('Helvetica 10'))
-        canvas.create_text(945, 1160, text="Page 1 of 1", fill="black", font=('Helvetica 10'))
-      elif edit_est_data[13] == 'Professional 2 (logo on right side)': 
+        canvas.create_text(315, 1140, text="Sales Person:", fill="black", font=('Helvetica 10'))
+        canvas.create_text(395, 1140, text=""+edit_estimates_e6.get(), fill="black", font=('Helvetica 10'))
+
+        com_label = Label(canvas,text=" "+edit_estimates_e21.get(),font=('Helvetica 10 '),background='white')
+        com_label_window = canvas.create_window(268, 1160, anchor="w", window=com_label)
+
+        canvas.create_text(960, 1160, text="Page 1 of 1", fill="black", font=('Helvetica 10'))
+
+      elif edit_estimates_e5.get() == 'Professional 2 (logo on right side)': 
         previewcreate = Toplevel()
         previewcreate.geometry("1360x730")
         frame = Frame(previewcreate, width=953, height=300)
@@ -7294,6 +8403,8 @@ def mainpage():
         canvas.config(yscrollcommand=vertibar.set)
         canvas.pack(expand=True,side=LEFT,fill=BOTH)
         canvas.create_rectangle(235, 25, 1035, 1175, outline='yellow',fill='white')
+        com_label = Label(canvas,text=" "+edit_estimates_e01.get(),font=('Helvetica 10 '),background='white')
+        com_label_window = canvas.create_window(550, 65, anchor="w", window=com_label)
         try:
             image = Image.open("images/"+est_compdataord[13])
             resize_image = image.resize((250, 125))
@@ -7303,36 +8414,79 @@ def mainpage():
             canvas.create_window(845, 150,window=b2)
         except:
           pass
-        canvas.create_text(722, 245, text=""+est_str2.get(), fill="black", font=('Helvetica 12')) 
-        canvas.create_text(735, 270, text=""+est_str3.get(), fill="black", font=('Helvetica 12')) 
-        canvas.create_text(720, 295, text=""+est_str4.get(), fill="black", font=('Helvetica 12')) 
-        canvas.create_text(921, 245, text=""+edit_est_data[1], fill="black", font=('Helvetica 12')) 
-        canvas.create_text(920, 270, text=edit_est_data[2], fill="black", font=('Helvetica 12')) 
-        canvas.create_text(920, 295, text=edit_est_data[3], fill="black", font=('Helvetica 12')) 
-        #canvas.create_text(375, 100, text=" "+comname.get(), fill="black", font=('Helvetica 12 '))
+        
+        com_label = Label(canvas,text=" "+est_str2.get(),font=('Helvetica 12 '),background='white')
+        com_label_window = canvas.create_window(720, 240, anchor="w", window=com_label)
+        
+        com_label = Label(canvas,text=" "+est_str3.get(),font=('Helvetica 12 '),background='white')
+        com_label_window = canvas.create_window(720, 260, anchor="w", window=com_label)
+        
+        com_label = Label(canvas,text=" "+est_str4.get(),font=('Helvetica 12 '),background='white')
+        com_label_window = canvas.create_window(722, 280, anchor="w", window=com_label)
+
+        com_label = Label(canvas,text=" "+edit_estimate_ee01.get(),font=('Helvetica 12 '),background='white')
+        com_label_window = canvas.create_window(870, 240, anchor="w", window=com_label)
+
+        canvas.create_text(920, 260, text=edit_estimate_ee02.get_date(), fill="black", font=('Helvetica 12')) 
+        canvas.create_text(920, 280, text=edit_estimate_ee03.get_date(), fill="black", font=('Helvetica 12')) 
+
+        com_label = Label(canvas,text="Terms",font=('Helvetica 12 '),background='white')
+        com_label_window = canvas.create_window(724, 300, anchor="w", window=com_label)
+
+        com_label = Label(canvas,text="Order ref.#",font=('Helvetica 12 '),background='white')
+        com_label_window = canvas.create_window(724, 320, anchor="w", window=com_label)
+
+
+        com_label = Label(canvas,text=" "+edit_estimate_ee04.get(),font=('Helvetica 12 '),background='white')
+        com_label_window = canvas.create_window(870, 300, anchor="w", window=com_label)
+      
+        com_label = Label(canvas,text=" "+edit_estimate_ee11.get(),font=('Helvetica 12 '),background='white')
+        com_label_window = canvas.create_window(870, 320, anchor="w", window=com_label)
+
+        
         com_label = Label(canvas,text=" "+comname.get(),font=('Helvetica 12 '),background='white')
         com_label_window = canvas.create_window(280, 100, anchor="w", window=com_label)
-        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0)
+
+        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0,cursor="arrow")
         T_address.tag_configure('tag_name',justify='left')
         T_address.insert('1.0', est_compdataord[2])
         T_address.tag_add('tag_name','1.0', 'end')
+        T_address.config(state=DISABLED)
         T_address_window = canvas.create_window(284, 125, anchor="nw", window=T_address)
-        canvas.create_text(319, 225, text=""+comsalestax.get(), fill="black", font=('Helvetica 10')) 
-        canvas.create_text(339, 255, text=" "+est_str1.get(), fill="black", font=('Helvetica 20 bold'))
-        canvas.create_text(335, 345, text=""+est_str5.get(), fill="black", font=('Helvetica 10 underline')) 
-        canvas.create_text(680, 345, text="Ship to", fill="black", font=('Helvetica 10 underline'))
-        canvas.create_text(315, 365, text=""+edit_est_data[18], fill="black", font=('Helvetica 10')) 
-        canvas.create_text(673, 365, text=""+edit_est_data[20], fill="black", font=('Helvetica 10'))  
-        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0)
+
+        com_label = Label(canvas,text=" "+comsalestax.get(),font=('Helvetica 10 '),background='white')
+        com_label_window = canvas.create_window(280, 225, anchor="w", window=com_label)
+
+        com_label = Label(canvas,text=" "+est_str1.get(),font=('Helvetica 20 bold '),background='white')
+        com_label_window = canvas.create_window(278, 255, anchor="w", window=com_label)
+
+        com_label = Label(canvas,text=""+est_str5.get(),font=('Helvetica 10 underline'),background='white')
+        com_label_window = canvas.create_window(301, 345, anchor="w", window=com_label)
+
+        com_label = Label(canvas,text="Ship to",font=('Helvetica 10 underline'),background='white')
+        com_label_window = canvas.create_window(660, 345, anchor="w", window=com_label)
+
+        com_label = Label(canvas,text=" "+edit_estimate_combo.get(),font=('Helvetica 10'),background='white')
+        com_label_window = canvas.create_window(302, 365, anchor="w", window=com_label)
+
+        com_label = Label(canvas,text=""+edit_estimate_ee3.get(),font=('Helvetica 10'),background='white')
+        com_label_window = canvas.create_window(662, 365, anchor="w", window=com_label)
+
+        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0,cursor="arrow")
         T_address.tag_configure('tag_name',justify='left')
-        T_address.insert('1.0', edit_est_data[19])
+        T_address.insert('1.0', edit_estimate_ee2.get("1.0",END))
         T_address.tag_add('tag_name','1.0', 'end')
+        T_address.config(state=DISABLED)
         T_address_window = canvas.create_window(306, 380, anchor="nw", window=T_address)
-        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0)
+
+        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0,cursor="arrow")
         T_address.tag_configure('tag_name',justify='left')
-        T_address.insert('1.0', edit_est_data[21])
+        T_address.insert('1.0', edit_estimate_ee4.get("1.0",END))
         T_address.tag_add('tag_name','1.0', 'end')
+        T_address.config(state=DISABLED)
         T_address_window = canvas.create_window(665, 380, anchor="nw", window=T_address)
+        com_label = Label(canvas,text=" "+edit_estimates_e11.get(),font=('Helvetica 10 '),background='white')
+        com_label_window = canvas.create_window(550, 455, anchor="w", window=com_label)
         s = ttk.Style()
         s.configure('mystyle_prev_1.Treeview.Heading', background=''+win_menu1.get(),State='DISABLE')
 
@@ -7343,7 +8497,7 @@ def mainpage():
         est_prev_tree.column("2", anchor=CENTER, width=350)
         est_prev_tree.column("3", anchor=CENTER, width=80)
         est_prev_tree.column("4", anchor=CENTER, width=90)
-        est_prev_tree.column("5", anchor=CENTER, width=85)
+        est_prev_tree.column("5", anchor=E, width=85)
         est_prev_tree.heading("#0", text="")
         est_prev_tree.heading("1", text="ID/SKU")
         est_prev_tree.heading("2", text="Product/Service - Description")
@@ -7371,7 +8525,7 @@ def mainpage():
             est_prev_tree.insert(parent='', index='end',text='', values=(previewdata1[0],previewdata1[1]+"-"+previewdata1[2],previewdata1[4],previewdata1[3],previewdata1[7]))
           elif est_taxcheck[12] == "3":
             est_prev_tree.insert(parent='', index='end',text='', values=(previewdata1[0],previewdata1[1]+"-"+previewdata1[2],previewdata1[4],previewdata1[3],previewdata1[8]))
-      
+
         if est_taxcheck[12] == "1":
           canvas.create_line(980, 715, 980, 815 )
           canvas.create_line(720, 715, 720, 815 )
@@ -7383,128 +8537,128 @@ def mainpage():
           canvas.create_line(980, 790, 720, 790 )
           canvas.create_line(980, 815, 720, 815 )
 
-        #   if not est_symbolcheck:
-        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+          if not est_symbolcheck:
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_discounttt1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)  
   
-        #     canvas.create_text(900, 755, text=str(estimate_costtt.cget("text"))+"$", fill="black", font=('Helvetica 10 '))
-        #     canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_subbb1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)  
   
-        #     canvas.create_text(900, 780, text=str(estimate_total1.cget("text"))+"$", fill="black", font=('Helvetica 10 bold'))
-        #     canvas.create_text(780, 780, text="Estimate total.", fill="black", font=('Helvetica 10 bold'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_costtt.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)  
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 779, anchor="w", window=com_label)  
+  
+            com_label = Label(canvas,text=str(edit_estimate_orderrr1.cget("text")),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 805, anchor="e", window=com_label)  
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 804, anchor="w", window=com_label)
+        
 
-        #   elif est_symbolcheck[0] == "before amount":
-        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 730, text=""+comcursign.get()+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+          elif est_symbolcheck[0] == "before amount":
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_discounttt1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)  
   
-        #     canvas.create_text(900, 755, text=""+comcursign.get()+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10 '))
   
-        #     canvas.create_text(900, 780, text=""+comcursign.get()+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10 bold'))
-        #     canvas.create_text(780, 780, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
-        #   elif est_symbolcheck[0] == "before amount with space":
-        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 730, text=""+comcursign.get()+" "+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_subbb1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)  
+   
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_costtt.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)  
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 779, anchor="w", window=com_label)  
   
-        #     canvas.create_text(900, 755, text=""+comcursign.get()+" "+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10'))
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_orderrr1.cget("text")),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 804, anchor="e", window=com_label)  
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 804, anchor="w", window=com_label)
+        
+          elif est_symbolcheck[0] == "before amount with space":
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_discounttt1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)  
   
-        #     canvas.create_text(900, 780, text=""+comcursign.get()+" "+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10 bold'))
-        #     canvas.create_text(780, 780, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
-        #   elif est_symbolcheck[0] == "after amount":
-        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_subbb1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)  
   
-        #     canvas.create_text(900, 755, text=str(estimate_costtt.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10 '))
-        #     canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_costtt.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)  
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 779, anchor="w", window=com_label)  
   
-        #     canvas.create_text(900, 780, text=str(estimate_total1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
-        #     canvas.create_text(780, 780, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
-
-        #   elif est_symbolcheck[0] == "after amount with space":
-        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_orderrr1.cget("text")),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 804, anchor="e", window=com_label)  
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 804, anchor="w", window=com_label)
+        
+          elif est_symbolcheck[0] == "after amount":
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_discounttt1.cget("text"))+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)  
   
-        #     canvas.create_text(900, 755, text=str(estimate_costtt.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_subbb1.cget("text"))+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)
   
-        #     canvas.create_text(900, 780, text=str(estimate_total1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
-        #     canvas.create_text(780, 780, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+            com_label = Label(canvas,text=str(edit_estimate_costtt.cget("text"))+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 779, anchor="w", window=com_label)  
+  
+            com_label = Label(canvas,text=str(edit_estimate_orderrr1.cget("text"))+""+comcursign.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 804, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 804, anchor="w", window=com_label)
+        
+          elif est_symbolcheck[0] == "after amount with space":
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_discounttt1.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)  
+            
+  
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_subbb1.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)
+    
+            com_label = Label(canvas,text=str(edit_estimate_costtt.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 779, anchor="w", window=com_label)  
+  
+            com_label = Label(canvas,text=str(edit_estimate_orderrr1.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 804, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 804, anchor="w", window=com_label)
+        
         elif est_taxcheck[12] == "2":
-          canvas.create_line(980, 715, 980, 815 )
-          canvas.create_line(720, 715, 720, 815 )
-          canvas.create_line(860, 715, 860, 815 )#1st
-          canvas.create_line(980, 815, 720, 815 )
-          canvas.create_line(980, 715, 720, 715 )
-          canvas.create_line(980, 740, 720, 740 )
-          canvas.create_line(980, 765, 720, 765 ) 
-          canvas.create_line(980, 790, 720, 790 )
-          canvas.create_line(980, 815, 720, 815 )
-
-        #   if not est_symbolcheck:
-        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+"$", fill="black", font=('Helvetica 10'))
-  
-        #     canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+"$", fill="black", font=('Helvetica 10'))
-  
-        #     canvas.create_text(900, 780, text=str(estimate_costtt.cget("text"))+"$", fill="black", font=('Helvetica 10 '))
-        #     canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
-  
-        #     canvas.create_text(900, 805, text=str(estimate_total1.cget("text"))+"$", fill="black", font=('Helvetica 10 bold'))
-        #     canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
-        #   elif est_symbolcheck[0] == "before amount":
-        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 730, text=""+comcursign.get()+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
-  
-        #     canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 755, text=""+comcursign.get()+str(estimate_ttax1.cget("text")), fill="black", font=('Helvetica 10'))
-  
-        #     canvas.create_text(900, 780, text=""+comcursign.get()+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10 '))
-        #     canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
-  
-        #     canvas.create_text(900, 805, text=""+comcursign.get()+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10 bold'))
-        #     canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
-      
-        #   elif est_symbolcheck[0] == "before amount with space":
-        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 730, text=""+comcursign.get()+" "+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
-  
-        #     canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 755, text=""+comcursign.get()+" "+str(estimate_ttax1.cget("text")), fill="black", font=('Helvetica 10'))
-  
-        #     canvas.create_text(900, 780, text=""+comcursign.get()+" "+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10 '))
-        #     canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
-  
-        #     canvas.create_text(900, 805, text=""+comcursign.get()+" "+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10 bold'))
-        #     canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
-          
-        #   elif est_symbolcheck[0] == "after amount":
-        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
-  
-        #     canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
-  
-        #     canvas.create_text(900, 780, text=str(estimate_costtt.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10 '))
-        #     canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
-  
-        #     canvas.create_text(900, 805, text=str(estimate_total1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
-        #     canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
-          
-        #   elif est_symbolcheck[0] == "after amount with space":
-        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
-  
-        #     canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
-  
-        #     canvas.create_text(900, 780, text=str(estimate_costtt.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10 '))
-        #     canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
-  
-        #     canvas.create_text(900, 805, text=str(estimate_total1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
-        #     canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
-        elif est_taxcheck[12] == "3":
           canvas.create_line(980, 715, 980, 840 )
           canvas.create_line(720, 715, 720, 840 )
           canvas.create_line(860, 715, 860, 840 )#1st
@@ -7516,98 +8670,357 @@ def mainpage():
           canvas.create_line(980, 815, 720, 815 )
           canvas.create_line(980, 840, 720, 840 )
 
-        #   if not est_symbolcheck:
-        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+          if not est_symbolcheck:
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_discounttt1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)  
   
-        #     canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+"$", fill="black", font=('Helvetica 10'))
   
-        #     canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 780, text=str(estimate_ttax2.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_subbb1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)
   
-        #     canvas.create_text(900, 805, text=str(estimate_costtt.cget("text"))+"$", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+            canvas.create_text(780, 780, text="TAX1", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_ttax1label.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)
   
-        #     canvas.create_text(900, 830, text=str(estimate_total1.cget("text"))+"$", fill="black", font=('Helvetica 10   bold'))
-        #     canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))  
-        #   elif est_symbolcheck[0] == "before amount":
-        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 730, text=""+comcursign.get()+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+            com_label = Label(canvas,text=str(edit_estimate_costtt.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 804, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 804, anchor="w", window=com_label)  
   
-        #     canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 755, text=""+comcursign.get()+str(estimate_ttax1.cget("text")), fill="black", font=('Helvetica 10'))
+            com_label = Label(canvas,text=str(edit_estimate_orderrr1.cget("text")),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 829, anchor="e", window=com_label)
+             
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 829, anchor="w", window=com_label)
+        
+          elif est_symbolcheck[0] == "before amount":
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_discounttt1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)  
   
-        #     canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 780, text=""+comcursign.get()+str(estimate_ttax2.cget("text")), fill="black", font=('Helvetica 10'))
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_subbb1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)  
   
-        #     canvas.create_text(900, 805, text=""+comcursign.get()+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+            canvas.create_text(780, 780, text="TAX1", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_ttax1label.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)  
   
-        #     canvas.create_text(900, 830, text=""+comcursign.get()+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10   bold'))
-        #     canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_costtt.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 804, anchor="e", window=com_label)  
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 804, anchor="w", window=com_label)  
+  
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_orderrr1.cget("text")),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 830, anchor="e", window=com_label)  
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 829, anchor="w", window=com_label)
+        
+      
+          elif est_symbolcheck[0] == "before amount with space":
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_discounttt1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)  
+
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_subbb1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)
+
+            canvas.create_text(780, 780, text="TAX1", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_ttax1label.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)
+
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_costtt.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 804, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 804, anchor="w", window=com_label)  
+
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_orderrr1.cget("text")),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 829, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 829, anchor="w", window=com_label)
+        
           
-        #   elif est_symbolcheck[0] == "before amount with space":
-        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 730, text=""+comcursign.get()+" "+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+          elif est_symbolcheck[0] == "after amount":
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_discounttt1.cget("text"))+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)  
+  
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_subbb1.cget("text"))+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)
+  
+            canvas.create_text(780, 780, text="TAX1", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_ttax1label.cget("text"))+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)
+  
+            com_label = Label(canvas,text=str(edit_estimate_costtt.cget("text"))+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 804, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 804, anchor="w", window=com_label)  
+  
+            com_label = Label(canvas,text=str(edit_estimate_orderrr1.cget("text"))+""+comcursign.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 829, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 829, anchor="w", window=com_label)
+        
+          
+          elif est_symbolcheck[0] == "after amount with space":
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_discounttt1.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label) 
+  
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_subbb1.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label) 
+  
+            canvas.create_text(780, 780, text="TAX1", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_ttax1label.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label) 
+  
+            com_label = Label(canvas,text=str(edit_estimate_costtt.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 804, anchor="e", window=com_label) 
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 804, anchor="w", window=com_label)  
+  
+            com_label = Label(canvas,text=str(edit_estimate_orderrr1.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 829, anchor="e", window=com_label) 
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 829, anchor="w", window=com_label)
+        
+        elif est_taxcheck[12] == "3":
+          canvas.create_line(980, 715, 980, 865 )
+          canvas.create_line(720, 715, 720, 865 )
+          canvas.create_line(860, 715, 860, 865 )#1st
+          canvas.create_line(980, 815, 720, 815 )
+          canvas.create_line(980, 715, 720, 715 )
+          canvas.create_line(980, 740, 720, 740 )
+          canvas.create_line(980, 765, 720, 765 ) 
+          canvas.create_line(980, 790, 720, 790 )
+          canvas.create_line(980, 815, 720, 815 )
+          canvas.create_line(980, 840, 720, 840 )
+          canvas.create_line(980, 865, 720, 865 )
 
-        #     canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 755, text=""+comcursign.get()+" "+str(estimate_ttax1.cget("text")), fill="black", font=('Helvetica 10'))
 
-        #     canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 780, text=""+comcursign.get()+" "+str(estimate_ttax2.cget("text")), fill="black", font=('Helvetica 10'))
+          if not est_symbolcheck:
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_discounttt1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)
+  
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_subbb1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)
+  
+            canvas.create_text(780, 780, text="TAX1", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_ttax1label.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)
+  
+            
+            com_label = Label(canvas,text=str(edit_estimate_ttax2label.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 804, anchor="e", window=com_label)
+            canvas.create_text(780, 805, text="TAX2", fill="black", font=('Helvetica 10 '))
+  
+            
+            com_label = Label(canvas,text=str(edit_estimate_costtt.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 829, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 829, anchor="w", window=com_label)  
+            
+            com_label = Label(canvas,text=str(edit_estimate_orderrr1.cget("text")),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 854, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 854, anchor="w", window=com_label)
+        
+          elif est_symbolcheck[0] == "before amount":
+            
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_discounttt1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)
+  
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_subbb1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)
+  
+            canvas.create_text(780, 780, text="TAX1", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_ttax1label.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)
+    
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_ttax2label.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 804, anchor="e", window=com_label)
+            canvas.create_text(780, 805, text="TAX2", fill="black", font=('Helvetica 10 '))
+  
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_costtt.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 829, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 829, anchor="w", window=com_label)  
+            
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_orderrr1.cget("text")),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 854, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 854, anchor="w", window=com_label)
+            
+          
+          elif est_symbolcheck[0] == "before amount with space":
+            
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_discounttt1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)
+  
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_subbb1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)
+  
+            canvas.create_text(780, 780, text="TAX1", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_ttax1label.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)
+  
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_ttax2label.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 804, anchor="e", window=com_label)
+            canvas.create_text(780, 805, text="TAX2", fill="black", font=('Helvetica 10 '))
+  
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_costtt.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 829, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 829, anchor="w", window=com_label)  
+           
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_orderrr1.cget("text")),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 854, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 854, anchor="w", window=com_label)
+            
+          elif est_symbolcheck[0] == "after amount":
+            
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_discounttt1.cget("text"))+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)
+  
+  
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_subbb1.cget("text"))+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)
+  
+            canvas.create_text(780, 780, text="TAX1", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_ttax1label.cget("text"))+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)
+  
+            com_label = Label(canvas,text=str(edit_estimate_ttax2label.cget("text"))+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 804, anchor="e", window=com_label)
+            canvas.create_text(780, 805, text="TAX2", fill="black", font=('Helvetica 10 '))
+  
+            com_label = Label(canvas,text=str(edit_estimate_costtt.cget("text"))+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 829, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 829, anchor="w", window=com_label)  
+            
+            com_label = Label(canvas,text=str(edit_estimate_orderrr1.cget("text"))+""+comcursign.get(),font=('Helvetica 10  bold'),background='white')
+            com_label_window = canvas.create_window(975, 854, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 854, anchor="w", window=com_label)
+            
+          elif est_symbolcheck[0] == "after amount with space":
+            
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
 
-        #     canvas.create_text(900, 805, text=""+comcursign.get()+" "+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
-
-        #     canvas.create_text(900, 830, text=""+comcursign.get()+" "+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10    bold'))
-        #     canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
-        #   elif est_symbolcheck[0] == "after amount":
-        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+            com_label = Label(canvas,text=str(edit_estimate_discounttt1.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)  
   
-        #     canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_subbb1.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)  
   
-        #     canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 780, text=str(estimate_ttax2.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+            canvas.create_text(780, 780, text="TAX1", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_ttax1label.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)  
   
-        #     canvas.create_text(900, 805, text=str(estimate_costtt.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+            
+            com_label = Label(canvas,text=str(edit_estimate_ttax2label.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 805, anchor="e", window=com_label)  
+            canvas.create_text(780, 805, text="TAX2", fill="black", font=('Helvetica 10 '))
   
-        #     canvas.create_text(900, 830, text=str(estimate_total1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10   bold'))
-        #     canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
-        #   elif est_symbolcheck[0] == "after amount with space":
-        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
-  
-        #     canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
-  
-        #     canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 780, text=str(estimate_ttax2.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
-  
-        #     canvas.create_text(900, 805, text=str(estimate_costtt.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
-  
-        #     canvas.create_text(900, 830, text=str(estimate_total1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10   bold'))
-        #     canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
-        est_comments = Text(canvas,font=('Helvetica 10'),width=100,height=6,fg= "black",
+            
+            com_label = Label(canvas,text=str(edit_estimate_costtt.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 829, anchor="e", window=com_label)  
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 829, anchor="w", window=com_label)  
+           
+            com_label = Label(canvas,text=str(edit_estimate_orderrr1.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 854, anchor="e", window=com_label)  
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 854, anchor="w", window=com_label)
+        
+        
+        est_comments = Text(canvas,font=('Helvetica 10'),width=105,height=6,fg= "black",
         bg="white",cursor="arrow",bd=0)
-        est_comments.insert("1.0",edit_est_data[32])
+        est_comments.insert("1.0",edit_estimates_e61.get("1.0","end-1c"))
         est_comments.config(state=DISABLED)
-        canvas.create_window(630, 900,window=est_comments)
+        canvas.create_window(630, 950,window=est_comments)
         canvas.create_text(620, 1020, text="Terms and Conditions", fill="black", font=('Helvetica 10'))
         canvas.create_line(265, 1040, 1000, 1040)
 
-        T = Text(canvas, height=3, width=90, font=('Helvetica 10'),borderwidth=0)
-        T.insert(END, edit_est_data[31])
+        T = Text(canvas, height=3, width=105, font=('Helvetica 10'),borderwidth=0,cursor="arrow")
+        T.insert(END, edit_estimates_e51.get("1.0","end-1c"))
+        T.config(state=DISABLED)
         T_window = canvas.create_window(270, 1055, anchor="nw", window=T)
 
-        canvas.create_text(315, 1150, text="Sales Person:", fill="black", font=('Helvetica 10'))
-        canvas.create_text(395, 1150, text=""+edit_est_data[14], fill="black", font=('Helvetica 10'))
-        canvas.create_text(945, 1160, text="Page 1 of 1", fill="black", font=('Helvetica 10')) 
-      elif edit_est_data[13] == 'Simplified 1 (logo on left side)':
+        canvas.create_text(315, 1140, text="Sales Person:", fill="black", font=('Helvetica 10'))
+        canvas.create_text(395, 1140, text=""+edit_estimates_e6.get(), fill="black", font=('Helvetica 10'))
+
+        com_label = Label(canvas,text=" "+edit_estimates_e21.get(),font=('Helvetica 10 '),background='white')
+        com_label_window = canvas.create_window(268, 1160, anchor="w", window=com_label)
+
+        canvas.create_text(960, 1160, text="Page 1 of 1", fill="black", font=('Helvetica 10')) 
+
+      elif edit_estimates_e5.get() == 'Simplified 1 (logo on left side)':
         previewcreate = Toplevel()
         previewcreate.geometry("1360x730")
         frame = Frame(previewcreate, width=953, height=300)
@@ -7623,6 +9036,8 @@ def mainpage():
         canvas.config(yscrollcommand=vertibar.set)
         canvas.pack(expand=True,side=LEFT,fill=BOTH)
         canvas.create_rectangle(235, 25, 1035, 1175, outline='yellow',fill='white')
+        com_label = Label(canvas,text=" "+edit_estimates_e01.get(),font=('Helvetica 10 '),background='white')
+        com_label_window = canvas.create_window(550, 65, anchor="w", window=com_label)
         try:
             image = Image.open("images/"+est_compdataord[13])
             resize_image = image.resize((250, 125))
@@ -7632,36 +9047,76 @@ def mainpage():
             canvas.create_window(425, 150,window=b2)
         except:
           pass
-        canvas.create_text(322, 245, text=""+est_str2.get(), fill="black", font=('Helvetica 12')) 
-        canvas.create_text(335, 270, text=""+est_str3.get(), fill="black", font=('Helvetica 12')) 
-        canvas.create_text(320, 295, text=""+est_str4.get(), fill="black", font=('Helvetica 12')) 
-        canvas.create_text(521, 245, text=""+edit_est_data[1], fill="black", font=('Helvetica 12')) 
-        canvas.create_text(520, 270, text=edit_est_data[2], fill="black", font=('Helvetica 12')) 
-        canvas.create_text(520, 295, text=edit_est_data[3], fill="black", font=('Helvetica 12')) 
-        #canvas.create_text(885, 100, text=" "+comname.get(), fill="black", font=('Helvetica 12 '))
+        com_label = Label(canvas,text=" "+est_str2.get(),font=('Helvetica 12 '),background='white')
+        com_label_window = canvas.create_window(300, 240, anchor="w", window=com_label)
+        
+        com_label = Label(canvas,text=" "+est_str3.get(),font=('Helvetica 12 '),background='white')
+        com_label_window = canvas.create_window(300, 260, anchor="w", window=com_label)
+        
+        com_label = Label(canvas,text=" "+est_str4.get(),font=('Helvetica 12 '),background='white')
+        com_label_window = canvas.create_window(301, 280, anchor="w", window=com_label)
+
+        com_label = Label(canvas,text=" "+edit_estimate_ee01.get(),font=('Helvetica 12 '),background='white')
+        com_label_window = canvas.create_window(471, 240, anchor="w", window=com_label)
+
+        canvas.create_text(520, 260, text=edit_estimate_ee02.get_date(), fill="black", font=('Helvetica 12')) 
+        canvas.create_text(520, 280, text=edit_estimate_ee03.get_date(), fill="black", font=('Helvetica 12'))
+
+        com_label = Label(canvas,text="Terms",font=('Helvetica 12 '),background='white')
+        com_label_window = canvas.create_window(303, 300, anchor="w", window=com_label)
+
+        com_label = Label(canvas,text="Order ref.#",font=('Helvetica 12 '),background='white')
+        com_label_window = canvas.create_window(303, 320, anchor="w", window=com_label)
+
+        com_label = Label(canvas,text=" "+edit_estimate_ee04.get(),font=('Helvetica 12 '),background='white')
+        com_label_window = canvas.create_window(470, 300, anchor="w", window=com_label)
+      
+        com_label = Label(canvas,text=" "+edit_estimate_ee11.get(),font=('Helvetica 12 '),background='white')
+        com_label_window = canvas.create_window(470, 320, anchor="w", window=com_label)
+        
         com_label = Label(canvas,text=" "+comname.get(),font=('Helvetica 12 '),background='white')
         com_label_window = canvas.create_window(976, 100, anchor="e", window=com_label)
-        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0)
+
+        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0,cursor="arrow")
         T_address.tag_configure('tag_name',justify='right')
         T_address.insert('1.0', est_compdataord[2])
         T_address.tag_add('tag_name','1.0', 'end')
+        T_address.config(state=DISABLED)
         T_address_window = canvas.create_window(694, 125, anchor="nw", window=T_address)
-        canvas.create_text(935, 225, text=""+comsalestax.get(), fill="black", font=('Helvetica 10')) 
-        canvas.create_text(909, 255, text=" "+est_str1.get(), fill="black", font=('Helvetica 20 bold'))
-        canvas.create_text(335, 345, text=""+est_str5.get(), fill="black", font=('Helvetica 10 underline')) 
-        canvas.create_text(680, 345, text="Ship to", fill="black", font=('Helvetica 10 underline'))
-        canvas.create_text(315, 365, text=""+edit_est_data[18], fill="black", font=('Helvetica 10')) 
-        canvas.create_text(673, 365, text=""+edit_est_data[20], fill="black", font=('Helvetica 10'))  
-        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0)
+
+        com_label = Label(canvas,text=" "+comsalestax.get(),font=('Helvetica 10 '),background='white')
+        com_label_window = canvas.create_window(976, 225, anchor="e", window=com_label)
+
+        com_label = Label(canvas,text=" "+est_str1.get(),font=('Helvetica 20 bold '),background='white')
+        com_label_window = canvas.create_window(976, 255, anchor="e", window=com_label)
+
+        com_label = Label(canvas,text=""+est_str5.get(),font=('Helvetica 10 underline'),background='white')
+        com_label_window = canvas.create_window(301, 345, anchor="w", window=com_label)
+
+        com_label = Label(canvas,text="Ship to",font=('Helvetica 10 underline'),background='white')
+        com_label_window = canvas.create_window(660, 345, anchor="w", window=com_label)
+
+        com_label = Label(canvas,text=" "+edit_estimate_combo.get(),font=('Helvetica 10'),background='white')
+        com_label_window = canvas.create_window(302, 365, anchor="w", window=com_label)
+
+        com_label = Label(canvas,text=""+edit_estimate_ee3.get(),font=('Helvetica 10'),background='white')
+        com_label_window = canvas.create_window(662, 365, anchor="w", window=com_label)
+
+        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0,cursor="arrow")
         T_address.tag_configure('tag_name',justify='left')
-        T_address.insert('1.0', edit_est_data[19])
+        T_address.insert('1.0', edit_estimate_ee2.get("1.0",END))
         T_address.tag_add('tag_name','1.0', 'end')
+        T_address.config(state=DISABLED)
         T_address_window = canvas.create_window(306, 380, anchor="nw", window=T_address)
-        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0)
+
+        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0,cursor="arrow")
         T_address.tag_configure('tag_name',justify='left')
-        T_address.insert('1.0', edit_est_data[21])
+        T_address.insert('1.0', edit_estimate_ee4.get("1.0",END))
         T_address.tag_add('tag_name','1.0', 'end')
+        T_address.config(state=DISABLED)
         T_address_window = canvas.create_window(665, 380, anchor="nw", window=T_address)
+        com_label = Label(canvas,text=" "+edit_estimates_e11.get(),font=('Helvetica 10 '),background='white')
+        com_label_window = canvas.create_window(550, 455, anchor="w", window=com_label)
         s = ttk.Style()
         s.configure('mystyle_prev_1.Treeview.Heading', background=''+win_menu1.get(),State='DISABLE')
 
@@ -7670,7 +9125,7 @@ def mainpage():
         est_prev_tree.column("# 0",width=1)
         est_prev_tree.column("1", anchor=CENTER, width=530)
         est_prev_tree.column("2", anchor=CENTER, width=80)
-        est_prev_tree.column("3", anchor=CENTER, width=95)
+        est_prev_tree.column("3", anchor=E, width=95)
         est_prev_tree.heading("#0", text="")
         est_prev_tree.heading("1", text="Product/Service - Description")
         est_prev_tree.heading("2", text="Quantity")
@@ -7696,7 +9151,7 @@ def mainpage():
             est_prev_tree.insert(parent='', index='end',text='', values=(previewdata1[1]+"-"+previewdata1[2],previewdata1[4],previewdata1[7]))
           elif est_taxcheck[12] == "3":
             est_prev_tree.insert(parent='', index='end',text='', values=(previewdata1[1]+"-"+previewdata1[2],previewdata1[4],previewdata1[8]))
-      
+
         if est_taxcheck[12] == "1":
           canvas.create_line(980, 715, 980, 815 )
           canvas.create_line(720, 715, 720, 815 )
@@ -7707,128 +9162,129 @@ def mainpage():
           canvas.create_line(980, 765, 720, 765 ) 
           canvas.create_line(980, 790, 720, 790 )
           canvas.create_line(980, 815, 720, 815 )
-        #   if not est_symbolcheck:
-        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+"$", fill="black", font=('Helvetica 10'))
-  
-        #     canvas.create_text(900, 755, text=str(estimate_costtt.cget("text"))+"$", fill="black", font=('Helvetica 10 '))
-        #     canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10 '))
-  
-        #     canvas.create_text(900, 780, text=str(estimate_total1.cget("text"))+"$", fill="black", font=('Helvetica 10 bold'))
-        #     canvas.create_text(780, 780, text="Estimate total.", fill="black", font=('Helvetica 10 bold'))
 
-        #   elif est_symbolcheck[0] == "before amount":
-        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 730, text=""+comcursign.get()+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+          if not est_symbolcheck:
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_discounttt1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)  
   
-        #     canvas.create_text(900, 755, text=""+comcursign.get()+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_subbb1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)  
   
-        #     canvas.create_text(900, 780, text=""+comcursign.get()+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10 bold'))
-        #     canvas.create_text(780, 780, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
-        #   elif est_symbolcheck[0] == "before amount with space":
-        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 730, text=""+comcursign.get()+" "+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_costtt.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)  
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 779, anchor="w", window=com_label)  
   
-        #     canvas.create_text(900, 755, text=""+comcursign.get()+" "+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10'))
-  
-        #     canvas.create_text(900, 780, text=""+comcursign.get()+" "+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10 bold'))
-        #     canvas.create_text(780, 780, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
-        #   elif est_symbolcheck[0] == "after amount":
-        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
-  
-        #     canvas.create_text(900, 755, text=str(estimate_costtt.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10 '))
-        #     canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10 '))
-  
-        #     canvas.create_text(900, 780, text=str(estimate_total1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
-        #     canvas.create_text(780, 780, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+            com_label = Label(canvas,text=str(edit_estimate_orderrr1.cget("text")),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 805, anchor="e", window=com_label)  
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 804, anchor="w", window=com_label)
+        
 
-        #   elif est_symbolcheck[0] == "after amount with space":
-        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+          elif est_symbolcheck[0] == "before amount":
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_discounttt1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)  
   
-        #     canvas.create_text(900, 755, text=str(estimate_costtt.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10 '))
   
-        #     canvas.create_text(900, 780, text=str(estimate_total1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
-        #     canvas.create_text(780, 780, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_subbb1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)  
+   
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_costtt.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)  
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 779, anchor="w", window=com_label)  
+  
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_orderrr1.cget("text")),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 804, anchor="e", window=com_label)  
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 804, anchor="w", window=com_label)
+        
+          elif est_symbolcheck[0] == "before amount with space":
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_discounttt1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)  
+  
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_subbb1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)  
+  
+            
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_costtt.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)  
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 779, anchor="w", window=com_label)  
+  
+            
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_orderrr1.cget("text")),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 804, anchor="e", window=com_label)  
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 804, anchor="w", window=com_label)
+        
+          elif est_symbolcheck[0] == "after amount":
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_discounttt1.cget("text"))+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)  
+  
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_subbb1.cget("text"))+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)
+  
+            com_label = Label(canvas,text=str(edit_estimate_costtt.cget("text"))+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 779, anchor="w", window=com_label)  
+  
+            com_label = Label(canvas,text=str(edit_estimate_orderrr1.cget("text"))+""+comcursign.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 804, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 804, anchor="w", window=com_label)
+        
+          elif est_symbolcheck[0] == "after amount with space":
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_discounttt1.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)  
+            
+  
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_subbb1.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)
+    
+            com_label = Label(canvas,text=str(edit_estimate_costtt.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 779, anchor="w", window=com_label)  
+  
+            com_label = Label(canvas,text=str(edit_estimate_orderrr1.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 804, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 804, anchor="w", window=com_label)
+        
         elif est_taxcheck[12] == "2":
-          canvas.create_line(980, 715, 980, 815 )
-          canvas.create_line(720, 715, 720, 815 )
-          canvas.create_line(860, 715, 860, 815 )#1st
-          canvas.create_line(980, 815, 720, 815 )
-          canvas.create_line(980, 715, 720, 715 )
-          canvas.create_line(980, 740, 720, 740 )
-          canvas.create_line(980, 765, 720, 765 ) 
-          canvas.create_line(980, 790, 720, 790 )
-          canvas.create_line(980, 815, 720, 815 )
-
-        #   if not est_symbolcheck:
-        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+"$", fill="black", font=('Helvetica 10'))
-  
-        #     canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+"$", fill="black", font=('Helvetica 10'))
-  
-        #     canvas.create_text(900, 780, text=str(estimate_costtt.cget("text"))+"$", fill="black", font=('Helvetica 10 '))
-        #     canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
-  
-        #     canvas.create_text(900, 805, text=str(estimate_total1.cget("text"))+"$", fill="black", font=('Helvetica 10 bold'))
-        #     canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
-        #   elif est_symbolcheck[0] == "before amount":
-        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 730, text=""+comcursign.get()+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
-  
-        #     canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 755, text=""+comcursign.get()+str(estimate_ttax1.cget("text")), fill="black", font=('Helvetica 10'))
-  
-        #     canvas.create_text(900, 780, text=""+comcursign.get()+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10 '))
-        #     canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
-  
-        #     canvas.create_text(900, 805, text=""+comcursign.get()+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10 bold'))
-        #     canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
-      
-        #   elif est_symbolcheck[0] == "before amount with space":
-        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 730, text=""+comcursign.get()+" "+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
-  
-        #     canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 755, text=""+comcursign.get()+" "+str(estimate_ttax1.cget("text")), fill="black", font=('Helvetica 10'))
-  
-        #     canvas.create_text(900, 780, text=""+comcursign.get()+" "+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10 '))
-        #     canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
-  
-        #     canvas.create_text(900, 805, text=""+comcursign.get()+" "+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10 bold'))
-        #     canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
-          
-        #   elif est_symbolcheck[0] == "after amount":
-        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
-  
-        #     canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
-  
-        #     canvas.create_text(900, 780, text=str(estimate_costtt.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10 '))
-        #     canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
-  
-        #     canvas.create_text(900, 805, text=str(estimate_total1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
-        #     canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
-          
-        #   elif est_symbolcheck[0] == "after amount with space":
-        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
-  
-        #     canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
-  
-        #     canvas.create_text(900, 780, text=str(estimate_costtt.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10 '))
-        #     canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
-  
-        #     canvas.create_text(900, 805, text=str(estimate_total1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
-        #     canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
-        elif est_taxcheck[12] == "3":
           canvas.create_line(980, 715, 980, 840 )
           canvas.create_line(720, 715, 720, 840 )
           canvas.create_line(860, 715, 860, 840 )#1st
@@ -7840,98 +9296,357 @@ def mainpage():
           canvas.create_line(980, 815, 720, 815 )
           canvas.create_line(980, 840, 720, 840 )
 
-        #   if not est_symbolcheck:
-        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+          if not est_symbolcheck:
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_discounttt1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)  
   
-        #     canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+"$", fill="black", font=('Helvetica 10'))
   
-        #     canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 780, text=str(estimate_ttax2.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_subbb1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)
   
-        #     canvas.create_text(900, 805, text=str(estimate_costtt.cget("text"))+"$", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+            canvas.create_text(780, 780, text="TAX1", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_ttax1label.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)
   
-        #     canvas.create_text(900, 830, text=str(estimate_total1.cget("text"))+"$", fill="black", font=('Helvetica 10   bold'))
-        #     canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))  
-        #   elif est_symbolcheck[0] == "before amount":
-        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 730, text=""+comcursign.get()+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+            com_label = Label(canvas,text=str(edit_estimate_costtt.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 804, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 804, anchor="w", window=com_label)  
   
-        #     canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 755, text=""+comcursign.get()+str(estimate_ttax1.cget("text")), fill="black", font=('Helvetica 10'))
+            com_label = Label(canvas,text=str(edit_estimate_orderrr1.cget("text")),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 829, anchor="e", window=com_label)
+             
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 829, anchor="w", window=com_label)
+        
+          elif est_symbolcheck[0] == "before amount":
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_discounttt1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)  
   
-        #     canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 780, text=""+comcursign.get()+str(estimate_ttax2.cget("text")), fill="black", font=('Helvetica 10'))
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_subbb1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)  
   
-        #     canvas.create_text(900, 805, text=""+comcursign.get()+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+            canvas.create_text(780, 780, text="TAX1", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_ttax1label.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)  
   
-        #     canvas.create_text(900, 830, text=""+comcursign.get()+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10   bold'))
-        #     canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_costtt.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 804, anchor="e", window=com_label)  
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 804, anchor="w", window=com_label)  
+  
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_orderrr1.cget("text")),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 830, anchor="e", window=com_label)  
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 829, anchor="w", window=com_label)
+        
+      
+          elif est_symbolcheck[0] == "before amount with space":
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_discounttt1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)  
+
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_subbb1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)
+
+            canvas.create_text(780, 780, text="TAX1", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_ttax1label.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)
+
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_costtt.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 804, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 804, anchor="w", window=com_label)  
+
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_orderrr1.cget("text")),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 829, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 829, anchor="w", window=com_label)
+        
           
-        #   elif est_symbolcheck[0] == "before amount with space":
-        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 730, text=""+comcursign.get()+" "+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+          elif est_symbolcheck[0] == "after amount":
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_discounttt1.cget("text"))+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)  
+  
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_subbb1.cget("text"))+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)
+  
+            canvas.create_text(780, 780, text="TAX1", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_ttax1label.cget("text"))+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)
+  
+            com_label = Label(canvas,text=str(edit_estimate_costtt.cget("text"))+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 804, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 804, anchor="w", window=com_label)  
+  
+            com_label = Label(canvas,text=str(edit_estimate_orderrr1.cget("text"))+""+comcursign.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 829, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 829, anchor="w", window=com_label)
+        
+          
+          elif est_symbolcheck[0] == "after amount with space":
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_discounttt1.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label) 
+  
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_subbb1.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label) 
+  
+            canvas.create_text(780, 780, text="TAX1", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_ttax1label.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label) 
+  
+            com_label = Label(canvas,text=str(edit_estimate_costtt.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 804, anchor="e", window=com_label) 
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 804, anchor="w", window=com_label)  
+  
+            com_label = Label(canvas,text=str(edit_estimate_orderrr1.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 829, anchor="e", window=com_label) 
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 829, anchor="w", window=com_label)
+        
+        elif est_taxcheck[12] == "3":
+          canvas.create_line(980, 715, 980, 865 )
+          canvas.create_line(720, 715, 720, 865 )
+          canvas.create_line(860, 715, 860, 865 )#1st
+          canvas.create_line(980, 815, 720, 815 )
+          canvas.create_line(980, 715, 720, 715 )
+          canvas.create_line(980, 740, 720, 740 )
+          canvas.create_line(980, 765, 720, 765 ) 
+          canvas.create_line(980, 790, 720, 790 )
+          canvas.create_line(980, 815, 720, 815 )
+          canvas.create_line(980, 840, 720, 840 )
+          canvas.create_line(980, 865, 720, 865 )
 
-        #     canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 755, text=""+comcursign.get()+" "+str(estimate_ttax1.cget("text")), fill="black", font=('Helvetica 10'))
 
-        #     canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 780, text=""+comcursign.get()+" "+str(estimate_ttax2.cget("text")), fill="black", font=('Helvetica 10'))
+          if not est_symbolcheck:
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_discounttt1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)
+  
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_subbb1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)
+  
+            canvas.create_text(780, 780, text="TAX1", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_ttax1label.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)
+  
+            
+            com_label = Label(canvas,text=str(edit_estimate_ttax2label.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 804, anchor="e", window=com_label)
+            canvas.create_text(780, 805, text="TAX2", fill="black", font=('Helvetica 10 '))
+  
+            
+            com_label = Label(canvas,text=str(edit_estimate_costtt.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 829, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 829, anchor="w", window=com_label)  
+            
+            com_label = Label(canvas,text=str(edit_estimate_orderrr1.cget("text")),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 854, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 854, anchor="w", window=com_label)
+        
+          elif est_symbolcheck[0] == "before amount":
+            
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_discounttt1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)
+  
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_subbb1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)
+  
+            canvas.create_text(780, 780, text="TAX1", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_ttax1label.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)
+    
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_ttax2label.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 804, anchor="e", window=com_label)
+            canvas.create_text(780, 805, text="TAX2", fill="black", font=('Helvetica 10 '))
+  
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_costtt.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 829, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 829, anchor="w", window=com_label)  
+            
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_orderrr1.cget("text")),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 854, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 854, anchor="w", window=com_label)
+            
+          
+          elif est_symbolcheck[0] == "before amount with space":
+            
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_discounttt1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)
+  
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_subbb1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)
+  
+            canvas.create_text(780, 780, text="TAX1", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_ttax1label.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)
+  
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_ttax2label.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 804, anchor="e", window=com_label)
+            canvas.create_text(780, 805, text="TAX2", fill="black", font=('Helvetica 10 '))
+  
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_costtt.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 829, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 829, anchor="w", window=com_label)  
+           
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_orderrr1.cget("text")),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 854, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 854, anchor="w", window=com_label)
+            
+          elif est_symbolcheck[0] == "after amount":
+            
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_discounttt1.cget("text"))+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)
+  
+  
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_subbb1.cget("text"))+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)
+  
+            canvas.create_text(780, 780, text="TAX1", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_ttax1label.cget("text"))+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)
+  
+            com_label = Label(canvas,text=str(edit_estimate_ttax2label.cget("text"))+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 804, anchor="e", window=com_label)
+            canvas.create_text(780, 805, text="TAX2", fill="black", font=('Helvetica 10 '))
+  
+            com_label = Label(canvas,text=str(edit_estimate_costtt.cget("text"))+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 829, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 829, anchor="w", window=com_label)  
+            
+            com_label = Label(canvas,text=str(edit_estimate_orderrr1.cget("text"))+""+comcursign.get(),font=('Helvetica 10  bold'),background='white')
+            com_label_window = canvas.create_window(975, 854, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 854, anchor="w", window=com_label)
+            
+          elif est_symbolcheck[0] == "after amount with space":
+            
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
 
-        #     canvas.create_text(900, 805, text=""+comcursign.get()+" "+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+            com_label = Label(canvas,text=str(edit_estimate_discounttt1.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)  
+  
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_subbb1.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)  
+  
+            canvas.create_text(780, 780, text="TAX1", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_ttax1label.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)  
+  
+            
+            com_label = Label(canvas,text=str(edit_estimate_ttax2label.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 805, anchor="e", window=com_label)  
+            canvas.create_text(780, 805, text="TAX2", fill="black", font=('Helvetica 10 '))
+  
+            
+            com_label = Label(canvas,text=str(edit_estimate_costtt.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 829, anchor="e", window=com_label)  
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 829, anchor="w", window=com_label)  
+           
+            com_label = Label(canvas,text=str(edit_estimate_orderrr1.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 854, anchor="e", window=com_label)  
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 854, anchor="w", window=com_label)
+        
 
-        #     canvas.create_text(900, 830, text=""+comcursign.get()+" "+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10    bold'))
-        #     canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
-        #   elif est_symbolcheck[0] == "after amount":
-        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
-  
-        #     canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
-  
-        #     canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 780, text=str(estimate_ttax2.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
-  
-        #     canvas.create_text(900, 805, text=str(estimate_costtt.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
-  
-        #     canvas.create_text(900, 830, text=str(estimate_total1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10   bold'))
-        #     canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
-        #   elif est_symbolcheck[0] == "after amount with space":
-        #     canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
-  
-        #     canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
-  
-        #     canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(900, 780, text=str(estimate_ttax2.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
-  
-        #     canvas.create_text(900, 805, text=str(estimate_costtt.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
-        #     canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
-  
-        #     canvas.create_text(900, 830, text=str(estimate_total1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10   bold'))
-        #     canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
-        est_comments = Text(canvas,font=('Helvetica 10'),width=100,height=6,fg= "black",
+        est_comments = Text(canvas,font=('Helvetica 10'),width=105,height=6,fg= "black",
         bg="white",cursor="arrow",bd=0)
-        est_comments.insert("1.0",edit_est_data[32])
+        est_comments.insert("1.0",edit_estimates_e61.get("1.0","end-1c"))
         est_comments.config(state=DISABLED)
-        canvas.create_window(630, 900,window=est_comments)
+        canvas.create_window(630, 950,window=est_comments)
         canvas.create_text(620, 1020, text="Terms and Conditions", fill="black", font=('Helvetica 10'))
         canvas.create_line(265, 1040, 1000, 1040)
 
-        T = Text(canvas, height=3, width=90, font=('Helvetica 10'),borderwidth=0)
-        T.insert(END, edit_est_data[31])
+        T = Text(canvas, height=3, width=105, font=('Helvetica 10'),borderwidth=0,cursor="arrow")
+        T.insert(END, edit_estimates_e51.get("1.0","end-1c"))
+        T.config(state=DISABLED)
         T_window = canvas.create_window(270, 1055, anchor="nw", window=T)
 
-        canvas.create_text(315, 1150, text="Sales Person:", fill="black", font=('Helvetica 10'))
-        canvas.create_text(395, 1150, text=""+edit_est_data[14], fill="black", font=('Helvetica 10'))
-        canvas.create_text(945, 1160, text="Page 1 of 1", fill="black", font=('Helvetica 10'))  
-      elif edit_est_data[13] == 'Simplified 2 (logo on right side)': 
+        canvas.create_text(315, 1140, text="Sales Person:", fill="black", font=('Helvetica 10'))
+        canvas.create_text(395, 1140, text=""+edit_estimates_e6.get(), fill="black", font=('Helvetica 10'))
+
+        com_label = Label(canvas,text=" "+edit_estimates_e21.get(),font=('Helvetica 10 '),background='white')
+        com_label_window = canvas.create_window(268, 1160, anchor="w", window=com_label)
+
+        canvas.create_text(960, 1160, text="Page 1 of 1", fill="black", font=('Helvetica 10'))
+
+      elif edit_estimates_e5.get() == 'Simplified 2 (logo on right side)': 
         previewcreate = Toplevel()
         previewcreate.geometry("1360x730")
         frame = Frame(previewcreate, width=953, height=300)
@@ -7947,6 +9662,8 @@ def mainpage():
         canvas.config(yscrollcommand=vertibar.set)
         canvas.pack(expand=True,side=LEFT,fill=BOTH)
         canvas.create_rectangle(235, 25, 1035, 1175, outline='yellow',fill='white')
+        com_label = Label(canvas,text=" "+edit_estimates_e01.get(),font=('Helvetica 10 '),background='white')
+        com_label_window = canvas.create_window(550, 65, anchor="w", window=com_label)
         try:
             image = Image.open("images/"+est_compdataord[13])
             resize_image = image.resize((250, 125))
@@ -7956,38 +9673,81 @@ def mainpage():
             canvas.create_window(845, 150,window=b2)
         except:
           pass
-        canvas.create_text(722, 245, text=""+est_str2.get(), fill="black", font=('Helvetica 12')) 
-        canvas.create_text(735, 270, text=""+est_str3.get(), fill="black", font=('Helvetica 12')) 
-        canvas.create_text(720, 295, text=""+est_str4.get(), fill="black", font=('Helvetica 12')) 
-        canvas.create_text(921, 245, text=""+edit_est_data[1], fill="black", font=('Helvetica 12')) 
-        canvas.create_text(920, 270, text=edit_est_data[2], fill="black", font=('Helvetica 12')) 
-        canvas.create_text(920, 295, text=edit_est_data[3], fill="black", font=('Helvetica 12')) 
-        #canvas.create_text(375, 100, text=" "+comname.get(), fill="black", font=('Helvetica 12 '))
+
+        com_label = Label(canvas,text=" "+est_str2.get(),font=('Helvetica 12 '),background='white')
+        com_label_window = canvas.create_window(720, 240, anchor="w", window=com_label)
+        
+        com_label = Label(canvas,text=" "+est_str3.get(),font=('Helvetica 12 '),background='white')
+        com_label_window = canvas.create_window(720, 260, anchor="w", window=com_label)
+        
+        com_label = Label(canvas,text=" "+est_str4.get(),font=('Helvetica 12 '),background='white')
+        com_label_window = canvas.create_window(722, 280, anchor="w", window=com_label)
+
+        
+        com_label = Label(canvas,text=" "+edit_estimate_ee01.get(),font=('Helvetica 12 '),background='white')
+        com_label_window = canvas.create_window(870, 240, anchor="w", window=com_label)
+
+        canvas.create_text(920, 260, text=edit_estimate_ee02.get_date(), fill="black", font=('Helvetica 12')) 
+        canvas.create_text(920, 280, text=edit_estimate_ee03.get_date(), fill="black", font=('Helvetica 12')) 
+
+        com_label = Label(canvas,text="Terms",font=('Helvetica 12 '),background='white')
+        com_label_window = canvas.create_window(724, 300, anchor="w", window=com_label)
+
+        com_label = Label(canvas,text="Order ref.#",font=('Helvetica 12 '),background='white')
+        com_label_window = canvas.create_window(724, 320, anchor="w", window=com_label)
+
+
+        com_label = Label(canvas,text=" "+edit_estimate_ee04.get(),font=('Helvetica 12 '),background='white')
+        com_label_window = canvas.create_window(870, 300, anchor="w", window=com_label)
+      
+        com_label = Label(canvas,text=" "+edit_estimate_ee11.get(),font=('Helvetica 12 '),background='white')
+        com_label_window = canvas.create_window(870, 320, anchor="w", window=com_label) 
+        
         com_label = Label(canvas,text=" "+comname.get(),font=('Helvetica 12 '),background='white')
         com_label_window = canvas.create_window(280, 100, anchor="w", window=com_label)
-        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0)
+
+        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0,cursor="arrow")
         T_address.tag_configure('tag_name',justify='left')
         T_address.insert('1.0', est_compdataord[2])
         T_address.tag_add('tag_name','1.0', 'end')
+        T_address.config(state=DISABLED)
         T_address_window = canvas.create_window(284, 125, anchor="nw", window=T_address)
-        canvas.create_text(319, 225, text=""+comsalestax.get(), fill="black", font=('Helvetica 10')) 
-        canvas.create_text(339, 255, text=" "+est_str1.get(), fill="black", font=('Helvetica 20 bold'))
-        canvas.create_text(335, 345, text=""+est_str5.get(), fill="black", font=('Helvetica 10 underline')) 
-        canvas.create_text(680, 345, text="Ship to", fill="black", font=('Helvetica 10 underline'))
-        canvas.create_text(315, 365, text=""+edit_est_data[18], fill="black", font=('Helvetica 10')) 
-        canvas.create_text(673, 365, text=""+edit_est_data[20], fill="black", font=('Helvetica 10'))  
-        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0)
-        T_address.tag_configure('tag_name',justify='left')
-        T_address.insert('1.0', edit_est_data[19])
-        T_address.tag_add('tag_name','1.0', 'end')
-        T_address_window = canvas.create_window(306, 380, anchor="nw", window=T_address)
-        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0)
-        T_address.tag_configure('tag_name',justify='left')
-        T_address.insert('1.0', edit_est_data[21])
-        T_address.tag_add('tag_name','1.0', 'end')
-        T_address_window = canvas.create_window(665, 380, anchor="nw", window=T_address)
+
+        com_label = Label(canvas,text=" "+comsalestax.get(),font=('Helvetica 10 '),background='white')
+        com_label_window = canvas.create_window(280, 225, anchor="w", window=com_label)
 
         
+        com_label = Label(canvas,text=" "+est_str1.get(),font=('Helvetica 20 bold'),background='white')
+        com_label_window = canvas.create_window(278, 255, anchor="w", window=com_label)
+
+        com_label = Label(canvas,text=""+est_str5.get(),font=('Helvetica 10 underline'),background='white')
+        com_label_window = canvas.create_window(301, 345, anchor="w", window=com_label)
+
+        com_label = Label(canvas,text="Ship to",font=('Helvetica 10 underline'),background='white')
+        com_label_window = canvas.create_window(660, 345, anchor="w", window=com_label)
+
+        com_label = Label(canvas,text=" "+edit_estimate_combo.get(),font=('Helvetica 10'),background='white')
+        com_label_window = canvas.create_window(302, 365, anchor="w", window=com_label)
+
+        com_label = Label(canvas,text=""+edit_estimate_ee3.get(),font=('Helvetica 10'),background='white')
+        com_label_window = canvas.create_window(662, 365, anchor="w", window=com_label)
+
+        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0,cursor="arrow")
+        T_address.tag_configure('tag_name',justify='left')
+        T_address.insert('1.0', edit_estimate_ee2.get("1.0",END))
+        T_address.tag_add('tag_name','1.0', 'end')
+        T_address.config(state=DISABLED)
+        T_address_window = canvas.create_window(306, 380, anchor="nw", window=T_address)
+
+        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0,cursor="arrow")
+        T_address.tag_configure('tag_name',justify='left')
+        T_address.insert('1.0', edit_estimate_ee4.get("1.0",END))
+        T_address.tag_add('tag_name','1.0', 'end')
+        T_address.config(state=DISABLED)
+        T_address_window = canvas.create_window(665, 380, anchor="nw", window=T_address)
+
+        com_label = Label(canvas,text=" "+edit_estimates_e11.get(),font=('Helvetica 10 '),background='white')
+        com_label_window = canvas.create_window(550, 455, anchor="w", window=com_label)
 
         s = ttk.Style()
         s.configure('mystyle_prev_1.Treeview.Heading', background=''+win_menu1.get(),State='DISABLE')
@@ -7997,7 +9757,7 @@ def mainpage():
         est_prev_tree.column("# 0",width=1)
         est_prev_tree.column("1", anchor=CENTER, width=530)
         est_prev_tree.column("2", anchor=CENTER, width=80)
-        est_prev_tree.column("3", anchor=CENTER, width=95)
+        est_prev_tree.column("3", anchor=E, width=95)
         est_prev_tree.heading("#0", text="")
         est_prev_tree.heading("1", text="Product/Service - Description")
         est_prev_tree.heading("2", text="Quantity")
@@ -8023,7 +9783,7 @@ def mainpage():
             est_prev_tree.insert(parent='', index='end',text='', values=(previewdata1[1]+"-"+previewdata1[2],previewdata1[4],previewdata1[7]))
           elif est_taxcheck[12] == "3":
             est_prev_tree.insert(parent='', index='end',text='', values=(previewdata1[1]+"-"+previewdata1[2],previewdata1[4],previewdata1[8]))
-      
+
         if est_taxcheck[12] == "1":
           canvas.create_line(980, 715, 980, 815 )
           canvas.create_line(720, 715, 720, 815 )
@@ -8035,128 +9795,128 @@ def mainpage():
           canvas.create_line(980, 790, 720, 790 )
           canvas.create_line(980, 815, 720, 815 )
 
-      #     if not est_symbolcheck:
-      #       canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+          if not est_symbolcheck:
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_discounttt1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)  
   
-      #       canvas.create_text(900, 755, text=str(estimate_costtt.cget("text"))+"$", fill="black", font=('Helvetica 10 '))
-      #       canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_subbb1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)  
   
-      #       canvas.create_text(900, 780, text=str(estimate_total1.cget("text"))+"$", fill="black", font=('Helvetica 10 bold'))
-      #       canvas.create_text(780, 780, text="Estimate total.", fill="black", font=('Helvetica 10 bold'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_costtt.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)  
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 779, anchor="w", window=com_label)  
+  
+            com_label = Label(canvas,text=str(edit_estimate_orderrr1.cget("text")),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 805, anchor="e", window=com_label)  
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 804, anchor="w", window=com_label)
+        
 
-      #     elif est_symbolcheck[0] == "before amount":
-      #       canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(900, 730, text=""+comcursign.get()+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+          elif est_symbolcheck[0] == "before amount":
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_discounttt1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)  
   
-      #       canvas.create_text(900, 755, text=""+comcursign.get()+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10 '))
   
-      #       canvas.create_text(900, 780, text=""+comcursign.get()+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10 bold'))
-      #       canvas.create_text(780, 780, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
-      #     elif est_symbolcheck[0] == "before amount with space":
-      #       canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(900, 730, text=""+comcursign.get()+" "+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_subbb1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)  
+   
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_costtt.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)  
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 779, anchor="w", window=com_label)  
   
-      #       canvas.create_text(900, 755, text=""+comcursign.get()+" "+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10'))
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_orderrr1.cget("text")),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 804, anchor="e", window=com_label)  
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 804, anchor="w", window=com_label)
+        
+          elif est_symbolcheck[0] == "before amount with space":
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_discounttt1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)  
   
-      #       canvas.create_text(900, 780, text=""+comcursign.get()+" "+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10 bold'))
-      #       canvas.create_text(780, 780, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
-      #     elif est_symbolcheck[0] == "after amount":
-      #       canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_subbb1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)  
   
-      #       canvas.create_text(900, 755, text=str(estimate_costtt.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10 '))
-      #       canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_costtt.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)  
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 779, anchor="w", window=com_label)  
   
-      #       canvas.create_text(900, 780, text=str(estimate_total1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
-      #       canvas.create_text(780, 780, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
-
-      #     elif est_symbolcheck[0] == "after amount with space":
-      #       canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_orderrr1.cget("text")),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 804, anchor="e", window=com_label)  
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 804, anchor="w", window=com_label)
+        
+          elif est_symbolcheck[0] == "after amount":
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_discounttt1.cget("text"))+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)  
   
-      #       canvas.create_text(900, 755, text=str(estimate_costtt.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_subbb1.cget("text"))+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)
   
-      #       canvas.create_text(900, 780, text=str(estimate_total1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
-      #       canvas.create_text(780, 780, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+            com_label = Label(canvas,text=str(edit_estimate_costtt.cget("text"))+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 779, anchor="w", window=com_label)  
+  
+            com_label = Label(canvas,text=str(edit_estimate_orderrr1.cget("text"))+""+comcursign.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 804, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 804, anchor="w", window=com_label)
+        
+          elif est_symbolcheck[0] == "after amount with space":
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_discounttt1.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)  
+            
+  
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_subbb1.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)
+    
+            com_label = Label(canvas,text=str(edit_estimate_costtt.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 779, anchor="w", window=com_label)  
+  
+            com_label = Label(canvas,text=str(edit_estimate_orderrr1.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 804, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 804, anchor="w", window=com_label)
+        
         elif est_taxcheck[12] == "2":
-          canvas.create_line(980, 715, 980, 815 )
-          canvas.create_line(720, 715, 720, 815 )
-          canvas.create_line(860, 715, 860, 815 )#1st
-          canvas.create_line(980, 815, 720, 815 )
-          canvas.create_line(980, 715, 720, 715 )
-          canvas.create_line(980, 740, 720, 740 )
-          canvas.create_line(980, 765, 720, 765 ) 
-          canvas.create_line(980, 790, 720, 790 )
-          canvas.create_line(980, 815, 720, 815 )
-
-      #     if not est_symbolcheck:
-      #       canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+"$", fill="black", font=('Helvetica 10'))
-  
-      #       canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+"$", fill="black", font=('Helvetica 10'))
-  
-      #       canvas.create_text(900, 780, text=str(estimate_costtt.cget("text"))+"$", fill="black", font=('Helvetica 10 '))
-      #       canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
-  
-      #       canvas.create_text(900, 805, text=str(estimate_total1.cget("text"))+"$", fill="black", font=('Helvetica 10 bold'))
-      #       canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
-      #     elif est_symbolcheck[0] == "before amount":
-      #       canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(900, 730, text=""+comcursign.get()+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
-  
-      #       canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(900, 755, text=""+comcursign.get()+str(estimate_ttax1.cget("text")), fill="black", font=('Helvetica 10'))
-  
-      #       canvas.create_text(900, 780, text=""+comcursign.get()+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10 '))
-      #       canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
-  
-      #       canvas.create_text(900, 805, text=""+comcursign.get()+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10 bold'))
-      #       canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
-      
-      #     elif est_symbolcheck[0] == "before amount with space":
-      #       canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(900, 730, text=""+comcursign.get()+" "+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
-  
-      #       canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(900, 755, text=""+comcursign.get()+" "+str(estimate_ttax1.cget("text")), fill="black", font=('Helvetica 10'))
-  
-      #       canvas.create_text(900, 780, text=""+comcursign.get()+" "+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10 '))
-      #       canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
-  
-      #       canvas.create_text(900, 805, text=""+comcursign.get()+" "+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10 bold'))
-      #       canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
-          
-      #     elif est_symbolcheck[0] == "after amount":
-      #       canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
-  
-      #       canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
-  
-      #       canvas.create_text(900, 780, text=str(estimate_costtt.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10 '))
-      #       canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
-  
-      #       canvas.create_text(900, 805, text=str(estimate_total1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
-      #       canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
-          
-      #     elif est_symbolcheck[0] == "after amount with space":
-      #       canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
-  
-      #       canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
-  
-      #       canvas.create_text(900, 780, text=str(estimate_costtt.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10 '))
-      #       canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
-  
-      #       canvas.create_text(900, 805, text=str(estimate_total1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
-      #       canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
-        elif est_taxcheck[12] == "3":
           canvas.create_line(980, 715, 980, 840 )
           canvas.create_line(720, 715, 720, 840 )
           canvas.create_line(860, 715, 860, 840 )#1st
@@ -8168,98 +9928,357 @@ def mainpage():
           canvas.create_line(980, 815, 720, 815 )
           canvas.create_line(980, 840, 720, 840 )
 
-      #     if not est_symbolcheck:
-      #       canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+          if not est_symbolcheck:
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_discounttt1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)  
   
-      #       canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+"$", fill="black", font=('Helvetica 10'))
   
-      #       canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(900, 780, text=str(estimate_ttax2.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_subbb1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)
   
-      #       canvas.create_text(900, 805, text=str(estimate_costtt.cget("text"))+"$", fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+            canvas.create_text(780, 780, text="TAX1", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_ttax1label.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)
   
-      #       canvas.create_text(900, 830, text=str(estimate_total1.cget("text"))+"$", fill="black", font=('Helvetica 10   bold'))
-      #       canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))  
-      #     elif est_symbolcheck[0] == "before amount":
-      #       canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(900, 730, text=""+comcursign.get()+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+            com_label = Label(canvas,text=str(edit_estimate_costtt.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 804, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 804, anchor="w", window=com_label)  
   
-      #       canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(900, 755, text=""+comcursign.get()+str(estimate_ttax1.cget("text")), fill="black", font=('Helvetica 10'))
+            com_label = Label(canvas,text=str(edit_estimate_orderrr1.cget("text")),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 829, anchor="e", window=com_label)
+             
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 829, anchor="w", window=com_label)
+        
+          elif est_symbolcheck[0] == "before amount":
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_discounttt1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)  
   
-      #       canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(900, 780, text=""+comcursign.get()+str(estimate_ttax2.cget("text")), fill="black", font=('Helvetica 10'))
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_subbb1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)  
   
-      #       canvas.create_text(900, 805, text=""+comcursign.get()+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+            canvas.create_text(780, 780, text="TAX1", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_ttax1label.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)  
   
-      #       canvas.create_text(900, 830, text=""+comcursign.get()+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10   bold'))
-      #       canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_costtt.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 804, anchor="e", window=com_label)  
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 804, anchor="w", window=com_label)  
+  
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_orderrr1.cget("text")),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 830, anchor="e", window=com_label)  
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 829, anchor="w", window=com_label)
+        
+      
+          elif est_symbolcheck[0] == "before amount with space":
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_discounttt1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)  
+
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_subbb1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)
+
+            canvas.create_text(780, 780, text="TAX1", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_ttax1label.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)
+
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_costtt.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 804, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 804, anchor="w", window=com_label)  
+
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_orderrr1.cget("text")),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 829, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 829, anchor="w", window=com_label)
+        
           
-      #     elif est_symbolcheck[0] == "before amount with space":
-      #       canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(900, 730, text=""+comcursign.get()+" "+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+          elif est_symbolcheck[0] == "after amount":
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_discounttt1.cget("text"))+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)  
+  
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_subbb1.cget("text"))+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)
+  
+            canvas.create_text(780, 780, text="TAX1", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_ttax1label.cget("text"))+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)
+  
+            com_label = Label(canvas,text=str(edit_estimate_costtt.cget("text"))+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 804, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 804, anchor="w", window=com_label)  
+  
+            com_label = Label(canvas,text=str(edit_estimate_orderrr1.cget("text"))+""+comcursign.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 829, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 829, anchor="w", window=com_label)
+        
+          
+          elif est_symbolcheck[0] == "after amount with space":
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_discounttt1.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label) 
+  
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_subbb1.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label) 
+  
+            canvas.create_text(780, 780, text="TAX1", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_ttax1label.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label) 
+  
+            com_label = Label(canvas,text=str(edit_estimate_costtt.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 804, anchor="e", window=com_label) 
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 804, anchor="w", window=com_label)  
+  
+            com_label = Label(canvas,text=str(edit_estimate_orderrr1.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 829, anchor="e", window=com_label) 
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 829, anchor="w", window=com_label)
+        
+        elif est_taxcheck[12] == "3":
+          canvas.create_line(980, 715, 980, 865 )
+          canvas.create_line(720, 715, 720, 865 )
+          canvas.create_line(860, 715, 860, 865 )#1st
+          canvas.create_line(980, 815, 720, 815 )
+          canvas.create_line(980, 715, 720, 715 )
+          canvas.create_line(980, 740, 720, 740 )
+          canvas.create_line(980, 765, 720, 765 ) 
+          canvas.create_line(980, 790, 720, 790 )
+          canvas.create_line(980, 815, 720, 815 )
+          canvas.create_line(980, 840, 720, 840 )
+          canvas.create_line(980, 865, 720, 865 )
 
-      #       canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(900, 755, text=""+comcursign.get()+" "+str(estimate_ttax1.cget("text")), fill="black", font=('Helvetica 10'))
 
-      #       canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(900, 780, text=""+comcursign.get()+" "+str(estimate_ttax2.cget("text")), fill="black", font=('Helvetica 10'))
+          if not est_symbolcheck:
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_discounttt1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)
+  
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_subbb1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)
+  
+            canvas.create_text(780, 780, text="TAX1", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_ttax1label.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)
+  
+            
+            com_label = Label(canvas,text=str(edit_estimate_ttax2label.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 804, anchor="e", window=com_label)
+            canvas.create_text(780, 805, text="TAX2", fill="black", font=('Helvetica 10 '))
+  
+            
+            com_label = Label(canvas,text=str(edit_estimate_costtt.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 829, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 829, anchor="w", window=com_label)  
+            
+            com_label = Label(canvas,text=str(edit_estimate_orderrr1.cget("text")),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 854, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 854, anchor="w", window=com_label)
+        
+          elif est_symbolcheck[0] == "before amount":
+            
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_discounttt1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)
+  
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_subbb1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)
+  
+            canvas.create_text(780, 780, text="TAX1", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_ttax1label.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)
+    
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_ttax2label.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 804, anchor="e", window=com_label)
+            canvas.create_text(780, 805, text="TAX2", fill="black", font=('Helvetica 10 '))
+  
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_costtt.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 829, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 829, anchor="w", window=com_label)  
+            
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_orderrr1.cget("text")),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 854, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 854, anchor="w", window=com_label)
+            
+          
+          elif est_symbolcheck[0] == "before amount with space":
+            
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_discounttt1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)
+  
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_subbb1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)
+  
+            canvas.create_text(780, 780, text="TAX1", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_ttax1label.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)
+  
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_ttax2label.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 804, anchor="e", window=com_label)
+            canvas.create_text(780, 805, text="TAX2", fill="black", font=('Helvetica 10 '))
+  
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_costtt.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 829, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 829, anchor="w", window=com_label)  
+           
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_orderrr1.cget("text")),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 854, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 854, anchor="w", window=com_label)
+            
+          elif est_symbolcheck[0] == "after amount":
+            
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_discounttt1.cget("text"))+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)
+  
+  
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_subbb1.cget("text"))+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)
+  
+            canvas.create_text(780, 780, text="TAX1", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_ttax1label.cget("text"))+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)
+  
+            com_label = Label(canvas,text=str(edit_estimate_ttax2label.cget("text"))+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 804, anchor="e", window=com_label)
+            canvas.create_text(780, 805, text="TAX2", fill="black", font=('Helvetica 10 '))
+  
+            com_label = Label(canvas,text=str(edit_estimate_costtt.cget("text"))+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 829, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 829, anchor="w", window=com_label)  
+            
+            com_label = Label(canvas,text=str(edit_estimate_orderrr1.cget("text"))+""+comcursign.get(),font=('Helvetica 10  bold'),background='white')
+            com_label_window = canvas.create_window(975, 854, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 854, anchor="w", window=com_label)
+            
+          elif est_symbolcheck[0] == "after amount with space":
+            
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
 
-      #       canvas.create_text(900, 805, text=""+comcursign.get()+" "+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+            com_label = Label(canvas,text=str(edit_estimate_discounttt1.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)  
+  
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_subbb1.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)  
+  
+            canvas.create_text(780, 780, text="TAX1", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_ttax1label.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)  
+  
+            
+            com_label = Label(canvas,text=str(edit_estimate_ttax2label.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 805, anchor="e", window=com_label)  
+            canvas.create_text(780, 805, text="TAX2", fill="black", font=('Helvetica 10 '))
+  
+            
+            com_label = Label(canvas,text=str(edit_estimate_costtt.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 829, anchor="e", window=com_label)  
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 829, anchor="w", window=com_label)  
+           
+            com_label = Label(canvas,text=str(edit_estimate_orderrr1.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 854, anchor="e", window=com_label)  
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 854, anchor="w", window=com_label)
+        
 
-      #       canvas.create_text(900, 830, text=""+comcursign.get()+" "+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10    bold'))
-      #       canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
-      #     elif est_symbolcheck[0] == "after amount":
-      #       canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
-  
-      #       canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
-  
-      #       canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(900, 780, text=str(estimate_ttax2.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
-  
-      #       canvas.create_text(900, 805, text=str(estimate_costtt.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
-  
-      #       canvas.create_text(900, 830, text=str(estimate_total1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10   bold'))
-      #       canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
-      #     elif est_symbolcheck[0] == "after amount with space":
-      #       canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
-  
-      #       canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
-  
-      #       canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(900, 780, text=str(estimate_ttax2.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
-  
-      #       canvas.create_text(900, 805, text=str(estimate_costtt.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
-  
-      #       canvas.create_text(900, 830, text=str(estimate_total1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10   bold'))
-      #       canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
-        est_comments = Text(canvas,font=('Helvetica 10'),width=100,height=6,fg= "black",
+        est_comments = Text(canvas,font=('Helvetica 10'),width=105,height=6,fg= "black",
         bg="white",cursor="arrow",bd=0)
-        est_comments.insert("1.0",edit_est_data[32])
+        est_comments.insert("1.0",edit_estimates_e61.get("1.0","end-1c"))
         est_comments.config(state=DISABLED)
-        canvas.create_window(630, 900,window=est_comments)
+        canvas.create_window(630, 950,window=est_comments)
         canvas.create_text(620, 1020, text="Terms and Conditions", fill="black", font=('Helvetica 10'))
         canvas.create_line(265, 1040, 1000, 1040)
 
-        T = Text(canvas, height=3, width=90, font=('Helvetica 10'),borderwidth=0)
-        T.insert(END, edit_est_data[31])
+        T = Text(canvas, height=3, width=105, font=('Helvetica 10'),borderwidth=0,cursor="arrow")
+        T.insert(END, edit_estimates_e51.get("1.0","end-1c"))
+        T.config(state=DISABLED)
         T_window = canvas.create_window(270, 1055, anchor="nw", window=T)
 
-        canvas.create_text(315, 1150, text="Sales Person:", fill="black", font=('Helvetica 10'))
-        canvas.create_text(395, 1150, text=""+edit_est_data[14], fill="black", font=('Helvetica 10'))
-        canvas.create_text(945, 1160, text="Page 1 of 1", fill="black", font=('Helvetica 10')) 
-      elif edit_est_data[13] == 'Business Classic': 
+        canvas.create_text(315, 1140, text="Sales Person:", fill="black", font=('Helvetica 10'))
+        canvas.create_text(395, 1140, text=""+edit_estimates_e6.get(), fill="black", font=('Helvetica 10'))
+
+        com_label = Label(canvas,text=" "+edit_estimates_e21.get(),font=('Helvetica 10 '),background='white')
+        com_label_window = canvas.create_window(268, 1160, anchor="w", window=com_label)
+
+        canvas.create_text(960, 1160, text="Page 1 of 1", fill="black", font=('Helvetica 10'))
+
+      elif edit_estimates_e5.get() == 'Business Classic': 
         previewcreate = Toplevel()
         previewcreate.geometry("1360x730")
         frame = Frame(previewcreate, width=953, height=300)
@@ -8275,6 +10294,8 @@ def mainpage():
         canvas.config(yscrollcommand=vertibar.set)
         canvas.pack(expand=True,side=LEFT,fill=BOTH)
         canvas.create_rectangle(235, 25, 1035, 1175, outline='yellow',fill='white')
+        com_label = Label(canvas,text=" "+edit_estimates_e01.get(),font=('Helvetica 10 '),background='white')
+        com_label_window = canvas.create_window(550, 65, anchor="w", window=com_label)
         canvas.create_line(265, 100, 750, 100,fill='orange',width=3)
         canvas.create_line(750, 100, 1000, 100,fill='grey',width=3)
         try:
@@ -8286,28 +10307,46 @@ def mainpage():
           canvas.create_window(425, 225,window=b2)
         except:
           pass
-        #canvas.create_text(665, 150, text=" "+comname.get(), fill="black", font=('Helvetica 12 '))
+        
         com_label = Label(canvas,text=" "+comname.get(),font=('Helvetica 12 '),background='white')
         com_label_window = canvas.create_window(573, 150, anchor="w", window=com_label)
-        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0)
+
+        T_address = Text(canvas, height=5, width=40, font=('Helvetica 10'),borderwidth=0,cursor="arrow")
         T_address.tag_configure('tag_name',justify='left')
         T_address.insert('1.0', est_compdataord[2])
         T_address.tag_add('tag_name','1.0', 'end')
+        T_address.config(state=DISABLED)
         T_address_window = canvas.create_window(576, 175, anchor="nw", window=T_address)
-        canvas.create_text(612, 275, text=""+comsalestax.get(), fill="black", font=('Helvetica 10')) 
-        canvas.create_text(793, 150, text=""+edit_est_data[20], fill="black", font=('Helvetica 10')) 
-        T_address = Text(canvas, height=5, width=35, font=('Helvetica 10'),borderwidth=0)
+
+        com_label = Label(canvas,text=" "+comsalestax.get(),font=('Helvetica 10 '),background='white')
+        com_label_window = canvas.create_window(573, 275, anchor="w", window=com_label)
+
+        com_label = Label(canvas,text=" "+edit_estimate_ee3.get(),font=('Helvetica 10 '),background='white')
+        com_label_window = canvas.create_window(777, 150, anchor="w", window=com_label)
+
+        T_address = Text(canvas, height=5, width=35, font=('Helvetica 10'),borderwidth=0,cursor="arrow")
         T_address.tag_configure('tag_name',justify='left')
-        T_address.insert('1.0', edit_est_data[21])
+        T_address.insert('1.0', edit_estimate_ee4.get("1.0",END))
         T_address.tag_add('tag_name','1.0', 'end')
+        T_address.config(state=DISABLED)
         T_address_window = canvas.create_window(784, 170, anchor="nw", window=T_address) 
 
-        canvas.create_text(812, 270, text=""+est_str2.get(), fill="black", font=('Helvetica 10')) 
-        canvas.create_text(825, 295, text=""+est_str3.get(), fill="black", font=('Helvetica 10')) 
-        canvas.create_text(810, 320, text=""+est_str4.get(), fill="black", font=('Helvetica 10')) 
-        canvas.create_text(921, 270, text=""+edit_est_data[1], fill="black", font=('Helvetica 10')) 
-        canvas.create_text(920, 295, text=edit_est_data[2], fill="black", font=('Helvetica 10')) 
-        canvas.create_text(920, 320, text=edit_est_data[3], fill="black", font=('Helvetica 10')) 
+    
+        com_label = Label(canvas,text=" "+est_str2.get(),font=('Helvetica 10 '),background='white')
+        com_label_window = canvas.create_window(777, 300, anchor="w", window=com_label)
+        
+        com_label = Label(canvas,text=" "+est_str3.get(),font=('Helvetica 10 '),background='white')
+        com_label_window = canvas.create_window(777, 325, anchor="w", window=com_label)
+        
+        com_label = Label(canvas,text=" "+est_str4.get(),font=('Helvetica 10 '),background='white')
+        com_label_window = canvas.create_window(779, 350, anchor="w", window=com_label)
+
+        com_label = Label(canvas,text=" "+edit_estimate_ee01.get(),font=('Helvetica 10 '),background='white')
+        com_label_window = canvas.create_window(900, 300, anchor="w", window=com_label)
+        canvas.create_text(940, 325, text=edit_estimate_ee02.get_date(), fill="black", font=('Helvetica 10')) 
+        canvas.create_text(940, 350, text=edit_estimate_ee03.get_date(), fill="black", font=('Helvetica 10')) 
+        com_label = Label(canvas,text=" "+edit_estimates_e11.get(),font=('Helvetica 10 '),background='white')
+        com_label_window = canvas.create_window(550, 455, anchor="w", window=com_label)
 
         s = ttk.Style()
         s.configure('mystyle_prev_1.Treeview.Heading', background=''+win_menu1.get(),State='DISABLE')
@@ -8319,7 +10358,7 @@ def mainpage():
         est_prev_tree.column("2", anchor=CENTER, width=225)
         est_prev_tree.column("3", anchor=CENTER, width=90)
         est_prev_tree.column("4", anchor=CENTER, width=80)
-        est_prev_tree.column("5", anchor=CENTER, width=85)
+        est_prev_tree.column("5", anchor=E, width=85)
         est_prev_tree.heading("#0", text="")
         est_prev_tree.heading("1", text="Product/Service")
         est_prev_tree.heading("2", text="Description")
@@ -8348,11 +10387,11 @@ def mainpage():
             est_prev_tree.insert(parent='', index='end',text='', values=(previewdata1[1],previewdata1[2],previewdata1[3],previewdata1[4],previewdata1[7]))
           elif est_taxcheck[12] == "3":
             est_prev_tree.insert(parent='', index='end',text='', values=(previewdata1[1],previewdata1[2],previewdata1[3],previewdata1[4],previewdata1[8]))
-        
+
         if est_taxcheck[12] == "1":
           canvas.create_line(980, 715, 980, 815 )
           canvas.create_line(720, 715, 720, 815 )
-          canvas.create_line(860, 715, 860, 815 )#1st
+          #canvas.create_line(860, 715, 860, 815 )#1st
           canvas.create_line(980, 815, 720, 815 )
           canvas.create_line(980, 715, 720, 715 )
           canvas.create_line(980, 740, 720, 740 )
@@ -8360,131 +10399,131 @@ def mainpage():
           canvas.create_line(980, 790, 720, 790 )
           canvas.create_line(980, 815, 720, 815 )
 
-      #     if not est_symbolcheck:
-      #       canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+          if not est_symbolcheck:
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_discounttt1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)  
   
-      #       canvas.create_text(900, 755, text=str(estimate_costtt.cget("text"))+"$", fill="black", font=('Helvetica 10 '))
-      #       canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_subbb1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)  
   
-      #       canvas.create_text(900, 780, text=str(estimate_total1.cget("text"))+"$", fill="black", font=('Helvetica 10 bold'))
-      #       canvas.create_text(780, 780, text="Estimate total.", fill="black", font=('Helvetica 10 bold'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_costtt.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)  
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 779, anchor="w", window=com_label)  
+  
+            com_label = Label(canvas,text=str(edit_estimate_orderrr1.cget("text")),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 805, anchor="e", window=com_label)  
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 804, anchor="w", window=com_label)
+        
 
-      #     elif est_symbolcheck[0] == "before amount":
-      #       canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(900, 730, text=""+comcursign.get()+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+          elif est_symbolcheck[0] == "before amount":
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_discounttt1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)  
   
-      #       canvas.create_text(900, 755, text=""+comcursign.get()+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10 '))
   
-      #       canvas.create_text(900, 780, text=""+comcursign.get()+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10 bold'))
-      #       canvas.create_text(780, 780, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
-      #     elif est_symbolcheck[0] == "before amount with space":
-      #       canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(900, 730, text=""+comcursign.get()+" "+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_subbb1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)  
+   
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_costtt.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)  
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 779, anchor="w", window=com_label)  
   
-      #       canvas.create_text(900, 755, text=""+comcursign.get()+" "+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10'))
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_orderrr1.cget("text")),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 804, anchor="e", window=com_label)  
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 804, anchor="w", window=com_label)
+        
+          elif est_symbolcheck[0] == "before amount with space":
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_discounttt1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)  
   
-      #       canvas.create_text(900, 780, text=""+comcursign.get()+" "+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10 bold'))
-      #       canvas.create_text(780, 780, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
-      #     elif est_symbolcheck[0] == "after amount":
-      #       canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_subbb1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)  
   
-      #       canvas.create_text(900, 755, text=str(estimate_costtt.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10 '))
-      #       canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_costtt.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)  
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 779, anchor="w", window=com_label)  
   
-      #       canvas.create_text(900, 780, text=str(estimate_total1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
-      #       canvas.create_text(780, 780, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
-
-      #     elif est_symbolcheck[0] == "after amount with space":
-      #       canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_orderrr1.cget("text")),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 804, anchor="e", window=com_label)  
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 804, anchor="w", window=com_label)
+        
+          elif est_symbolcheck[0] == "after amount":
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_discounttt1.cget("text"))+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)  
   
-      #       canvas.create_text(900, 755, text=str(estimate_costtt.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(780, 755, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_subbb1.cget("text"))+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)
   
-      #       canvas.create_text(900, 780, text=str(estimate_total1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
-      #       canvas.create_text(780, 780, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+            com_label = Label(canvas,text=str(edit_estimate_costtt.cget("text"))+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 779, anchor="w", window=com_label)  
+  
+            com_label = Label(canvas,text=str(edit_estimate_orderrr1.cget("text"))+""+comcursign.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 804, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 804, anchor="w", window=com_label)
+        
+          elif est_symbolcheck[0] == "after amount with space":
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_discounttt1.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)  
+            
+  
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_subbb1.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)
+    
+            com_label = Label(canvas,text=str(edit_estimate_costtt.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 779, anchor="w", window=com_label)  
+  
+            com_label = Label(canvas,text=str(edit_estimate_orderrr1.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 804, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 804, anchor="w", window=com_label)
+        
         elif est_taxcheck[12] == "2":
-          canvas.create_line(980, 715, 980, 815 )
-          canvas.create_line(720, 715, 720, 815 )
-          canvas.create_line(860, 715, 860, 815 )#1st
-          canvas.create_line(980, 815, 720, 815 )
-          canvas.create_line(980, 715, 720, 715 )
-          canvas.create_line(980, 740, 720, 740 )
-          canvas.create_line(980, 765, 720, 765 ) 
-          canvas.create_line(980, 790, 720, 790 )
-          canvas.create_line(980, 815, 720, 815 )
-
-      #     if not est_symbolcheck:
-      #       canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+"$", fill="black", font=('Helvetica 10'))
-  
-      #       canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+"$", fill="black", font=('Helvetica 10'))
-  
-      #       canvas.create_text(900, 780, text=str(estimate_costtt.cget("text"))+"$", fill="black", font=('Helvetica 10 '))
-      #       canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
-  
-      #       canvas.create_text(900, 805, text=str(estimate_total1.cget("text"))+"$", fill="black", font=('Helvetica 10 bold'))
-      #       canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
-      #     elif est_symbolcheck[0] == "before amount":
-      #       canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(900, 730, text=""+comcursign.get()+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
-  
-      #       canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(900, 755, text=""+comcursign.get()+str(estimate_ttax1.cget("text")), fill="black", font=('Helvetica 10'))
-  
-      #       canvas.create_text(900, 780, text=""+comcursign.get()+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10 '))
-      #       canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
-  
-      #       canvas.create_text(900, 805, text=""+comcursign.get()+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10 bold'))
-      #       canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
-      
-      #     elif est_symbolcheck[0] == "before amount with space":
-      #       canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(900, 730, text=""+comcursign.get()+" "+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
-  
-      #       canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(900, 755, text=""+comcursign.get()+" "+str(estimate_ttax1.cget("text")), fill="black", font=('Helvetica 10'))
-  
-      #       canvas.create_text(900, 780, text=""+comcursign.get()+" "+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10 '))
-      #       canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
-  
-      #       canvas.create_text(900, 805, text=""+comcursign.get()+" "+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10 bold'))
-      #       canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
-          
-      #     elif est_symbolcheck[0] == "after amount":
-      #       canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
-  
-      #       canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
-  
-      #       canvas.create_text(900, 780, text=str(estimate_costtt.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10 '))
-      #       canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
-  
-      #       canvas.create_text(900, 805, text=str(estimate_total1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
-      #       canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
-          
-      #     elif est_symbolcheck[0] == "after amount with space":
-      #       canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
-  
-      #       canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
-  
-      #       canvas.create_text(900, 780, text=str(estimate_costtt.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10 '))
-      #       canvas.create_text(780, 780, text="Extra Cost", fill="black", font=('Helvetica 10'))
-  
-      #       canvas.create_text(900, 805, text=str(estimate_total1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10 bold'))
-      #       canvas.create_text(780, 805, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
-        elif est_taxcheck[12] == "3":
           canvas.create_line(980, 715, 980, 840 )
           canvas.create_line(720, 715, 720, 840 )
-          canvas.create_line(860, 715, 860, 840 )#1st
+          #canvas.create_line(860, 715, 860, 840 )#1st
           canvas.create_line(980, 815, 720, 815 )
           canvas.create_line(980, 715, 720, 715 )
           canvas.create_line(980, 740, 720, 740 )
@@ -8493,106 +10532,405 @@ def mainpage():
           canvas.create_line(980, 815, 720, 815 )
           canvas.create_line(980, 840, 720, 840 )
 
-      #     if not est_symbolcheck:
-      #       canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+          if not est_symbolcheck:
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_discounttt1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)  
   
-      #       canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+"$", fill="black", font=('Helvetica 10'))
   
-      #       canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(900, 780, text=str(estimate_ttax2.cget("text"))+"$", fill="black", font=('Helvetica 10'))
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_subbb1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)
   
-      #       canvas.create_text(900, 805, text=str(estimate_costtt.cget("text"))+"$", fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+            canvas.create_text(780, 780, text="TAX1", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_ttax1label.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)
   
-      #       canvas.create_text(900, 830, text=str(estimate_total1.cget("text"))+"$", fill="black", font=('Helvetica 10   bold'))
-      #       canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))  
-      #     elif est_symbolcheck[0] == "before amount":
-      #       canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(900, 730, text=""+comcursign.get()+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+            com_label = Label(canvas,text=str(edit_estimate_costtt.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 804, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 804, anchor="w", window=com_label)  
   
-      #       canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(900, 755, text=""+comcursign.get()+str(estimate_ttax1.cget("text")), fill="black", font=('Helvetica 10'))
+            com_label = Label(canvas,text=str(edit_estimate_orderrr1.cget("text")),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 829, anchor="e", window=com_label)
+             
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 829, anchor="w", window=com_label)
+        
+          elif est_symbolcheck[0] == "before amount":
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_discounttt1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)  
   
-      #       canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(900, 780, text=""+comcursign.get()+str(estimate_ttax2.cget("text")), fill="black", font=('Helvetica 10'))
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_subbb1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)  
   
-      #       canvas.create_text(900, 805, text=""+comcursign.get()+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+            canvas.create_text(780, 780, text="TAX1", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_ttax1label.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)  
   
-      #       canvas.create_text(900, 830, text=""+comcursign.get()+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10   bold'))
-      #       canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_costtt.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 804, anchor="e", window=com_label)  
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 804, anchor="w", window=com_label)  
+  
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_orderrr1.cget("text")),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 830, anchor="e", window=com_label)  
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 829, anchor="w", window=com_label)
+        
+      
+          elif est_symbolcheck[0] == "before amount with space":
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_discounttt1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)  
+
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_subbb1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)
+
+            canvas.create_text(780, 780, text="TAX1", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_ttax1label.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)
+
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_costtt.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 804, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 804, anchor="w", window=com_label)  
+
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_orderrr1.cget("text")),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 829, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 829, anchor="w", window=com_label)
+        
           
-      #     elif est_symbolcheck[0] == "before amount with space":
-      #       canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(900, 730, text=""+comcursign.get()+" "+str(estimate_subbb1.cget("text")), fill="black", font=('Helvetica 10'))
+          elif est_symbolcheck[0] == "after amount":
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_discounttt1.cget("text"))+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)  
+  
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_subbb1.cget("text"))+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)
+  
+            canvas.create_text(780, 780, text="TAX1", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_ttax1label.cget("text"))+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)
+  
+            com_label = Label(canvas,text=str(edit_estimate_costtt.cget("text"))+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 804, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 804, anchor="w", window=com_label)  
+  
+            com_label = Label(canvas,text=str(edit_estimate_orderrr1.cget("text"))+""+comcursign.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 829, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 829, anchor="w", window=com_label)
+        
+          
+          elif est_symbolcheck[0] == "after amount with space":
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_discounttt1.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label) 
+  
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_subbb1.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label) 
+  
+            canvas.create_text(780, 780, text="TAX1", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_ttax1label.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label) 
+  
+            com_label = Label(canvas,text=str(edit_estimate_costtt.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 804, anchor="e", window=com_label) 
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 804, anchor="w", window=com_label)  
+  
+            com_label = Label(canvas,text=str(edit_estimate_orderrr1.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 829, anchor="e", window=com_label) 
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 829, anchor="w", window=com_label)
+        
+        elif est_taxcheck[12] == "3":
+          canvas.create_line(980, 715, 980, 865 )
+          canvas.create_line(720, 715, 720, 865 )
+          #canvas.create_line(860, 715, 860, 865 )#1st
+          canvas.create_line(980, 815, 720, 815 )
+          canvas.create_line(980, 715, 720, 715 )
+          canvas.create_line(980, 740, 720, 740 )
+          canvas.create_line(980, 765, 720, 765 ) 
+          canvas.create_line(980, 790, 720, 790 )
+          canvas.create_line(980, 815, 720, 815 )
+          canvas.create_line(980, 840, 720, 840 )
+          canvas.create_line(980, 865, 720, 865 )
 
-      #       canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(900, 755, text=""+comcursign.get()+" "+str(estimate_ttax1.cget("text")), fill="black", font=('Helvetica 10'))
 
-      #       canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(900, 780, text=""+comcursign.get()+" "+str(estimate_ttax2.cget("text")), fill="black", font=('Helvetica 10'))
+          if not est_symbolcheck:
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_discounttt1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)
+  
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_subbb1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)
+  
+            canvas.create_text(780, 780, text="TAX1", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_ttax1label.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)
+  
+            
+            com_label = Label(canvas,text=str(edit_estimate_ttax2label.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 804, anchor="e", window=com_label)
+            canvas.create_text(780, 805, text="TAX2", fill="black", font=('Helvetica 10 '))
+  
+            
+            com_label = Label(canvas,text=str(edit_estimate_costtt.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 829, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 829, anchor="w", window=com_label)  
+            
+            com_label = Label(canvas,text=str(edit_estimate_orderrr1.cget("text")),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 854, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 854, anchor="w", window=com_label)
+        
+          elif est_symbolcheck[0] == "before amount":
+            
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_discounttt1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)
+  
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_subbb1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)
+  
+            canvas.create_text(780, 780, text="TAX1", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_ttax1label.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)
+    
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_ttax2label.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 804, anchor="e", window=com_label)
+            canvas.create_text(780, 805, text="TAX2", fill="black", font=('Helvetica 10 '))
+  
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_costtt.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 829, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 829, anchor="w", window=com_label)  
+            
+            com_label = Label(canvas,text=""+comcursign.get()+str(edit_estimate_orderrr1.cget("text")),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 854, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 854, anchor="w", window=com_label)
+            
+          
+          elif est_symbolcheck[0] == "before amount with space":
+            
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_discounttt1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)
+  
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_subbb1.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)
+  
+            canvas.create_text(780, 780, text="TAX1", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_ttax1label.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)
+  
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_ttax2label.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 804, anchor="e", window=com_label)
+            canvas.create_text(780, 805, text="TAX2", fill="black", font=('Helvetica 10 '))
+  
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_costtt.cget("text")),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 829, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 829, anchor="w", window=com_label)  
+           
+            com_label = Label(canvas,text=""+comcursign.get()+" "+str(edit_estimate_orderrr1.cget("text")),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 854, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 854, anchor="w", window=com_label)
+            
+          elif est_symbolcheck[0] == "after amount":
+            
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_discounttt1.cget("text"))+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)
+  
+  
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_subbb1.cget("text"))+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)
+  
+            canvas.create_text(780, 780, text="TAX1", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_ttax1label.cget("text"))+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)
+  
+            com_label = Label(canvas,text=str(edit_estimate_ttax2label.cget("text"))+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 804, anchor="e", window=com_label)
+            canvas.create_text(780, 805, text="TAX2", fill="black", font=('Helvetica 10 '))
+  
+            com_label = Label(canvas,text=str(edit_estimate_costtt.cget("text"))+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 829, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 829, anchor="w", window=com_label)  
+            
+            com_label = Label(canvas,text=str(edit_estimate_orderrr1.cget("text"))+""+comcursign.get(),font=('Helvetica 10  bold'),background='white')
+            com_label_window = canvas.create_window(975, 854, anchor="e", window=com_label)
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 854, anchor="w", window=com_label)
+            
+          elif est_symbolcheck[0] == "after amount with space":
+            
+            canvas.create_text(780, 730, text=str(float(edit_estimates_disrate.get())) + "" +"% Discount", fill="black", font=('Helvetica 10'))
 
-      #       canvas.create_text(900, 805, text=""+comcursign.get()+" "+str(estimate_costtt.cget("text")), fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
+            com_label = Label(canvas,text=str(edit_estimate_discounttt1.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 729, anchor="e", window=com_label)  
+  
+            canvas.create_text(780, 755, text="Subtotal", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_subbb1.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 754, anchor="e", window=com_label)  
+  
+            canvas.create_text(780, 780, text="TAX1", fill="black", font=('Helvetica 10'))
+            
+            com_label = Label(canvas,text=str(edit_estimate_ttax1label.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 779, anchor="e", window=com_label)  
+  
+            
+            com_label = Label(canvas,text=str(edit_estimate_ttax2label.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 805, anchor="e", window=com_label)  
+            canvas.create_text(780, 805, text="TAX2", fill="black", font=('Helvetica 10 '))
+  
+            
+            com_label = Label(canvas,text=str(edit_estimate_costtt.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(975, 829, anchor="e", window=com_label)  
+            
+            com_label = Label(canvas,text=""+edit_estimates_e1.get(),font=('Helvetica 10 '),background='white')
+            com_label_window = canvas.create_window(725, 829, anchor="w", window=com_label)  
+           
+            com_label = Label(canvas,text=str(edit_estimate_orderrr1.cget("text"))+" "+""+comcursign.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(975, 854, anchor="e", window=com_label)  
+            
+            com_label = Label(canvas,text=" "+est_str6.get(),font=('Helvetica 10 bold'),background='white')
+            com_label_window = canvas.create_window(731, 854, anchor="w", window=com_label)
+        
+        
+        canvas.create_line(265, 900, 750, 900,fill='orange',width=3)
+        canvas.create_line(750, 900, 1000, 900,fill='grey',width=3)
 
-      #       canvas.create_text(900, 830, text=""+comcursign.get()+" "+str(estimate_total1.cget("text")), fill="black", font=('Helvetica 10    bold'))
-      #       canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
-      #     elif est_symbolcheck[0] == "after amount":
-      #       canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
-  
-      #       canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
-  
-      #       canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(900, 780, text=str(estimate_ttax2.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
-  
-      #       canvas.create_text(900, 805, text=str(estimate_costtt.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
-  
-      #       canvas.create_text(900, 830, text=str(estimate_total1.cget("text"))+""+comcursign.get(), fill="black", font=('Helvetica 10   bold'))
-      #       canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
-      #     elif est_symbolcheck[0] == "after amount with space":
-      #       canvas.create_text(780, 730, text="Subtotal", fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(900, 730, text=str(estimate_subbb1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
-  
-      #       canvas.create_text(780, 755, text="TAX1", fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(900, 755, text=str(estimate_ttax1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
-  
-      #       canvas.create_text(780, 780, text="TAX2", fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(900, 780, text=str(estimate_ttax2.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
-  
-      #       canvas.create_text(900, 805, text=str(estimate_costtt.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10'))
-      #       canvas.create_text(780, 805, text="Extra Cost", fill="black", font=('Helvetica 10 '))
-  
-      #       canvas.create_text(900, 830, text=str(estimate_total1.cget("text"))+" "+""+comcursign.get(), fill="black", font=('Helvetica 10   bold'))
-      #       canvas.create_text(780, 830, text=""+est_str6.get(), fill="black", font=('Helvetica 10 bold'))
-        canvas.create_line(265, 850, 750, 850,fill='orange',width=3)
-        canvas.create_line(750, 850, 1000, 850,fill='grey',width=3)
-
-        est_comments = Text(canvas,font=('Helvetica 10'),width=100,height=6,fg= "black",
+        est_comments = Text(canvas,font=('Helvetica 10'),width=105,height=6,fg= "black",
         bg="white",cursor="arrow",bd=0)
-        est_comments.insert("1.0",edit_est_data[32])
+        est_comments.insert("1.0",edit_estimates_e61.get("1.0","end-1c"))
         est_comments.config(state=DISABLED)
-        canvas.create_window(630, 920,window=est_comments)
+        canvas.create_window(630, 965,window=est_comments)
 
         canvas.create_text(620, 1020, text="Terms and Conditions", fill="black", font=('Helvetica 10'))
         canvas.create_line(265, 1040, 750, 1040,fill='orange',width=3)
         canvas.create_line(750, 1040, 1000, 1040,fill='grey',width=3)
 
-        T = Text(canvas, height=3, width=90, font=('Helvetica 10'),borderwidth=0)
-        T.insert(END, edit_est_data[31])
+        T = Text(canvas, height=3, width=105, font=('Helvetica 10'),borderwidth=0,cursor="arrow")
+        T.insert(END, edit_estimates_e51.get("1.0","end-1c"))
+        T.config(state=DISABLED)
         T_window = canvas.create_window(270, 1055, anchor="nw", window=T)
 
-        canvas.create_text(315, 1150, text="Sales Person:", fill="black", font=('Helvetica 10'))
-        canvas.create_text(395, 1150, text=""+edit_est_data[14], fill="black", font=('Helvetica 10'))
-        canvas.create_text(945, 1160, text="Page 1 of 1", fill="black", font=('Helvetica 10')) 
+        canvas.create_text(315, 1140, text="Sales Person:", fill="black", font=('Helvetica 10'))
+        canvas.create_text(395, 1140, text=""+edit_estimates_e6.get(), fill="black", font=('Helvetica 10'))
+
+        com_label = Label(canvas,text=" "+edit_estimates_e21.get(),font=('Helvetica 10 '),background='white')
+        com_label_window = canvas.create_window(268, 1160, anchor="w", window=com_label)
+
+        canvas.create_text(960, 1160, text="Page 1 of 1", fill="black", font=('Helvetica 10'))
+
       else:
         pass
-    edit_estimate_prev= Button(edit_estimate_firFrame,compound="top", text="Preview\nEstimate",relief=RAISED, image=photo4,bg="#f5f3f2", fg="black", height=55, bd=1, width=55,command=edit_prev_estimate)
+        
+
+      
+    edit_estimate_prev= Button(edit_estimate_firFrame,compound="top", text="Preview\nEstimate",relief=RAISED, image=photo4,bg="#f5f3f2", fg="black", height=55, bd=1, width=55,command=edit_estimate_previewline)
     edit_estimate_prev.pack(side="left", pady=3, ipadx=4)
+
+    edit_estimate_prin= Button(edit_estimate_firFrame,compound="top", text="Print \nEstimate",relief=RAISED, image=photo5,bg="#f5f3f2", fg="black", height=55, bd=1, width=55,command=estimate_printsele)
+    edit_estimate_prin.pack(side="left", pady=3, ipadx=4)
+
+    edit_estimate_w3 = Canvas(edit_estimate_firFrame, width=1, height=65, bg="#b3b3b3", bd=0)
+    edit_estimate_w3.pack(side="left", padx=5)
+
+    edit_estimate_mail= Button(edit_estimate_firFrame,compound="top", text="Email\nEstimate",relief=RAISED, image=photo6,bg="#f5f3f2", fg="black", height=55, bd=1, width=55,command=estimate_emailord)
+    edit_estimate_mail.pack(side="left", pady=3, ipadx=4)
+
+    edit_estimate_smss1= Button(edit_estimate_firFrame,compound="top", text="Send SMS\nnotification",relief=RAISED, image=photo10,bg="#f5f3f2", fg="black", height=55, bd=1, width=55,command=edit_estimate_sms1)
+    edit_estimate_smss1.pack(side="left", pady=3, ipadx=4)
+
+    edit_estimate_w4 = Canvas(edit_estimate_firFrame, width=1, height=65, bg="#b3b3b3", bd=0)
+    edit_estimate_w4.pack(side="left", padx=5)
+
+    def edit_on_click():
+      text.set("Accepted")
+        
+
+    def edit_eston_click():
+      text.set("Declined")
+
+    edit_estimate_smss1= Button(edit_estimate_firFrame,compound="top", text="Set Status\nto Accepted",relief=RAISED, image=mark1,bg="#f5f3f2", fg="black", height=55, bd=1, width=55,command=edit_on_click)
+    edit_estimate_smss1.pack(side="left", pady=3, ipadx=4)
+
+    edit_estimate_smss1= Button(edit_estimate_firFrame,compound="top", text="Set Status\nto Declined",relief=RAISED, image=mark1,bg="#f5f3f2", fg="black", height=55, bd=1, width=55,command=edit_eston_click)
+    edit_estimate_smss1.pack(side="left", pady=3, ipadx=4)
+
+    def edit_calcu():
+      subprocess.Popen('C:\\Windows\\System32\\calc.exe')
+
+    edit_estimate_calc= Button(edit_estimate_firFrame,compound="top", text="Open\nCalculator",relief=RAISED, image=photo9,bg="#f5f3f2", fg="black", height=55, bd=1, width=55, command=edit_calcu)
+    edit_estimate_calc.pack(side="left", pady=3, ipadx=4)
+
+    edit_estimate_save= Button(edit_estimate_firFrame,compound="top", text="Save",relief=RAISED, image=tick,bg="#f5f3f2", fg="black", height=55, bd=1, width=55)
+    edit_estimate_save.pack(side="right", pady=3, ipadx=4)
 
 
     edit_estimates_sales=Label(edit_estimate_labelfram1,text="Sales Person").place(x=25,y=100)
@@ -8629,16 +10967,22 @@ def mainpage():
     edit_estimates_e01=ttk.Combobox(edit_estimate_headerFrame, value=edithfdata,width=60)
     edit_estimates_e01.place(x=125,y=5)
     edit_estimates_e01.bind("<<ComboboxSelected>>")
+    edit_estimates_e01.delete(0, END)
+    edit_estimates_e01.insert(0, edit_est_data[24])
 
     edit_estimates_text02=Label(edit_estimate_headerFrame,text="Page header text").place(x=2,y=45)
     edit_estimates_e11=ttk.Combobox(edit_estimate_headerFrame, value=edithfdata,width=60)
     edit_estimates_e11.place(x=125,y=45)
     edit_estimates_e11.bind("<<ComboboxSelected>>")
+    edit_estimates_e11.delete(0, END)
+    edit_estimates_e11.insert(0, edit_est_data[25])
 
     edit_estimates_text03=Label(edit_estimate_headerFrame,text="Footer text").place(x=35,y=85)
     edit_estimates_e21=ttk.Combobox(edit_estimate_headerFrame, value=edithfdata,width=60)
     edit_estimates_e21.place(x=125,y=85)
     edit_estimates_e21.bind("<<ComboboxSelected>>")
+    edit_estimates_e21.delete(0, END)
+    edit_estimates_e21.insert(0, edit_est_data[26])
 
     
     edit_estimates_texttt=Label(edit_estimate_noteFrame,text="Private notes(not shown on invoice/order/estemates)").place(x=10,y=10)
@@ -8671,8 +11015,6 @@ def mainpage():
 
     
 
-    
-
     edit_doc_plus_btn=Button(edit_estimate_documentFrame,text="+",width=2,height=2)
     edit_doc_plus_btn.place(x=5,y=10)
     edit_doc_minus_btn=Button(edit_estimate_documentFrame,height=2,width=2,text="-")
@@ -8691,8 +11033,7 @@ def mainpage():
     edit_doc_tree.heading("3",text="Filesize")  
     edit_doc_tree.place(x=50, y=10)
     #edit_doc_tree.bind('<Double-Button-1>',show_sel_file)
-
-    
+  
 
     edit_estimate_fir4Frame1=Frame(edit_estimate_pop,height=190,width=210,bg="#f5f3f2")
     edit_estimate_fir4Frame1.place(x=740,y=520)
@@ -9771,9 +12112,22 @@ def mainpage():
   estimate_orderLabel = Button(estimate_midFrame,compound="top", text="View/Edit\nEstimate",relief=RAISED, image=photo1,bg="#f8f8f2", fg="black", height=55, bd=1, width=55,command=edit_estimates_create)
   estimate_orderLabel.pack(side="left")
 
+  def delete_estimate():
+    delmess = messagebox.askyesno("Delete Estimate", "Are you sure to delete this Estimate?")
+  #   if delmess == True:
+  #     itemid = est_tree.item(est_tree.focus())["values"][0]
+  #     print(itemid)
+  #     sql = 'DELETE FROM estimate WHERE estimate_number=%s'
+  #     val = (itemid,)
+  #     fbcursor.execute(sql, val)
+  #     fbilldb.commit()
+  #     est_tree.delete(est_tree.selection()[0])
+  #   else:
+  #     pass
 
 
-  estimate_estimateLabel = Button(estimate_midFrame,compound="top", text="Delete\nSelected",relief=RAISED, image=photo2,bg="#f8f8f2", fg="black", height=55, bd=1, width=55,command=estimate_dele)
+
+  estimate_estimateLabel = Button(estimate_midFrame,compound="top", text="Delete\nSelected",relief=RAISED, image=photo2,bg="#f8f8f2", fg="black", height=55, bd=1, width=55,command=delete_estimate)
   estimate_estimateLabel.pack(side="left")
 
   estimate_w3 = Canvas(estimate_midFrame, width=1, height=65, bg="#b3b3b3", bd=0)
