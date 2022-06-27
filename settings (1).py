@@ -1410,63 +1410,73 @@ def mainpage():
       estimate_ctegorytree.heading("1",text="View filter by category", anchor=CENTER)
       estimate_ctegorytree.place(x=660, y=45)
 
-      # def estlist_filter_customer(event):
-      #   estselected_cust_indices = est_cust_fil_cat_list.curselection()
-      #   selected_cust_filter = ",".join([est_cust_fil_cat_list.get(i) for i in estselected_cust_indices])
+      
+      def est_ct_filter(event):
+        selected_indices = est_cust_fil_cat_list.curselection()
+        if str(selected_indices)=="(0,)":
+          for record in estimate_cusventtree.get_children():
+            estimate_cusventtree.delete(record)
+          cus_main_table_sql="select * from customer"
+          fbcursor.execute(cus_main_table_sql)
+          main_tb_val=fbcursor.fetchall()
+          
+          count_cus=0
 
-      #   if selected_cust_filter == "View all records":
-      #     cust_all_sql = "SELECT * FROM Customer"
-      #     fbcursor.execute(cust_all_sql)
-      #     cust_all_data = fbcursor.fetchall()
-      #     for record in estimate_cusventtree.get_children():
-      #       estimate_cusventtree.delete(record)
-      #     count_all = 0
-      #     for i in cust_all_data:
-      #       estimate_cusventtree.insert(parent='',index='end',iid=i,text='',values=(i[24],i[4],i[10],i[8]))
-      #     count_all += 1
-      #   elif selected_cust_filter == "View only Client type":
-      #     client_sql = "SELECT * FROM Customer WHERE customertype=%s"
-      #     client_val = ('Client',)
-      #     fbcursor.execute(client_sql,client_val)
-      #     client_data = fbcursor.fetchall()
-      #     for record in estimate_cusventtree.get_children():
-      #       estimate_cusventtree.delete(record)
-      #     count_c = 0
-      #     for i in client_data:
-      #       estimate_cusventtree.insert(parent='',index='end',iid=i,text='',values=(i[24],i[4],i[10],i[8]))
-      #     count_c += 1
-      #   elif selected_cust_filter == "View only Client/Vendor":
-      #     client_sql1 = "SELECT * FROM Customer WHERE customertype=%s"
-      #     client_val1 = ('Both(Client/Vendor',)
-      #     fbcursor.execute(client_sql1,client_val1)
-      #     client_data1 = fbcursor.fetchall()
-      #     for record in estimate_cusventtree.get_children():
-      #       estimate_cusventtree.delete(record)
-      #     count_c1 = 0
-      #     for i in client_data1:
-      #       estimate_cusventtree.insert(parent='',index='end',iid=i,text='',values=(i[24],i[4],i[10],i[8]))
-      #     count_c1 += 1
-      #   else:
-      #     vendor_sql = "SELECT * FROM Customer WHERE customertype=%s"
-      #     vendor_val = ('Vendor',)
-      #     fbcursor.execute(vendor_sql,vendor_val)
-      #     vendor_data = fbcursor.fetchall()
-      #     for record in estimate_cusventtree.get_children():
-      #       estimate_cusventtree.delete(record)
-      #     count_v = 0
-      #     for i in vendor_data:
-      #       estimate_cusventtree.insert(parent='',index='end',iid=i,text='',values=(i[24],i[4],i[10],i[8]))
-      #     count_v += 1
+          for i in main_tb_val:
+            estimate_cusventtree.insert(parent='', index='end', iid=count_cus, text='', values=(i[24],i[4],i[10],i[8]))
+            
+            count_cus +=1
+        elif str(selected_indices)=="(1,)":
+          for record in estimate_cusventtree.get_children():
+            estimate_cusventtree.delete(record)
+          cus_main_table_sql="select * from customer where customertype='Both(Client/Vender)'"
+          fbcursor.execute(cus_main_table_sql)
+          main_tb_val=fbcursor.fetchall()
+          
+          count_cus=0
+
+          for i in main_tb_val:
+            estimate_cusventtree.insert(parent='', index='end', iid=count_cus, text='', values=(i[24],i[4],i[10],i[8]))
+            
+            count_cus +=1
+        elif str(selected_indices)=="(2,)":
+          for record in estimate_cusventtree.get_children():
+            estimate_cusventtree.delete(record)
+          cus_main_table_sql="select * from customer where customertype='Client'"
+          fbcursor.execute(cus_main_table_sql)
+          main_tb_val=fbcursor.fetchall()
+          
+          count_cus=0
+
+          for i in main_tb_val:
+            estimate_cusventtree.insert(parent='', index='end', iid=count_cus, text='', values=(i[24],i[4],i[10],i[8]))
+            
+            count_cus +=1
+        elif str(selected_indices)=="(3,)":
+          for record in estimate_cusventtree.get_children():
+            estimate_cusventtree.delete(record)
+          cus_main_table_sql="select * from customer where customertype='Vender'"
+          fbcursor.execute(cus_main_table_sql)
+          main_tb_val=fbcursor.fetchall()
+          
+          count_cus=0
+
+          for i in main_tb_val:
+            estimate_cusventtree.insert(parent='', index='end', iid=count_cus, text='', values=(i[24],i[4],i[10],i[8]))
+            
+            count_cus +=1
+        else:
+          pass
 
 
       est_cust_fil_cat_list = Listbox(estimate_cuselection,height=34,width=40,bg="white",activestyle="dotbox",fg="black",highlightbackground="white")
-      est_cust_fil_cat_list.insert(0,"View all records")
-      est_cust_fil_cat_list.insert(1,"View only Client/Vendor")
-      est_cust_fil_cat_list.insert(2,"View only Client type")
-      est_cust_fil_cat_list.insert(3,"View only Vendor type")
-      est_cust_fil_cat_list.insert(4,"Default")
+      est_cust_fil_cat_list.insert(0, "  View all records")
+      est_cust_fil_cat_list.insert(1, "  View only Client/Vendor Type")
+      est_cust_fil_cat_list.insert(2, "  View only Client Type")
+      est_cust_fil_cat_list.insert(3, "  View only Vendor Type")
+      
       est_cust_fil_cat_list.place(x=660,y=63)
-      est_cust_fil_cat_list.bind('<<ListboxSelect>>')
+      est_cust_fil_cat_list.bind('<<ListboxSelect>>', est_ct_filter)
 
 
       estimate_scrollbar = Scrollbar(estimate_cuselection)
@@ -1487,1264 +1497,1275 @@ def mainpage():
 
     #add new line item
     def estimate_newline():
-      estimate_newselection=Toplevel()
-      estimate_newselection.title("Select Customer")
-      estimate_newselection.geometry("930x650+240+10")
-      estimate_newselection.resizable(False, False)
+      businessname = estimate_combo_name1.get()
+      sql='SELECT * FROM estimate WHERE businessname=%s'
+      val=(businessname,)
+      fbcursor.execute(sql,val)
+      if fbcursor.fetchone()is not None:
+        estimate_newselection=Toplevel()
+        estimate_newselection.title("Select Customer")
+        estimate_newselection.geometry("930x650+240+10")
+        estimate_newselection.resizable(False, False)
 
 
-      #add new product
-      def estimate_product():  
-        estimate_top = Toplevel()  
-        estimate_top.title("Add a new Product/Service")
-        estimate_p2 = PhotoImage(file = 'images/fbicon.png')
-        estimate_top.iconphoto(False, estimate_p2)
-      
-        estimate_top.geometry("600x550+390+15")
-        estimate_tabControl = ttk.Notebook(estimate_top)
-        estimate_s = ttk.Style()
-        estimate_s.theme_use('default')
-        estimate_s.configure('TNotebook.Tab', background="#999999",padding=10,bd=0)
-
-
-        estimate_tab1 = ttk.Frame(estimate_tabControl)
-        estimate_tab2 = ttk.Frame(estimate_tabControl)
-      
-        estimate_tabControl.add(estimate_tab1,compound = LEFT, text ='Product/Service')
-        estimate_tabControl.add(estimate_tab2,compound = LEFT, text ='Product Image')
-      
-        estimate_tabControl.pack(expand = 1, fill ="both")
-
-        global filename
-        filename = ""
-
-        def este_upload_file():
-          global filename,img, b2
-          f_types =[('Png files','*.png'),('Jpg Files', '*.jpg'),('PDF', '*.pdf',)]
-          filename = filedialog.askopenfilename(filetypes=f_types)
-          shutil.copyfile(filename, os.getcwd()+'/images/'+filename.split('/')[-1])
-          image = Image.open(filename)
-          resize_image = image.resize((350, 350))
-          img = ImageTk.PhotoImage(resize_image)
-          b2 = Button(estimate_imageFrame,image=img)
-          b2.place(x=130, y=80)
-
+        #add new product
+        def estimate_product():  
+          estimate_top = Toplevel()  
+          estimate_top.title("Add a new Product/Service")
+          estimate_p2 = PhotoImage(file = 'images/fbicon.png')
+          estimate_top.iconphoto(False, estimate_p2)
         
-        def est_addproducts():
-          global img , filename 
-          sku = estimate_codeentry.get()
-          status = estimate_checkvarStatus.get()
-          catgory = estimate_n.get()
-          name = estimate_nameentry.get()
-          description = estimate_desentry.get()
-          unitprice = estimate_uval.get()
-          peices = estimate_pcsentry.get()
-          cost = estimate_costval.get()
-          price_cost = estimate_priceval.get()
-          taxable = estimate_checkvarStatus2.get()
-          tax2 = estimate_checkvarStatus_2.get()
-          nostockcontrol = estimate_checkvarStatus3.get()
-          stock = estimate_stockentry.get()
-          lowstock = estimate_lowentry.get()
-          warehouse = estimate_wareentry.get()
-          pnotes = estimate_txt.get("1.0",'end-1c')
-          entries = [sku,name, unitprice, cost]
-          entri = []
-          for i in entries:
-            if i == '':
-              entri.append(i)
-          if len(entri) == 0:
-            sql = 'select * from Productservice where sku = %s or name = %s'
-            val  = (sku, name)
-            fbcursor.execute(sql, val)
-            fbcursor.fetchall()
-            row_count = fbcursor.rowcount
-            if row_count == 0:
-              if filename == "":
-                sql = 'insert into Productservice(sku, category, name, description, status, unitprice, peices, cost, taxable, priceminuscost, serviceornot, stock, stocklimit, warehouse, privatenote,tax2) values(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s)'
-                val = (sku, catgory, name, description, status, unitprice, peices, cost, taxable, price_cost, nostockcontrol, stock, lowstock, warehouse, pnotes,tax2)
-                fbcursor.execute(sql, val)
-                fbilldb.commit()
+          estimate_top.geometry("600x550+390+15")
+          estimate_tabControl = ttk.Notebook(estimate_top)
+          estimate_s = ttk.Style()
+          estimate_s.theme_use('default')
+          estimate_s.configure('TNotebook.Tab', background="#999999",padding=10,bd=0)
+
+
+          estimate_tab1 = ttk.Frame(estimate_tabControl)
+          estimate_tab2 = ttk.Frame(estimate_tabControl)
+        
+          estimate_tabControl.add(estimate_tab1,compound = LEFT, text ='Product/Service')
+          estimate_tabControl.add(estimate_tab2,compound = LEFT, text ='Product Image')
+        
+          estimate_tabControl.pack(expand = 1, fill ="both")
+
+          global filename
+          filename = ""
+
+          def este_upload_file():
+            global filename,img, b2
+            f_types =[('Png files','*.png'),('Jpg Files', '*.jpg'),('PDF', '*.pdf',)]
+            filename = filedialog.askopenfilename(filetypes=f_types)
+            shutil.copyfile(filename, os.getcwd()+'/images/'+filename.split('/')[-1])
+            image = Image.open(filename)
+            resize_image = image.resize((350, 350))
+            img = ImageTk.PhotoImage(resize_image)
+            b2 = Button(estimate_imageFrame,image=img)
+            b2.place(x=130, y=80)
+
+          
+          def est_addproducts():
+            global img , filename 
+            sku = estimate_codeentry.get()
+            status = estimate_checkvarStatus.get()
+            catgory = estimate_n.get()
+            name = estimate_nameentry.get()
+            description = estimate_desentry.get()
+            unitprice = estimate_uval.get()
+            peices = estimate_pcsentry.get()
+            cost = estimate_costval.get()
+            price_cost = estimate_priceval.get()
+            taxable = estimate_checkvarStatus2.get()
+            tax2 = estimate_checkvarStatus_2.get()
+            nostockcontrol = estimate_checkvarStatus3.get()
+            stock = estimate_stockentry.get()
+            lowstock = estimate_lowentry.get()
+            warehouse = estimate_wareentry.get()
+            pnotes = estimate_txt.get("1.0",'end-1c')
+            entries = [sku,name, unitprice, cost]
+            entri = []
+            for i in entries:
+              if i == '':
+                entri.append(i)
+            if len(entri) == 0:
+              sql = 'select * from Productservice where sku = %s or name = %s'
+              val  = (sku, name)
+              fbcursor.execute(sql, val)
+              fbcursor.fetchall()
+              row_count = fbcursor.rowcount
+              if row_count == 0:
+                if filename == "":
+                  sql = 'insert into Productservice(sku, category, name, description, status, unitprice, peices, cost, taxable, priceminuscost, serviceornot, stock, stocklimit, warehouse, privatenote,tax2) values(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s)'
+                  val = (sku, catgory, name, description, status, unitprice, peices, cost, taxable, price_cost, nostockcontrol, stock, lowstock, warehouse, pnotes,tax2)
+                  fbcursor.execute(sql, val)
+                  fbilldb.commit()
+                else:
+                  file = shutil.copyfile(filename, os.getcwd()+'/images/'+filename.split('/')[-1])
+                  sql = 'insert into Productservice(sku, category, name, description, status, unitprice, peices, cost, taxable, priceminuscost, serviceornot, stock, stocklimit, warehouse, image, privatenote,tax2) values(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s)'
+                  val = (sku, catgory, name, description, status, unitprice, peices, cost, taxable, price_cost, nostockcontrol, stock, lowstock, warehouse, filename.split('/')[-1], pnotes,tax2)
+                  fbcursor.execute(sql, val)
+                  fbilldb.commit()
               else:
-                file = shutil.copyfile(filename, os.getcwd()+'/images/'+filename.split('/')[-1])
-                sql = 'insert into Productservice(sku, category, name, description, status, unitprice, peices, cost, taxable, priceminuscost, serviceornot, stock, stocklimit, warehouse, image, privatenote,tax2) values(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s)'
-                val = (sku, catgory, name, description, status, unitprice, peices, cost, taxable, price_cost, nostockcontrol, stock, lowstock, warehouse, filename.split('/')[-1], pnotes,tax2)
-                fbcursor.execute(sql, val)
-                fbilldb.commit()
-            else:
-              messagebox.showinfo("Alert", "Entry with same name or SKU already exists.\nTry again.")
+                messagebox.showinfo("Alert", "Entry with same name or SKU already exists.\nTry again.")
+                estimate_top.destroy()
+
+              for record in estimate_cusventtree1.get_children():
+                estimate_cusventtree1.delete(record)
+              fbcursor.execute("select *  from Productservice")
+              est_pandsdata = fbcursor.fetchall()
+              countp = 0
+              for i in est_pandsdata:
+                if i[12] == '1':
+                  servi = '🗹'
+                else:
+                  servi = ''
+                sql = "select currencysign,currsignplace from company"
+                fbcursor.execute(sql)
+                estcurrsymb = fbcursor.fetchone()
+                if not estcurrsymb: 
+                  if i[13] > i[14]:
+                    estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('green',))
+                    countp += 1              
+                  elif i[12] == '1':
+                    estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('blue',))
+                    countp += 1
+                  else:
+                    estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('red',))
+                    countp += 1
+                          
+                elif estcurrsymb[1] == "before amount":
+                  if (i[13]) > (i[14]):
+                    estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('green',))
+                    countp += 1
+                  elif i[12] == '1':
+                    estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('blue',))
+                    countp += 1
+                  else:
+                    estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('red',))
+                    countp += 1
+
+                elif estcurrsymb[1] == "before amount with space":
+                  if (i[13]) > (i[14]):
+                    estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('green',))
+                    countp += 1
+                  elif i[12] == '1':
+                    estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('blue',))
+                    countp += 1
+                  else:
+                    estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('red',))
+                    countp += 1
+
+                elif estcurrsymb[1] == "after amount":
+                  if (i[13]) > (i[14]):
+                    estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('green',))
+                    countp += 1
+                  elif i[12] == '1':
+                    estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('blue',))
+                    countp += 1
+                  else:
+                    estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('red',))
+                    countp += 1
+
+                elif estcurrsymb[1] == "after amount with space":
+                  if (i[13]) > (i[14]):
+                    estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('green',))
+                    countp += 1
+                  elif i[12] == '1':
+                    estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('blue',))
+                    countp += 1
+                  else:
+                    estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('red',))
+                    countp += 1
+
               estimate_top.destroy()
-
-            for record in estimate_cusventtree1.get_children():
-              estimate_cusventtree1.delete(record)
-            fbcursor.execute("select *  from Productservice")
-            est_pandsdata = fbcursor.fetchall()
-            countp = 0
-            for i in est_pandsdata:
-              if i[12] == '1':
-                servi = '🗹'
-              else:
-                servi = ''
-              sql = "select currencysign,currsignplace from company"
-              fbcursor.execute(sql)
-              estcurrsymb = fbcursor.fetchone()
-              if not estcurrsymb: 
-                if i[13] > i[14]:
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('green',))
-                  countp += 1              
-                elif i[12] == '1':
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('blue',))
-                  countp += 1
-                else:
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('red',))
-                  countp += 1
-                        
-              elif estcurrsymb[1] == "before amount":
-                if (i[13]) > (i[14]):
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('green',))
-                  countp += 1
-                elif i[12] == '1':
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('blue',))
-                  countp += 1
-                else:
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('red',))
-                  countp += 1
-
-              elif estcurrsymb[1] == "before amount with space":
-                if (i[13]) > (i[14]):
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('green',))
-                  countp += 1
-                elif i[12] == '1':
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('blue',))
-                  countp += 1
-                else:
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('red',))
-                  countp += 1
-
-              elif estcurrsymb[1] == "after amount":
-                if (i[13]) > (i[14]):
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('green',))
-                  countp += 1
-                elif i[12] == '1':
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('blue',))
-                  countp += 1
-                else:
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('red',))
-                  countp += 1
-
-              elif estcurrsymb[1] == "after amount with space":
-                if (i[13]) > (i[14]):
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('green',))
-                  countp += 1
-                elif i[12] == '1':
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('blue',))
-                  countp += 1
-                else:
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('red',))
-                  countp += 1
-
-            estimate_top.destroy()
-  
     
-        estimate_innerFrame = Frame(estimate_tab1,bg="#f5f3f2", relief=GROOVE)
-        estimate_innerFrame.pack(side="top",fill=BOTH)
-
-        estimate_Customerlabelframe = LabelFrame(estimate_innerFrame,text="Product/Service",width=580,height=455)
-        estimate_Customerlabelframe.pack(side="top",fill=BOTH,padx=10,pady=(10,45))
-
-        fbcursor.execute("SELECT * FROM Productservice ORDER BY sku DESC LIMIT 1")
-        skuin = fbcursor.fetchone()
-
-        estimate_code1=Label(estimate_Customerlabelframe,text="Code or SKU:",fg="blue",pady=10,padx=10)
-        estimate_code1.place(x=20,y=0)
-        estimate_codeentry = Entry(estimate_Customerlabelframe,width=35)
-        estimate_codeentry.place(x=120,y=8)
-
-        estimate_checkvarStatus=IntVar()
-        estimate_status1=Label(estimate_Customerlabelframe,text="Status:")
-        estimate_status1.place(x=400,y=8)
-        estimate_Button1 = Checkbutton(estimate_Customerlabelframe,
-                          variable = estimate_checkvarStatus,text="Active",compound="right",
-                          onvalue =1,
-                          offvalue = 0,
-                        
-                          width = 10)
-
-        estimate_Button1.place(x=450,y=5)
-
-        estimate_category1=Label(estimate_Customerlabelframe,text="Category:",pady=5,padx=10)
-        estimate_category1.place(x=20,y=40)
-        estimate_n = StringVar()
-        estimate_country0 = ttk.Combobox(estimate_Customerlabelframe, width = 40, textvariable = estimate_n )
-        estimate_country0['values'] = ('Default')
-        estimate_country0.place(x=120,y=45)
-        estimate_country0.insert(0, 'Default')
-
-
-        estimate_name81=Label(estimate_Customerlabelframe,text="Name :",fg="blue",pady=5,padx=10)
-        estimate_name81.place(x=20,y=70)
-        estimate_nameentry = Entry(estimate_Customerlabelframe,width=60)
-        estimate_nameentry.place(x=120,y=75)
-
-        estimate_des1=Label(estimate_Customerlabelframe,text="Description :",pady=5,padx=10)
-        estimate_des1.place(x=20,y=100)
-        estimate_desentry = Entry(estimate_Customerlabelframe,width=60)
-        estimate_desentry.place(x=120,y=105)
-        def est_prdoucts_cal(S,d):
-          if d == '1': #insert
-            if not S in ['.','0','1','2','3','4','5','6','7','8','9']:
-              return False
-            return True
-          if d.isdigit():
-            return True
-
-
-        estimate_uval = StringVar()(value="0")
-        estimate_unit1=Label(estimate_Customerlabelframe,text="Unit Price:",fg="blue",pady=5,padx=10)
-        estimate_unit1.place(x=20,y=130)
-        estimate_unitentry = Entry(estimate_Customerlabelframe,width=20,textvariable=estimate_uval)
-        estimate_unitentry.place(x=120,y=135)
-        est_cal_unit = (estimate_Customerlabelframe.register(est_prdoucts_cal),'%S','%d')
-        estimate_unitentry.config(validate='key',validatecommand=(est_cal_unit),justify='right')
-
-        # estimate_pcsval = IntVar(estimate_Customerlabelframe, value='$0.00')
-        estimate_pcs1=Label(estimate_Customerlabelframe,text="Pcs/Weight:",fg="blue",pady=5,padx=10)
-        estimate_pcs1.place(x=330,y=135)
-        estimate_pcsentry = Entry(estimate_Customerlabelframe,width=20)
-        estimate_pcsentry.place(x=420,y=140)
-
-        estimate_costval = StringVar(value="0")
-        estimate_cost1=Label(estimate_Customerlabelframe,text="Cost:",pady=5,padx=10)
-        estimate_cost1.place(x=20,y=160)
-        estimate_costentry = Entry(estimate_Customerlabelframe,width=20,textvariable=estimate_costval)
-        estimate_costentry.place(x=120,y=165)
-        est_cal_cost = (estimate_Customerlabelframe.register(est_prdoucts_cal),'%S','%d')
-        estimate_costentry.config(validate='key',validatecommand=(est_cal_cost),justify='right')
-
-
-        def est_set_label(name, index, mode):
-          est_copr = float(estimate_uval.get()) - float(estimate_costval.get())
-          estimate_priceval.set(str(est_copr))
-
-
-        estimate_priceval = StringVar()
-        estimate_price1=Label(estimate_Customerlabelframe,text="(Price Cost):",pady=5,padx=10)
-        estimate_price1.place(x=20,y=190)
-        estimate_priceentry = Entry(estimate_Customerlabelframe,width=20,textvariable=estimate_priceval,state=DISABLED,disabledbackground="white",disabledforeground="black")
-        estimate_priceentry.config(justify="right")
-        estimate_priceentry.place(x=120,y=195)
-
-
-        estimate_uval.trace('w', est_set_label)
-        estimate_costval.trace('w', est_set_label)
-
-        sql = "select taxtype from company"
-        fbcursor.execute(sql)
-        est_taxchoose = fbcursor.fetchone()
-
-        estimate_checkvarStatus2=IntVar()
       
-        estimate_Button92 = Checkbutton(estimate_Customerlabelframe,variable = estimate_checkvarStatus2,
-                          text="Taxable Tax1rate",compound="right",
-                          onvalue =1 ,
-                          offvalue = 0,
-                          height=2,
-                          width = 12)
+          estimate_innerFrame = Frame(estimate_tab1,bg="#f5f3f2", relief=GROOVE)
+          estimate_innerFrame.pack(side="top",fill=BOTH)
 
-        #estimate_Button92.place(x=415,y=170)
+          estimate_Customerlabelframe = LabelFrame(estimate_innerFrame,text="Product/Service",width=580,height=455)
+          estimate_Customerlabelframe.pack(side="top",fill=BOTH,padx=10,pady=(10,45))
 
-        estimate_checkvarStatus_2=IntVar()
-      
-        estimate_Button_92 = Checkbutton(estimate_Customerlabelframe,variable = estimate_checkvarStatus_2,
-                          text="Taxable Tax2rate",compound="right",
-                          onvalue =1,
-                          offvalue =0,
-                          height=2,
-                          width = 12)
+          fbcursor.execute("SELECT * FROM Productservice ORDER BY sku DESC LIMIT 1")
+          skuin = fbcursor.fetchone()
 
-        #estimate_Button_92.place(x=415,y=210)
-        if not est_taxchoose:
-          pass
-        elif est_taxchoose[0] == '1':
-          estimate_Button92.place_forget()
-          estimate_Button_92.place_forget()
-        elif est_taxchoose[0] == '2':
-          estimate_Button92.place(x=415,y=170)
-          estimate_Button_92.place_forget()
-        elif est_taxchoose[0] == '3':
-          estimate_Button92.place(x=415,y=170)
-          estimate_Button_92.place(x=415,y=210)
+          estimate_code1=Label(estimate_Customerlabelframe,text="Code or SKU:",fg="blue",pady=10,padx=10)
+          estimate_code1.place(x=20,y=0)
+          estimate_codeentry = Entry(estimate_Customerlabelframe,width=35)
+          estimate_codeentry.place(x=120,y=8)
 
-        def est_switch():
-          if estimate_checkvarStatus3.get():
-            estimate_stockentry["state"] = DISABLED
-            estimate_lowentry["state"] = DISABLED
-            estimate_wareentry["state"] = DISABLED
-          else:
-            estimate_stockentry["state"] = NORMAL
-            estimate_lowentry["state"] = NORMAL
-            estimate_wareentry["state"] = NORMAL
+          estimate_checkvarStatus=IntVar()
+          estimate_status1=Label(estimate_Customerlabelframe,text="Status:")
+          estimate_status1.place(x=400,y=8)
+          estimate_Button1 = Checkbutton(estimate_Customerlabelframe,
+                            variable = estimate_checkvarStatus,text="Active",compound="right",
+                            onvalue =1,
+                            offvalue = 0,
+                          
+                            width = 10)
+
+          estimate_Button1.place(x=450,y=5)
+
+          estimate_category1=Label(estimate_Customerlabelframe,text="Category:",pady=5,padx=10)
+          estimate_category1.place(x=20,y=40)
+          estimate_n = StringVar()
+          estimate_country0 = ttk.Combobox(estimate_Customerlabelframe, width = 40, textvariable = estimate_n )
+          estimate_country0['values'] = ('Default')
+          estimate_country0.place(x=120,y=45)
+          estimate_country0.insert(0, 'Default')
+
+
+          estimate_name81=Label(estimate_Customerlabelframe,text="Name :",fg="blue",pady=5,padx=10)
+          estimate_name81.place(x=20,y=70)
+          estimate_nameentry = Entry(estimate_Customerlabelframe,width=60)
+          estimate_nameentry.place(x=120,y=75)
+
+          estimate_des1=Label(estimate_Customerlabelframe,text="Description :",pady=5,padx=10)
+          estimate_des1.place(x=20,y=100)
+          estimate_desentry = Entry(estimate_Customerlabelframe,width=60)
+          estimate_desentry.place(x=120,y=105)
+          def est_prdoucts_cal(S,d):
+            if d == '1': #insert
+              if not S in ['.','0','1','2','3','4','5','6','7','8','9']:
+                return False
+              return True
+            if d.isdigit():
+              return True
+
+
+          estimate_uval = StringVar()(value="0")
+          estimate_unit1=Label(estimate_Customerlabelframe,text="Unit Price:",fg="blue",pady=5,padx=10)
+          estimate_unit1.place(x=20,y=130)
+          estimate_unitentry = Entry(estimate_Customerlabelframe,width=20,textvariable=estimate_uval)
+          estimate_unitentry.place(x=120,y=135)
+          est_cal_unit = (estimate_Customerlabelframe.register(est_prdoucts_cal),'%S','%d')
+          estimate_unitentry.config(validate='key',validatecommand=(est_cal_unit),justify='right')
+
+          # estimate_pcsval = IntVar(estimate_Customerlabelframe, value='$0.00')
+          estimate_pcs1=Label(estimate_Customerlabelframe,text="Pcs/Weight:",fg="blue",pady=5,padx=10)
+          estimate_pcs1.place(x=330,y=135)
+          estimate_pcsentry = Entry(estimate_Customerlabelframe,width=20)
+          estimate_pcsentry.place(x=420,y=140)
+
+          estimate_costval = StringVar(value="0")
+          estimate_cost1=Label(estimate_Customerlabelframe,text="Cost:",pady=5,padx=10)
+          estimate_cost1.place(x=20,y=160)
+          estimate_costentry = Entry(estimate_Customerlabelframe,width=20,textvariable=estimate_costval)
+          estimate_costentry.place(x=120,y=165)
+          est_cal_cost = (estimate_Customerlabelframe.register(est_prdoucts_cal),'%S','%d')
+          estimate_costentry.config(validate='key',validatecommand=(est_cal_cost),justify='right')
+
+
+          def est_set_label(name, index, mode):
+            est_copr = float(estimate_uval.get()) - float(estimate_costval.get())
+            estimate_priceval.set(str(est_copr))
+
+
+          estimate_priceval = StringVar()
+          estimate_price1=Label(estimate_Customerlabelframe,text="(Price Cost):",pady=5,padx=10)
+          estimate_price1.place(x=20,y=190)
+          estimate_priceentry = Entry(estimate_Customerlabelframe,width=20,textvariable=estimate_priceval,state=DISABLED,disabledbackground="white",disabledforeground="black")
+          estimate_priceentry.config(justify="right")
+          estimate_priceentry.place(x=120,y=195)
+
+
+          estimate_uval.trace('w', est_set_label)
+          estimate_costval.trace('w', est_set_label)
+
+          sql = "select taxtype from company"
+          fbcursor.execute(sql)
+          est_taxchoose = fbcursor.fetchone()
+
+          estimate_checkvarStatus2=IntVar()
         
-        estimate_checkvarStatus3=BooleanVar()
-        estimate_Button93 = Checkbutton(estimate_Customerlabelframe,variable = estimate_checkvarStatus3,command=est_switch, 
-                          text="This is a service(no stock control)",
-                          onvalue =1 ,
-                          offvalue =0,
-                          height=3)
-        estimate_Button93.place(x=40,y=220)
+          estimate_Button92 = Checkbutton(estimate_Customerlabelframe,variable = estimate_checkvarStatus2,
+                            text="Taxable Tax1rate",compound="right",
+                            onvalue =1 ,
+                            offvalue = 0,
+                            height=2,
+                            width = 12)
 
-        def est_stocknum(input):
-          if input.isdigit():
-            return True
-          elif input is "":
-            return True
-          else:
-            return False
+          #estimate_Button92.place(x=415,y=170)
 
-
+          estimate_checkvarStatus_2=IntVar()
         
-        estimate_stock1=Label(estimate_Customerlabelframe,text="Stock:",pady=5,padx=10)
-        estimate_stock1.place(x=90,y=260)
-        estimate_stockentry = Entry(estimate_Customerlabelframe,width=15)
-        estimate_stockentry.place(x=150,y=265)
-        est_sto = estimate_Customerlabelframe.register(est_stocknum)
-        estimate_stockentry.config(validate="key",validatecommand=(est_sto, '%S'))
+          estimate_Button_92 = Checkbutton(estimate_Customerlabelframe,variable = estimate_checkvarStatus_2,
+                            text="Taxable Tax2rate",compound="right",
+                            onvalue =1,
+                            offvalue =0,
+                            height=2,
+                            width = 12)
 
-        
-        estimate_low1=Label(estimate_Customerlabelframe,text="Low Stock Warning Limit:",pady=5,padx=10)
-        estimate_low1.place(x=270,y=260)
-        estimate_lowentry = Entry(estimate_Customerlabelframe,width=10)
-        estimate_lowentry.place(x=432,y=265)
-        est_lowsto = estimate_Customerlabelframe.register(est_stocknum)
-        estimate_lowentry.config(validate="key",validatecommand=(est_lowsto, '%S'))
+          #estimate_Button_92.place(x=415,y=210)
+          if not est_taxchoose:
+            pass
+          elif est_taxchoose[0] == '1':
+            estimate_Button92.place_forget()
+            estimate_Button_92.place_forget()
+          elif est_taxchoose[0] == '2':
+            estimate_Button92.place(x=415,y=170)
+            estimate_Button_92.place_forget()
+          elif est_taxchoose[0] == '3':
+            estimate_Button92.place(x=415,y=170)
+            estimate_Button_92.place(x=415,y=210)
 
-      
-        estimate_ware1=Label(estimate_Customerlabelframe,text="Warehouse:",pady=5,padx=10)
-        estimate_ware1.place(x=60,y=290)
-        estimate_wareentry = Entry(estimate_Customerlabelframe,width=50)
-        estimate_wareentry.place(x=150,y=295)
-
-        estimate_text10=Label(estimate_Customerlabelframe,text="Private notes(not appears on invoice):",pady=5,padx=10)
-        estimate_text10.place(x=20,y=330)
-
-        estimate_txt = scrolledtext.ScrolledText(estimate_Customerlabelframe, undo=True,width=62,height=4)
-        estimate_txt.place(x=32,y=358)
-
-
-
-
-        estimate_okButton = Button(estimate_innerFrame,compound = LEFT,image=tick , text ="Ok",width=60,command=est_addproducts)
-        estimate_okButton.place(x=10,y=475)
-
-        def est_closetab():
-          estimate_top.destroy()
-
-
-        estimate_cancelButton = Button(estimate_innerFrame,compound = LEFT,image=cancel ,text="Cancel",width=60,command=est_closetab)
-        estimate_cancelButton.place(x=519,y=475)
-
-        estimate_imageFrame = Frame(estimate_tab2, relief=GROOVE,height=580)
-        estimate_imageFrame.pack(side="top",fill=BOTH)
-        
-
-        estimate_browseimg=Label(estimate_imageFrame,text=" Browse for product image file(recommended image type:JPG,size 480x320 pixels) ",bg='#f5f3f2')
-        estimate_browseimg.place(x=15,y=35)
-
-        estimate_browsebutton=Button(estimate_imageFrame,text = 'Browse',command=este_upload_file)
-        estimate_browsebutton.place(x=520,y=30,height=30,width=50)
-        
-        estimate_removeButton = Button(estimate_imageFrame,compound = LEFT,image=cancel, text ="Remove Product Image",width=150, command=lambda: b2.destroy())
-        estimate_removeButton.place(x=400,y=450)
-      
-      # ###---------------Edit product-----------------###    
-      def est_edit_product(): 
-        edit_est_itemid = estimate_cusventtree1.item(estimate_cusventtree1.focus())["values"][0]  
-        global filename
-        filename = ""
-      
-        def edit_estupload_file():
-          global filename,img, b2
-          f_types =[('Png files','*.png'),('Jpg Files', '*.jpg')]
-          filename = filedialog.askopenfilename(filetypes=f_types)
-          shutil.copyfile(filename, os.getcwd()+'/images/'+filename.split('/')[-1])
-          image = Image.open(filename)
-          resize_image = image.resize((350, 350))
-          img = ImageTk.PhotoImage(resize_image)
-          edit_est_b2 = Button(edit_est_imageFrame,image=img)
-          edit_est_b2.place(x=130, y=80)
-        
-        def edit_est_updateproducts():
-          global img , filename 
-          sku = edit_est_codeentry.get()
-          status = edit_est_checkvarStatus.get()
-          catgory = edit_est_n.get()
-          name = edit_est_nameentry.get()
-          description = edit_est_desentry.get()
-          unitprice = edit_est_uval.get()
-          peices = edit_est_pcsentry.get()
-          cost = edit_est_costval.get()
-          price_cost = edit_est_priceval.get()
-          taxable = edit_est_checkvarStatus2.get()
-          tax2 = edit_est_checkvarStatustax2.get()
-          nostockcontrol = edit_est_checkvarStatus3.get()
-          stock = edit_est_stockval.get()
-          lowstock = edit_est_lowval.get()
-          warehouse = edit_est_wareentry.get()
-          pnotes = edit_est_sctxt.get("1.0", 'end-1c')
-          entries = [sku, name, unitprice, cost]
-          entri = []
-          for i in entries:
-            if i == '':
-              entri.append(i)
-          if len(entri) == 0:
-            if filename == "":
-              print("hello")
-              sql = "update Productservice set sku=%s, category=%s, name=%s, description=%s, status=%s, unitprice=%s, peices=%s, cost=%s, taxable=%s, priceminuscost=%s, serviceornot=%s, stock=%s, stocklimit=%s, warehouse=%s, privatenote=%s,tax2=%s where sku = %s"
-              val = (sku, catgory, name, description, status, unitprice, peices, cost, taxable, price_cost, nostockcontrol, stock, lowstock, warehouse, pnotes,tax2, edit_est_itemid)
-              fbcursor.execute(sql, val)
-              fbilldb.commit()
+          def est_switch():
+            if estimate_checkvarStatus3.get():
+              estimate_stockentry["state"] = DISABLED
+              estimate_lowentry["state"] = DISABLED
+              estimate_wareentry["state"] = DISABLED
             else:
-              print("hai")
-              file = shutil.copyfile(filename, os.getcwd()+'/images/'+filename.split('/')[-1])
-              sql = "update Productservice set category=%s, name=%s, description=%s, status=%s, unitprice=%s, peices=%s, cost=%s, taxable=%s, priceminuscost=%s, serviceornot=%s, stock=%s, stocklimit=%s, warehouse=%s, image=%s, privatenote=%s,tax2=%s where sku = %s"
-              val = (catgory, name, description, status, unitprice, peices, cost, taxable, price_cost, nostockcontrol, stock, lowstock, warehouse,filename.split('/')[-1], pnotes,tax2, edit_est_itemid)
-              fbcursor.execute(sql, val)
-              fbilldb.commit()
-            for record in estimate_cusventtree1.get_children():
-              estimate_cusventtree1.delete(record)
-            fbcursor.execute("select *  from Productservice")
-            edit_est_pandsdata = fbcursor.fetchall()
-            countp = 0
-            for i in edit_est_pandsdata:
-              if i[12] == '1':
-                servi = '🗹'
-              else:
-                servi = ''
-              sql = "select currencysign,currsignplace from company"
-              fbcursor.execute(sql)
-              estcurrsymb = fbcursor.fetchone()
-              if not estcurrsymb: 
-                if i[13] > i[14]:
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('green',))
-                  countp += 1              
-                elif i[12] == '1':
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('blue',))
-                  countp += 1
-                else:
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('red',))
-                  countp += 1
-                        
-              elif estcurrsymb[1] == "before amount":
-                if (i[13]) > (i[14]):
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('green',))
-                  countp += 1
-                elif i[12] == '1':
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('blue',))
-                  countp += 1
-                else:
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('red',))
-                  countp += 1
+              estimate_stockentry["state"] = NORMAL
+              estimate_lowentry["state"] = NORMAL
+              estimate_wareentry["state"] = NORMAL
+          
+          estimate_checkvarStatus3=BooleanVar()
+          estimate_Button93 = Checkbutton(estimate_Customerlabelframe,variable = estimate_checkvarStatus3,command=est_switch, 
+                            text="This is a service(no stock control)",
+                            onvalue =1 ,
+                            offvalue =0,
+                            height=3)
+          estimate_Button93.place(x=40,y=220)
 
-              elif estcurrsymb[1] == "before amount with space":
-                if (i[13]) > (i[14]):
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('green',))
-                  countp += 1
-                elif i[12] == '1':
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('blue',))
-                  countp += 1
-                else:
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('red',))
-                  countp += 1
-
-              elif estcurrsymb[1] == "after amount":
-                if (i[13]) > (i[14]):
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('green',))
-                  countp += 1
-                elif i[12] == '1':
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('blue',))
-                  countp += 1
-                else:
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('red',))
-                  countp += 1
-
-              elif estcurrsymb[1] == "after amount with space":
-                if (i[13]) > (i[14]):
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('green',))
-                  countp += 1
-                elif i[12] == '1':
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('blue',))
-                  countp += 1
-                else:
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('red',))
-                  countp += 1
-            edit_est_top.destroy()
-          else:
-            messagebox.showinfo("F-Billing Revolution", "Fields name or SKU entered is already in database.")
-            edit_est_top.destroy()
-            
-
-        sql = "select * from Productservice where sku = %s"
-        val = (edit_est_itemid, )
-        fbcursor.execute(sql, val)
-        edit_est_psdata = fbcursor.fetchone()
-        print(edit_est_itemid)
-        edit_est_top = Toplevel()  
-        edit_est_top.title("Edit Product/Service details")
-        p3 = PhotoImage(file = 'images/fbicon.png')
-        edit_est_top.iconphoto(False, p3)
-        edit_est_top.geometry("600x550+350+15")
-        tabControl = ttk.Notebook(edit_est_top)
-        s = ttk.Style()
-        s.theme_use('default')
-        s.configure('TNotebook.Tab', background="#999999", width=50, padding=10,bd=0)
-
-        edit_est_taba = ttk.Frame(tabControl)
-        edit_est_tabb = ttk.Frame(tabControl)
-        
-        tabControl.add(edit_est_taba,compound = LEFT, text ='Product/Service')
-        tabControl.add(edit_est_tabb,compound = LEFT, text ='Product Image')
-        
-        tabControl.pack(expand = 1, fill ="both")
-        
-        edit_est_innerFrame = Frame(edit_est_taba,bg="#f5f3f2", relief=GROOVE)
-        edit_est_innerFrame.pack(side="top",fill=BOTH)
-
-        edit_est_updateframe = LabelFrame(edit_est_innerFrame,text="Product/Service",width=580,height=455)
-        edit_est_updateframe.pack(side="top",fill=BOTH,padx=10,pady=(10,45))
-
-        edit_est_code1=Label(edit_est_updateframe,text="Code or SKU:",fg="blue",pady=10,padx=10)
-        edit_est_code1.place(x=20,y=0)
-        edit_est_codeentry = Entry(edit_est_updateframe,width=35)
-        edit_est_codeentry.place(x=120,y=8)
-        edit_est_codeentry.insert(0, edit_est_psdata[2])
-
-        edit_est_checkvarStatus=IntVar()
-        edit_est_status1=Label(edit_est_updateframe,text="Status:")
-        edit_est_status1.place(x=400,y=8)
-        edit_est_Button1 = Checkbutton(edit_est_updateframe, 
-                          variable = edit_est_checkvarStatus,text="Active",compound="right",
-                          onvalue =1,
-                          offvalue =0,
-                          width = 10)
-        edit_est_Button1.place(x=450,y=5)
-        edit_est_sta = edit_est_psdata[6]
-        if edit_est_sta == '1':
-          edit_est_Button1.select()
-        else:
-          edit_est_Button1.deselect()
-
-
-
-        edit_est_category1=Label(edit_est_updateframe,text="Category:",pady=5,padx=10)
-        edit_est_category1.place(x=20,y=40)
-        edit_est_n = StringVar() 
-        edit_est_category = Entry(edit_est_updateframe,width=40,textvariable=edit_est_n) 
-        edit_est_category.insert(0, edit_est_psdata[3])
-        edit_est_category = ttk.Combobox(edit_est_updateframe, width = 40, textvariable = edit_est_n )
-        edit_est_category['values'] = ('Default')
-        edit_est_category.place(x=120,y=45)
-        #edit_est_category.insert(0, 'Default')
-
-
-
-        edit_est_name1=Label(edit_est_updateframe,text="Name :",fg="blue",pady=5,padx=10)
-        edit_est_name1.place(x=20,y=70)
-        edit_est_nameentry = Entry(edit_est_updateframe,width=70)
-        edit_est_nameentry.place(x=120,y=75)
-        edit_est_nameentry.insert(0, edit_est_psdata[4])
-
-        edit_est_des1=Label(edit_est_updateframe,text="Description :",pady=5,padx=10)
-        edit_est_des1.place(x=20,y=100)
-        edit_est_desentry = Entry(edit_est_updateframe,width=70)
-        edit_est_desentry.place(x=120,y=105)
-        edit_est_desentry.insert(0, edit_est_psdata[5])
-
-        def edit_est_set_label(name, index, mode):
-          edit_est_priceval.set(float(edit_est_uval.get()) - float(edit_est_costval.get()))
-
-        def edit_est_prdoucts_cal(S,d):
-          if d == '1': #insert
-            if not S in ['.','0','1','2','3','4','5','6','7','8','9']:
+          def est_stocknum(input):
+            if input.isdigit():
+              return True
+            elif input is "":
+              return True
+            else:
               return False
-            return True
-          if d.isdigit():
-            return True
-        
-        edit_est_unit1=Label(edit_est_updateframe,text="Unit Price:",fg="blue",pady=5,padx=10)
-        edit_est_unit1.place(x=20,y=130)
-        
-        edit_est_uval = StringVar()
-        edit_est_unitentry = Entry(edit_est_updateframe,width=20,textvariable=edit_est_uval)
-        edit_est_unitentry.place(x=120,y=135)
-        edit_est_unitentry.delete(0,'end')
-        edit_est_unitentry.insert(0, edit_est_psdata[7])
-        edit_est_cal_unit = (edit_est_updateframe.register(edit_est_prdoucts_cal),'%S','%d')
-        edit_est_unitentry.config(validate='key',validatecommand=(edit_est_cal_unit),justify='right')
-        
 
-        edit_est_pcsval = IntVar()
-        edit_est_pcs1=Label(edit_est_updateframe,text="Pcs/Weight:",fg="blue",pady=5,padx=10)
-        edit_est_pcs1.place(x=330,y=135)
-        edit_est_pcsentry = Entry(edit_est_updateframe,width=20,textvariable=edit_est_pcsval)
-        edit_est_pcsentry.place(x=420,y=140)
-        edit_est_pcsentry.delete(0,'end')
-        edit_est_pcsentry.insert(0, edit_est_psdata[8])
+
+          
+          estimate_stock1=Label(estimate_Customerlabelframe,text="Stock:",pady=5,padx=10)
+          estimate_stock1.place(x=90,y=260)
+          estimate_stockentry = Entry(estimate_Customerlabelframe,width=15)
+          estimate_stockentry.place(x=150,y=265)
+          est_sto = estimate_Customerlabelframe.register(est_stocknum)
+          estimate_stockentry.config(validate="key",validatecommand=(est_sto, '%S'))
+
+          
+          estimate_low1=Label(estimate_Customerlabelframe,text="Low Stock Warning Limit:",pady=5,padx=10)
+          estimate_low1.place(x=270,y=260)
+          estimate_lowentry = Entry(estimate_Customerlabelframe,width=10)
+          estimate_lowentry.place(x=432,y=265)
+          est_lowsto = estimate_Customerlabelframe.register(est_stocknum)
+          estimate_lowentry.config(validate="key",validatecommand=(est_lowsto, '%S'))
+
         
+          estimate_ware1=Label(estimate_Customerlabelframe,text="Warehouse:",pady=5,padx=10)
+          estimate_ware1.place(x=60,y=290)
+          estimate_wareentry = Entry(estimate_Customerlabelframe,width=50)
+          estimate_wareentry.place(x=150,y=295)
 
-        edit_est_costval = StringVar()
-        edit_est_cost1=Label(edit_est_updateframe,text="Cost:",pady=5,padx=10)
-        edit_est_cost1.place(x=20,y=160)
-        edit_est_costentry = Entry(edit_est_updateframe,width=20,textvariable=edit_est_costval)
-        edit_est_costentry.place(x=120,y=165)
-        edit_est_costentry.delete(0, END)
-        edit_est_costentry.insert(0, edit_est_psdata[9])
-        edit_est_cal_cost = (edit_est_updateframe.register(edit_est_prdoucts_cal),'%S','%d')
-        edit_est_costentry.config(validate='key',validatecommand=(edit_est_cal_cost),justify='right')
+          estimate_text10=Label(estimate_Customerlabelframe,text="Private notes(not appears on invoice):",pady=5,padx=10)
+          estimate_text10.place(x=20,y=330)
+
+          estimate_txt = scrolledtext.ScrolledText(estimate_Customerlabelframe, undo=True,width=62,height=4)
+          estimate_txt.place(x=32,y=358)
+
+
+
+
+          estimate_okButton = Button(estimate_innerFrame,compound = LEFT,image=tick , text ="Ok",width=60,command=est_addproducts)
+          estimate_okButton.place(x=10,y=475)
+
+          def est_closetab():
+            estimate_top.destroy()
+
+
+          estimate_cancelButton = Button(estimate_innerFrame,compound = LEFT,image=cancel ,text="Cancel",width=60,command=est_closetab)
+          estimate_cancelButton.place(x=519,y=475)
+
+          estimate_imageFrame = Frame(estimate_tab2, relief=GROOVE,height=580)
+          estimate_imageFrame.pack(side="top",fill=BOTH)
+          
+
+          estimate_browseimg=Label(estimate_imageFrame,text=" Browse for product image file(recommended image type:JPG,size 480x320 pixels) ",bg='#f5f3f2')
+          estimate_browseimg.place(x=15,y=35)
+
+          estimate_browsebutton=Button(estimate_imageFrame,text = 'Browse',command=este_upload_file)
+          estimate_browsebutton.place(x=520,y=30,height=30,width=50)
+          
+          estimate_removeButton = Button(estimate_imageFrame,compound = LEFT,image=cancel, text ="Remove Product Image",width=150, command=lambda: b2.destroy())
+          estimate_removeButton.place(x=400,y=450)
         
-
-        edit_est_priceval = StringVar()
-        edit_est_price1=Label(edit_est_updateframe,text="(Price-Cost):",pady=5,padx=10)
-        edit_est_price1.place(x=20,y=190)
-        edit_est_priceentry = Entry(edit_est_updateframe,width=20,textvariable=edit_est_priceval,state=DISABLED,disabledbackground="white",disabledforeground="black")
-        edit_est_priceentry.config(justify="right")
-        edit_est_priceentry.place(x=120,y=195)
-        edit_est_priceentry.delete(0,'end')
-        edit_est_priceentry.insert(0, edit_est_psdata[11])
-
-        edit_est_uval.trace('w', edit_est_set_label)
-        edit_est_costval.trace('w', edit_est_set_label)
+        # ###---------------Edit product-----------------###    
+        def est_edit_product(): 
+          edit_est_itemid = estimate_cusventtree1.item(estimate_cusventtree1.focus())["values"][0]  
+          global filename
+          filename = ""
         
+          def edit_estupload_file():
+            global filename,img, b2
+            f_types =[('Png files','*.png'),('Jpg Files', '*.jpg')]
+            filename = filedialog.askopenfilename(filetypes=f_types)
+            shutil.copyfile(filename, os.getcwd()+'/images/'+filename.split('/')[-1])
+            image = Image.open(filename)
+            resize_image = image.resize((350, 350))
+            img = ImageTk.PhotoImage(resize_image)
+            edit_est_b2 = Button(edit_est_imageFrame,image=img)
+            edit_est_b2.place(x=130, y=80)
+          
+          def edit_est_updateproducts():
+            global img , filename 
+            sku = edit_est_codeentry.get()
+            status = edit_est_checkvarStatus.get()
+            catgory = edit_est_n.get()
+            name = edit_est_nameentry.get()
+            description = edit_est_desentry.get()
+            unitprice = edit_est_uval.get()
+            peices = edit_est_pcsentry.get()
+            cost = edit_est_costval.get()
+            price_cost = edit_est_priceval.get()
+            taxable = edit_est_checkvarStatus2.get()
+            tax2 = edit_est_checkvarStatustax2.get()
+            nostockcontrol = edit_est_checkvarStatus3.get()
+            stock = edit_est_stockval.get()
+            lowstock = edit_est_lowval.get()
+            warehouse = edit_est_wareentry.get()
+            pnotes = edit_est_sctxt.get("1.0", 'end-1c')
+            entries = [sku, name, unitprice, cost]
+            entri = []
+            for i in entries:
+              if i == '':
+                entri.append(i)
+            if len(entri) == 0:
+              if filename == "":
+                print("hello")
+                sql = "update Productservice set sku=%s, category=%s, name=%s, description=%s, status=%s, unitprice=%s, peices=%s, cost=%s, taxable=%s, priceminuscost=%s, serviceornot=%s, stock=%s, stocklimit=%s, warehouse=%s, privatenote=%s,tax2=%s where sku = %s"
+                val = (sku, catgory, name, description, status, unitprice, peices, cost, taxable, price_cost, nostockcontrol, stock, lowstock, warehouse, pnotes,tax2, edit_est_itemid)
+                fbcursor.execute(sql, val)
+                fbilldb.commit()
+              else:
+                print("hai")
+                file = shutil.copyfile(filename, os.getcwd()+'/images/'+filename.split('/')[-1])
+                sql = "update Productservice set category=%s, name=%s, description=%s, status=%s, unitprice=%s, peices=%s, cost=%s, taxable=%s, priceminuscost=%s, serviceornot=%s, stock=%s, stocklimit=%s, warehouse=%s, image=%s, privatenote=%s,tax2=%s where sku = %s"
+                val = (catgory, name, description, status, unitprice, peices, cost, taxable, price_cost, nostockcontrol, stock, lowstock, warehouse,filename.split('/')[-1], pnotes,tax2, edit_est_itemid)
+                fbcursor.execute(sql, val)
+                fbilldb.commit()
+              for record in estimate_cusventtree1.get_children():
+                estimate_cusventtree1.delete(record)
+              fbcursor.execute("select *  from Productservice")
+              edit_est_pandsdata = fbcursor.fetchall()
+              countp = 0
+              for i in edit_est_pandsdata:
+                if i[12] == '1':
+                  servi = '🗹'
+                else:
+                  servi = ''
+                sql = "select currencysign,currsignplace from company"
+                fbcursor.execute(sql)
+                estcurrsymb = fbcursor.fetchone()
+                if not estcurrsymb: 
+                  if i[13] > i[14]:
+                    estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('green',))
+                    countp += 1              
+                  elif i[12] == '1':
+                    estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('blue',))
+                    countp += 1
+                  else:
+                    estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('red',))
+                    countp += 1
+                          
+                elif estcurrsymb[1] == "before amount":
+                  if (i[13]) > (i[14]):
+                    estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('green',))
+                    countp += 1
+                  elif i[12] == '1':
+                    estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('blue',))
+                    countp += 1
+                  else:
+                    estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('red',))
+                    countp += 1
 
-        edit_est_checkvarStatus2=IntVar()
-      
-        edit_est_Button2 = Checkbutton(edit_est_updateframe,variable = edit_est_checkvarStatus2, 
-                          text="Taxable Tax1rate",compound="right",
+                elif estcurrsymb[1] == "before amount with space":
+                  if (i[13]) > (i[14]):
+                    estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('green',))
+                    countp += 1
+                  elif i[12] == '1':
+                    estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('blue',))
+                    countp += 1
+                  else:
+                    estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('red',))
+                    countp += 1
+
+                elif estcurrsymb[1] == "after amount":
+                  if (i[13]) > (i[14]):
+                    estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('green',))
+                    countp += 1
+                  elif i[12] == '1':
+                    estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('blue',))
+                    countp += 1
+                  else:
+                    estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('red',))
+                    countp += 1
+
+                elif estcurrsymb[1] == "after amount with space":
+                  if (i[13]) > (i[14]):
+                    estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('green',))
+                    countp += 1
+                  elif i[12] == '1':
+                    estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('blue',))
+                    countp += 1
+                  else:
+                    estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('red',))
+                    countp += 1
+              edit_est_top.destroy()
+            else:
+              messagebox.showinfo("F-Billing Revolution", "Fields name or SKU entered is already in database.")
+              edit_est_top.destroy()
+              
+
+          sql = "select * from Productservice where sku = %s"
+          val = (edit_est_itemid, )
+          fbcursor.execute(sql, val)
+          edit_est_psdata = fbcursor.fetchone()
+          print(edit_est_itemid)
+          edit_est_top = Toplevel()  
+          edit_est_top.title("Edit Product/Service details")
+          p3 = PhotoImage(file = 'images/fbicon.png')
+          edit_est_top.iconphoto(False, p3)
+          edit_est_top.geometry("600x550+350+15")
+          tabControl = ttk.Notebook(edit_est_top)
+          s = ttk.Style()
+          s.theme_use('default')
+          s.configure('TNotebook.Tab', background="#999999", width=50, padding=10,bd=0)
+
+          edit_est_taba = ttk.Frame(tabControl)
+          edit_est_tabb = ttk.Frame(tabControl)
+          
+          tabControl.add(edit_est_taba,compound = LEFT, text ='Product/Service')
+          tabControl.add(edit_est_tabb,compound = LEFT, text ='Product Image')
+          
+          tabControl.pack(expand = 1, fill ="both")
+          
+          edit_est_innerFrame = Frame(edit_est_taba,bg="#f5f3f2", relief=GROOVE)
+          edit_est_innerFrame.pack(side="top",fill=BOTH)
+
+          edit_est_updateframe = LabelFrame(edit_est_innerFrame,text="Product/Service",width=580,height=455)
+          edit_est_updateframe.pack(side="top",fill=BOTH,padx=10,pady=(10,45))
+
+          edit_est_code1=Label(edit_est_updateframe,text="Code or SKU:",fg="blue",pady=10,padx=10)
+          edit_est_code1.place(x=20,y=0)
+          edit_est_codeentry = Entry(edit_est_updateframe,width=35)
+          edit_est_codeentry.place(x=120,y=8)
+          edit_est_codeentry.insert(0, edit_est_psdata[2])
+
+          edit_est_checkvarStatus=IntVar()
+          edit_est_status1=Label(edit_est_updateframe,text="Status:")
+          edit_est_status1.place(x=400,y=8)
+          edit_est_Button1 = Checkbutton(edit_est_updateframe, 
+                            variable = edit_est_checkvarStatus,text="Active",compound="right",
+                            onvalue =1,
+                            offvalue =0,
+                            width = 10)
+          edit_est_Button1.place(x=450,y=5)
+          edit_est_sta = edit_est_psdata[6]
+          if edit_est_sta == '1':
+            edit_est_Button1.select()
+          else:
+            edit_est_Button1.deselect()
+
+
+
+          edit_est_category1=Label(edit_est_updateframe,text="Category:",pady=5,padx=10)
+          edit_est_category1.place(x=20,y=40)
+          edit_est_n = StringVar() 
+          edit_est_category = Entry(edit_est_updateframe,width=40,textvariable=edit_est_n) 
+          edit_est_category.insert(0, edit_est_psdata[3])
+          edit_est_category = ttk.Combobox(edit_est_updateframe, width = 40, textvariable = edit_est_n )
+          edit_est_category['values'] = ('Default')
+          edit_est_category.place(x=120,y=45)
+          #edit_est_category.insert(0, 'Default')
+
+
+
+          edit_est_name1=Label(edit_est_updateframe,text="Name :",fg="blue",pady=5,padx=10)
+          edit_est_name1.place(x=20,y=70)
+          edit_est_nameentry = Entry(edit_est_updateframe,width=70)
+          edit_est_nameentry.place(x=120,y=75)
+          edit_est_nameentry.insert(0, edit_est_psdata[4])
+
+          edit_est_des1=Label(edit_est_updateframe,text="Description :",pady=5,padx=10)
+          edit_est_des1.place(x=20,y=100)
+          edit_est_desentry = Entry(edit_est_updateframe,width=70)
+          edit_est_desentry.place(x=120,y=105)
+          edit_est_desentry.insert(0, edit_est_psdata[5])
+
+          def edit_est_set_label(name, index, mode):
+            edit_est_priceval.set(float(edit_est_uval.get()) - float(edit_est_costval.get()))
+
+          def edit_est_prdoucts_cal(S,d):
+            if d == '1': #insert
+              if not S in ['.','0','1','2','3','4','5','6','7','8','9']:
+                return False
+              return True
+            if d.isdigit():
+              return True
+          
+          edit_est_unit1=Label(edit_est_updateframe,text="Unit Price:",fg="blue",pady=5,padx=10)
+          edit_est_unit1.place(x=20,y=130)
+          
+          edit_est_uval = StringVar()
+          edit_est_unitentry = Entry(edit_est_updateframe,width=20,textvariable=edit_est_uval)
+          edit_est_unitentry.place(x=120,y=135)
+          edit_est_unitentry.delete(0,'end')
+          edit_est_unitentry.insert(0, edit_est_psdata[7])
+          edit_est_cal_unit = (edit_est_updateframe.register(edit_est_prdoucts_cal),'%S','%d')
+          edit_est_unitentry.config(validate='key',validatecommand=(edit_est_cal_unit),justify='right')
+          
+
+          edit_est_pcsval = IntVar()
+          edit_est_pcs1=Label(edit_est_updateframe,text="Pcs/Weight:",fg="blue",pady=5,padx=10)
+          edit_est_pcs1.place(x=330,y=135)
+          edit_est_pcsentry = Entry(edit_est_updateframe,width=20,textvariable=edit_est_pcsval)
+          edit_est_pcsentry.place(x=420,y=140)
+          edit_est_pcsentry.delete(0,'end')
+          edit_est_pcsentry.insert(0, edit_est_psdata[8])
+          
+
+          edit_est_costval = StringVar()
+          edit_est_cost1=Label(edit_est_updateframe,text="Cost:",pady=5,padx=10)
+          edit_est_cost1.place(x=20,y=160)
+          edit_est_costentry = Entry(edit_est_updateframe,width=20,textvariable=edit_est_costval)
+          edit_est_costentry.place(x=120,y=165)
+          edit_est_costentry.delete(0, END)
+          edit_est_costentry.insert(0, edit_est_psdata[9])
+          edit_est_cal_cost = (edit_est_updateframe.register(edit_est_prdoucts_cal),'%S','%d')
+          edit_est_costentry.config(validate='key',validatecommand=(edit_est_cal_cost),justify='right')
+          
+
+          edit_est_priceval = StringVar()
+          edit_est_price1=Label(edit_est_updateframe,text="(Price-Cost):",pady=5,padx=10)
+          edit_est_price1.place(x=20,y=190)
+          edit_est_priceentry = Entry(edit_est_updateframe,width=20,textvariable=edit_est_priceval,state=DISABLED,disabledbackground="white",disabledforeground="black")
+          edit_est_priceentry.config(justify="right")
+          edit_est_priceentry.place(x=120,y=195)
+          edit_est_priceentry.delete(0,'end')
+          edit_est_priceentry.insert(0, edit_est_psdata[11])
+
+          edit_est_uval.trace('w', edit_est_set_label)
+          edit_est_costval.trace('w', edit_est_set_label)
+          
+
+          edit_est_checkvarStatus2=IntVar()
+        
+          edit_est_Button2 = Checkbutton(edit_est_updateframe,variable = edit_est_checkvarStatus2, 
+                            text="Taxable Tax1rate",compound="right",
+                            onvalue =1 ,
+                            offvalue =0,
+                            height=2,
+                            width = 12)
+          
+          edit_est_checkvarStatustax2=IntVar()
+          edit_est_Buttontax2 = Checkbutton(edit_est_updateframe,variable = edit_est_checkvarStatustax2, 
+                          text="Taxable Tax2rate",compound="right",
                           onvalue =1 ,
-                          offvalue =0,
+                          offvalue = 0,
                           height=2,
                           width = 12)
+          
+          sql = "select taxtype from company"
+          fbcursor.execute(sql)
+          edit_est_taxchoose = fbcursor.fetchone()
+          if not edit_est_taxchoose:
+            pass
+          elif edit_est_taxchoose[0] == '1':
+            edit_est_Button2.place_forget()
+            edit_est_Buttontax2.place_forget()
+          elif edit_est_taxchoose[0] == '2':
+            edit_est_Button2.place(x=415,y=170)
+            edit_est_Buttontax2.place_forget()
+          elif edit_est_taxchoose[0] == '3':
+            edit_est_Button2.place(x=415,y=170)
+            edit_est_Buttontax2.place(x=415,y=210)
+
+      
+          edit_est_tax = edit_est_psdata[10]
+          if edit_est_tax == '1':
+            edit_est_Button2.select()
+          else:
+            edit_est_Button2.deselect()
+
+          if edit_est_psdata[19] == '1':
+            edit_est_Buttontax2.select()
+          else:
+            edit_est_Buttontax2.deselect()
+
+          def edit_est_switch():
+            if edit_est_checkvarStatus3.get():
+              edit_est_stockentry["state"] = DISABLED
+              edit_est_lowentry["state"] = DISABLED
+              edit_est_wareentry["state"] = DISABLED
+            else:
+              edit_est_stockentry["state"] = NORMAL
+              edit_est_lowentry["state"] = NORMAL
+              edit_est_wareentry["state"] = NORMAL
+          edit_est_checkvarStatus3=BooleanVar()
         
-        edit_est_checkvarStatustax2=IntVar()
-        edit_est_Buttontax2 = Checkbutton(edit_est_updateframe,variable = edit_est_checkvarStatustax2, 
-                        text="Taxable Tax2rate",compound="right",
-                        onvalue =1 ,
-                        offvalue = 0,
-                        height=2,
-                        width = 12)
+          edit_est_Button3 = Checkbutton(edit_est_updateframe,variable = edit_est_checkvarStatus3,command=edit_est_switch, 
+                            text="This is a service(no stock control)", 
+                            onvalue =1 ,
+                            offvalue = 0,
+                            height=3)
+
+          edit_est_Button3.place(x=40,y=220)
+
+          
+
+          def edit_est_stocknum(input):
+            if input.isdigit():
+              return True
+            elif input is "":
+              return True
+            else:
+              return False
+          edit_est_stockval = IntVar(edit_est_updateframe)
+          edit_est_stock1=Label(edit_est_updateframe,text="Stock:",pady=5,padx=10)
+          edit_est_stock1.place(x=90,y=260)
+          edit_est_stockentry = Entry(edit_est_updateframe,width=15,textvariable=edit_est_stockval)
+          edit_est_stockentry.place(x=150,y=265)
+          edit_est_stockentry.delete(0,'end')
+          edit_est_stockentry.insert(0, edit_est_psdata[13])
+          edit_est_sto = edit_est_updateframe.register(edit_est_stocknum)
+          edit_est_stockentry.config(validate="key",validatecommand=(edit_est_sto, '%S'))
+          
+
+          edit_est_lowval = IntVar(edit_est_updateframe)
+          edit_est_low1=Label(edit_est_updateframe,text="Low Stock Warning Limit:",pady=5,padx=10)
+          edit_est_low1.place(x=270,y=260)
+          edit_est_lowentry = Entry(edit_est_updateframe,width=15,textvariable=edit_est_lowval)
+          edit_est_lowentry.place(x=432,y=265)
+          edit_est_lowentry.delete(0,'end')
+          edit_est_lowentry.insert(0, edit_est_psdata[14])
+          edit_est_lowsto = edit_est_updateframe.register(edit_est_stocknum)
+          edit_est_lowentry.config(validate="key",validatecommand=(edit_est_lowsto, '%S'))
+          
+
         
-        sql = "select taxtype from company"
-        fbcursor.execute(sql)
-        edit_est_taxchoose = fbcursor.fetchone()
-        if not edit_est_taxchoose:
-          pass
-        elif edit_est_taxchoose[0] == '1':
-          edit_est_Button2.place_forget()
-          edit_est_Buttontax2.place_forget()
-        elif edit_est_taxchoose[0] == '2':
-          edit_est_Button2.place(x=415,y=170)
-          edit_est_Buttontax2.place_forget()
-        elif edit_est_taxchoose[0] == '3':
-          edit_est_Button2.place(x=415,y=170)
-          edit_est_Buttontax2.place(x=415,y=210)
+          edit_est_ware1=Label(edit_est_updateframe,text="Warehouse:",pady=5,padx=10)
+          edit_est_ware1.place(x=60,y=290)
+          edit_est_wareentry = Entry(edit_est_updateframe,width=64)
+          edit_est_wareentry.place(x=150,y=295)
+          edit_est_wareentry.insert(0, edit_est_psdata[15])
 
-    
-        edit_est_tax = edit_est_psdata[10]
-        if edit_est_tax == '1':
-          edit_est_Button2.select()
-        else:
-          edit_est_Button2.deselect()
-
-        if edit_est_psdata[19] == '1':
-          edit_est_Buttontax2.select()
-        else:
-          edit_est_Buttontax2.deselect()
-
-        def edit_est_switch():
-          if edit_est_checkvarStatus3.get():
+          edit_est_scr = edit_est_psdata[12]
+          if edit_est_scr == '1':
+            edit_est_Button3.select()
             edit_est_stockentry["state"] = DISABLED
             edit_est_lowentry["state"] = DISABLED
             edit_est_wareentry["state"] = DISABLED
           else:
+            edit_est_Button3.deselect()
             edit_est_stockentry["state"] = NORMAL
             edit_est_lowentry["state"] = NORMAL
             edit_est_wareentry["state"] = NORMAL
-        edit_est_checkvarStatus3=BooleanVar()
-      
-        edit_est_Button3 = Checkbutton(edit_est_updateframe,variable = edit_est_checkvarStatus3,command=edit_est_switch, 
-                          text="This is a service(no stock control)", 
-                          onvalue =1 ,
-                          offvalue = 0,
-                          height=3)
+          
+          
 
-        edit_est_Button3.place(x=40,y=220)
+          
 
-        
+          edit_est_text1=Label(edit_est_updateframe,text="Private notes(not appears on invoice):",pady=5,padx=10)
+          edit_est_text1.place(x=20,y=330)
+          edit_est_sctxt = scrolledtext.ScrolledText(edit_est_updateframe, undo=True,width=62,height=4)
+          edit_est_sctxt.place(x=32,y=358)
+          try:
+            edit_est_sctxt.insert("1.0", edit_est_psdata[16])
+          except:
+            pass
 
-        def edit_est_stocknum(input):
-          if input.isdigit():
-            return True
-          elif input is "":
-            return True
-          else:
-            return False
-        edit_est_stockval = IntVar(edit_est_updateframe)
-        edit_est_stock1=Label(edit_est_updateframe,text="Stock:",pady=5,padx=10)
-        edit_est_stock1.place(x=90,y=260)
-        edit_est_stockentry = Entry(edit_est_updateframe,width=15,textvariable=edit_est_stockval)
-        edit_est_stockentry.place(x=150,y=265)
-        edit_est_stockentry.delete(0,'end')
-        edit_est_stockentry.insert(0, edit_est_psdata[13])
-        edit_est_sto = edit_est_updateframe.register(edit_est_stocknum)
-        edit_est_stockentry.config(validate="key",validatecommand=(edit_est_sto, '%S'))
-        
+          edit_est_okButton = Button(edit_est_innerFrame, text ="Ok",image=tick,width=70,compound = LEFT,command=edit_est_updateproducts)
+          edit_est_okButton.place(x=10, y=475)
 
-        edit_est_lowval = IntVar(edit_est_updateframe)
-        edit_est_low1=Label(edit_est_updateframe,text="Low Stock Warning Limit:",pady=5,padx=10)
-        edit_est_low1.place(x=270,y=260)
-        edit_est_lowentry = Entry(edit_est_updateframe,width=15,textvariable=edit_est_lowval)
-        edit_est_lowentry.place(x=432,y=265)
-        edit_est_lowentry.delete(0,'end')
-        edit_est_lowentry.insert(0, edit_est_psdata[14])
-        edit_est_lowsto = edit_est_updateframe.register(edit_est_stocknum)
-        edit_est_lowentry.config(validate="key",validatecommand=(edit_est_lowsto, '%S'))
-        
+          edit_est_cancelButton = Button(edit_est_innerFrame,image=cancel,text="Cancel",width=70,compound = LEFT, command=lambda : edit_est_top.destroy())
+          edit_est_cancelButton.place(x=519, y=475)
+          
+          
+          edit_est_imageFrame = Frame(edit_est_tabb, relief=GROOVE,height=580)
+          edit_est_imageFrame.pack(side="top",fill=BOTH)
+          # for record in estimate_cusventtree1.get_children():
+          #   estimate_cusventtree1.delete(record)
+          # doc_sql1 = "SELECT * FROM productservice WHERE sku=%s"
+          # doc_val1 = (edit_est_itemid,)
+          # fbcursor.execute(doc_sql1,doc_val1)
+          # doc_details1 = fbcursor.fetchall()
+          # print(doc_details1)
+          # countdocc = 0
+          # for doc1 in doc_details1:
+          #   file_size_31 = est_check_convertion(os.path.getsize("images/"+doc1[17]))
+          #   estimate_cusventtree1.insert(parent='',index='end',iid=doc1,text='',values=('',doc1[17],file_size_31))
+          # countdocc += 1
 
-      
-        edit_est_ware1=Label(edit_est_updateframe,text="Warehouse:",pady=5,padx=10)
-        edit_est_ware1.place(x=60,y=290)
-        edit_est_wareentry = Entry(edit_est_updateframe,width=64)
-        edit_est_wareentry.place(x=150,y=295)
-        edit_est_wareentry.insert(0, edit_est_psdata[15])
+          edit_est_browseimg=Label(edit_est_imageFrame,text=" Browse for product image file(recommended image type:JPG,size 480x320 pixels) ",bg='#f5f3f2')
+          edit_est_browseimg.place(x=15,y=35)
 
-        edit_est_scr = edit_est_psdata[12]
-        if edit_est_scr == '1':
-          edit_est_Button3.select()
-          edit_est_stockentry["state"] = DISABLED
-          edit_est_lowentry["state"] = DISABLED
-          edit_est_wareentry["state"] = DISABLED
-        else:
-          edit_est_Button3.deselect()
-          edit_est_stockentry["state"] = NORMAL
-          edit_est_lowentry["state"] = NORMAL
-          edit_est_wareentry["state"] = NORMAL
-        
-        
+          edit_est_browsebutton=Button(edit_est_imageFrame,text = 'Browse',command=edit_estupload_file)
+          edit_est_browsebutton.place(x=530,y=30,height=30,width=50)
 
-        
+          try:
+            image = Image.open("images/"+edit_est_psdata[17])
+            resize_image = image.resize((350, 350))
+            image = ImageTk.PhotoImage(resize_image)
+            edit_est_b2 = Label(edit_est_imageFrame,image=image,width=350,height=350)
+            edit_est_b2.photo = image
+            edit_est_b2.place(x=130, y=80)
+            print(image)
+          except:
+            pass
 
-        edit_est_text1=Label(edit_est_updateframe,text="Private notes(not appears on invoice):",pady=5,padx=10)
-        edit_est_text1.place(x=20,y=330)
-        edit_est_sctxt = scrolledtext.ScrolledText(edit_est_updateframe, undo=True,width=62,height=4)
-        edit_est_sctxt.place(x=32,y=358)
-        try:
-          edit_est_sctxt.insert("1.0", edit_est_psdata[16])
-        except:
-          pass
-
-        edit_est_okButton = Button(edit_est_innerFrame, text ="Ok",image=tick,width=70,compound = LEFT,command=edit_est_updateproducts)
-        edit_est_okButton.place(x=10, y=475)
-
-        edit_est_cancelButton = Button(edit_est_innerFrame,image=cancel,text="Cancel",width=70,compound = LEFT, command=lambda : edit_est_top.destroy())
-        edit_est_cancelButton.place(x=519, y=475)
-        
-        
-        edit_est_imageFrame = Frame(edit_est_tabb, relief=GROOVE,height=580)
-        edit_est_imageFrame.pack(side="top",fill=BOTH)
-        # for record in estimate_cusventtree1.get_children():
-        #   estimate_cusventtree1.delete(record)
-        # doc_sql1 = "SELECT * FROM productservice WHERE sku=%s"
-        # doc_val1 = (edit_est_itemid,)
-        # fbcursor.execute(doc_sql1,doc_val1)
-        # doc_details1 = fbcursor.fetchall()
-        # print(doc_details1)
-        # countdocc = 0
-        # for doc1 in doc_details1:
-        #   file_size_31 = est_check_convertion(os.path.getsize("images/"+doc1[17]))
-        #   estimate_cusventtree1.insert(parent='',index='end',iid=doc1,text='',values=('',doc1[17],file_size_31))
-        # countdocc += 1
-
-        edit_est_browseimg=Label(edit_est_imageFrame,text=" Browse for product image file(recommended image type:JPG,size 480x320 pixels) ",bg='#f5f3f2')
-        edit_est_browseimg.place(x=15,y=35)
-
-        edit_est_browsebutton=Button(edit_est_imageFrame,text = 'Browse',command=edit_estupload_file)
-        edit_est_browsebutton.place(x=530,y=30,height=30,width=50)
-
-        try:
-          image = Image.open("images/"+edit_est_psdata[17])
-          resize_image = image.resize((350, 350))
-          image = ImageTk.PhotoImage(resize_image)
-          edit_est_b2 = Label(edit_est_imageFrame,image=image,width=350,height=350)
-          edit_est_b2.photo = image
-          edit_est_b2.place(x=130, y=80)
-          print(image)
-        except:
-          pass
-
-        edit_est_removeButton = Button(edit_est_imageFrame,image=cancel,text="Remove Product Image",width=150,compound = LEFT,command=lambda: edit_est_b2 .destroy())
-        edit_est_removeButton.place(x=410,y=460)
-      # except:
-      #   try:
-      #     edit_est_top.destroy()
-      #   except:
-      #     pass
-        #messagebox.showerror('F-Billing Revolution', 'Select a record to edit.')
-  
-
-
-              
-      
-      estimate_enter10=Label(estimate_newselection, text="Enter filter text").place(x=5, y=10)
-      estimate_e10=Entry(estimate_newselection, width=20)
-      estimate_e10.place(x=110, y=10)
-      # estimate_text10=Label(estimate_newselection, text="Filtered column").place(x=340, y=10)
-      # estimate_e20=Entry(estimate_newselection, width=20).place(x=450, y=10)
-      estimate_pro_filter_button=Button(estimate_newselection, text='Click Here')
-      estimate_pro_filter_button.place(x=240, y=9,height=20,width=60)
-
-      
-      
-      global estimate_cusventtree1
-      estimate_cusventtree1=ttk.Treeview(estimate_newselection, height=25)
-      estimate_cusventtree1["columns"]=["1","2","3", "4","5"]
-      estimate_cusventtree1.column("#0", width=35)
-      estimate_cusventtree1.column("1", width=160)
-      estimate_cusventtree1.column("2", width=160)
-      estimate_cusventtree1.column("3", width=140)
-      estimate_cusventtree1.column("4", width=70)
-      estimate_cusventtree1.column("5", width=70)
-      estimate_cusventtree1.heading("#0",text="")
-      estimate_cusventtree1.heading("1",text="ID/SKU")
-      estimate_cusventtree1.heading("2",text="Product/Service Name")
-      estimate_cusventtree1.heading("3",text="Unit price")
-      estimate_cusventtree1.heading("4",text="Service")
-      estimate_cusventtree1.heading("5",text="Stock")
-      estimate_cusventtree1.tag_configure('green', foreground='green')
-      estimate_cusventtree1.tag_configure('red', foreground='red')
-      estimate_cusventtree1.tag_configure('blue', foreground='blue')
+          edit_est_removeButton = Button(edit_est_imageFrame,image=cancel,text="Remove Product Image",width=150,compound = LEFT,command=lambda: edit_est_b2 .destroy())
+          edit_est_removeButton.place(x=410,y=460)
+        # except:
+        #   try:
+        #     edit_est_top.destroy()
+        #   except:
+        #     pass
+          #messagebox.showerror('F-Billing Revolution', 'Select a record to edit.')
     
-      countp = 0
-      sql = 'select * from Productservice'
-      fbcursor.execute(sql)
-      estprodata = fbcursor.fetchall()
-      for i in estprodata:
-        if i[12] == '1':
-          servi = '🗹'
-        else:
-          servi = ''
-        sql = "select currencysign,currsignplace from company"
-        fbcursor.execute(sql)
-        estcurrsymb = fbcursor.fetchone()
-        if not estcurrsymb: 
-          if i[13] > i[14]:
-            estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('green',))
-            countp += 1              
-          elif i[12] == '1':
-            estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('blue',))
-            countp += 1
-          else:
-            estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('red',))
-            countp += 1
-                  
-        elif estcurrsymb[1] == "before amount":
-          if (i[13]) > (i[14]):
-            estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('green',))
-            countp += 1
-          elif i[12] == '1':
-            estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('blue',))
-            countp += 1
-          else:
-            estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('red',))
-            countp += 1
 
-        elif estcurrsymb[1] == "before amount with space":
-          if (i[13]) > (i[14]):
-            estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('green',))
-            countp += 1
-          elif i[12] == '1':
-            estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('blue',))
-            countp += 1
-          else:
-            estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('red',))
-            countp += 1
 
-        elif estcurrsymb[1] == "after amount":
-          if (i[13]) > (i[14]):
-            estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('green',))
-            countp += 1
-          elif i[12] == '1':
-            estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('blue',))
-            countp += 1
-          else:
-            estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('red',))
-            countp += 1
+                
+        
+        estimate_enter10=Label(estimate_newselection, text="Enter filter text").place(x=5, y=10)
+        estimate_e10=Entry(estimate_newselection, width=20)
+        estimate_e10.place(x=110, y=10)
+        # estimate_text10=Label(estimate_newselection, text="Filtered column").place(x=340, y=10)
+        # estimate_e20=Entry(estimate_newselection, width=20).place(x=450, y=10)
+        estimate_pro_filter_button=Button(estimate_newselection, text='Click Here')
+        estimate_pro_filter_button.place(x=240, y=9,height=20,width=60)
 
-        elif estcurrsymb[1] == "after amount with space":
-          if (i[13]) > (i[14]):
-            estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('green',))
-            countp += 1
-          elif i[12] == '1':
-            estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('blue',))
-            countp += 1
-          else:
-            estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('red',))
-            countp += 1
-      estimate_cusventtree1.place(x=5, y=45)
+        
+        
+        global estimate_cusventtree1
+        estimate_cusventtree1=ttk.Treeview(estimate_newselection, height=25)
+        estimate_cusventtree1["columns"]=["1","2","3", "4","5"]
+        estimate_cusventtree1.column("#0", width=35)
+        estimate_cusventtree1.column("1", width=160)
+        estimate_cusventtree1.column("2", width=160)
+        estimate_cusventtree1.column("3", width=140)
+        estimate_cusventtree1.column("4", width=70)
+        estimate_cusventtree1.column("5", width=70)
+        estimate_cusventtree1.heading("#0",text="")
+        estimate_cusventtree1.heading("1",text="ID/SKU")
+        estimate_cusventtree1.heading("2",text="Product/Service Name")
+        estimate_cusventtree1.heading("3",text="Unit price")
+        estimate_cusventtree1.heading("4",text="Service")
+        estimate_cusventtree1.heading("5",text="Stock")
+        estimate_cusventtree1.tag_configure('green', foreground='green')
+        estimate_cusventtree1.tag_configure('red', foreground='red')
+        estimate_cusventtree1.tag_configure('blue', foreground='blue')
       
-
-      estimate_ctegorytree1=ttk.Treeview(estimate_newselection, height=25)
-      estimate_ctegorytree1["columns"]=["1"]
-      estimate_ctegorytree1.column("#0", width=35, minwidth=20)
-      estimate_ctegorytree1.column("1", width=205, minwidth=25, anchor=CENTER)    
-      estimate_ctegorytree1.heading("#0",text="", anchor=W)
-      estimate_ctegorytree1.heading("1",text="View filter by category", anchor=CENTER)
-      estimate_ctegorytree1.place(x=660, y=45)
-      def est_items_selected(event):
-        selected_indices = est_fil_cat_list.curselection()
-        selected_filter = ",".join([est_fil_cat_list.get(i) for i in selected_indices])
-
+        countp = 0
         sql = 'select * from Productservice'
         fbcursor.execute(sql)
-        pandsdata = fbcursor.fetchall()
-        psql = "select * from Productservice where serviceornot=%s"
-        val = ('0', )
-        fbcursor.execute(psql, val)
-        pdata = fbcursor.fetchall()
-
-        ssql = "select * from Productservice where serviceornot=%s"
-        val = ('1', )
-        fbcursor.execute(ssql, val)
-        sdata = fbcursor.fetchall()
-
-        if selected_filter == "View all records":
-          for record in estimate_cusventtree1.get_children():
-            estimate_cusventtree1.delete(record)
-          countp = 0
-          for i in pandsdata:
-            if i[12] == '1':
-              servi = '🗹'                     #'Active'
+        estprodata = fbcursor.fetchall()
+        for i in estprodata:
+          if i[12] == '1':
+            servi = '🗹'
+          else:
+            servi = ''
+          sql = "select currencysign,currsignplace from company"
+          fbcursor.execute(sql)
+          estcurrsymb = fbcursor.fetchone()
+          if not estcurrsymb: 
+            if i[13] > i[14]:
+              estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('green',))
+              countp += 1              
+            elif i[12] == '1':
+              estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('blue',))
+              countp += 1
             else:
-              servi = ' '                         #'Inactive'
-            sql = "select currencysign,currsignplace from company"
-            fbcursor.execute(sql)
-            estcurrsymb = fbcursor.fetchone()
-            if not estcurrsymb: 
-              if i[13] > i[14]:
-                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('green',))
-                countp += 1              
-              elif i[12] == '1':
-                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('blue',))
-                countp += 1
-              else:
-                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('red',))
-                countp += 1
-                      
-            elif estcurrsymb[1] == "before amount":
-              if (i[13]) > (i[14]):
-                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('green',))
-                countp += 1
-              elif i[12] == '1':
-                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('blue',))
-                countp += 1
-              else:
-                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('red',))
-                countp += 1
-
-            elif estcurrsymb[1] == "before amount with space":
-              if (i[13]) > (i[14]):
-                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('green',))
-                countp += 1
-              elif i[12] == '1':
-                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('blue',))
-                countp += 1
-              else:
-                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('red',))
-                countp += 1
-
-            elif estcurrsymb[1] == "after amount":
-              if (i[13]) > (i[14]):
-                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('green',))
-                countp += 1
-              elif i[12] == '1':
-                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('blue',))
-                countp += 1
-              else:
-                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('red',))
-                countp += 1
-
-            elif estcurrsymb[1] == "after amount with space":
-              if (i[13]) > (i[14]):
-                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('green',))
-                countp += 1
-              elif i[12] == '1':
-                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('blue',))
-                countp += 1
-              else:
-                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('red',))
-                countp += 1
-
-        elif selected_filter == "View all products":
-          for record in estimate_cusventtree1.get_children():
-            estimate_cusventtree1.delete(record)
-          countp = 0
-          for i in pdata:
-            if i[12] == '1':
-              servi = '🗹'                   #'Active'
+              estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('red',))
+              countp += 1
+                    
+          elif estcurrsymb[1] == "before amount":
+            if (i[13]) > (i[14]):
+              estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('green',))
+              countp += 1
+            elif i[12] == '1':
+              estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('blue',))
+              countp += 1
             else:
-              servi = ' '                    #'Inactive'
-            sql = "select currencysign,currsignplace from company"
-            fbcursor.execute(sql)
-            estcurrsymb = fbcursor.fetchone()
-            if not estcurrsymb: 
-              if i[13] > i[14]:
-                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('green',))
-                countp += 1              
-              elif i[12] == '1':
-                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('blue',))
-                countp += 1
-              else:
-                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('red',))
-                countp += 1
-                      
-            elif estcurrsymb[1] == "before amount":
-              if (i[13]) > (i[14]):
-                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('green',))
-                countp += 1
-              elif i[12] == '1':
-                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('blue',))
-                countp += 1
-              else:
-                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('red',))
-                countp += 1
+              estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('red',))
+              countp += 1
 
-            elif estcurrsymb[1] == "before amount with space":
-              if (i[13]) > (i[14]):
-                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('green',))
-                countp += 1
-              elif i[12] == '1':
-                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('blue',))
-                countp += 1
-              else:
-                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('red',))
-                countp += 1
-
-            elif estcurrsymb[1] == "after amount":
-              if (i[13]) > (i[14]):
-                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('green',))
-                countp += 1
-              elif i[12] == '1':
-                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('blue',))
-                countp += 1
-              else:
-                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('red',))
-                countp += 1
-
-            elif estcurrsymb[1] == "after amount with space":
-              if (i[13]) > (i[14]):
-                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('green',))
-                countp += 1
-              elif i[12] == '1':
-                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('blue',))
-                countp += 1
-              else:
-                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('red',))
-                countp += 1
-        elif selected_filter == "View all services":
-          for record in estimate_cusventtree1.get_children():
-            estimate_cusventtree1.delete(record)
-          countp = 0
-          for i in sdata:
-            if i[12] == '1':
-              servi = '🗹'             #'Active'
+          elif estcurrsymb[1] == "before amount with space":
+            if (i[13]) > (i[14]):
+              estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('green',))
+              countp += 1
+            elif i[12] == '1':
+              estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('blue',))
+              countp += 1
             else:
-              servi = ' '              #'Inactive'
-            sql = "select currencysign,currsignplace from company"
-            fbcursor.execute(sql)
-            estcurrsymb = fbcursor.fetchone()
-            if not estcurrsymb: 
-              if i[13] > i[14]:
-                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('green',))
-                countp += 1              
-              elif i[12] == '1':
-                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('blue',))
-                countp += 1
-              else:
-                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('red',))
-                countp += 1
-                      
-            elif estcurrsymb[1] == "before amount":
-              if (i[13]) > (i[14]):
-                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('green',))
-                countp += 1
-              elif i[12] == '1':
-                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('blue',))
-                countp += 1
-              else:
-                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('red',))
-                countp += 1
+              estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('red',))
+              countp += 1
 
-            elif estcurrsymb[1] == "before amount with space":
-              if (i[13]) > (i[14]):
-                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('green',))
-                countp += 1
-              elif i[12] == '1':
-                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('blue',))
-                countp += 1
-              else:
-                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('red',))
-                countp += 1
-
-            elif estcurrsymb[1] == "after amount":
-              if (i[13]) > (i[14]):
-                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('green',))
-                countp += 1
-              elif i[12] == '1':
-                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('blue',))
-                countp += 1
-              else:
-                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('red',))
-                countp += 1
-
-            elif estcurrsymb[1] == "after amount with space":
-              if (i[13]) > (i[14]):
-                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('green',))
-                countp += 1
-              elif i[12] == '1':
-                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('blue',))
-                countp += 1
-              else:
-                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('red',))
-                countp += 1
-
-      est_fil_cat_list = Listbox(estimate_newselection,height=34,width=40,bg="white",activestyle="dotbox",fg="black",highlightbackground="white")
-      est_fil_cat_list.insert(0,"View all records")
-      est_fil_cat_list.insert(1,"View all products")
-      est_fil_cat_list.insert(2,"View all services")
-      est_fil_cat_list.place(x=660,y=63)
-      est_fil_cat_list.bind('<<ListboxSelect>>',est_items_selected)
-      est_stockok = Label(estimate_newselection,text="Green: Stock is Ok",foreground="green").place(x =15,y =580)
-      est_stocko = Label(estimate_newselection,text="Red: Limit <= Low Stock Limit",foreground="red").place(x =136,y=580)
-      est_stock = Label(estimate_newselection,text="Blue: Service,no Stock Control",foreground="blue").place(x =335,y =580)
-
-
-      estimate_scrollbar10 = Scrollbar(estimate_newselection)
-      estimate_scrollbar10.place(x=640, y=45, height=520)
-      estimate_scrollbar10.config( command=estimate_cusventtree1.yview )
-
-      def estselepro():
-        global estpriceview
-        estpriceview = Label(estimate_listFrame,bg="#f5f3f2")
-        estpriceview.place(x=850,y=200,width=78,height=18)
-        proskuid = estimate_cusventtree1.item(estimate_cusventtree1.focus())["values"][0]
-        sql = "select * from Productservice where sku = %s"
-        val = (proskuid,)
-        fbcursor.execute(sql,val)
-        prosele = fbcursor.fetchone()
-        sql = "select * from company"
-        fbcursor.execute(sql)
-        create_maintree_insert = fbcursor.fetchone()
-        if prosele[10] == '1':
-          tax1 = 'yes'
-        else:
-          tax1 = ''
-        if prosele[19] == '1':
-          tax2 = 'yes'
-        else:
-          tax2 = ''
-        if not create_maintree_insert:
-          estimate_tree.insert(parent='', index='end',text='', values=(prosele[2],prosele[4],prosele[5],prosele[7],1,prosele[8],tax1,prosele[7]*1))
-
-        elif create_maintree_insert[12] == "1":
-          estimate_tree.insert(parent='', index='end',text='', values=(prosele[2],prosele[4],prosele[5],prosele[7],1,prosele[8],prosele[7]*1))
-          extracs = 0.0
-          discou = 0.0
-          total = 0.0
-          for child in estimate_tree.get_children():
-            total += float(estimate_tree.item(child, 'values')[6])
-          discou = (total*float(estimates_discount2.get())/100)
-          extracs = (extracs+float(estimates_cost3.get()))
-          estimate_costtt.config(text=estimates_cost3.get())
-          estimate_discounttt1.config(text=discou)
-          estpriceview.config(text=total)
-          estimate_total1.config(text=total-discou+extracs)
-          estimate_balancee1.config(text=total-discou+extracs)
-          estimate_subbb1.config(text=total-discou)
-        elif create_maintree_insert[12] == "2":
-          estimate_tree.insert(parent='', index='end',text='', values=(prosele[2],prosele[4],prosele[5],prosele[7],1,prosele[8],tax1,prosele[7]*1))
-          extracs = 0.0
-          discou = 0.0
-          total = 0.0
-          for child in estimate_tree.get_children():
-            total += float(estimate_tree.item(child, 'values')[7])
-          discou = (total*float(estimates_discount2.get())/100)
-          extracs = (extracs+float(estimates_cost3.get()))
-          estimate_costtt.config(text=estimates_cost3.get())
-          estimate_discounttt1.config(text=discou)
-          estpriceview.config(text=total)
-          estimate_subbb1.config(text=total-discou)
-
-          tot = 0.0
-          totaltax1 = 0.0
-          for child in estimate_tree.get_children():
-            checktax1 = list(estimate_tree.item(child, 'values'))
-            if checktax1[6] == "yes":
-              totaltax1 =(totaltax1 + float(checktax1[7]))
-              estimate_ttax1.config(text=(float(totaltax1)*float(estimates_tax4.get())/100))
-              tot = (float(totaltax1)*float(estimates_tax4.get())/100)
+          elif estcurrsymb[1] == "after amount":
+            if (i[13]) > (i[14]):
+              estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('green',))
+              countp += 1
+            elif i[12] == '1':
+              estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('blue',))
+              countp += 1
             else:
-              pass
-          estimate_total1.config(text=total+tot-discou+extracs)
-          estimate_balancee1.config(text=total+tot-discou+extracs)
-            
-        elif create_maintree_insert[12] == "3":
-          estimate_tree.insert(parent='', index='end',text='', values=(prosele[2],prosele[4],prosele[5],prosele[7],1,prosele[8],tax1,tax2,prosele[7]*1))
-          extracs = 0.0
-          discou = 0.0
-          total = 0.0
-          for child in estimate_tree.get_children():
-            total += float(estimate_tree.item(child, 'values')[8])
-          extracs = (extracs+float(estimates_cost3.get()))
-          estimate_costtt.config(text=estimates_cost3.get())
-          discou = (total*float(estimates_discount2.get())/100)
-          estimate_discounttt1.config(text=discou)
-          estpriceview.config(text=total)
-          estimate_subbb1.config(text=total-discou)
-            
-          tot = 0.0
-          totaltax1 = 0.0
-          for child in estimate_tree.get_children():
-            checktax1 = list(estimate_tree.item(child, 'values'))
-            if checktax1[6] == "yes":
-              totaltax1 =(totaltax1 + float(checktax1[8]))
-              estimate_ttax1.config(text=(float(totaltax1)*float(estimates_tax4.get())/100))
-              tot = (float(totaltax1)*float(estimates_tax4.get())/100)
+              estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('red',))
+              countp += 1
+
+          elif estcurrsymb[1] == "after amount with space":
+            if (i[13]) > (i[14]):
+              estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('green',))
+              countp += 1
+            elif i[12] == '1':
+              estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('blue',))
+              countp += 1
             else:
-              pass
+              estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('red',))
+              countp += 1
+        estimate_cusventtree1.place(x=5, y=45)
+        
+
+        estimate_ctegorytree1=ttk.Treeview(estimate_newselection, height=25)
+        estimate_ctegorytree1["columns"]=["1"]
+        estimate_ctegorytree1.column("#0", width=35, minwidth=20)
+        estimate_ctegorytree1.column("1", width=205, minwidth=25, anchor=CENTER)    
+        estimate_ctegorytree1.heading("#0",text="", anchor=W)
+        estimate_ctegorytree1.heading("1",text="View filter by category", anchor=CENTER)
+        estimate_ctegorytree1.place(x=660, y=45)
+        def est_items_selected(event):
+          selected_indices = est_fil_cat_list.curselection()
+          selected_filter = ",".join([est_fil_cat_list.get(i) for i in selected_indices])
+
+          sql = 'select * from Productservice'
+          fbcursor.execute(sql)
+          pandsdata = fbcursor.fetchall()
+          psql = "select * from Productservice where serviceornot=%s"
+          val = ('0', )
+          fbcursor.execute(psql, val)
+          pdata = fbcursor.fetchall()
+
+          ssql = "select * from Productservice where serviceornot=%s"
+          val = ('1', )
+          fbcursor.execute(ssql, val)
+          sdata = fbcursor.fetchall()
+
+          if selected_filter == "View all records":
+            for record in estimate_cusventtree1.get_children():
+              estimate_cusventtree1.delete(record)
+            countp = 0
+            for i in pandsdata:
+              if i[12] == '1':
+                servi = '🗹'                     #'Active'
+              else:
+                servi = ' '                         #'Inactive'
+              sql = "select currencysign,currsignplace from company"
+              fbcursor.execute(sql)
+              estcurrsymb = fbcursor.fetchone()
+              if not estcurrsymb: 
+                if i[13] > i[14]:
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('green',))
+                  countp += 1              
+                elif i[12] == '1':
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('blue',))
+                  countp += 1
+                else:
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('red',))
+                  countp += 1
+                        
+              elif estcurrsymb[1] == "before amount":
+                if (i[13]) > (i[14]):
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('green',))
+                  countp += 1
+                elif i[12] == '1':
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('blue',))
+                  countp += 1
+                else:
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('red',))
+                  countp += 1
+
+              elif estcurrsymb[1] == "before amount with space":
+                if (i[13]) > (i[14]):
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('green',))
+                  countp += 1
+                elif i[12] == '1':
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('blue',))
+                  countp += 1
+                else:
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('red',))
+                  countp += 1
+
+              elif estcurrsymb[1] == "after amount":
+                if (i[13]) > (i[14]):
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('green',))
+                  countp += 1
+                elif i[12] == '1':
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('blue',))
+                  countp += 1
+                else:
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('red',))
+                  countp += 1
+
+              elif estcurrsymb[1] == "after amount with space":
+                if (i[13]) > (i[14]):
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('green',))
+                  countp += 1
+                elif i[12] == '1':
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('blue',))
+                  countp += 1
+                else:
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('red',))
+                  countp += 1
+
+          elif selected_filter == "View all products":
+            for record in estimate_cusventtree1.get_children():
+              estimate_cusventtree1.delete(record)
+            countp = 0
+            for i in pdata:
+              if i[12] == '1':
+                servi = '🗹'                   #'Active'
+              else:
+                servi = ' '                    #'Inactive'
+              sql = "select currencysign,currsignplace from company"
+              fbcursor.execute(sql)
+              estcurrsymb = fbcursor.fetchone()
+              if not estcurrsymb: 
+                if i[13] > i[14]:
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('green',))
+                  countp += 1              
+                elif i[12] == '1':
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('blue',))
+                  countp += 1
+                else:
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('red',))
+                  countp += 1
+                        
+              elif estcurrsymb[1] == "before amount":
+                if (i[13]) > (i[14]):
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('green',))
+                  countp += 1
+                elif i[12] == '1':
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('blue',))
+                  countp += 1
+                else:
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('red',))
+                  countp += 1
+
+              elif estcurrsymb[1] == "before amount with space":
+                if (i[13]) > (i[14]):
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('green',))
+                  countp += 1
+                elif i[12] == '1':
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('blue',))
+                  countp += 1
+                else:
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('red',))
+                  countp += 1
+
+              elif estcurrsymb[1] == "after amount":
+                if (i[13]) > (i[14]):
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('green',))
+                  countp += 1
+                elif i[12] == '1':
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('blue',))
+                  countp += 1
+                else:
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('red',))
+                  countp += 1
+
+              elif estcurrsymb[1] == "after amount with space":
+                if (i[13]) > (i[14]):
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('green',))
+                  countp += 1
+                elif i[12] == '1':
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('blue',))
+                  countp += 1
+                else:
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('red',))
+                  countp += 1
+          elif selected_filter == "View all services":
+            for record in estimate_cusventtree1.get_children():
+              estimate_cusventtree1.delete(record)
+            countp = 0
+            for i in sdata:
+              if i[12] == '1':
+                servi = '🗹'             #'Active'
+              else:
+                servi = ' '              #'Inactive'
+              sql = "select currencysign,currsignplace from company"
+              fbcursor.execute(sql)
+              estcurrsymb = fbcursor.fetchone()
+              if not estcurrsymb: 
+                if i[13] > i[14]:
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('green',))
+                  countp += 1              
+                elif i[12] == '1':
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('blue',))
+                  countp += 1
+                else:
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('red',))
+                  countp += 1
+                        
+              elif estcurrsymb[1] == "before amount":
+                if (i[13]) > (i[14]):
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('green',))
+                  countp += 1
+                elif i[12] == '1':
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('blue',))
+                  countp += 1
+                else:
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('red',))
+                  countp += 1
+
+              elif estcurrsymb[1] == "before amount with space":
+                if (i[13]) > (i[14]):
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('green',))
+                  countp += 1
+                elif i[12] == '1':
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('blue',))
+                  countp += 1
+                else:
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('red',))
+                  countp += 1
+
+              elif estcurrsymb[1] == "after amount":
+                if (i[13]) > (i[14]):
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('green',))
+                  countp += 1
+                elif i[12] == '1':
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('blue',))
+                  countp += 1
+                else:
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('red',))
+                  countp += 1
+
+              elif estcurrsymb[1] == "after amount with space":
+                if (i[13]) > (i[14]):
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('green',))
+                  countp += 1
+                elif i[12] == '1':
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('blue',))
+                  countp += 1
+                else:
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('red',))
+                  countp += 1
+
+        est_fil_cat_list = Listbox(estimate_newselection,height=34,width=40,bg="white",activestyle="dotbox",fg="black",highlightbackground="white")
+        est_fil_cat_list.insert(0,"View all records")
+        est_fil_cat_list.insert(1,"View all products")
+        est_fil_cat_list.insert(2,"View all services")
+        est_fil_cat_list.place(x=660,y=63)
+        est_fil_cat_list.bind('<<ListboxSelect>>',est_items_selected)
+        est_stockok = Label(estimate_newselection,text="Green: Stock is Ok",foreground="green").place(x =15,y =580)
+        est_stocko = Label(estimate_newselection,text="Red: Limit <= Low Stock Limit",foreground="red").place(x =136,y=580)
+        est_stock = Label(estimate_newselection,text="Blue: Service,no Stock Control",foreground="blue").place(x =335,y =580)
+
+
+        estimate_scrollbar10 = Scrollbar(estimate_newselection)
+        estimate_scrollbar10.place(x=640, y=45, height=520)
+        estimate_scrollbar10.config( command=estimate_cusventtree1.yview )
+
+        def estselepro():
+          global estpriceview
+          estpriceview = Label(estimate_listFrame,bg="#f5f3f2")
+          estpriceview.place(x=850,y=200,width=78,height=18)
+          proskuid = estimate_cusventtree1.item(estimate_cusventtree1.focus())["values"][0]
+          sql = "select * from Productservice where sku = %s"
+          val = (proskuid,)
+          fbcursor.execute(sql,val)
+          prosele = fbcursor.fetchone()
+          sql = "select * from company"
+          fbcursor.execute(sql)
+          create_maintree_insert = fbcursor.fetchone()
+          if prosele[10] == '1':
+            tax1 = 'yes'
+          else:
+            tax1 = ''
+          if prosele[19] == '1':
+            tax2 = 'yes'
+          else:
+            tax2 = ''
           
-          tot2 = 0.0
-          totaltax2 = 0.0
-          for child in estimate_tree.get_children():
-            checktax1 = list(estimate_tree.item(child, 'values'))
-            if checktax1[7] == "yes":
-              totaltax2 =(totaltax2 + float(checktax1[8]))
-              estimate_ttax2.config(text=(float(totaltax2)*float(estimates_tax5.get())/100))
+          if not create_maintree_insert:
+            estimate_tree.insert(parent='', index='end',text='', values=(prosele[2],prosele[4],prosele[5],prosele[7],1,prosele[8],tax1,prosele[7]*1))
+
+          elif create_maintree_insert[12] == "1":
+            
+            estimate_tree.insert(parent='', index='end',text='', values=(prosele[2],prosele[4],prosele[5],prosele[7],1,prosele[8],prosele[7]*1))
+          
+            extracs = 0.0
+            discou = 0.0
+            total = 0.0
+            for child in estimate_tree.get_children():
+              total += float(estimate_tree.item(child, 'values')[6])
+            discou = (total*float(estimates_discount2.get())/100)
+            extracs = (extracs+float(estimates_cost3.get()))
+            estimate_costtt.config(text=estimates_cost3.get())
+            estimate_discounttt1.config(text=discou)
+            estpriceview.config(text=total)
+            estimate_total1.config(text=total-discou+extracs)
+            estimate_balancee1.config(text=total-discou+extracs)
+            estimate_subbb1.config(text=total-discou)
+            
+          elif create_maintree_insert[12] == "2":
+            estimate_tree.insert(parent='', index='end',text='', values=(prosele[2],prosele[4],prosele[5],prosele[7],1,prosele[8],tax1,prosele[7]*1))
+            extracs = 0.0
+            discou = 0.0
+            total = 0.0
+            for child in estimate_tree.get_children():
+              total += float(estimate_tree.item(child, 'values')[7])
+            discou = (total*float(estimates_discount2.get())/100)
+            extracs = (extracs+float(estimates_cost3.get()))
+            estimate_costtt.config(text=estimates_cost3.get())
+            estimate_discounttt1.config(text=discou)
+            estpriceview.config(text=total)
+            estimate_subbb1.config(text=total-discou)
+
+            tot = 0.0
+            totaltax1 = 0.0
+            for child in estimate_tree.get_children():
+              checktax1 = list(estimate_tree.item(child, 'values'))
+              if checktax1[6] == "yes":
+                totaltax1 =(totaltax1 + float(checktax1[7]))
+                estimate_ttax1.config(text=(float(totaltax1)*float(estimates_tax4.get())/100))
+                tot = (float(totaltax1)*float(estimates_tax4.get())/100)
+              else:
+                pass
+            estimate_total1.config(text=total+tot-discou+extracs)
+            estimate_balancee1.config(text=total+tot-discou+extracs)
               
-              tot2 = (float(totaltax2)*float(estimates_tax5.get())/100)
-            else:
-              pass
+          elif create_maintree_insert[12] == "3":
+            estimate_tree.insert(parent='', index='end',text='', values=(prosele[2],prosele[4],prosele[5],prosele[7],1,prosele[8],tax1,tax2,prosele[7]*1))
+            extracs = 0.0
+            discou = 0.0
+            total = 0.0
+            for child in estimate_tree.get_children():
+              total += float(estimate_tree.item(child, 'values')[8])
+            extracs = (extracs+float(estimates_cost3.get()))
+            estimate_costtt.config(text=estimates_cost3.get())
+            discou = (total*float(estimates_discount2.get())/100)
+            estimate_discounttt1.config(text=discou)
+            estpriceview.config(text=total)
+            estimate_subbb1.config(text=total-discou)
+              
+            tot = 0.0
+            totaltax1 = 0.0
+            for child in estimate_tree.get_children():
+              checktax1 = list(estimate_tree.item(child, 'values'))
+              if checktax1[6] == "yes":
+                totaltax1 =(totaltax1 + float(checktax1[8]))
+                estimate_ttax1.config(text=(float(totaltax1)*float(estimates_tax4.get())/100))
+                tot = (float(totaltax1)*float(estimates_tax4.get())/100)
+              else:
+                pass
+            
+            tot2 = 0.0
+            totaltax2 = 0.0
+            for child in estimate_tree.get_children():
+              checktax1 = list(estimate_tree.item(child, 'values'))
+              if checktax1[7] == "yes":
+                totaltax2 =(totaltax2 + float(checktax1[8]))
+                estimate_ttax2.config(text=(float(totaltax2)*float(estimates_tax5.get())/100))
+                
+                tot2 = (float(totaltax2)*float(estimates_tax5.get())/100)
+              else:
+                pass
 
-          estimate_total1.config(text=total+tot+tot2-discou+extracs)
-          estimate_balancee1.config(text=total+tot+tot2-discou+extracs)
+            estimate_total1.config(text=total+tot+tot2-discou+extracs)
+            estimate_balancee1.config(text=total+tot+tot2-discou+extracs)
+          
+          estimate_newselection.destroy()
         
-        estimate_newselection.destroy()
-      
-      
         
+          
 
-      estimate_btn11=Button(estimate_newselection,compound = LEFT,image=tick ,text="ok", width=60, command=estselepro).place(x=15, y=610)
-      estimate_btn11=Button(estimate_newselection,compound = LEFT,image=tick , text="Edit product/Service", width=150,command=est_edit_product).place(x=250, y=610)
-      estimate_btnadd=Button(estimate_newselection,compound = LEFT,image=tick , text="Add product/Service", width=150,command=estimate_product)
-      estimate_btnadd.place(x=435, y=610)
-      estimate_btn11=Button(estimate_newselection,compound = LEFT,image=cancel ,text="Cancel", width=60).place(x=740, y=610)
+        estimate_btn11=Button(estimate_newselection,compound = LEFT,image=tick ,text="ok", width=60, command=estselepro).place(x=15, y=610)
+        estimate_btn11=Button(estimate_newselection,compound = LEFT,image=tick , text="Edit product/Service", width=150,command=est_edit_product).place(x=250, y=610)
+        estimate_btnadd=Button(estimate_newselection,compound = LEFT,image=tick , text="Add product/Service", width=150,command=estimate_product)
+        estimate_btnadd.place(x=435, y=610)
+        estimate_btn11=Button(estimate_newselection,compound = LEFT,image=cancel ,text="Cancel", width=60).place(x=740, y=610)
+      else:
+        messagebox.showwarning("F-Billing Revolution 2022", "Customer is required, please select customer\n before adding line item to estimates.")
 
 
 
@@ -3299,7 +3320,6 @@ def mainpage():
         estimate_subbb1.config(text=sub_tot)
         estimate_costtt.config(text=round(exc,2))
         estimate_total1.config(text=round(total_cost,2))
-        
       elif taxdata1[12] == "2":
         price = 0.0
         p = 0.0
@@ -3386,6 +3406,7 @@ def mainpage():
         discount_rate = (price*dis_rate)/100
         total_cost += (price - discount_rate) + exc
         estimate_discounttt.config(text= str(dis_rate) + "" +"% Discount")
+        
         estimate_totalpaid1.config(text="" +"0.00")
         estimate_ttax1.config(text="" +"0.00")
         #estimate_ttax2.config(text="" +"0.00")
@@ -14843,12 +14864,114 @@ def mainpage():
     estimate_btnup.place(x=150, y=0)
   ############################ End create new estimate #########################
   def edit_estimates_create():
+    # edit_est_fetch = est_tree.item(est_tree.focus())["values"][1]
+    # def edit_new_estimate():
+    #   #estidd = estimate_number_entry0.get()
+    #   estimate_number = edit_estimate_ee01.get()
+    #   estdate = edit_estimate_ee02.get_date()
+    #   duedate = edit_estimate_ee03.get_date()
+    #   status = edit_estimates_draft.cget("text")
+    #   emailon = edit_estimates_nev1.cget("text")
+    #   printon = edit_estimates_nev2.cget("text")
+    #   #smson = 
+    #   esttot =  edit_estimate_orderrr1.cget("text")
+    #   totpaid = edit_estimate_totalll1.cget("text")
+    #   balance = edit_estimate_balancee1.cget("text")
+    #   extracostname = edit_estimates_e1.get()
+    #   extracost = edit_estimates_excost.get()
+    #   template = edit_estimates_e5.get()
+    #   salesper =  edit_estimates_e6.get()
+    #   discourate = edit_estimates_disrate.get()
+    #   tax1 =  edit_estimates_tax1.get()
+    #   category = edit_estimates_e7.get()
+    #   businessname = edit_estimate_combo.get()
+    #   businessaddress = edit_estimate_ee2.get("1.0",END)
+    #   shipname = edit_estimate_ee3.get()
+    #   shipaddress =  edit_estimate_ee4.get("1.0",END)
+    #   cpemail = edit_estimate_ee5.get()
+    #   cpmobileforsms = edit_estimate_ee6.get()
+    #   title_text = edit_estimates_e01.get()
+    #   header_text = edit_estimates_e11.get()
+    #   footer_text = edit_estimates_e21.get()
+    #   term_of_payment = edit_estimate_ee04.get()
+    #   terms = edit_estimates_e51.get("1.0","end-1c")
+    #   comments = edit_estimates_e61.get("1.0","end-1c")
+    #   private_notes = edit_estimates_e41.get("1.0","end-1c")
+    #   tax2 = edit_estimates_tax2.get()
+    #   orderref = edit_estimate_ee11.get()
+    #   subtotal = edit_estimate_subbb1.cget("text")
+    #   extracostt = edit_estimate_costtt.cget("text")
+    #   discount = edit_estimate_discounttt1.cget("text")
+    #   ttax1 = edit_estimate_ttax1label.cget("text")
+    #   ttax2 = edit_estimate_ttax2label.cget("text")
+
+
+      
+
+    #   estimate_sql="update estimate set estimate_number=%s, estdate=%s, duedate=%s, status=%s, emailon=%s, printon=%s, esttot=%s, totpaid=%s, balance=%s,extracostname=%s, extracost=%s, template=%s, salesper=%s, discourate=%s, tax1=%s, category=%s, businessname=%s, businessaddress=%s, shipname=%s, shipaddress=%s, cpemail=%s, cpmobileforsms=%s, title_text=%s, header_text=%s, footer_text=%s, term_of_payment=%s, terms=%s, comments=%s, private_notes=%s, tax2=%s, orderref=%s, subtotal=%s, extracostt=%s, discount=%s, ttax1=%s, ttax2=%s"#adding values into db
+    #   estimate_val=(estimate_number,estdate,duedate,status,emailon,printon,esttot,totpaid,balance,extracostname,extracost,template, salesper,discourate,tax1, category,businessname,businessaddress,shipname, shipaddress,cpemail,cpmobileforsms,title_text, header_text, footer_text,term_of_payment,terms,comments,private_notes,tax2,orderref,subtotal,extracostt,discount,ttax1,ttax2 )
+    #   fbcursor.execute(estimate_sql,estimate_val)
+    #   fbilldb.commit()
+    #   #messagebox.showinfo("F-Billing Revolution","Estimate saved")
+
+   
+    #   sql = "select * from company"
+    #   fbcursor.execute(sql)
+    #   est_pro_ser = fbcursor.fetchone()
+    #   for child in edit_estimate_tree.get_children():
+    #     insert_estpro_ser = list(edit_estimate_tree.item(child, 'values'))
+    #     #print(insert_estpro_ser[7],insert_estpro_ser[6])
+    #     if not est_pro_ser:
+    #       # sql = 'insert into storingproduct(estimate_number,sku,name,description,unitprice,quantity,peices,price) values(%s,%s,%s,%s,%s,%s,%s,%s)'
+    #       sql="update storingproduct set estimate_number=%s, sku=%s, name=%s, description=%s, unitprice=%s, quantity=%s, peices=%s, price=%s"
+    #       val = (estimate_number,insert_estpro_ser[0],insert_estpro_ser[1],insert_estpro_ser[2],insert_estpro_ser[3],insert_estpro_ser[4],insert_estpro_ser[5],insert_estpro_ser[6])
+    #       fbcursor.execute(sql,val)
+    #       fbilldb.commit()
+    #     elif  est_pro_ser[12] == "1":
+    #       sql="update storingproduct set estimate_number=%s, sku=%s, name=%s, description=%s, unitprice=%s, quantity=%s, peices=%s, price=%s"
+    #       val = (estimate_number,insert_estpro_ser[0],insert_estpro_ser[1],insert_estpro_ser[2],insert_estpro_ser[3],insert_estpro_ser[4],insert_estpro_ser[5],insert_estpro_ser[6])
+    #       fbcursor.execute(sql,val)
+    #       fbilldb.commit()
+    #     elif est_pro_ser[12] == "2":
+    #       # sql = 'insert into storingproduct(estimate_number,sku,name,description,unitprice,quantity,peices,tax1,price) values(%s,%s,%s,%s,%s,%s,%s,%s,%s)'
+    #       sql="update storingproduct set estimate_number=%s, sku=%s, name=%s, description=%s, unitprice=%s, quantity=%s, peices=%s, tax1=%s, price=%s"
+    #       val = (estimate_number,insert_estpro_ser[0],insert_estpro_ser[1],insert_estpro_ser[2],insert_estpro_ser[3],insert_estpro_ser[4],insert_estpro_ser[5],insert_estpro_ser[6],insert_estpro_ser[7])
+    #       fbcursor.execute(sql,val)
+    #       fbilldb.commit()
+    #     elif est_pro_ser[12] == "3":
+    #       # sql = 'insert into storingproduct(estimate_number,sku,name,description,unitprice,quantity,peices,tax1,tax2,price) values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'
+    #       sql="update storingproduct set estimate_number=%s, sku=%s, name=%s, description=%s, unitprice=%s, quantity=%s, peices=%s, tax1=%s, tax2=%s, price=%s"
+    #       val = (estimate_number,insert_estpro_ser[0],insert_estpro_ser[1],insert_estpro_ser[2],insert_estpro_ser[3],insert_estpro_ser[4],insert_estpro_ser[5],insert_estpro_ser[6],insert_estpro_ser[7],insert_estpro_ser[8])
+    #       fbcursor.execute(sql,val)
+    #       fbilldb.commit()
+      
+    #   #---------------Documents Insert--------------#
+    #   for child in edit_doc_tree.get_children():
+    #     est_doc_list = list(edit_doc_tree.item(child, 'values'))
+    #     # sql = 'insert into documents(estimate_number,documents) values(%s,%s)'
+    #     sql="update documents set estimate_number=%s, documents=%s"
+    #     val = (estimate_number,est_doc_list[1])
+    #     fbcursor.execute(sql,val)
+    #     fbilldb.commit()
+      # #---------------Refresh insert tree--------------#
+      # for record in est_tree.get_children():
+      #   est_tree.delete(record)
+      # sql = "select * from estimate"
+      # fbcursor.execute(sql)
+      # est_refresh = fbcursor.fetchall()
+      # count0 = 0
+      # for i in est_refresh:
+      #   est_tree.insert(parent='', index='end', iid=count0, text='', values=('',i[1],i[2],i[3],i[18],i[4],i[5],i[6],i[7],i[8]))
+      #   count0 += 1
+      # edit_estimate_pop.destroy()
+
+    
+
     edit_estimate_pop=Toplevel(estimate_midFrame)
     edit_estimate_pop.title("Estimate")
     edit_estimate_pop.geometry("950x690+150+0")
-    #edit_est_fetch = tree.item(tree.focus())["values"][0]
     edit_est_fetch = est_tree.item(est_tree.focus())["values"][1]
-    #print(itemid)
+
     sql_edit = "SELECT * FROM estimate WHERE estimate_number=%s"
     val_edit = (edit_est_fetch,)
     fbcursor.execute(sql_edit, val_edit)
@@ -14863,97 +14986,969 @@ def mainpage():
       edit_estimate_cuselection.geometry("930x650+240+10")
       edit_estimate_cuselection.resizable(False, False)
 
-
-      #add new customer
-      def edit_estimate_create1():
-        edit_estimate_ven=Toplevel(estimate_midFrame)
-        edit_estimate_ven.title("Add new vendor")
-        edit_estimate_ven.geometry("930x650+240+10")
-        edit_estimate_checkvar1=IntVar()
-        edit_estimate_checkvar2=IntVar()
-        edit_estimate_radio=IntVar()
-        edit_estimate_createFrame=Frame(edit_estimate_ven, bg="#f5f3f2", height=650)
-        edit_estimate_createFrame.pack(side="top", fill="both")
-        edit_estimate_labelframe1 = LabelFrame(edit_estimate_createFrame,text="Customer",bg="#f5f3f2",font=("arial",15))
-        edit_estimate_labelframe1.place(x=10,y=5,width=910,height=600)
-        edit_estimate_text1=Label(edit_estimate_labelframe1, text="Customer ID:",bg="#f5f3f2",fg="blue").place(x=5 ,y=10)
-        edit_estimate_e1=Entry(edit_estimate_labelframe1,width=25).place(x=150,y=10)
-        edit_estimate_text2=Label(edit_estimate_labelframe1, text="Category:",bg="#f5f3f2").place(x=390 ,y=10)
-        edit_estimate_e2=ttk.Combobox(edit_estimate_labelframe1,width=25,value="Default").place(x=460 ,y=10)
-        edit_estimate_text3=Label(edit_estimate_labelframe1, text="Status:",bg="#f5f3f2").place(x=710 ,y=10)
-        edit_estimate_checkbtn1=Checkbutton(edit_estimate_labelframe1,text="Active",variable=edit_estimate_checkvar1,onvalue=1,offvalue=0,bg="#f5f3f2").place(x=760 ,y=10)
+      #------------------------------------------------------------------------------------Add Customer
+      def edit_cus_add_customer():
+        #-------------------------------------------------------------------------------Add to database
+        def edit_cancel_add():
         
-        edit_estimate_labelframe2 = LabelFrame(edit_estimate_labelframe1,text="Invoice to (appears on invoices)",bg="#f5f3f2")
-        edit_estimate_labelframe2.place(x=5,y=40,width=420,height=150)
-        edit_estimate_name = Label(edit_estimate_labelframe2, text="Ship to name:",bg="#f5f3f2",fg="blue").place(x=5,y=5)
-        edit_estimate_e1 = Entry(edit_estimate_labelframe2,width=28).place(x=130,y=5)
-        edit_estimate_addr = Label(edit_estimate_labelframe2, text="Address:",bg="#f5f3f2",fg="blue").place(x=5,y=40)
-        edit_estimate_e2 = Entry(edit_estimate_labelframe2,width=28).place(x=130,y=40,height=80)
+          add_customer.destroy()
+        def edit_cus_add_cst():
+          cst_id=b1sd.get()#id
+          cus_bs_nm=bnm_cus.get()
+          if cst_id=="" or cus_bs_nm=="" :
+                
+            messagebox.showerror("Empty Field", "Customer ID field and Business Name field is Required!")
+
+          else:
+            
+            #bs name
+            # cmp_id=
+            cus_bs_ad_cus=bdfdsfsd2.get("1.0",END)#bs ad name
+            
+            cus_bs_cnt=bs_cnt.get()#Contact person
+            cus_bs_em=bs_em.get()#email bs
+            cus_bs_tel=bs_tel.get()#bs tel
+            cus_bs_fax=bs_fax.get()#bs fax
+            cus_bs_mob=bs_mobi.get()#bs mob
+            cus_bs_pymcheck=cus_ds_chk.get()# discount checkboc
+            cus_bs_spc_tax=blsr.get()# specific tax
+            cus_bs_spc_tax2=bdsfd14.get()# specific tax
+            cus_bs_dis=b1f2.get()# discount
+            cus_bs_ctr=bs_cus_ct.get()# customer category
+
+            # ship 
+            cus_shp_cat=cus_catg.get()# category
+            cus_shp_st=cus_st.get()# status Checkbox
+            cus_shp_cnt_pr=cus_sh_nam.get()#contact person
+            cus_shp_adr=b2sds1.get("1.0",END)#contact address
+            cus_shp_cnt=bs_sh_cnt.get()#Contact person
+            cus_shp_em=bs_sh_em.get()#email bs
+            cus_shp_tel=bs_sh_tel.get()#bs tel
+            cus_shp_fax=bs_sh_fax.get()#bs fax
+            cus_shp_cntry=cus_sh_coun.get()#contry
+            cus_shp_city=cus_sh_cty.get()#city
+            cus_shp_nte=scll.get("1.0", END)
+
+            cus_ed_tbles="select customerno from customer where customerno=%s"
+            cus_ed_tbles_valuz=(cst_id,)
+            fbcursor.execute(cus_ed_tbles,cus_ed_tbles_valuz)
+            cus_ins_val=fbcursor.fetchone()
+
+            cus_ed_tbless="select businessname from customer where businessname=%s"
+            cus_ed_tbless_valuz=(cus_bs_nm,)
+            fbcursor.execute(cus_ed_tbless,cus_ed_tbless_valuz)
+            cus_ins_valse=fbcursor.fetchone()
         
-        edit_estimate_btn1=Button(edit_estimate_labelframe1,width=3,height=2,compound = LEFT,text=">>").place(x=440, y=90)
-
-        edit_estimate_labelframe3 = LabelFrame(edit_estimate_labelframe1,text="Ship to (appears on invoices)",bg="#f5f3f2")
-        edit_estimate_labelframe3.place(x=480,y=40,width=420,height=150)
-        edit_estimate_name1 = Label(edit_estimate_labelframe3, text="Business name:",bg="#f5f3f2").place(x=5,y=5)
-        edit_estimate_e01 = Entry(edit_estimate_labelframe3,width=28).place(x=130,y=5)
-        edit_estimate_addr01 = Label(edit_estimate_labelframe3, text="Address:",bg="#f5f3f2").place(x=5,y=40)
-        edit_estimate_e02 = Entry(edit_estimate_labelframe3,width=28).place(x=130,y=40,height=80)
+            if cus_ins_val is None:
+              if cus_ins_valse is None:
+                cus_tbl_add="INSERT INTO customer(customerno,category,status,businessname,businessaddress,shipname,shipaddress,contactperson,cpemail,cptelno,cpfax,cpmobileforsms,shipcontactperson,shipcpemail,shipcptelno,shipcpfax,taxexempt,specifictax1,discount,country,city,customertype,notes,specifictax2)VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)" #adding values into db
+                cus_tbl_add_val=(cst_id,cus_shp_cat,cus_shp_st,cus_bs_nm,cus_bs_ad_cus,cus_shp_cnt_pr,cus_shp_adr,cus_bs_cnt,cus_bs_em,cus_bs_tel,cus_bs_fax,cus_bs_mob,cus_shp_cnt,cus_shp_em,cus_shp_tel,cus_shp_fax,cus_bs_pymcheck,cus_bs_spc_tax,cus_bs_dis,cus_shp_cntry,cus_shp_city,cus_bs_ctr,cus_shp_nte,cus_bs_spc_tax2)
+                fbcursor.execute(cus_tbl_add,cus_tbl_add_val)
+                fbilldb.commit()
+                
+                for record in edit_estimate_cusventtree.get_children():
+                  edit_estimate_cusventtree.delete(record)
+                fbcursor.execute("select *  from customer")
+                pandsdata = fbcursor.fetchall()
+                countp = 0
+                for i in pandsdata:
+                  edit_estimate_cusventtree.insert(parent='', index='end', iid=countp, text='', values=(i[24],i[4],i[10],i[8]))
+                  countp +=1
+                
+                add_customer.destroy()
+              else:
+                messagebox.showerror("Already Exists", "Customer ID value already exists. Duplicate value not allowed")
+            else:
+                messagebox.showerror("Already Exists", "Business name is already exists. Duplicate value not allowed")
         
-        edit_estimate_labelframe4 = LabelFrame(edit_estimate_labelframe1,text="Contact",bg="#f5f3f2")
-        edit_estimate_labelframe4.place(x=5,y=195,width=420,height=150)
-        edit_estimate_name11 = Label(edit_estimate_labelframe4, text="Contact person:",bg="#f5f3f2").place(x=5,y=5)
-        edit_estimate_e11 = Entry(edit_estimate_labelframe4,width=28).place(x=130,y=5)
-        edit_estimate_email1 = Label(edit_estimate_labelframe4, text="E-mail address:",bg="#f5f3f2",fg="blue").place(x=5,y=35)
-        edit_estimate_e21 = Entry(edit_estimate_labelframe4,width=28).place(x=130,y=35)
-        edit_estimate_tel1 = Label(edit_estimate_labelframe4, text="Tel.number:",bg="#f5f3f2").place(x=5,y=65)
-        edit_estimate_e31 = Entry(edit_estimate_labelframe4,width=11).place(x=130,y=65)
-        edit_estimate_fax1 = Label(edit_estimate_labelframe4, text="Fax:",bg="#f5f3f2").place(x=240,y=65)
-        edit_estimate_e41 = Entry(edit_estimate_labelframe4,width=11).place(x=280,y=65)
-        edit_estimate_sms1 = Label(edit_estimate_labelframe4, text="Mobile number for SMS notifications:",bg="#f5f3f2").place(x=5,y=95)
-        edit_estimate_e51 = Entry(edit_estimate_labelframe4,width=15).place(x=248,y=95)      
+        def top_btn():
+            cus_bs_nm=bnm_cus.get()
+            cus_bs_ad_cus=bdfdsfsd2.get("1.0",END)#bs ad name
+            b1fr1.delete(0,'end')
+            b1fr1.insert(0,cus_bs_nm)
+            b2sds1.delete(1.0,'end')
+            b2sds1.insert(1.0,cus_bs_ad_cus)
 
-        edit_estimate_btn11=Button(edit_estimate_labelframe1,width=3,height=2,compound = LEFT,text=">>").place(x=440, y=250)
+        def btm_btn():
+            cus_bs_cnt=bs_cnt.get()#Contact person
+            cus_bs_em=bs_em.get()#email bs
+            cus_bs_tel=bs_tel.get()#bs tel
+            cus_bs_fax=bs_fax.get()#bs fax
+            b141sd.insert(0,cus_bs_cnt)
+            b21vcvc1.delete(0,'end')
+            b21vcvc1.insert(0,cus_bs_em)
+            b3zx1.delete(0,'end')
+            b3zx1.insert(0,cus_bs_tel)
+            b4x141.delete(0,'end')
+            b4x141.insert(0,cus_bs_fax)
+
+
+
+        add_customer = Toplevel()  
+        add_customer.title("Add new Customer ")
+        p2 = PhotoImage(file = "images/fbicon.png")
+        add_customer.iconphoto(False, p2)
+        add_customer.geometry("775x580+300+100")
+        Labelframe1=LabelFrame(add_customer,text="Customer")
+        Labelframe1.place(x=10,y=10,width=755,height=525)
+        a1=Label(Labelframe1,text="Customer ID:",fg="Blue")
+        a2=Label(Labelframe1,text="Category:")
+        a3=Label(Labelframe1,text="Status :")
+        a3.place(x=620,y=7)
+        cu_idr=IntVar() 
+        b1sd=Entry(Labelframe1)
+        cus_catg=StringVar() 
+        b2=ttk.Combobox(Labelframe1,textvariable = cus_catg)    
+        sql_cust_dt='SELECT DISTINCT category from customer'
+        fbcursor.execute(sql_cust_dt)
+        catgry=fbcursor.fetchall()
+        b2['values'] = catgry 
+        b2.place(x=390,y=220) 
+        b2.current(0)
+        a1.place(x=10,y=7)
+        a2.place(x=330,y=7)   
+        b1sd.place(x=120,y=7,width=200)
+        b2.place(x=390,y=7,width=220)
+        cus_st = IntVar()
+        chkbtn1 = Checkbutton(Labelframe1, text = "Active", variable = cus_st, onvalue = 1, offvalue = 0)
+        chkbtn1.select()
+        chkbtn1.place(x=670,y=6)
+
+
+        Labelframe2=LabelFrame(Labelframe1,text="Invoice to (appears on invoice)")
+        Labelframe2.place(x=10,y=35,width=340,height=125)
+        a1=Label(Labelframe2,text="Business Name:",fg="Blue").place(x=10,y=10)
+        a2=Label(Labelframe2,text="Address:",fg="Blue").place(x=10,y=35)
+        bnm_cus=StringVar()
+        bs_adr_cus=StringVar()
+        
+        
+
+        b1=Entry(Labelframe2, textvariable=bnm_cus)
+        # b1.config(validate='focusout', validatecommand=vcmd, invalidcommand=ivcmd)
+        b1.place(x=110,y=10,width=210)
+
+        bdfdsfsd2=scrolledtext.ScrolledText(Labelframe2)
+        bdfdsfsd2.place(x=110,y=35,width=210,height=63)  
+        btn110=Button(Labelframe1,width=3,height=2,compound = LEFT,text=">>", command=lambda:top_btn()).place(x=359,y=85,height=20)
+
+
+        Labelframe3=LabelFrame(Labelframe1,text="Ship to (appears on invoice)")
+        Labelframe3.place(x=400,y=35,width=340,height=125)
+        a11=Label(Labelframe3,text="Ship to Name:").place(x=10,y=10)
+        a21=Label(Labelframe3,text="Address:").place(x=10,y=35)
+        cus_sh_nam=StringVar()
+        cus_sh_adr=StringVar()
+        b1fr1=Entry(Labelframe3, textvariable=cus_sh_nam)
+        b1fr1.place(x=110,y=10,width=210)
+        b2sds1=scrolledtext.ScrolledText(Labelframe3)
+        b2sds1.place(x=110,y=35,width=210,height=63)
+
+
+        Labelframe4=LabelFrame(Labelframe1,text="Contact")
+        Labelframe4.place(x=10,y=170,width=340,height=137)
+        a11=Label(Labelframe4,text="Contact Person:").place(x=10,y=10)
+        a21=Label(Labelframe4,text="Email Address:",fg="Blue").place(x=10,y=35)
+        a31=Label(Labelframe4,text="Tel. No:").place(x=10,y=60)
+        a41=Label(Labelframe4,text="Fax:").place(x=200,y=60)
+        a51=Label(Labelframe4,text="Mobile number for SMS notification:").place(x=10,y=85)
+        bs_cnt=StringVar()
+        bs_em=StringVar()
+        bs_tel=StringVar()
+        bs_fax=StringVar()
+        bs_mobi=StringVar()
+        b11=Entry(Labelframe4, textvariable=bs_cnt).place(x=110,y=10,width=210)
+
+        #-------------------------------------------------------------------------------------------Email Validation
+        b21=Entry(Labelframe4,textvariable=bs_em)
+        
+
+        def validate(value):
+              
+              """
+              Validat the email entry
+              :param value:
+              :return:
+              """
+              pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+              if re.fullmatch(pattern, value) is None:
+                  
+                  return False
+
+              b21.config(fg="black")
+              return True
+
+        def on_invalid():
+              b21.config(fg="red")
+              
+        vcmd = (Labelframe2.register(validate), '%P')
+        ivcmd = (Labelframe2.register(on_invalid),)
+
+        b21.config(validate='focusout', validatecommand=vcmd, invalidcommand=ivcmd)
+        
+        b21.place(x=110,y=35,width=210)
+
+        b311=Entry(Labelframe4,textvariable=bs_tel)
+        def validate_tel(value):
+              
+              """
+              Validat the email entry
+              :param value:
+              :return:
+              """
+              pattern = r'^[0-9]\d{9,10}$'
+              if re.fullmatch(pattern, value) is None:
+                  
+                  return False
+              b311.config(fg="black")
+              return True
+
+        def on_invalid_tel():
+              b311.config(fg="red")
+              
+        v_tel_cmd = (Labelframe2.register(validate_tel), '%P')
+        iv_tel_cmd = (Labelframe2.register(on_invalid_tel),)
+        
+        
+        b311.config(validate='focusout', validatecommand=v_tel_cmd, invalidcommand=iv_tel_cmd)
+        b311.place(x=110,y=60,width=90)
+
+        b4126=Entry(Labelframe4,textvariable=bs_fax)
+        def validate_telb4126(value):
+              
+              """
+              Validat the email entry
+              :param value:
+              :return:
+              """
+              pattern = r'^(\+\d{1,2}\s)?\(?\d{3}\)?[\s.-]\d{3}[\s.-]\d{4}$'
+              if re.fullmatch(pattern, value) is None:
+                  
+                  return False
+              b4126.config(fg="black")
+              return True
+
+        def on_invalid_telb4126():
+              b4126.config(fg="red")
+              
+        v_tel_cmdb4126 = (Labelframe2.register(validate_telb4126), '%P')
+        iv_tel_cmdb4126 = (Labelframe2.register(on_invalid_telb4126),)
+        b4126.config(validate='focusout', validatecommand=v_tel_cmdb4126, invalidcommand=iv_tel_cmdb4126)
+        b4126.place(x=230,y=60,width=90)
+        
+        b51=Entry(Labelframe4,textvariable=bs_mobi)
+        def validate_telb51(value):
+              
+              """
+              Validat the email entry
+              :param value:
+              :return:
+              """
+              pattern = r'^[0-9]\d{9}$'
+              if re.fullmatch(pattern, value) is None:
+                  
+                  return False
+              b51.config(fg="black")
+              return True
+
+        def on_invalid_telb51():
+              b51.config(fg="red")
+              
+        v_tel_cmdb51 = (Labelframe2.register(validate_telb51), '%P')
+        iv_tel_cmdb51 = (Labelframe2.register(on_invalid_telb51),)
+        b51.config(validate='focusout', validatecommand=v_tel_cmdb51, invalidcommand=iv_tel_cmdb51)
+        b51.place(x=215,y=85,width=105)
+        btn111=Button(Labelframe1,width=3,height=2,compound = LEFT,text=">>", command=lambda:btm_btn()).place(x=359,y=220,height=20)
+
+        bs_sh_cnt=StringVar()
+        bs_sh_em=StringVar()
+        bs_sh_tel=StringVar()
+        bs_sh_fax=StringVar()
+
+        Labelframe5=LabelFrame(Labelframe1,text="Ship To Contact")
+        Labelframe5.place(x=400,y=170,width=340,height=108)
+        a11=Label(Labelframe5,text="Contact Person:").place(x=10,y=10)
+        a21=Label(Labelframe5,text="Email Address:").place(x=10,y=35)
+        a31=Label(Labelframe5,text="Tel. No:").place(x=10,y=60)
+        a41=Label(Labelframe5,text="Fax:").place(x=200,y=60)
+      
+        b141sd=Entry(Labelframe5, textvariable=bs_sh_cnt)
+        b141sd.place(x=110,y=10,width=210)
+        
+        b21vcvc1=Entry(Labelframe5,textvariable=bs_sh_em)
+        def validateb211(value):
+              
+              """
+              Validat the email entry
+              :param value:
+              :return:
+              """
+              pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+              if re.fullmatch(pattern, value) is None:
+                  
+                  return False
+
+              b21vcvc1.config(fg="black")
+              return True
+
+        def on_invalidb211():
+              b21vcvc1.config(fg="red")
+              
+        vcmdb211 = (Labelframe2.register(validateb211), '%P')
+        ivcmdb211 = (Labelframe2.register(on_invalidb211),)
+
+        b21vcvc1.config(validate='focusout', validatecommand=vcmdb211, invalidcommand=ivcmdb211)
+        b21vcvc1.place(x=110,y=35,width=210)
+        
+        b3zx1=Entry(Labelframe5,textvariable=bs_sh_tel)
+        def validate_telb31(value):
+              
+              """
+              Validat the email entry
+              :param value:
+              :return:
+              """
+              pattern = r'^[0-9]\d{9,10}$'
+              if re.fullmatch(pattern, value) is None:
+                  
+                  return False
+              b3zx1.config(fg="black")
+              return True
+
+        def on_invalid_telb31():
+              b3zx1.config(fg="red")
+              
+        v_tel_cmdb31 = (Labelframe2.register(validate_telb31), '%P')
+        iv_tel_cmdb31 = (Labelframe2.register(on_invalid_telb31),)
+        b3zx1.config(validate='focusout', validatecommand=v_tel_cmdb31, invalidcommand=iv_tel_cmdb31)
+        b3zx1.place(x=110,y=60,width=90)
+
+        b4x141=Entry(Labelframe5,textvariable=bs_sh_fax)
+        def validate_telb4141(value):
+              
+              """
+              Validat the email entry
+              :param value:
+              :return:
+              """
+              pattern = r'^(\+\d{1,2}\s)?\(?\d{3}\)?[\s.-]\d{3}[\s.-]\d{4}$'
+              if re.fullmatch(pattern, value) is None:
+                  
+                  return False
+              b4x141.config(fg="black")
+              return True
+
+        def on_invalid_telb4141():
+              b4x141.config(fg="red")
+              
+        v_tel_cmdb4141 = (Labelframe2.register(validate_telb4141), '%P')
+        iv_tel_cmdb4141 = (Labelframe2.register(on_invalid_telb4141),)
+        b4x141.config(validate='focusout', validatecommand=v_tel_cmdb4141, invalidcommand=iv_tel_cmdb4141)
+        b4x141.place(x=230,y=60,width=90)
+
+
+        Labelframe6=LabelFrame(Labelframe1,text="Payment Option")
+        Labelframe6.place(x=10,y=317,width=340,height=80)
+        cus_ds_chk = StringVar()
+        cus_sp_tx=IntVar()
+        cus_sp_tx2=IntVar()
+        cus_sp_disc=IntVar()
+        chkbtn1 = Checkbutton(Labelframe6, text = "Tax Exempt", variable = cus_ds_chk, onvalue = 1, offvalue = 0, font=("arial", 8))
+        chkbtn1.place(x=10,y=6)
+        chkbtn1.select()
 
         
-        edit_estimate_labelframe5 = LabelFrame(edit_estimate_labelframe1,text="Ship to contact",bg="#f5f3f2")
-        edit_estimate_labelframe5.place(x=480,y=195,width=420,height=125)
-        edit_estimate_name2 = Label(edit_estimate_labelframe5, text="Contact person:",bg="#f5f3f2").place(x=5,y=5)
-        edit_estimate_e21 = Entry(edit_estimate_labelframe5,width=28).place(x=130,y=5)
-        edit_estimate_email2 = Label(edit_estimate_labelframe5, text="E-mail address:",bg="#f5f3f2").place(x=5,y=35)
-        edit_estimate_e22 = Entry(edit_estimate_labelframe5,width=28).place(x=130,y=35)
-        edit_estimate_tel2 = Label(edit_estimate_labelframe5, text="Tel.number:",bg="#f5f3f2").place(x=5,y=65)
-        edit_estimate_e32 = Entry(edit_estimate_labelframe5,width=11).place(x=130,y=65)
-        edit_estimate_fax2 = Label(edit_estimate_labelframe5, text="Fax:",bg="#f5f3f2").place(x=240,y=65)
-        edit_estimate_e42 = Entry(edit_estimate_labelframe5,width=11).place(x=280,y=65)
+        a12=Label(Labelframe6,text="Discount%:").place(x=10,y=30)
+        
+        cus_sp_disc = IntVar(Labelframe6)
+        
+        
+        #-----------------------------------------------------------------------------------------------tax2
+        swt='select taxtype from company'
+        fbcursor.execute(swt)
+        fdt=fbcursor.fetchone()
+        def tax_frt(S,d):
+            if d=='1':
+              if not S in ['.','0','1','2','3','4','5','6','7','8','9']:
+                return False
+              return True
+              
+            if d.isdigit():
+              return True
 
-        edit_estimate_labelframe6 = LabelFrame(edit_estimate_labelframe1,text="Contact",bg="#f5f3f2")
-        edit_estimate_labelframe6.place(x=5,y=350,width=420,height=100)
-        edit_estimate_checkbtn2=Checkbutton(edit_estimate_labelframe6,text="Tax Exempt",variable=edit_estimate_checkvar2,onvalue=1,offvalue=0,bg="#f5f3f2").place(x=5 ,y=5)
-        edit_estimate_tax3 = Label(edit_estimate_labelframe6, text="Specific Tax1 %:",bg="#f5f3f2").place(x=180,y=5)
-        edit_estimate_e31 = Entry(edit_estimate_labelframe6,width=10).place(x=290,y=5)
-        edit_estimate_discount = Label(edit_estimate_labelframe6, text="Discount%:",bg="#f5f3f2").place(x=5,y=35)
-        edit_estimate_e32 = Entry(edit_estimate_labelframe6,width=10).place(x=100,y=35)
 
-        edit_estimate_labelframe7 = LabelFrame(edit_estimate_labelframe1,text="Contact",bg="#f5f3f2")
-        edit_estimate_labelframe7.place(x=480,y=330,width=420,height=100)
-        edit_estimate_country4 = Label(edit_estimate_labelframe7, text="country:",bg="#f5f3f2").place(x=5,y=5)
-        edit_estimate_e41 = Entry(edit_estimate_labelframe7,width=28).place(x=130,y=5)
-        edit_estimate_city4 = Label(edit_estimate_labelframe7, text="City:",bg="#f5f3f2").place(x=5,y=35)
-        edit_estimate_e24 = Entry(edit_estimate_labelframe7,width=28).place(x=130,y=35)
+        edt_lty=(Labelframe6.register(tax_frt), '%S','%d')
+        blsr=Entry(Labelframe6, textvariable=cus_sp_tx)
+        bdsfd14=Entry(Labelframe6)
+        if fdt[0]=='3':
+          a11=Label(Labelframe6,text="Specific Tax1%:").place(x=150,y=7)
+          blsr=Entry(Labelframe6, )
+          
+          # edt_ltyr=(Labelframe6.register(tax_frtinv),)
+          blsr.config(validate='key',validatecommand=(edt_lty))
+          blsr.place(x=250,y=7,width=70)
+          
+          bdsfd14.config(validate='key',validatecommand=(edt_lty))
+          bdsfd14.place(x=250,y=30,width=70)
+          a16=Label(Labelframe6,text="Specific Tax2%::").place(x=150,y=30)
+        elif fdt[0]=='2':
+          a11=Label(Labelframe6,text="Specific Tax1%:").place(x=150,y=7)
+          
+          blsr.config(validate='key',validatecommand=(edt_lty))
+          blsr.place(x=250,y=7,width=70)
+        elif fdt[0]=='1':
+          pass
+        b1f2=Entry(Labelframe6)
+        b1f2.config(validate='key',validatecommand=(edt_lty))
+        b1f2.place(x=80,y=30,width=70)
 
-        edit_estimate_labelframe8 = LabelFrame(edit_estimate_labelframe1,text="Customer Type",bg="#f5f3f2")
-        edit_estimate_labelframe8.place(x=5,y=460,width=420,height=100)
-        edit_estimate_R1=Radiobutton(edit_estimate_labelframe8,text=" Client ",variable=edit_estimate_radio,value=1,bg="#f5f3f2").place(x=5,y=15)
-        edit_estimate_R2=Radiobutton(edit_estimate_labelframe8,text=" Vendor ",variable=edit_estimate_radio,value=2,bg="#f5f3f2").place(x=150,y=15)
-        edit_estimate_R3=Radiobutton(edit_estimate_labelframe8,text=" Both(client/vendor)",variable=edit_estimate_radio,value=3,bg="#f5f3f2").place(x=250,y=15)
+        Labelframe7=LabelFrame(Labelframe1,text="Customer type")
+        Labelframe7.place(x=10,y=405,width=340,height=90)
+        bs_cus_ct=StringVar()
+        r1=Radiobutton(Labelframe7, text = "Client", variable = bs_cus_ct, value ="Client")
+        r1.select()
+        r1.place(x=5,y=15)
+        
+        r2=Radiobutton(Labelframe7, text = "Vender", variable = bs_cus_ct, value = "Vender")
+        r2.deselect()
+        r2.place(x=90,y=15)
+        r3=Radiobutton(Labelframe7, text = "Both(Client/Vender)", variable = bs_cus_ct, value = "Both(Client/Vender)")
+        r3.deselect()
+        r3.place(x=180,y=15)
+
+
+        Labelframe8=LabelFrame(Labelframe1,text="Additional Info")
+        Labelframe8.place(x=400,y=288,width=340,height=80)
+        a11=Label(Labelframe8,text="Country:").place(x=10,y=5)
+        a12=Label(Labelframe8,text="City:").place(x=10,y=30)
+        cus_sh_coun=StringVar() 
+        cus_sh_cty=StringVar() 
+
+        b11=ttk.Combobox(Labelframe8,textvariable=cus_sh_coun)
+        b11.place(x=110,y=5,width=210)
+        b11['values'] = ('India','America')    
+        
+        b11.place(x=110,y=5) 
+        b12=Entry(Labelframe8,textvariable=cus_sh_cty).place(x=110,y=30,width=210)
+        Labelframe9=LabelFrame(Labelframe1,text="Notes")
+        Labelframe9.place(x=400,y=380,width=340,height=115)
+        '''scrollbar = Scrollbar(Labelframe9)
+              scrollbar.place(x=300,y=10)
+              b12=Entry(Labelframe9,yscrollcommand=scrollbar.set).place(x=10,y=10,width=290,height=70)
+              yscrollcommand.config(command=b12.yview)'''
+        cus_nt=StringVar()
+        global scll
+        scll=scrolledtext.ScrolledText(Labelframe9)
+        scll.place(x=20,y=10,width=295,height=70)
+        # scrollbar_cus_nt = Scrollbar(Labelframe9)
+        # scrollbar_cus_nt.place(x=295,y=10)
+
+        btn1=Button(add_customer,width=50,compound = LEFT,image=tick ,command=lambda:edit_cus_add_cst(),text="  OK").place(x=20, y=545)
+        btn2=Button(add_customer,width=80,compound = LEFT,image=cancel,text="  Cancel",command=edit_cancel_add).place(x=665, y=545)
+        add_customer.mainloop()
+
+
+      #edit new customer
+      def edit_cus_edit_customer():
+        #try:
+        cus_id=edit_estimate_cusventtree.item(edit_estimate_cusventtree.focus())["values"][0]
+        
+        cus_ed_tbles="select * from customer where customerno=%s"
+        cus_ed_tbles_valuz=(cus_id,)
+        fbcursor.execute(cus_ed_tbles,cus_ed_tbles_valuz)
+        cus_ins_val=fbcursor.fetchone()
         
 
-        edit_estimate_labelframe9 = LabelFrame(edit_estimate_labelframe1,text="Notes",bg="#f5f3f2")
-        edit_estimate_labelframe9.place(x=480,y=430,width=420,height=150)
-        edit_estimate_e51 = Entry(edit_estimate_labelframe9).place(x=10,y=10,height=100,width=390)
+        def cancel_edt():
+          edit_customer.destroy()
 
-        edit_estimate_btn51=Button(edit_estimate_ven,width=60,height=10,bg="#f5f3f2",compound = LEFT,image=tick ,text="OK").place(x=20, y=615)
-        edit_estimate_btn52=Button(edit_estimate_ven,width=60,height=10,bg="#f5f3f2",compound = LEFT,image=cancel,text="Cancel").place(x=800, y=615)
+        def cus_edit_cst():
+          
+                cst_id=b1s.get()#id
+              
+                cus_bs_nm=bnm_cus.get()#bs name
+
+                cus_bs_ad_cus=bnjh2.get('1.0',END)#bs ad name
+                cus_bs_cnt=bs_cnt.get()#Contact person
+                cus_bs_em=bs_em.get()#email bs
+                cus_bs_tel=bs_tel.get()#bs tel
+                cus_bs_fax=bs_fax.get()#bs fax
+                cus_bs_mob=bs_mobi.get()#bs mob
+                cus_bs_pymcheck=cus_ds_chk.get()# discount checkboc
+                cus_bs_spc_tax=cus_sp_tx.get()# specific tax
+                cus_bs_spc_tax2=cus_sp_tx2.get()
+                cus_bs_dis=cus_sp_disc.get()# discount
+                cus_bs_ctr=bs_cus_ct.get()# customer category
+
+                # ship 
+                cus_shp_cat=cus_catg.get()# category
+                cus_shp_st=cus_st.get()# status Checkbox
+                cus_shp_cnt_pr=cus_sh_nam.get()#contact person
+                cus_shp_adr=b2vxcvcxbc1.get("1.0",END)#contact address
+                cus_shp_cnt=bs_sh_cnt.get()#Contact person
+                cus_shp_em=bs_sh_em.get()#email bs
+                cus_shp_tel=bs_sh_tel.get()#bs tel
+                cus_shp_fax=bs_sh_fax.get()#bs fax
+                cus_shp_cntry=cus_sh_coun.get()#contry
+                cus_shp_city=cus_sh_cty.get()#city
+                cus_shp_ntre=cfgd.get("1.0", END) 
+                
+                cus_ed_tbless="select businessname from customer where businessname=%s"
+                cus_ed_tbless_valuz=(cus_bs_nm,)
+                fbcursor.execute(cus_ed_tbless,cus_ed_tbless_valuz)
+                cus_ins_valse=fbcursor.fetchone()
+              
+                cus_tbl_edit="update customer set customerno=%s,category=%s,status=%s,businessname=%s,businessaddress=%s,shipname=%s,shipaddress=%s,contactperson=%s,cpemail=%s,cptelno=%s,cpfax=%s,cpmobileforsms=%s,shipcontactperson=%s,shipcpemail=%s,shipcptelno=%s,shipcpfax=%s,taxexempt=%s,specifictax1=%s,discount=%s,country=%s,city=%s,customertype=%s,notes=%s, specifictax2=%s where customerno = %s" #adding values into db
+                cus_tbl_edit_val=(cst_id,cus_shp_cat,cus_shp_st,cus_bs_nm,cus_bs_ad_cus,cus_shp_cnt_pr,cus_shp_adr,cus_bs_cnt,cus_bs_em,cus_bs_tel,cus_bs_fax,cus_bs_mob,cus_shp_cnt,cus_shp_em,cus_shp_tel,cus_shp_fax,cus_bs_pymcheck,cus_bs_spc_tax,cus_bs_dis,cus_shp_cntry,cus_shp_city,cus_bs_ctr,cus_shp_ntre,cus_bs_spc_tax2,cus_id,)
+                fbcursor.execute(cus_tbl_edit,cus_tbl_edit_val)
+                fbilldb.commit()
+                cus_main_s=ttk.Style()
+                for record in edit_estimate_cusventtree.get_children():
+                  edit_estimate_cusventtree.delete(record)
+                cus_main_table_sql="select * from customer"
+                fbcursor.execute(cus_main_table_sql)
+                main_tb_val=fbcursor.fetchall()
+                count_cus=0
+
+                for i in main_tb_val:
+                  edit_estimate_cusventtree.insert(parent='', index='end', iid=count_cus, text='', values=(i[24],i[4],i[10],i[8]))
+                  count_cus +=1
+                edit_customer.destroy()
+                  
+
+        def top_SHP_btn():
+          cus_bs_nm=bnm_cus.get()#bs name
+          # cmp_id=
+          cus_bs_ad_cus=bnjh2.get("1.0",END)#bs ad name
+          b1fdgfg1.delete(0,'end')
+          b1fdgfg1.insert(0,cus_bs_nm)
+          b2vxcvcxbc1.delete(1.0,'end')
+          b2vxcvcxbc1.insert(1.0,cus_bs_ad_cus)
+
+        def btm_shp_btn():
+            
+            cus_bs_cnt=bs_cnt.get()#Contact person
+            cus_bs_em=bs_em.get()#email bs
+            cus_bs_tel=bs_tel.get()#bs tel
+            cus_bs_fax=bs_fax.get()#bs fax
+            b1dsf1.delete(0,'end')
+            b1dsf1.insert(0,cus_bs_cnt)
+            b21cd1.delete(0,'end')
+            b21cd1.insert(0,cus_bs_em)
+            b311.delete(0,'end')
+            b311.insert(0,cus_bs_tel)
+            b414.delete(0,'end')
+            b414.insert(0,cus_bs_fax)
+        edit_customer = Toplevel()  
+        edit_customer.title("Add new Customer ")
+        p2 = PhotoImage(file = "images/fbicon.png")
+        edit_customer.iconphoto(False, p2)
+        edit_customer.geometry("775x580+300+100")
+        Labelframe1=LabelFrame(edit_customer,text="Customer")
+        Labelframe1.place(x=10,y=10,width=755,height=525)
+        a1=Label(Labelframe1,text="Customer ID:",fg="Blue")
+        a2=Label(Labelframe1,text="Category:")
+        a3=Label(Labelframe1,text="Status :")
+        a3.place(x=620,y=7)
+      
+        b1s=Entry(Labelframe1)
+        
+        b1s.insert(0,cus_ins_val[24])
+        print(cus_ins_val[24])
+        b1s.config(state=DISABLED,disabledbackground="white",disabledforeground="black")
+        cus_catg=StringVar() 
+        b2=ttk.Combobox(Labelframe1,textvariable = cus_catg) 
+        sql_cust_dt='SELECT DISTINCT category from customer'
+        fbcursor.execute(sql_cust_dt)
+        catgry=fbcursor.fetchall()    
+        b2['values'] = catgry  
+        b2.place(x=390,y=220) 
+        b2.current(cus_ins_val[3])
+        a1.place(x=10,y=7)
+        a2.place(x=330,y=7)   
+        b1s.place(x=120,y=7,width=200)
+        b2.place(x=390,y=7,width=220)
+        cus_st = IntVar()
+        chkbtn1 = Checkbutton(Labelframe1, text = "Active", variable = cus_st, onvalue = 1, offvalue = 0)
+        if cus_ins_val[3]=="0":
+          chkbtn1.deselect()
+        else:
+          chkbtn1.select()
+        chkbtn1.place(x=670,y=6)
+
+        Labelframe2=LabelFrame(Labelframe1,text="Invoice to (appears on invoice)")
+        Labelframe2.place(x=10,y=35,width=340,height=125)
+        a1=Label(Labelframe2,text="Business Name:",fg="Blue").place(x=10,y=10)
+        a2=Label(Labelframe2,text="Address:",fg="Blue").place(x=10,y=35)
+        bnm_cus=StringVar()
+        bs_adr_cus=StringVar()
+        b1=Entry(Labelframe2, textvariable=bnm_cus)
+        b1.insert(0,cus_ins_val[4])
+        b1.place(x=110,y=10,width=210)
+        bnjh2=scrolledtext.ScrolledText(Labelframe2) 
+        
+        bnjh2.insert(1.0,cus_ins_val[5])
+        bnjh2.place(x=110,y=35,width=210,height=63) 
+        # b1.place(x=359,y=85,height=20)
+        btn110=Button(Labelframe1,width=3,height=2,compound = LEFT,text=">>", command=lambda:top_SHP_btn()).place(x=359,y=85,height=20)
+
+
+        Labelframe3=LabelFrame(Labelframe1,text="Ship to (appears on invoice)")
+        Labelframe3.place(x=400,y=35,width=340,height=125)
+        a11=Label(Labelframe3,text="Ship to Name:").place(x=10,y=10)
+        a21=Label(Labelframe3,text="Address:").place(x=10,y=35)
+        cus_sh_nam=StringVar()
+        cus_sh_adr=StringVar()
+        b1fdgfg1=Entry(Labelframe3, textvariable=cus_sh_nam)
+        b1fdgfg1.insert(0,str(cus_ins_val[6]))
+        b1fdgfg1.place(x=110,y=10,width=210)
+        b2vxcvcxbc1=scrolledtext.ScrolledText(Labelframe3)
+        b2vxcvcxbc1.delete(1.0,'end')
+        b2vxcvcxbc1.insert(1.0,str(cus_ins_val[7]))
+        b2vxcvcxbc1.place(x=110,y=35,width=210,height=63)
+        
+
+
+        Labelframe4=LabelFrame(Labelframe1,text="Contact")
+        Labelframe4.place(x=10,y=170,width=340,height=137)
+        a11=Label(Labelframe4,text="Contact Person:").place(x=10,y=10)
+        
+        a21=Label(Labelframe4,text="Email Address:",fg="Blue").place(x=10,y=35)
+        a31=Label(Labelframe4,text="Tel. No:").place(x=10,y=60)
+        a41=Label(Labelframe4,text="Fax:").place(x=200,y=60)
+        a51=Label(Labelframe4,text="Mobile number for SMS notification:").place(x=10,y=85)
+        
+        bs_cnt=StringVar()
+        bs_em=StringVar()
+        bs_tel=StringVar()
+        bs_fax=StringVar()
+        
+        b11=Entry(Labelframe4, textvariable=bs_cnt)
+        b11.insert(0,str(cus_ins_val[8]))
+        b11.place(x=110,y=10,width=210)
+        
+        b21=Entry(Labelframe4,textvariable=bs_em)
+        def validate(value):
+              
+              """
+              Validat the email entry
+              :param value:
+              :return:
+              """
+              pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+              if re.fullmatch(pattern, value) is None:
+                  
+                  return False
+              b21.config(fg="black")
+              return True
+
+        def on_invalid():
+              b21.config(fg="red")
+              
+        vcmd = (Labelframe4.register(validate), '%P')
+        ivcmd = (Labelframe4.register(on_invalid),)
+
+        
+        
+        b21.insert(0,str(cus_ins_val[9]))
+        b21.config(validate='focusout', validatecommand=vcmd, invalidcommand=ivcmd)
+        b21.place(x=110,y=35,width=210)
+        
+        def validate_tel(value):
+              
+              """
+              Validat the email entry
+              :param value:
+              :return:
+              """
+              pattern = r'^[0-9]\d{9,10}$'
+              if re.fullmatch(pattern, value) is None:
+                  return False
+                  
+              b31.config(fg="black")
+              return True
+
+        def on_invalid_tel():
+            b31.config(fg="red")
+        
+            
+        v_tel_cmd = (Labelframe4.register(validate_tel), '%P')
+        iv_tel_cmd = (Labelframe4.register(on_invalid_tel),)
+
+        b31=Entry(Labelframe4,textvariable=bs_tel)
+        b31.config(validate='focusout', validatecommand=v_tel_cmd, invalidcommand=iv_tel_cmd)
+        b31.insert(0,str(cus_ins_val[10]))
+
+        b31.place(x=110,y=60,width=90)
+        b4126=Entry(Labelframe4,textvariable=bs_fax)
+        def validate_telb4126(value):
+              
+              """
+              Validat the email entry
+              :param value:
+              :return:
+              """
+              pattern = r'^(\+\d{1,2}\s)?\(?\d{3}\)?[\s.-]\d{3}[\s.-]\d{4}$'
+              if re.fullmatch(pattern, value) is None:
+                  
+                  return False
+              b4126.config(fg="black")
+              return True
+
+        def on_invalid_telb4126():
+              b4126.config(fg="red")
+              
+        v_tel_cmdb4126 = (Labelframe4.register(validate_telb4126), '%P')
+        iv_tel_cmdb4126 = (Labelframe4.register(on_invalid_telb4126),)
+        b4126.config(validate='focusout', validatecommand=v_tel_cmdb4126, invalidcommand=iv_tel_cmdb4126)
+        b4126.insert(0,str(cus_ins_val[11]))
+        b4126.place(x=230,y=60,width=90)
+        bs_mobi=StringVar()
+        b5fd1=Entry(Labelframe4,textvariable=bs_mobi)
+        def validate_tel3(value):
+              
+              """
+              Validat the email entry
+              :param value:
+              :return:
+              """
+              pattern = r'^[0-9]\d{9}$'
+              if re.fullmatch(pattern, value) is None:
+                  return False
+                  
+              b5fd1.config(fg="black")
+              return True
+
+        def on_invalid_tel3():
+            b5fd1.config(fg="red")
+        
+        v_tel_cmd3 = (Labelframe4.register(validate_tel3), '%P')
+        iv_tel_cmd3 = (Labelframe4.register(on_invalid_tel3),)
+        b5fd1.insert(0,str(cus_ins_val[12]))
+        b5fd1.config(validate='focusout', validatecommand=v_tel_cmd3, invalidcommand=iv_tel_cmd3)
+      
+        b5fd1.place(x=215,y=85,width=105)
+        btn111=Button(Labelframe1,width=3,height=2,compound = LEFT,text=">>",command=lambda:btm_shp_btn())
+        btn111.place(x=359,y=220,height=20)
+      
+        bs_sh_cnt=StringVar()
+        bs_sh_em=StringVar()
+        bs_sh_tel=StringVar()
+        bs_sh_fax=StringVar()
+    
+        Labelframe5=LabelFrame(Labelframe1,text="Ship To Contact")
+        Labelframe5.place(x=400,y=170,width=340,height=108)
+        a11=Label(Labelframe5,text="Contact Person:").place(x=10,y=10)
+        a21=Label(Labelframe5,text="Email Address:").place(x=10,y=35)
+        a31=Label(Labelframe5,text="Tel. No:").place(x=10,y=60)
+        a41=Label(Labelframe5,text="Fax:").place(x=200,y=60)
+        
+        b1dsf1=Entry(Labelframe5, textvariable=bs_sh_cnt)
+        b1dsf1.insert(0,str(cus_ins_val[13]))
+        b1dsf1.place(x=110,y=10,width=210)
+        b21cd1=Entry(Labelframe5,textvariable=bs_sh_em)
+        
+
+        def validateb21(value):
+              
+              """
+              Validat the email entry
+              :param value:
+              :return:
+              """
+              pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+              if re.fullmatch(pattern, value) is None:
+                  
+                  return False
+
+            
+              b21cd1.config(fg="black")
+              return True
+
+        def on_invalidb21():
+              b21cd1.config(fg="red")
+              
+        vcmdb21 = (Labelframe5.register(validateb21), '%P')
+        ivcmdb21 = (Labelframe5.register(on_invalidb21),)
+        
+        b21cd1.config(validate='focusout', validatecommand=vcmdb21, invalidcommand=ivcmdb21)
+        b21cd1.insert(0,str(cus_ins_val[14]))
+        b21cd1.place(x=110,y=35,width=210)
+        b311=Entry(Labelframe5,textvariable=bs_sh_tel)
+        def validate_telb311(value):
+              
+              """
+              Validat the email entry
+              :param value:
+              :return:
+              """
+              pattern = r'^[0-9]\d{9,10}$'
+              if re.fullmatch(pattern, value) is None:
+                  return False
+                  
+              b311.config(fg="black")
+              return True
+
+        def on_invalid_telb311():
+            b311.config(fg="red")
+        v_tel_cmdb311 = (Labelframe5.register(validate_telb311), '%P')
+        iv_tel_cmdb311 = (Labelframe5.register(on_invalid_telb311),)
+
+        b311.insert(0,str(cus_ins_val[15]))
+        b311.config(validate='focusout', validatecommand=v_tel_cmdb311, invalidcommand=iv_tel_cmdb311)
+        b311.place(x=110,y=60,width=90)
+
+        b414=Entry(Labelframe5,textvariable=bs_sh_fax)
+        def validate_telb414(value):
+              
+              """
+              Validat the email entry
+              :param value:
+              :return:
+              """
+              pattern = r'^(\+\d{1,2}\s)?\(?\d{3}\)?[\s.-]\d{3}[\s.-]\d{4}$'
+              if re.fullmatch(pattern, value) is None:
+                  
+                  return False
+              b414.config(fg="black")
+              return True
+
+        def on_invalid_telb414():
+              b414.config(fg="red")
+              
+        v_tel_cmdb414 = (Labelframe5.register(validate_telb414), '%P')
+        iv_tel_cmdb414 = (Labelframe5.register(on_invalid_telb414),)
+        b414.config(validate='focusout', validatecommand=v_tel_cmdb414, invalidcommand=iv_tel_cmdb414)
+
+        b414.insert(0,str(cus_ins_val[16]))
+        b414.place(x=230,y=60,width=90)
+
+
+        Labelframe6=LabelFrame(Labelframe1,text="Payment Option")
+        Labelframe6.place(x=10,y=317,width=340,height=80)
+        cus_ds_chk = StringVar()
+        cus_sp_tx=IntVar()
+        cus_sp_tx2=IntVar()
+        cus_sp_disc=IntVar()
+        chkbtn1 = Checkbutton(Labelframe6, text = "Tax Exempt", variable = cus_ds_chk, onvalue = 1, offvalue = 0, font=("arial", 8))
+        if cus_ins_val[17]=="0":
+          chkbtn1.deselect()
+        else:
+          chkbtn1.select()
+        chkbtn1.place(x=10,y=6)
+
+        
+        a12=Label(Labelframe6,text="Discount%:").place(x=10,y=30)
+        cus_sp_disc = IntVar(Labelframe6)
+
+        cus_sp_disc=Entry(Labelframe6)
+        
+          # edt_ltyr=(Labelframe6.register(tax_frtinv),)
+        def tax_frt(S,d):
+            if d=='1':
+              if not S in ['.','0','1','2','3','4','5','6','7','8','9']:
+                return False
+              return True
+              
+            if d.isdigit():
+              return True
+
+
+        edt_lty=(Labelframe6.register(tax_frt), '%S','%d')
+
+        cus_sp_disc.insert(0,str(cus_ins_val[19]))
+        cus_sp_disc.config(validate='key',validatecommand=(edt_lty))
+        cus_sp_disc.place(x=80,y=30,width=70)
+
+        swt='select taxtype from company'
+        fbcursor.execute(swt)
+        fdt=fbcursor.fetchone()
+        print(fdt[0])
+        cus_sp_tx=Entry(Labelframe6)
+        cus_sp_tx2=Entry(Labelframe6)
+        cus_sp_tx=Entry(Labelframe6)
+        if fdt[0]=='3':
+
+          a11=Label(Labelframe6,text="Specific Tax1%:").place(x=150,y=7)
+          
+          cus_sp_tx.insert(0,str(cus_ins_val[18]))
+          cus_sp_tx.config(validate='key',validatecommand=(edt_lty))
+          cus_sp_tx.place(x=250,y=7,width=70)
+          
+          cus_sp_tx2.insert(0,str(cus_ins_val[25]))
+          cus_sp_tx2.config(validate='key',validatecommand=(edt_lty))
+          cus_sp_tx2.place(x=250,y=30,width=70)
+          
+          a16=Label(Labelframe6,text="Specific Tax2%::").place(x=150,y=30)
+        elif fdt[0]=='2':
+          a11=Label(Labelframe6,text="Specific Tax1%:").place(x=150,y=7)
+          
+          cus_sp_tx.insert(0,str(cus_ins_val[18]))
+          cus_sp_tx.config(validate='key',validatecommand=(edt_lty))
+          cus_sp_tx.place(x=250,y=7,width=70)
+        elif fdt[0]=='1':
+          pass
+
+        Labelframe7=LabelFrame(Labelframe1,text="Customer type")
+        Labelframe7.place(x=10,y=405,width=340,height=90)
+        bs_cus_ct=StringVar()
+        r1=Radiobutton(Labelframe7, text = "Client", variable = bs_cus_ct, value ="Client")
+        r2=Radiobutton(Labelframe7, text = "Vender", variable = bs_cus_ct, value = "Vender")
+        r3=Radiobutton(Labelframe7, text = "Both(Client/Vender)", variable = bs_cus_ct, value = "Both(Client/Vender)")
+        if cus_ins_val[22]=="Client":
+          r1.select()
+          r2.deselect()
+          r3.deselect()
+        elif cus_ins_val[22]=="Vender":
+          r1.deselect()
+          r2.select()
+          r3.deselect()
+        else:
+          r1.deselect()
+          r2.deselect()
+          r3.select()
+        r1.place(x=5,y=15)
+        r2.place(x=90,y=15)
+        r3.place(x=180,y=15)
+
+        Labelframe8=LabelFrame(Labelframe1,text="Additional Info")
+        Labelframe8.place(x=400,y=288,width=340,height=80)
+        a11=Label(Labelframe8,text="Country:").place(x=10,y=5)
+        a12=Label(Labelframe8,text="City:").place(x=10,y=30)
+        cus_sh_coun=StringVar() 
+        cus_sh_cty=StringVar() 
+
+        b11=ttk.Combobox(Labelframe8,textvariable=cus_sh_coun)
+        b11.place(x=110,y=5,width=210)
+        b11['values'] = ('India','America')  
+        b11.insert(0,str(cus_ins_val[20]))  
+        b11.place(x=110,y=5) 
+        b12=Entry(Labelframe8,textvariable=cus_sh_cty)
+        b12.insert(0,str(cus_ins_val[21]))  
+        b12.place(x=110,y=30,width=210)
+        Labelframe9=LabelFrame(Labelframe1,text="Notes")
+        Labelframe9.place(x=400,y=380,width=340,height=115)
+        '''scrollbar = Scrollbar(Labelframe9)
+              scrollbar.place(x=300,y=10)
+              b12=Entry(Labelframe9,yscrollcommand=scrollbar.set).place(x=10,y=10,width=290,height=70)
+              yscrollcommand.config(command=b12.yview)'''
+        cus_nt=StringVar()
+        global cfgd
+        cfgd=scrolledtext.ScrolledText(Labelframe9)
+        cfgd.insert(1.0,str(str(cus_ins_val[23])))
+        cfgd.place(x=20,y=10,width=295,height=70)
+        # scrollbar_cus_nt = Scrollbar(Labelframe9)
+        # scrollbar_cus_nt.place(x=295,y=10)
+
+        btn1=Button(edit_customer,width=50,compound = LEFT,image=tick ,command=lambda:cus_edit_cst(),text="OK").place(x=20, y=545)
+        btn2=Button(edit_customer,width=80,compound = LEFT,image=cancel,text="Cancel", command=cancel_edt).place(x=665, y=545)
+        edit_customer.mainloop()
+        # except:
+        #   pass
+
+
+
+      
           
                 
       # filter customers
@@ -15036,51 +16031,72 @@ def mainpage():
       edit_estimate_ctegorytree.heading("1",text="View filter by category", anchor=CENTER)
       edit_estimate_ctegorytree.place(x=660, y=45)
 
-      # def edit_list_filter_customer_1(event):
-      #   edit_selected_cust_indices_1 = edit_fil_cat_list_1.curselection()
-      #   selected_cust_filter_1 = ",".join([edit_fil_cat_list_1.get(i) for i in edit_selected_cust_indices_1])
 
-      #   if selected_cust_filter_1 == "View all records" or selected_cust_filter_1 == "View only Client/Vendor" or selected_cust_filter_1 == "Default":
-      #     cust_all_sql_1 = "SELECT * FROM Customer"
-      #     fbcursor.execute(cust_all_sql_1)
-      #     cust_all_data_1 = fbcursor.fetchall()
-      #     for record in edit_estimate_cusventtree.get_children():
-      #       edit_estimate_cusventtree.delete(record)
-      #     count_all = 0
-      #     for i in cust_all_data_1:
-      #       edit_estimate_cusventtree.insert(parent='',index='end',iid=i,text='',values=(i[0],i[4],i[10],i[8]))
-      #     count_all += 1
-      #   elif selected_cust_filter_1 == "View only Client type":
-      #     client_sql_1 = "SELECT * FROM Customer WHERE customertype=%s"
-      #     client_val_1 = ('Client',)
-      #     fbcursor.execute(client_sql_1,client_val_1)
-      #     client_data_1 = fbcursor.fetchall()
-      #     for record in edit_estimate_cusventtree.get_children():
-      #       edit_estimate_cusventtree.delete(record)
-      #     count_c = 0
-      #     for i in client_data_1:
-      #       edit_estimate_cusventtree.insert(parent='',index='end',iid=i,text='',values=(i[0],i[4],i[10],i[8]))
-      #     count_c += 1
-      #   else:
-      #     vendor_sql_1 = "SELECT * FROM Customer WHERE customertype=%s"
-      #     vendor_val_1 = ('Vendor',)
-      #     fbcursor.execute(vendor_sql_1,vendor_val_1)
-      #     vendor_data_1 = fbcursor.fetchall()
-      #     for record in edit_estimate_cusventtree.get_children():
-      #       edit_estimate_cusventtree.delete(record)
-      #     count_v = 0
-      #     for i in vendor_data_1:
-      #       edit_estimate_cusventtree.insert(parent='',index='end',iid=i,text='',values=(i[0],i[4],i[10],i[8]))
-      #     count_v += 1
+      def edit_est_ct_filter(event):
+        selected_indices = edit_fil_cat_list_1.curselection()
+        if str(selected_indices)=="(0,)":
+          for record in edit_estimate_cusventtree.get_children():
+            edit_estimate_cusventtree.delete(record)
+          cus_main_table_sql="select * from customer"
+          fbcursor.execute(cus_main_table_sql)
+          main_tb_val=fbcursor.fetchall()
+          
+          count_cus=0
+
+          for i in main_tb_val:
+            edit_estimate_cusventtree.insert(parent='', index='end', iid=count_cus, text='', values=(i[24],i[4],i[10],i[8]))
+            
+            count_cus +=1
+        elif str(selected_indices)=="(1,)":
+          for record in edit_estimate_cusventtree.get_children():
+            edit_estimate_cusventtree.delete(record)
+          cus_main_table_sql="select * from customer where customertype='Both(Client/Vender)'"
+          fbcursor.execute(cus_main_table_sql)
+          main_tb_val=fbcursor.fetchall()
+          
+          count_cus=0
+
+          for i in main_tb_val:
+            edit_estimate_cusventtree.insert(parent='', index='end', iid=count_cus, text='', values=(i[24],i[4],i[10],i[8]))
+            
+            count_cus +=1
+        elif str(selected_indices)=="(2,)":
+          for record in edit_estimate_cusventtree.get_children():
+            edit_estimate_cusventtree.delete(record)
+          cus_main_table_sql="select * from customer where customertype='Client'"
+          fbcursor.execute(cus_main_table_sql)
+          main_tb_val=fbcursor.fetchall()
+          
+          count_cus=0
+
+          for i in main_tb_val:
+            edit_estimate_cusventtree.insert(parent='', index='end', iid=count_cus, text='', values=(i[24],i[4],i[10],i[8]))
+            
+            count_cus +=1
+        elif str(selected_indices)=="(3,)":
+          for record in edit_estimate_cusventtree.get_children():
+            edit_estimate_cusventtree.delete(record)
+          cus_main_table_sql="select * from customer where customertype='Vender'"
+          fbcursor.execute(cus_main_table_sql)
+          main_tb_val=fbcursor.fetchall()
+          
+          count_cus=0
+
+          for i in main_tb_val:
+            edit_estimate_cusventtree.insert(parent='', index='end', iid=count_cus, text='', values=(i[24],i[4],i[10],i[8]))
+            
+            count_cus +=1
+        else:
+          pass
 
       edit_fil_cat_list_1 = Listbox(edit_estimate_cuselection,height=34,width=40,bg="white",activestyle="dotbox",fg="black",highlightbackground="white")
-      edit_fil_cat_list_1.insert(0,"View all records")
-      edit_fil_cat_list_1.insert(1,"View only Client/Vendor")
-      edit_fil_cat_list_1.insert(2,"View only Client type")
-      edit_fil_cat_list_1.insert(3,"View only Vendor type")
-      edit_fil_cat_list_1.insert(4,"Default")
+      edit_fil_cat_list_1.insert(0, "  View all records")
+      edit_fil_cat_list_1.insert(1, "  View only Client/Vendor Type")
+      edit_fil_cat_list_1.insert(2, "  View only Client Type")
+      edit_fil_cat_list_1.insert(3, "  View only Vendor Type")
+      
       edit_fil_cat_list_1.place(x=660,y=63)
-      edit_fil_cat_list_1.bind('<<ListboxSelect>>')
+      edit_fil_cat_list_1.bind('<<ListboxSelect>>', edit_est_ct_filter)
 
       edit_estimate_scrollbar = Scrollbar(edit_estimate_cuselection)
       edit_estimate_scrollbar.place(x=640, y=45, height=560)
@@ -15088,1243 +16104,1253 @@ def mainpage():
 
       edit_estimate_btn71=Button(edit_estimate_cuselection,compound = LEFT,image=tick ,text="ok", width=60)
       edit_estimate_btn71.place(x=15, y=610)
-      edit_estimate_btn72=Button(edit_estimate_cuselection,compound = LEFT,image=tick,text="Edit selected customer", width=150,command=edit_estimate_create1).place(x=250, y=610)
-      edit_estimate_btn73=Button(edit_estimate_cuselection,compound = LEFT,image=tick, text="Add new customer", width=150,command=edit_estimate_create1).place(x=435, y=610)
+      edit_estimate_btn72=Button(edit_estimate_cuselection,compound = LEFT,image=tick,text="Edit selected customer", width=150,command=lambda:edit_cus_edit_customer())
+      edit_estimate_btn72.place(x=250, y=610)
+      edit_estimate_btn73=Button(edit_estimate_cuselection,compound = LEFT,image=tick, text="Add new customer", width=150,command=lambda:edit_cus_add_customer())
+      edit_estimate_btn73.place(x=435, y=610)
       edit_estimate_btn74=Button(edit_estimate_cuselection,compound = LEFT,image=cancel ,text="Cancel", width=60).place(x=740, y=610)   
 
 
     #add new line item
     def edit_estimate_newline():
-      edit_estimate_newselection=Toplevel()
-      edit_estimate_newselection.title("Select Customer")
-      edit_estimate_newselection.geometry("930x650+240+10")
-      edit_estimate_newselection.resizable(False, False)
+      businessname = edit_estimate_combo.get()
+      sql='SELECT * FROM estimate WHERE businessname=%s'
+      val=(businessname,)
+      fbcursor.execute(sql,val)
+      if fbcursor.fetchone()is not None:
+        edit_estimate_newselection=Toplevel()
+        edit_estimate_newselection.title("Select Customer")
+        edit_estimate_newselection.geometry("930x650+240+10")
+        edit_estimate_newselection.resizable(False, False)
 
 
-      #add new product
-      def edit_estimate_product():  
-        edit_estimate_top = Toplevel()  
-        edit_estimate_top.title("Add a new Product/Service")
-        edit_estimate_p2 = PhotoImage(file = 'images/fbicon.png')
-        edit_estimate_top.iconphoto(False, edit_estimate_p2)
-      
-        edit_estimate_top.geometry("600x550+390+15")
-        edit_estimate_tabControl = ttk.Notebook(edit_estimate_top)
-        edit_estimate_s = ttk.Style()
-        edit_estimate_s.theme_use('default')
-        edit_estimate_s.configure('TNotebook.Tab', background="#999999",padding=10,bd=0)
-
-
-        edit_estimate_tab1 = ttk.Frame(edit_estimate_tabControl)
-        edit_estimate_tab2 = ttk.Frame(edit_estimate_tabControl)
-      
-        edit_estimate_tabControl.add(edit_estimate_tab1,compound = LEFT, text ='Product/Service')
-        edit_estimate_tabControl.add(edit_estimate_tab2,compound = LEFT, text ='Product Image')
-      
-        edit_estimate_tabControl.pack(expand = 1, fill ="both")
-
-        global filename
-        filename = ""
-
-        def este_upload_file_1():
-          global filename,img, b2
-          f_types =[('Png files','*.png'),('Jpg Files', '*.jpg'),('PDF', '*.pdf',)]
-          filename = filedialog.askopenfilename(filetypes=f_types)
-          shutil.copyfile(filename, os.getcwd()+'/images/'+filename.split('/')[-1])
-          image = Image.open(filename)
-          resize_image = image.resize((350, 350))
-          img = ImageTk.PhotoImage(resize_image)
-          b2 = Button(edit_estimate_imageFrame,image=img)
-          b2.place(x=130, y=80)
+        #add new product
+        def edit_estimate_product():  
+          edit_estimate_top = Toplevel()  
+          edit_estimate_top.title("Add a new Product/Service")
+          edit_estimate_p2 = PhotoImage(file = 'images/fbicon.png')
+          edit_estimate_top.iconphoto(False, edit_estimate_p2)
         
-        def est_addproducts_1():
-          global img , filename 
-          sku = edit_estimate_codeentry.get()
-          status = edit_estimate_checkvarStatus.get()
-          catgory = edit_estimate_n.get()
-          name = edit_estimate_nameentry.get()
-          description = edit_estimate_desentry.get()
-          unitprice = edit_estimate_uval.get()
-          peices = edit_estimate_pcsentry.get()
-          cost = edit_estimate_costval.get()
-          price_cost = edit_estimate_priceval.get()
-          taxable = edit_estimate_checkvarStatus2.get()
-          tax2 = edit_estimate_checkvarStatus_2.get()
-          nostockcontrol = edit_estimate_checkvarStatus3.get()
-          stock = edit_estimate_stockentry.get()
-          lowstock = edit_estimate_lowentry.get()
-          warehouse = edit_estimate_wareentry.get()
-          pnotes = edit_estimate_txt.get("1.0",'end-1c')
-          entries = [sku,name, unitprice, cost]
-          entri = []
-          for i in entries:
-            if i == '':
-              entri.append(i)
-          if len(entri) == 0:
-            sql = 'select * from Productservice where sku = %s or name = %s'
-            val  = (sku, name)
-            fbcursor.execute(sql, val)
-            fbcursor.fetchall()
-            row_count = fbcursor.rowcount
-            if row_count == 0:
-              if filename == "":
-                sql = 'insert into Productservice(sku, category, name, description, status, unitprice, peices, cost, taxable, priceminuscost, serviceornot, stock, stocklimit, warehouse, privatenote,tax2) values(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s)'
-                val = (sku, catgory, name, description, status, unitprice, peices, cost, taxable, price_cost, nostockcontrol, stock, lowstock, warehouse, pnotes,tax2)
-                fbcursor.execute(sql, val)
-                fbilldb.commit()
+          edit_estimate_top.geometry("600x550+390+15")
+          edit_estimate_tabControl = ttk.Notebook(edit_estimate_top)
+          edit_estimate_s = ttk.Style()
+          edit_estimate_s.theme_use('default')
+          edit_estimate_s.configure('TNotebook.Tab', background="#999999",padding=10,bd=0)
+
+
+          edit_estimate_tab1 = ttk.Frame(edit_estimate_tabControl)
+          edit_estimate_tab2 = ttk.Frame(edit_estimate_tabControl)
+        
+          edit_estimate_tabControl.add(edit_estimate_tab1,compound = LEFT, text ='Product/Service')
+          edit_estimate_tabControl.add(edit_estimate_tab2,compound = LEFT, text ='Product Image')
+        
+          edit_estimate_tabControl.pack(expand = 1, fill ="both")
+
+          global filename
+          filename = ""
+
+          def este_upload_file_1():
+            global filename,img, b2
+            f_types =[('Png files','*.png'),('Jpg Files', '*.jpg'),('PDF', '*.pdf',)]
+            filename = filedialog.askopenfilename(filetypes=f_types)
+            shutil.copyfile(filename, os.getcwd()+'/images/'+filename.split('/')[-1])
+            image = Image.open(filename)
+            resize_image = image.resize((350, 350))
+            img = ImageTk.PhotoImage(resize_image)
+            b2 = Button(edit_estimate_imageFrame,image=img)
+            b2.place(x=130, y=80)
+          
+          def est_addproducts_1():
+            global img , filename 
+            sku = edit_estimate_codeentry.get()
+            status = edit_estimate_checkvarStatus.get()
+            catgory = edit_estimate_n.get()
+            name = edit_estimate_nameentry.get()
+            description = edit_estimate_desentry.get()
+            unitprice = edit_estimate_uval.get()
+            peices = edit_estimate_pcsentry.get()
+            cost = edit_estimate_costval.get()
+            price_cost = edit_estimate_priceval.get()
+            taxable = edit_estimate_checkvarStatus2.get()
+            tax2 = edit_estimate_checkvarStatus_2.get()
+            nostockcontrol = edit_estimate_checkvarStatus3.get()
+            stock = edit_estimate_stockentry.get()
+            lowstock = edit_estimate_lowentry.get()
+            warehouse = edit_estimate_wareentry.get()
+            pnotes = edit_estimate_txt.get("1.0",'end-1c')
+            entries = [sku,name, unitprice, cost]
+            entri = []
+            for i in entries:
+              if i == '':
+                entri.append(i)
+            if len(entri) == 0:
+              sql = 'select * from Productservice where sku = %s or name = %s'
+              val  = (sku, name)
+              fbcursor.execute(sql, val)
+              fbcursor.fetchall()
+              row_count = fbcursor.rowcount
+              if row_count == 0:
+                if filename == "":
+                  sql = 'insert into Productservice(sku, category, name, description, status, unitprice, peices, cost, taxable, priceminuscost, serviceornot, stock, stocklimit, warehouse, privatenote,tax2) values(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s)'
+                  val = (sku, catgory, name, description, status, unitprice, peices, cost, taxable, price_cost, nostockcontrol, stock, lowstock, warehouse, pnotes,tax2)
+                  fbcursor.execute(sql, val)
+                  fbilldb.commit()
+                else:
+                  file = shutil.copyfile(filename, os.getcwd()+'/images/'+filename.split('/')[-1])
+                  sql = 'insert into Productservice(sku, category, name, description, status, unitprice, peices, cost, taxable, priceminuscost, serviceornot, stock, stocklimit, warehouse, image, privatenote,tax2) values(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s)'
+                  val = (sku, catgory, name, description, status, unitprice, peices, cost, taxable, price_cost, nostockcontrol, stock, lowstock, warehouse, filename.split('/')[-1], pnotes,tax2)
+                  fbcursor.execute(sql, val)
+                  fbilldb.commit()
               else:
-                file = shutil.copyfile(filename, os.getcwd()+'/images/'+filename.split('/')[-1])
-                sql = 'insert into Productservice(sku, category, name, description, status, unitprice, peices, cost, taxable, priceminuscost, serviceornot, stock, stocklimit, warehouse, image, privatenote,tax2) values(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s)'
-                val = (sku, catgory, name, description, status, unitprice, peices, cost, taxable, price_cost, nostockcontrol, stock, lowstock, warehouse, filename.split('/')[-1], pnotes,tax2)
-                fbcursor.execute(sql, val)
-                fbilldb.commit()
-            else:
-              messagebox.showinfo("Alert", "Entry with same name or SKU already exists.\nTry again.")
+                messagebox.showinfo("Alert", "Entry with same name or SKU already exists.\nTry again.")
+                edit_estimate_top.destroy()
+
+              for record in edit_estimate_cusventtree1.get_children():
+                edit_estimate_cusventtree1.delete(record)
+              fbcursor.execute("select *  from Productservice")
+              est_pandsdata = fbcursor.fetchall()
+              countp = 0
+              for i in est_pandsdata:
+                if i[12] == '1':
+                  servi = '🗹'
+                else:
+                  servi = ''
+                sql = "select currencysign,currsignplace from company"
+                fbcursor.execute(sql)
+                estcurrsymb = fbcursor.fetchone()
+                if not estcurrsymb: 
+                  if i[13] > i[14]:
+                    edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('green',))
+                    countp += 1              
+                  elif i[12] == '1':
+                    edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('blue',))
+                    countp += 1
+                  else:
+                    edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('red',))
+                    countp += 1
+                          
+                elif estcurrsymb[1] == "before amount":
+                  if (i[13]) > (i[14]):
+                    edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('green',))
+                    countp += 1
+                  elif i[12] == '1':
+                    edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('blue',))
+                    countp += 1
+                  else:
+                    edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('red',))
+                    countp += 1
+
+                elif estcurrsymb[1] == "before amount with space":
+                  if (i[13]) > (i[14]):
+                    edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('green',))
+                    countp += 1
+                  elif i[12] == '1':
+                    edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('blue',))
+                    countp += 1
+                  else:
+                    edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('red',))
+                    countp += 1
+
+                elif estcurrsymb[1] == "after amount":
+                  if (i[13]) > (i[14]):
+                    edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('green',))
+                    countp += 1
+                  elif i[12] == '1':
+                    edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('blue',))
+                    countp += 1
+                  else:
+                    edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('red',))
+                    countp += 1
+
+                elif estcurrsymb[1] == "after amount with space":
+                  if (i[13]) > (i[14]):
+                    edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('green',))
+                    countp += 1
+                  elif i[12] == '1':
+                    edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('blue',))
+                    countp += 1
+                  else:
+                    edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('red',))
+                    countp += 1
+
               edit_estimate_top.destroy()
-
-            for record in edit_estimate_cusventtree1.get_children():
-              edit_estimate_cusventtree1.delete(record)
-            fbcursor.execute("select *  from Productservice")
-            est_pandsdata = fbcursor.fetchall()
-            countp = 0
-            for i in est_pandsdata:
-              if i[12] == '1':
-                servi = '🗹'
-              else:
-                servi = ''
-              sql = "select currencysign,currsignplace from company"
-              fbcursor.execute(sql)
-              estcurrsymb = fbcursor.fetchone()
-              if not estcurrsymb: 
-                if i[13] > i[14]:
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('green',))
-                  countp += 1              
-                elif i[12] == '1':
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('blue',))
-                  countp += 1
-                else:
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('red',))
-                  countp += 1
-                        
-              elif estcurrsymb[1] == "before amount":
-                if (i[13]) > (i[14]):
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('green',))
-                  countp += 1
-                elif i[12] == '1':
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('blue',))
-                  countp += 1
-                else:
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('red',))
-                  countp += 1
-
-              elif estcurrsymb[1] == "before amount with space":
-                if (i[13]) > (i[14]):
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('green',))
-                  countp += 1
-                elif i[12] == '1':
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('blue',))
-                  countp += 1
-                else:
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('red',))
-                  countp += 1
-
-              elif estcurrsymb[1] == "after amount":
-                if (i[13]) > (i[14]):
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('green',))
-                  countp += 1
-                elif i[12] == '1':
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('blue',))
-                  countp += 1
-                else:
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('red',))
-                  countp += 1
-
-              elif estcurrsymb[1] == "after amount with space":
-                if (i[13]) > (i[14]):
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('green',))
-                  countp += 1
-                elif i[12] == '1':
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('blue',))
-                  countp += 1
-                else:
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('red',))
-                  countp += 1
-
-            edit_estimate_top.destroy()
-      
-        edit_estimate_innerFrame = Frame(edit_estimate_tab1,bg="#f5f3f2", relief=GROOVE)
-        edit_estimate_innerFrame.pack(side="top",fill=BOTH)
-
-        edit_estimate_Customerlabelframe = LabelFrame(edit_estimate_innerFrame,text="Product/Service",width=580,height=455)
-        edit_estimate_Customerlabelframe.pack(side="top",fill=BOTH,padx=10,pady=(10,45))
-
-        fbcursor.execute("SELECT * FROM Productservice ORDER BY sku DESC LIMIT 1")
-        skuin = fbcursor.fetchone()
-
-        edit_estimate_code1=Label(edit_estimate_Customerlabelframe,text="Code or SKU:",fg="blue",pady=10,padx=10)
-        edit_estimate_code1.place(x=20,y=0)
-        edit_estimate_codeentry = Entry(edit_estimate_Customerlabelframe,width=35)
-        edit_estimate_codeentry.place(x=120,y=8)
-
-        edit_estimate_checkvarStatus=IntVar()
-        edit_estimate_status1=Label(edit_estimate_Customerlabelframe,text="Status:")
-        edit_estimate_status1.place(x=400,y=8)
-        edit_estimate_Button1 = Checkbutton(edit_estimate_Customerlabelframe,
-                          variable = edit_estimate_checkvarStatus,text="Active",compound="right",
-                          onvalue =1,
-                          offvalue =0,
-                        
-                          width = 10)
-
-        edit_estimate_Button1.place(x=450,y=5)
-
-        edit_estimate_category1=Label(edit_estimate_Customerlabelframe,text="Category:",pady=5,padx=10)
-        edit_estimate_category1.place(x=20,y=40)
-        edit_estimate_n = StringVar()
-        edit_estimate_country0 = ttk.Combobox(edit_estimate_Customerlabelframe, width = 40, textvariable = edit_estimate_n )
         
-        edit_estimate_country0['values'] = ('Default')
+          edit_estimate_innerFrame = Frame(edit_estimate_tab1,bg="#f5f3f2", relief=GROOVE)
+          edit_estimate_innerFrame.pack(side="top",fill=BOTH)
+
+          edit_estimate_Customerlabelframe = LabelFrame(edit_estimate_innerFrame,text="Product/Service",width=580,height=455)
+          edit_estimate_Customerlabelframe.pack(side="top",fill=BOTH,padx=10,pady=(10,45))
+
+          fbcursor.execute("SELECT * FROM Productservice ORDER BY sku DESC LIMIT 1")
+          skuin = fbcursor.fetchone()
+
+          edit_estimate_code1=Label(edit_estimate_Customerlabelframe,text="Code or SKU:",fg="blue",pady=10,padx=10)
+          edit_estimate_code1.place(x=20,y=0)
+          edit_estimate_codeentry = Entry(edit_estimate_Customerlabelframe,width=35)
+          edit_estimate_codeentry.place(x=120,y=8)
+
+          edit_estimate_checkvarStatus=IntVar()
+          edit_estimate_status1=Label(edit_estimate_Customerlabelframe,text="Status:")
+          edit_estimate_status1.place(x=400,y=8)
+          edit_estimate_Button1 = Checkbutton(edit_estimate_Customerlabelframe,
+                            variable = edit_estimate_checkvarStatus,text="Active",compound="right",
+                            onvalue =1,
+                            offvalue =0,
+                          
+                            width = 10)
+
+          edit_estimate_Button1.place(x=450,y=5)
+
+          edit_estimate_category1=Label(edit_estimate_Customerlabelframe,text="Category:",pady=5,padx=10)
+          edit_estimate_category1.place(x=20,y=40)
+          edit_estimate_n = StringVar()
+          edit_estimate_country0 = ttk.Combobox(edit_estimate_Customerlabelframe, width = 40, textvariable = edit_estimate_n )
+          
+          edit_estimate_country0['values'] = ('Default')
+          
+          edit_estimate_country0.place(x=120,y=45)
+          edit_estimate_country0.insert(0,'Default')
+
+
+          edit_estimate_name81=Label(edit_estimate_Customerlabelframe,text="Name :",fg="blue",pady=5,padx=10)
+          edit_estimate_name81.place(x=20,y=70)
+          edit_estimate_nameentry = Entry(edit_estimate_Customerlabelframe,width=60)
+          edit_estimate_nameentry.place(x=120,y=75)
+
+          edit_estimate_des1=Label(edit_estimate_Customerlabelframe,text="Description :",pady=5,padx=10)
+          edit_estimate_des1.place(x=20,y=100)
+          edit_estimate_desentry = Entry(edit_estimate_Customerlabelframe,width=60)
+          edit_estimate_desentry.place(x=120,y=105)
+
+          def editt_est_prdoucts_cal(S,d):
+            if d == '1': #insert
+              if not S in ['.','0','1','2','3','4','5','6','7','8','9']:
+                return False
+              return True
+            if d.isdigit():
+              return True
+              
+          edit_estimate_uval = StringVar()(value="0")
+          edit_estimate_unit1=Label(edit_estimate_Customerlabelframe,text="Unit Price:",fg="blue",pady=5,padx=10)
+          edit_estimate_unit1.place(x=20,y=130)
+          edit_estimate_unitentry = Entry(edit_estimate_Customerlabelframe,width=20,textvariable=edit_estimate_uval)
+          edit_estimate_unitentry.place(x=120,y=135)
+          editt_est_cal_unit = (edit_estimate_Customerlabelframe.register(editt_est_prdoucts_cal),'%S','%d')
+          edit_estimate_unitentry.config(validate='key',validatecommand=(editt_est_cal_unit),justify='right')
+
+          #edit_estimate_pcsval = StringVar(value="0")
+          edit_estimate_pcs1=Label(edit_estimate_Customerlabelframe,text="Pcs/Weight:",fg="blue",pady=5,padx=10)
+          edit_estimate_pcs1.place(x=330,y=135)
+          edit_estimate_pcsentry = Entry(edit_estimate_Customerlabelframe,width=20)
+          edit_estimate_pcsentry.place(x=420,y=140)
+
+          edit_estimate_costval = StringVar(value="0")
+          edit_estimate_cost1=Label(edit_estimate_Customerlabelframe,text="Cost:",pady=5,padx=10)
+          edit_estimate_cost1.place(x=20,y=160)
+          edit_estimate_costentry = Entry(edit_estimate_Customerlabelframe,width=20,textvariable=edit_estimate_costval)
+          edit_estimate_costentry.place(x=120,y=165)
+          editt_est_cal_cost = (edit_estimate_Customerlabelframe.register(editt_est_prdoucts_cal),'%S','%d')
+          edit_estimate_costentry.config(validate='key',validatecommand=(editt_est_cal_cost),justify='right')
+
+          def est_set_label_1(name, index, mode):
+            est_copr_1 = float(edit_estimate_uval.get()) - float(edit_estimate_costval.get())
+            edit_estimate_priceval.set(str(est_copr_1))
+
+          edit_estimate_priceval = StringVar()
+          edit_estimate_price1=Label(edit_estimate_Customerlabelframe,text="(Price Cost):",pady=5,padx=10)
+          edit_estimate_price1.place(x=20,y=190)
+          edit_estimate_priceentry = Entry(edit_estimate_Customerlabelframe,width=20,textvariable=edit_estimate_priceval,state=DISABLED,disabledbackground="white",disabledforeground="black")
+          edit_estimate_priceentry.config(justify="right")
+          edit_estimate_priceentry.place(x=120,y=195)
+
+          edit_estimate_uval.trace('w', est_set_label_1)
+          edit_estimate_costval.trace('w', est_set_label_1)
+
+          sql = "select taxtype from company"
+          fbcursor.execute(sql)
+          est_taxchoose_1 = fbcursor.fetchone()
+
+          edit_estimate_checkvarStatus2=IntVar()
         
-        edit_estimate_country0.place(x=120,y=45)
-        edit_estimate_country0.insert(0,'Default')
+          edit_estimate_Button92 = Checkbutton(edit_estimate_Customerlabelframe,variable = edit_estimate_checkvarStatus2,
+                            text="Taxable Tax1rate",compound="right",
+                            onvalue =1 ,
+                            offvalue = 0,
+                            height=2,
+                            width = 12)
 
+          #edit_estimate_Button92.place(x=415,y=170)
 
-        edit_estimate_name81=Label(edit_estimate_Customerlabelframe,text="Name :",fg="blue",pady=5,padx=10)
-        edit_estimate_name81.place(x=20,y=70)
-        edit_estimate_nameentry = Entry(edit_estimate_Customerlabelframe,width=60)
-        edit_estimate_nameentry.place(x=120,y=75)
+          
 
-        edit_estimate_des1=Label(edit_estimate_Customerlabelframe,text="Description :",pady=5,padx=10)
-        edit_estimate_des1.place(x=20,y=100)
-        edit_estimate_desentry = Entry(edit_estimate_Customerlabelframe,width=60)
-        edit_estimate_desentry.place(x=120,y=105)
+          edit_estimate_checkvarStatus_2=IntVar()
 
-        def editt_est_prdoucts_cal(S,d):
-          if d == '1': #insert
-            if not S in ['.','0','1','2','3','4','5','6','7','8','9']:
-              return False
-            return True
-          if d.isdigit():
-            return True
-            
-        edit_estimate_uval = StringVar()(value="0")
-        edit_estimate_unit1=Label(edit_estimate_Customerlabelframe,text="Unit Price:",fg="blue",pady=5,padx=10)
-        edit_estimate_unit1.place(x=20,y=130)
-        edit_estimate_unitentry = Entry(edit_estimate_Customerlabelframe,width=20,textvariable=edit_estimate_uval)
-        edit_estimate_unitentry.place(x=120,y=135)
-        editt_est_cal_unit = (edit_estimate_Customerlabelframe.register(editt_est_prdoucts_cal),'%S','%d')
-        edit_estimate_unitentry.config(validate='key',validatecommand=(editt_est_cal_unit),justify='right')
+          edit_estimate_Button_92 = Checkbutton(edit_estimate_Customerlabelframe,variable = edit_estimate_checkvarStatus_2,
+                            text="Taxable Tax2rate",compound="right",
+                            onvalue =1,
+                            offvalue =0,
+                            height=2,
+                            width = 12)
 
-        #edit_estimate_pcsval = StringVar(value="0")
-        edit_estimate_pcs1=Label(edit_estimate_Customerlabelframe,text="Pcs/Weight:",fg="blue",pady=5,padx=10)
-        edit_estimate_pcs1.place(x=330,y=135)
-        edit_estimate_pcsentry = Entry(edit_estimate_Customerlabelframe,width=20)
-        edit_estimate_pcsentry.place(x=420,y=140)
+          #edit_estimate_Button_92.place(x=415,y=210)
+          if not est_taxchoose_1:
+            pass
+          elif est_taxchoose_1[0] == '1':
+            edit_estimate_Button92.place_forget()
+            edit_estimate_Button_92.place_forget()
+          elif est_taxchoose_1[0] == '2':
+            edit_estimate_Button92.place(x=415,y=170)
+            edit_estimate_Button_92.place_forget()
+          elif est_taxchoose_1[0] == '3':
+            edit_estimate_Button92.place(x=415,y=170)
+            edit_estimate_Button_92.place(x=415,y=210)
 
-        edit_estimate_costval = StringVar(value="0")
-        edit_estimate_cost1=Label(edit_estimate_Customerlabelframe,text="Cost:",pady=5,padx=10)
-        edit_estimate_cost1.place(x=20,y=160)
-        edit_estimate_costentry = Entry(edit_estimate_Customerlabelframe,width=20,textvariable=edit_estimate_costval)
-        edit_estimate_costentry.place(x=120,y=165)
-        editt_est_cal_cost = (edit_estimate_Customerlabelframe.register(editt_est_prdoucts_cal),'%S','%d')
-        edit_estimate_costentry.config(validate='key',validatecommand=(editt_est_cal_cost),justify='right')
-
-        def est_set_label_1(name, index, mode):
-          est_copr_1 = float(edit_estimate_uval.get()) - float(edit_estimate_costval.get())
-          edit_estimate_priceval.set(str(est_copr_1))
-
-        edit_estimate_priceval = StringVar()
-        edit_estimate_price1=Label(edit_estimate_Customerlabelframe,text="(Price Cost):",pady=5,padx=10)
-        edit_estimate_price1.place(x=20,y=190)
-        edit_estimate_priceentry = Entry(edit_estimate_Customerlabelframe,width=20,textvariable=edit_estimate_priceval,state=DISABLED,disabledbackground="white",disabledforeground="black")
-        edit_estimate_priceentry.config(justify="right")
-        edit_estimate_priceentry.place(x=120,y=195)
-
-        edit_estimate_uval.trace('w', est_set_label_1)
-        edit_estimate_costval.trace('w', est_set_label_1)
-
-        sql = "select taxtype from company"
-        fbcursor.execute(sql)
-        est_taxchoose_1 = fbcursor.fetchone()
-
-        edit_estimate_checkvarStatus2=IntVar()
-      
-        edit_estimate_Button92 = Checkbutton(edit_estimate_Customerlabelframe,variable = edit_estimate_checkvarStatus2,
-                          text="Taxable Tax1rate",compound="right",
-                          onvalue =1 ,
-                          offvalue = 0,
-                          height=2,
-                          width = 12)
-
-        #edit_estimate_Button92.place(x=415,y=170)
-
-        
-
-        edit_estimate_checkvarStatus_2=IntVar()
-
-        edit_estimate_Button_92 = Checkbutton(edit_estimate_Customerlabelframe,variable = edit_estimate_checkvarStatus_2,
-                          text="Taxable Tax2rate",compound="right",
-                          onvalue =1,
-                          offvalue =0,
-                          height=2,
-                          width = 12)
-
-        #edit_estimate_Button_92.place(x=415,y=210)
-        if not est_taxchoose_1:
-          pass
-        elif est_taxchoose_1[0] == '1':
-          edit_estimate_Button92.place_forget()
-          edit_estimate_Button_92.place_forget()
-        elif est_taxchoose_1[0] == '2':
-          edit_estimate_Button92.place(x=415,y=170)
-          edit_estimate_Button_92.place_forget()
-        elif est_taxchoose_1[0] == '3':
-          edit_estimate_Button92.place(x=415,y=170)
-          edit_estimate_Button_92.place(x=415,y=210)
-
-        def est_switch_1():
-          if edit_estimate_checkvarStatus3.get():
-            edit_estimate_stockentry["state"] = DISABLED
-            edit_estimate_lowentry["state"] = DISABLED
-            edit_estimate_wareentry["state"] = DISABLED
-          else:
-            edit_estimate_stockentry["state"] = NORMAL
-            edit_estimate_lowentry["state"] = NORMAL
-            edit_estimate_wareentry["state"] = NORMAL
-
-
-
-        edit_estimate_checkvarStatus3=BooleanVar()
-      
-        edit_estimate_Button93 = Checkbutton(edit_estimate_Customerlabelframe,variable = edit_estimate_checkvarStatus3,command=est_switch_1,
-                          text="This is a service(no stock control)",
-                          onvalue =1 ,
-                          offvalue = 0,
-                          height=3)
-
-        edit_estimate_Button93.place(x=40,y=220)
-
-        def est_stocknum_1(input):
-          if input.isdigit():
-            return True
-          elif input is "":
-            return True
-          else:
-            return False
-
-
-        edit_estimate_stock1=Label(edit_estimate_Customerlabelframe,text="Stock:",pady=5,padx=10)
-        edit_estimate_stock1.place(x=90,y=260)
-        edit_estimate_stockentry = Entry(edit_estimate_Customerlabelframe,width=15)
-        edit_estimate_stockentry.place(x=150,y=265)
-        est_sto_1 = edit_estimate_Customerlabelframe.register(est_stocknum_1)
-        edit_estimate_stockentry.config(validate="key",validatecommand=(est_sto_1, '%S'))
-
-        
-        edit_estimate_low1=Label(edit_estimate_Customerlabelframe,text="Low Stock Warning Limit:",pady=5,padx=10)
-        edit_estimate_low1.place(x=300,y=260)
-        edit_estimate_lowentry = Entry(edit_estimate_Customerlabelframe,width=10)
-        edit_estimate_lowentry.place(x=495,y=265)
-        est_lowsto_1 = edit_estimate_Customerlabelframe.register(est_stocknum_1)
-        edit_estimate_lowentry.config(validate="key",validatecommand=(est_lowsto_1, '%S'))
-
-      
-        edit_estimate_ware1=Label(edit_estimate_Customerlabelframe,text="Warehouse:",pady=5,padx=10)
-        edit_estimate_ware1.place(x=60,y=290)
-        edit_estimate_wareentry = Entry(edit_estimate_Customerlabelframe,width=50)
-        edit_estimate_wareentry.place(x=150,y=295)
-
-        edit_estimate_text10=Label(edit_estimate_Customerlabelframe,text="Private notes(not appears on invoice):",pady=5,padx=10)
-        edit_estimate_text10.place(x=20,y=330)
-
-        edit_estimate_txt = scrolledtext.ScrolledText(edit_estimate_Customerlabelframe, undo=True,width=62,height=4)
-        edit_estimate_txt.place(x=32,y=358)
-
-
-        edit_estimate_okButton = Button(edit_estimate_innerFrame,compound = LEFT,image=tick , text ="Ok",width=60,command=est_addproducts_1)
-        edit_estimate_okButton.place(x=10,y=475)
-
-        def est_closetab_1():
-          edit_estimate_top.destroy()
-
-        edit_estimate_cancelButton = Button(edit_estimate_innerFrame,compound = LEFT,image=cancel ,text="Cancel",width=60,command=est_closetab_1)
-        edit_estimate_cancelButton.place(x=519,y=475)
-
-        edit_estimate_imageFrame = Frame(edit_estimate_tab2, relief=GROOVE,height=580)
-        edit_estimate_imageFrame.pack(side="top",fill=BOTH)
-
-        edit_estimate_browseimg=Label(edit_estimate_imageFrame,text=" Browse for product image file(recommended image type:JPG,size 480x320 pixels) ",bg='#f5f3f2')
-        edit_estimate_browseimg.place(x=15,y=35)
-
-        edit_estimate_browsebutton=Button(edit_estimate_imageFrame,text = 'Browse',command=este_upload_file_1)
-        edit_estimate_browsebutton.place(x=520,y=30,height=30,width=50)
-        
-        edit_estimate_removeButton = Button(edit_estimate_imageFrame,compound = LEFT,image=cancel, text ="Remove Product Image",width=150,command=lambda: b2.destroy())
-        edit_estimate_removeButton.place(x=400,y=450)
-
-    # ###---------------Edit product-----------------###    
-      def est_edit_product_1(): 
-        edit_est_itemid = edit_estimate_cusventtree1.item(edit_estimate_cusventtree1.focus())["values"][0]  
-        global filename
-        filename = ""
-      
-        def edit_estupload_file_1():
-          global filename,img, b2
-          f_types =[('Png files','*.png'),('Jpg Files', '*.jpg')]
-          filename = filedialog.askopenfilename(filetypes=f_types)
-          shutil.copyfile(filename, os.getcwd()+'/images/'+filename.split('/')[-1])
-          image = Image.open(filename)
-          resize_image = image.resize((350, 350))
-          img = ImageTk.PhotoImage(resize_image)
-          edit_est_b2 = Button(edit_est_imageFrame,image=img)
-          edit_est_b2.place(x=130, y=80)
-        
-        def edit_est_updateproducts_1():
-          global img , filename 
-          sku = edit_est_codeentry.get()
-          status = edit_est_checkvarStatus.get()
-          catgory = edit_est_n.get()
-          name = edit_est_nameentry.get()
-          description = edit_est_desentry.get()
-          unitprice = edit_est_uval.get()
-          peices = edit_est_pcsentry.get()
-          cost = edit_est_costval.get()
-          price_cost = edit_est_priceval.get()
-          taxable = edit_est_checkvarStatus2.get()
-          tax2 = edit_est_checkvarStatustax2.get()
-          nostockcontrol = edit_est_checkvarStatus3.get()
-          stock = edit_est_stockval.get()
-          lowstock = edit_est_lowval.get()
-          warehouse = edit_est_wareentry.get()
-          pnotes = edit_est_sctxt.get("1.0", 'end-1c')
-          entries = [sku, name, unitprice, cost]
-          entri = []
-          for i in entries:
-            if i == '':
-              entri.append(i)
-          if len(entri) == 0:
-            if filename == "":
-              print("hello")
-              sql = "update Productservice set sku=%s, category=%s, name=%s, description=%s, status=%s, unitprice=%s, peices=%s, cost=%s, taxable=%s, priceminuscost=%s, serviceornot=%s, stock=%s, stocklimit=%s, warehouse=%s, privatenote=%s,tax2=%s where sku = %s"
-              val = (sku, catgory, name, description, status, unitprice, peices, cost, taxable, price_cost, nostockcontrol, stock, lowstock, warehouse, pnotes,tax2, edit_est_itemid)
-              fbcursor.execute(sql, val)
-              fbilldb.commit()
+          def est_switch_1():
+            if edit_estimate_checkvarStatus3.get():
+              edit_estimate_stockentry["state"] = DISABLED
+              edit_estimate_lowentry["state"] = DISABLED
+              edit_estimate_wareentry["state"] = DISABLED
             else:
-              print("hai")
-              file = shutil.copyfile(filename, os.getcwd()+'/images/'+filename.split('/')[-1])
-              sql = "update Productservice set category=%s, name=%s, description=%s, status=%s, unitprice=%s, peices=%s, cost=%s, taxable=%s, priceminuscost=%s, serviceornot=%s, stock=%s, stocklimit=%s, warehouse=%s, image=%s, privatenote=%s,tax2=%s where sku = %s"
-              val = (catgory, name, description, status, unitprice, peices, cost, taxable, price_cost, nostockcontrol, stock, lowstock, warehouse,filename.split('/')[-1], pnotes,tax2, edit_est_itemid)
-              fbcursor.execute(sql, val)
-              fbilldb.commit()
-            for record in edit_estimate_cusventtree1.get_children():
-              edit_estimate_cusventtree1.delete(record)
-            fbcursor.execute("select *  from Productservice")
-            edit_est_pandsdata = fbcursor.fetchall()
-            countp = 0
-            for i in edit_est_pandsdata:
-              if i[12] == '1':
-                servi = '🗹'
-              else:
-                servi = ''
-              sql = "select currencysign,currsignplace from company"
-              fbcursor.execute(sql)
-              estcurrsymb = fbcursor.fetchone()
-              if not estcurrsymb: 
-                if i[13] > i[14]:
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('green',))
-                  countp += 1              
-                elif i[12] == '1':
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('blue',))
-                  countp += 1
-                else:
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('red',))
-                  countp += 1
-                        
-              elif estcurrsymb[1] == "before amount":
-                if (i[13]) > (i[14]):
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('green',))
-                  countp += 1
-                elif i[12] == '1':
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('blue',))
-                  countp += 1
-                else:
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('red',))
-                  countp += 1
+              edit_estimate_stockentry["state"] = NORMAL
+              edit_estimate_lowentry["state"] = NORMAL
+              edit_estimate_wareentry["state"] = NORMAL
 
-              elif estcurrsymb[1] == "before amount with space":
-                if (i[13]) > (i[14]):
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('green',))
-                  countp += 1
-                elif i[12] == '1':
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('blue',))
-                  countp += 1
-                else:
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('red',))
-                  countp += 1
 
-              elif estcurrsymb[1] == "after amount":
-                if (i[13]) > (i[14]):
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('green',))
-                  countp += 1
-                elif i[12] == '1':
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('blue',))
-                  countp += 1
-                else:
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('red',))
-                  countp += 1
 
-              elif estcurrsymb[1] == "after amount with space":
-                if (i[13]) > (i[14]):
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('green',))
-                  countp += 1
-                elif i[12] == '1':
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('blue',))
-                  countp += 1
-                else:
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('red',))
-                  countp += 1
-            edit_est_top.destroy()
-          else:
-            messagebox.showinfo("F-Billing Revolution", "Fields name or SKU entered is already in database.")
-            edit_est_top.destroy()
-            
-
-        sql = "select * from Productservice where sku = %s"
-        val = (edit_est_itemid, )
-        fbcursor.execute(sql, val)
-        edit_est_psdata = fbcursor.fetchone()
-        print(edit_est_itemid)
-        edit_est_top = Toplevel()  
-        edit_est_top.title("Edit Product/Service details")
-        p3 = PhotoImage(file = 'images/fbicon.png')
-        edit_est_top.iconphoto(False, p3)
-        edit_est_top.geometry("600x550+350+15")
-        tabControl = ttk.Notebook(edit_est_top)
-        s = ttk.Style()
-        s.theme_use('default')
-        s.configure('TNotebook.Tab', background="#999999", width=50, padding=10,bd=0)
-
-        edit_est_taba = ttk.Frame(tabControl)
-        edit_est_tabb = ttk.Frame(tabControl)
+          edit_estimate_checkvarStatus3=BooleanVar()
         
-        tabControl.add(edit_est_taba,compound = LEFT, text ='Product/Service')
-        tabControl.add(edit_est_tabb,compound = LEFT, text ='Product Image')
-        
-        tabControl.pack(expand = 1, fill ="both")
-        
-        edit_est_innerFrame = Frame(edit_est_taba,bg="#f5f3f2", relief=GROOVE)
-        edit_est_innerFrame.pack(side="top",fill=BOTH)
+          edit_estimate_Button93 = Checkbutton(edit_estimate_Customerlabelframe,variable = edit_estimate_checkvarStatus3,command=est_switch_1,
+                            text="This is a service(no stock control)",
+                            onvalue =1 ,
+                            offvalue = 0,
+                            height=3)
 
-        edit_est_updateframe = LabelFrame(edit_est_innerFrame,text="Product/Service",width=580,height=455)
-        edit_est_updateframe.pack(side="top",fill=BOTH,padx=10,pady=(10,45))
+          edit_estimate_Button93.place(x=40,y=220)
 
-        edit_est_code1=Label(edit_est_updateframe,text="Code or SKU:",fg="blue",pady=10,padx=10)
-        edit_est_code1.place(x=20,y=0)
-        edit_est_codeentry = Entry(edit_est_updateframe,width=35)
-        edit_est_codeentry.place(x=120,y=8)
-        edit_est_codeentry.insert(0, edit_est_psdata[2])
-
-        edit_est_checkvarStatus=IntVar()
-        edit_est_status1=Label(edit_est_updateframe,text="Status:")
-        edit_est_status1.place(x=400,y=8)
-        edit_est_Button1 = Checkbutton(edit_est_updateframe, 
-                          variable = edit_est_checkvarStatus,text="Active",compound="right",
-                          onvalue =1,
-                          offvalue =0,
-                          width = 10)
-        edit_est_Button1.place(x=450,y=5)
-        edit_est_sta = edit_est_psdata[6]
-        if edit_est_sta == '1':
-          edit_est_Button1.select()
-        else:
-          edit_est_Button1.deselect()
-
-
-
-        edit_est_category1=Label(edit_est_updateframe,text="Category:",pady=5,padx=10)
-        edit_est_category1.place(x=20,y=40)
-        edit_est_n = StringVar() 
-        edit_est_category = Entry(edit_est_updateframe,width=40,textvariable=edit_est_n) 
-        edit_est_category.insert(0, edit_est_psdata[3])
-        edit_est_category = ttk.Combobox(edit_est_updateframe, width = 40, textvariable = edit_est_n )
-        edit_est_category['values'] = ('Default')
-        edit_est_category.place(x=120,y=45)
-        #edit_est_category.insert(0, 'Default')
-
-
-
-        edit_est_name1=Label(edit_est_updateframe,text="Name :",fg="blue",pady=5,padx=10)
-        edit_est_name1.place(x=20,y=70)
-        edit_est_nameentry = Entry(edit_est_updateframe,width=70)
-        edit_est_nameentry.place(x=120,y=75)
-        edit_est_nameentry.insert(0, edit_est_psdata[4])
-
-        edit_est_des1=Label(edit_est_updateframe,text="Description :",pady=5,padx=10)
-        edit_est_des1.place(x=20,y=100)
-        edit_est_desentry = Entry(edit_est_updateframe,width=70)
-        edit_est_desentry.place(x=120,y=105)
-        edit_est_desentry.insert(0, edit_est_psdata[5])
-
-        def edit_est_set_label(name, index, mode):
-          edit_est_priceval.set(float(edit_est_uval.get()) - float(edit_est_costval.get()))
-
-        def edit_est_prdoucts_cal(S,d):
-          if d == '1': #insert
-            if not S in ['.','0','1','2','3','4','5','6','7','8','9']:
+          def est_stocknum_1(input):
+            if input.isdigit():
+              return True
+            elif input is "":
+              return True
+            else:
               return False
-            return True
-          if d.isdigit():
-            return True
-        
-        edit_est_unit1=Label(edit_est_updateframe,text="Unit Price:",fg="blue",pady=5,padx=10)
-        edit_est_unit1.place(x=20,y=130)
-        
-        edit_est_uval = StringVar()
-        edit_est_unitentry = Entry(edit_est_updateframe,width=20,textvariable=edit_est_uval)
-        edit_est_unitentry.place(x=120,y=135)
-        edit_est_unitentry.delete(0,'end')
-        edit_est_unitentry.insert(0, edit_est_psdata[7])
-        edit_est_cal_unit = (edit_est_updateframe.register(edit_est_prdoucts_cal),'%S','%d')
-        edit_est_unitentry.config(validate='key',validatecommand=(edit_est_cal_unit),justify='right')
-        
 
-        edit_est_pcsval = IntVar()
-        edit_est_pcs1=Label(edit_est_updateframe,text="Pcs/Weight:",fg="blue",pady=5,padx=10)
-        edit_est_pcs1.place(x=330,y=135)
-        edit_est_pcsentry = Entry(edit_est_updateframe,width=20,textvariable=edit_est_pcsval)
-        edit_est_pcsentry.place(x=420,y=140)
-        edit_est_pcsentry.delete(0,'end')
-        edit_est_pcsentry.insert(0, edit_est_psdata[8])
+
+          edit_estimate_stock1=Label(edit_estimate_Customerlabelframe,text="Stock:",pady=5,padx=10)
+          edit_estimate_stock1.place(x=90,y=260)
+          edit_estimate_stockentry = Entry(edit_estimate_Customerlabelframe,width=15)
+          edit_estimate_stockentry.place(x=150,y=265)
+          est_sto_1 = edit_estimate_Customerlabelframe.register(est_stocknum_1)
+          edit_estimate_stockentry.config(validate="key",validatecommand=(est_sto_1, '%S'))
+
+          
+          edit_estimate_low1=Label(edit_estimate_Customerlabelframe,text="Low Stock Warning Limit:",pady=5,padx=10)
+          edit_estimate_low1.place(x=300,y=260)
+          edit_estimate_lowentry = Entry(edit_estimate_Customerlabelframe,width=10)
+          edit_estimate_lowentry.place(x=495,y=265)
+          est_lowsto_1 = edit_estimate_Customerlabelframe.register(est_stocknum_1)
+          edit_estimate_lowentry.config(validate="key",validatecommand=(est_lowsto_1, '%S'))
+
         
+          edit_estimate_ware1=Label(edit_estimate_Customerlabelframe,text="Warehouse:",pady=5,padx=10)
+          edit_estimate_ware1.place(x=60,y=290)
+          edit_estimate_wareentry = Entry(edit_estimate_Customerlabelframe,width=50)
+          edit_estimate_wareentry.place(x=150,y=295)
 
-        edit_est_costval = StringVar()
-        edit_est_cost1=Label(edit_est_updateframe,text="Cost:",pady=5,padx=10)
-        edit_est_cost1.place(x=20,y=160)
-        edit_est_costentry = Entry(edit_est_updateframe,width=20,textvariable=edit_est_costval)
-        edit_est_costentry.place(x=120,y=165)
-        edit_est_costentry.delete(0, END)
-        edit_est_costentry.insert(0, edit_est_psdata[9])
-        edit_est_cal_cost = (edit_est_updateframe.register(edit_est_prdoucts_cal),'%S','%d')
-        edit_est_costentry.config(validate='key',validatecommand=(edit_est_cal_cost),justify='right')
+          edit_estimate_text10=Label(edit_estimate_Customerlabelframe,text="Private notes(not appears on invoice):",pady=5,padx=10)
+          edit_estimate_text10.place(x=20,y=330)
+
+          edit_estimate_txt = scrolledtext.ScrolledText(edit_estimate_Customerlabelframe, undo=True,width=62,height=4)
+          edit_estimate_txt.place(x=32,y=358)
+
+
+          edit_estimate_okButton = Button(edit_estimate_innerFrame,compound = LEFT,image=tick , text ="Ok",width=60,command=est_addproducts_1)
+          edit_estimate_okButton.place(x=10,y=475)
+
+          def est_closetab_1():
+            edit_estimate_top.destroy()
+
+          edit_estimate_cancelButton = Button(edit_estimate_innerFrame,compound = LEFT,image=cancel ,text="Cancel",width=60,command=est_closetab_1)
+          edit_estimate_cancelButton.place(x=519,y=475)
+
+          edit_estimate_imageFrame = Frame(edit_estimate_tab2, relief=GROOVE,height=580)
+          edit_estimate_imageFrame.pack(side="top",fill=BOTH)
+
+          edit_estimate_browseimg=Label(edit_estimate_imageFrame,text=" Browse for product image file(recommended image type:JPG,size 480x320 pixels) ",bg='#f5f3f2')
+          edit_estimate_browseimg.place(x=15,y=35)
+
+          edit_estimate_browsebutton=Button(edit_estimate_imageFrame,text = 'Browse',command=este_upload_file_1)
+          edit_estimate_browsebutton.place(x=520,y=30,height=30,width=50)
+          
+          edit_estimate_removeButton = Button(edit_estimate_imageFrame,compound = LEFT,image=cancel, text ="Remove Product Image",width=150,command=lambda: b2.destroy())
+          edit_estimate_removeButton.place(x=400,y=450)
+
+      # ###---------------Edit product-----------------###    
+        def est_edit_product_1(): 
+          edit_est_itemid = edit_estimate_cusventtree1.item(edit_estimate_cusventtree1.focus())["values"][0]  
+          global filename
+          filename = ""
         
+          def edit_estupload_file_1():
+            global filename,img, b2
+            f_types =[('Png files','*.png'),('Jpg Files', '*.jpg')]
+            filename = filedialog.askopenfilename(filetypes=f_types)
+            shutil.copyfile(filename, os.getcwd()+'/images/'+filename.split('/')[-1])
+            image = Image.open(filename)
+            resize_image = image.resize((350, 350))
+            img = ImageTk.PhotoImage(resize_image)
+            edit_est_b2 = Button(edit_est_imageFrame,image=img)
+            edit_est_b2.place(x=130, y=80)
+          
+          def edit_est_updateproducts_1():
+            global img , filename 
+            sku = edit_est_codeentry.get()
+            status = edit_est_checkvarStatus.get()
+            catgory = edit_est_n.get()
+            name = edit_est_nameentry.get()
+            description = edit_est_desentry.get()
+            unitprice = edit_est_uval.get()
+            peices = edit_est_pcsentry.get()
+            cost = edit_est_costval.get()
+            price_cost = edit_est_priceval.get()
+            taxable = edit_est_checkvarStatus2.get()
+            tax2 = edit_est_checkvarStatustax2.get()
+            nostockcontrol = edit_est_checkvarStatus3.get()
+            stock = edit_est_stockval.get()
+            lowstock = edit_est_lowval.get()
+            warehouse = edit_est_wareentry.get()
+            pnotes = edit_est_sctxt.get("1.0", 'end-1c')
+            entries = [sku, name, unitprice, cost]
+            entri = []
+            for i in entries:
+              if i == '':
+                entri.append(i)
+            if len(entri) == 0:
+              if filename == "":
+                print("hello")
+                sql = "update Productservice set sku=%s, category=%s, name=%s, description=%s, status=%s, unitprice=%s, peices=%s, cost=%s, taxable=%s, priceminuscost=%s, serviceornot=%s, stock=%s, stocklimit=%s, warehouse=%s, privatenote=%s,tax2=%s where sku = %s"
+                val = (sku, catgory, name, description, status, unitprice, peices, cost, taxable, price_cost, nostockcontrol, stock, lowstock, warehouse, pnotes,tax2, edit_est_itemid)
+                fbcursor.execute(sql, val)
+                fbilldb.commit()
+              else:
+                print("hai")
+                file = shutil.copyfile(filename, os.getcwd()+'/images/'+filename.split('/')[-1])
+                sql = "update Productservice set category=%s, name=%s, description=%s, status=%s, unitprice=%s, peices=%s, cost=%s, taxable=%s, priceminuscost=%s, serviceornot=%s, stock=%s, stocklimit=%s, warehouse=%s, image=%s, privatenote=%s,tax2=%s where sku = %s"
+                val = (catgory, name, description, status, unitprice, peices, cost, taxable, price_cost, nostockcontrol, stock, lowstock, warehouse,filename.split('/')[-1], pnotes,tax2, edit_est_itemid)
+                fbcursor.execute(sql, val)
+                fbilldb.commit()
+              for record in edit_estimate_cusventtree1.get_children():
+                edit_estimate_cusventtree1.delete(record)
+              fbcursor.execute("select *  from Productservice")
+              edit_est_pandsdata = fbcursor.fetchall()
+              countp = 0
+              for i in edit_est_pandsdata:
+                if i[12] == '1':
+                  servi = '🗹'
+                else:
+                  servi = ''
+                sql = "select currencysign,currsignplace from company"
+                fbcursor.execute(sql)
+                estcurrsymb = fbcursor.fetchone()
+                if not estcurrsymb: 
+                  if i[13] > i[14]:
+                    edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('green',))
+                    countp += 1              
+                  elif i[12] == '1':
+                    edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('blue',))
+                    countp += 1
+                  else:
+                    edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('red',))
+                    countp += 1
+                          
+                elif estcurrsymb[1] == "before amount":
+                  if (i[13]) > (i[14]):
+                    edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('green',))
+                    countp += 1
+                  elif i[12] == '1':
+                    edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('blue',))
+                    countp += 1
+                  else:
+                    edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('red',))
+                    countp += 1
 
-        edit_est_priceval = StringVar()
-        edit_est_price1=Label(edit_est_updateframe,text="(Price-Cost):",pady=5,padx=10)
-        edit_est_price1.place(x=20,y=190)
-        edit_est_priceentry = Entry(edit_est_updateframe,width=20,textvariable=edit_est_priceval,state=DISABLED,disabledbackground="white",disabledforeground="black")
-        edit_est_priceentry.config(justify="right")
-        edit_est_priceentry.place(x=120,y=195)
-        edit_est_priceentry.delete(0,'end')
-        edit_est_priceentry.insert(0, edit_est_psdata[11])
+                elif estcurrsymb[1] == "before amount with space":
+                  if (i[13]) > (i[14]):
+                    edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('green',))
+                    countp += 1
+                  elif i[12] == '1':
+                    edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('blue',))
+                    countp += 1
+                  else:
+                    edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('red',))
+                    countp += 1
 
-        edit_est_uval.trace('w', edit_est_set_label)
-        edit_est_costval.trace('w', edit_est_set_label)
+                elif estcurrsymb[1] == "after amount":
+                  if (i[13]) > (i[14]):
+                    edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('green',))
+                    countp += 1
+                  elif i[12] == '1':
+                    edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('blue',))
+                    countp += 1
+                  else:
+                    edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('red',))
+                    countp += 1
+
+                elif estcurrsymb[1] == "after amount with space":
+                  if (i[13]) > (i[14]):
+                    edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('green',))
+                    countp += 1
+                  elif i[12] == '1':
+                    edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('blue',))
+                    countp += 1
+                  else:
+                    edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('red',))
+                    countp += 1
+              edit_est_top.destroy()
+            else:
+              messagebox.showinfo("F-Billing Revolution", "Fields name or SKU entered is already in database.")
+              edit_est_top.destroy()
+              
+
+          sql = "select * from Productservice where sku = %s"
+          val = (edit_est_itemid, )
+          fbcursor.execute(sql, val)
+          edit_est_psdata = fbcursor.fetchone()
+          print(edit_est_itemid)
+          edit_est_top = Toplevel()  
+          edit_est_top.title("Edit Product/Service details")
+          p3 = PhotoImage(file = 'images/fbicon.png')
+          edit_est_top.iconphoto(False, p3)
+          edit_est_top.geometry("600x550+350+15")
+          tabControl = ttk.Notebook(edit_est_top)
+          s = ttk.Style()
+          s.theme_use('default')
+          s.configure('TNotebook.Tab', background="#999999", width=50, padding=10,bd=0)
+
+          edit_est_taba = ttk.Frame(tabControl)
+          edit_est_tabb = ttk.Frame(tabControl)
+          
+          tabControl.add(edit_est_taba,compound = LEFT, text ='Product/Service')
+          tabControl.add(edit_est_tabb,compound = LEFT, text ='Product Image')
+          
+          tabControl.pack(expand = 1, fill ="both")
+          
+          edit_est_innerFrame = Frame(edit_est_taba,bg="#f5f3f2", relief=GROOVE)
+          edit_est_innerFrame.pack(side="top",fill=BOTH)
+
+          edit_est_updateframe = LabelFrame(edit_est_innerFrame,text="Product/Service",width=580,height=455)
+          edit_est_updateframe.pack(side="top",fill=BOTH,padx=10,pady=(10,45))
+
+          edit_est_code1=Label(edit_est_updateframe,text="Code or SKU:",fg="blue",pady=10,padx=10)
+          edit_est_code1.place(x=20,y=0)
+          edit_est_codeentry = Entry(edit_est_updateframe,width=35)
+          edit_est_codeentry.place(x=120,y=8)
+          edit_est_codeentry.insert(0, edit_est_psdata[2])
+
+          edit_est_checkvarStatus=IntVar()
+          edit_est_status1=Label(edit_est_updateframe,text="Status:")
+          edit_est_status1.place(x=400,y=8)
+          edit_est_Button1 = Checkbutton(edit_est_updateframe, 
+                            variable = edit_est_checkvarStatus,text="Active",compound="right",
+                            onvalue =1,
+                            offvalue =0,
+                            width = 10)
+          edit_est_Button1.place(x=450,y=5)
+          edit_est_sta = edit_est_psdata[6]
+          if edit_est_sta == '1':
+            edit_est_Button1.select()
+          else:
+            edit_est_Button1.deselect()
+
+
+
+          edit_est_category1=Label(edit_est_updateframe,text="Category:",pady=5,padx=10)
+          edit_est_category1.place(x=20,y=40)
+          edit_est_n = StringVar() 
+          edit_est_category = Entry(edit_est_updateframe,width=40,textvariable=edit_est_n) 
+          edit_est_category.insert(0, edit_est_psdata[3])
+          edit_est_category = ttk.Combobox(edit_est_updateframe, width = 40, textvariable = edit_est_n )
+          edit_est_category['values'] = ('Default')
+          edit_est_category.place(x=120,y=45)
+          #edit_est_category.insert(0, 'Default')
+
+
+
+          edit_est_name1=Label(edit_est_updateframe,text="Name :",fg="blue",pady=5,padx=10)
+          edit_est_name1.place(x=20,y=70)
+          edit_est_nameentry = Entry(edit_est_updateframe,width=70)
+          edit_est_nameentry.place(x=120,y=75)
+          edit_est_nameentry.insert(0, edit_est_psdata[4])
+
+          edit_est_des1=Label(edit_est_updateframe,text="Description :",pady=5,padx=10)
+          edit_est_des1.place(x=20,y=100)
+          edit_est_desentry = Entry(edit_est_updateframe,width=70)
+          edit_est_desentry.place(x=120,y=105)
+          edit_est_desentry.insert(0, edit_est_psdata[5])
+
+          def edit_est_set_label(name, index, mode):
+            edit_est_priceval.set(float(edit_est_uval.get()) - float(edit_est_costval.get()))
+
+          def edit_est_prdoucts_cal(S,d):
+            if d == '1': #insert
+              if not S in ['.','0','1','2','3','4','5','6','7','8','9']:
+                return False
+              return True
+            if d.isdigit():
+              return True
+          
+          edit_est_unit1=Label(edit_est_updateframe,text="Unit Price:",fg="blue",pady=5,padx=10)
+          edit_est_unit1.place(x=20,y=130)
+          
+          edit_est_uval = StringVar()
+          edit_est_unitentry = Entry(edit_est_updateframe,width=20,textvariable=edit_est_uval)
+          edit_est_unitentry.place(x=120,y=135)
+          edit_est_unitentry.delete(0,'end')
+          edit_est_unitentry.insert(0, edit_est_psdata[7])
+          edit_est_cal_unit = (edit_est_updateframe.register(edit_est_prdoucts_cal),'%S','%d')
+          edit_est_unitentry.config(validate='key',validatecommand=(edit_est_cal_unit),justify='right')
+          
+
+          edit_est_pcsval = IntVar()
+          edit_est_pcs1=Label(edit_est_updateframe,text="Pcs/Weight:",fg="blue",pady=5,padx=10)
+          edit_est_pcs1.place(x=330,y=135)
+          edit_est_pcsentry = Entry(edit_est_updateframe,width=20,textvariable=edit_est_pcsval)
+          edit_est_pcsentry.place(x=420,y=140)
+          edit_est_pcsentry.delete(0,'end')
+          edit_est_pcsentry.insert(0, edit_est_psdata[8])
+          
+
+          edit_est_costval = StringVar()
+          edit_est_cost1=Label(edit_est_updateframe,text="Cost:",pady=5,padx=10)
+          edit_est_cost1.place(x=20,y=160)
+          edit_est_costentry = Entry(edit_est_updateframe,width=20,textvariable=edit_est_costval)
+          edit_est_costentry.place(x=120,y=165)
+          edit_est_costentry.delete(0, END)
+          edit_est_costentry.insert(0, edit_est_psdata[9])
+          edit_est_cal_cost = (edit_est_updateframe.register(edit_est_prdoucts_cal),'%S','%d')
+          edit_est_costentry.config(validate='key',validatecommand=(edit_est_cal_cost),justify='right')
+          
+
+          edit_est_priceval = StringVar()
+          edit_est_price1=Label(edit_est_updateframe,text="(Price-Cost):",pady=5,padx=10)
+          edit_est_price1.place(x=20,y=190)
+          edit_est_priceentry = Entry(edit_est_updateframe,width=20,textvariable=edit_est_priceval,state=DISABLED,disabledbackground="white",disabledforeground="black")
+          edit_est_priceentry.config(justify="right")
+          edit_est_priceentry.place(x=120,y=195)
+          edit_est_priceentry.delete(0,'end')
+          edit_est_priceentry.insert(0, edit_est_psdata[11])
+
+          edit_est_uval.trace('w', edit_est_set_label)
+          edit_est_costval.trace('w', edit_est_set_label)
+          
+
+          edit_est_checkvarStatus2=IntVar()
         
-
-        edit_est_checkvarStatus2=IntVar()
-      
-        edit_est_Button2 = Checkbutton(edit_est_updateframe,variable = edit_est_checkvarStatus2, 
-                          text="Taxable Tax1rate",compound="right",
+          edit_est_Button2 = Checkbutton(edit_est_updateframe,variable = edit_est_checkvarStatus2, 
+                            text="Taxable Tax1rate",compound="right",
+                            onvalue =1 ,
+                            offvalue =0,
+                            height=2,
+                            width = 12)
+          
+          edit_est_checkvarStatustax2=IntVar()
+          edit_est_Buttontax2 = Checkbutton(edit_est_updateframe,variable = edit_est_checkvarStatustax2, 
+                          text="Taxable Tax2rate",compound="right",
                           onvalue =1 ,
-                          offvalue =0,
+                          offvalue = 0,
                           height=2,
                           width = 12)
+          
+          sql = "select taxtype from company"
+          fbcursor.execute(sql)
+          edit_est_taxchoose = fbcursor.fetchone()
+          if not edit_est_taxchoose:
+            pass
+          elif edit_est_taxchoose[0] == '1':
+            edit_est_Button2.place_forget()
+            edit_est_Buttontax2.place_forget()
+          elif edit_est_taxchoose[0] == '2':
+            edit_est_Button2.place(x=415,y=170)
+            edit_est_Buttontax2.place_forget()
+          elif edit_est_taxchoose[0] == '3':
+            edit_est_Button2.place(x=415,y=170)
+            edit_est_Buttontax2.place(x=415,y=210)
+
+      
+          edit_est_tax = edit_est_psdata[10]
+          if edit_est_tax == '1':
+            edit_est_Button2.select()
+          else:
+            edit_est_Button2.deselect()
+
+          if edit_est_psdata[19] == '1':
+            edit_est_Buttontax2.select()
+          else:
+            edit_est_Buttontax2.deselect()
+
+          def edit_est_switch():
+            if edit_est_checkvarStatus3.get():
+              edit_est_stockentry["state"] = DISABLED
+              edit_est_lowentry["state"] = DISABLED
+              edit_est_wareentry["state"] = DISABLED
+            else:
+              edit_est_stockentry["state"] = NORMAL
+              edit_est_lowentry["state"] = NORMAL
+              edit_est_wareentry["state"] = NORMAL
+          edit_est_checkvarStatus3=BooleanVar()
         
-        edit_est_checkvarStatustax2=IntVar()
-        edit_est_Buttontax2 = Checkbutton(edit_est_updateframe,variable = edit_est_checkvarStatustax2, 
-                        text="Taxable Tax2rate",compound="right",
-                        onvalue =1 ,
-                        offvalue = 0,
-                        height=2,
-                        width = 12)
+          edit_est_Button3 = Checkbutton(edit_est_updateframe,variable = edit_est_checkvarStatus3,command=edit_est_switch, 
+                            text="This is a service(no stock control)", 
+                            onvalue =1 ,
+                            offvalue = 0,
+                            height=3)
+
+          edit_est_Button3.place(x=40,y=220)
+
+          
+
+          def edit_est_stocknum(input):
+            if input.isdigit():
+              return True
+            elif input is "":
+              return True
+            else:
+              return False
+          edit_est_stockval = IntVar(edit_est_updateframe)
+          edit_est_stock1=Label(edit_est_updateframe,text="Stock:",pady=5,padx=10)
+          edit_est_stock1.place(x=90,y=260)
+          edit_est_stockentry = Entry(edit_est_updateframe,width=15,textvariable=edit_est_stockval)
+          edit_est_stockentry.place(x=150,y=265)
+          edit_est_stockentry.delete(0,'end')
+          edit_est_stockentry.insert(0, edit_est_psdata[13])
+          edit_est_sto = edit_est_updateframe.register(edit_est_stocknum)
+          edit_est_stockentry.config(validate="key",validatecommand=(edit_est_sto, '%S'))
+          
+
+          edit_est_lowval = IntVar(edit_est_updateframe)
+          edit_est_low1=Label(edit_est_updateframe,text="Low Stock Warning Limit:",pady=5,padx=10)
+          edit_est_low1.place(x=270,y=260)
+          edit_est_lowentry = Entry(edit_est_updateframe,width=15,textvariable=edit_est_lowval)
+          edit_est_lowentry.place(x=432,y=265)
+          edit_est_lowentry.delete(0,'end')
+          edit_est_lowentry.insert(0, edit_est_psdata[14])
+          edit_est_lowsto = edit_est_updateframe.register(edit_est_stocknum)
+          edit_est_lowentry.config(validate="key",validatecommand=(edit_est_lowsto, '%S'))
+          
+
         
-        sql = "select taxtype from company"
-        fbcursor.execute(sql)
-        edit_est_taxchoose = fbcursor.fetchone()
-        if not edit_est_taxchoose:
-          pass
-        elif edit_est_taxchoose[0] == '1':
-          edit_est_Button2.place_forget()
-          edit_est_Buttontax2.place_forget()
-        elif edit_est_taxchoose[0] == '2':
-          edit_est_Button2.place(x=415,y=170)
-          edit_est_Buttontax2.place_forget()
-        elif edit_est_taxchoose[0] == '3':
-          edit_est_Button2.place(x=415,y=170)
-          edit_est_Buttontax2.place(x=415,y=210)
+          edit_est_ware1=Label(edit_est_updateframe,text="Warehouse:",pady=5,padx=10)
+          edit_est_ware1.place(x=60,y=290)
+          edit_est_wareentry = Entry(edit_est_updateframe,width=64)
+          edit_est_wareentry.place(x=150,y=295)
+          edit_est_wareentry.insert(0, edit_est_psdata[15])
 
-    
-        edit_est_tax = edit_est_psdata[10]
-        if edit_est_tax == '1':
-          edit_est_Button2.select()
-        else:
-          edit_est_Button2.deselect()
-
-        if edit_est_psdata[19] == '1':
-          edit_est_Buttontax2.select()
-        else:
-          edit_est_Buttontax2.deselect()
-
-        def edit_est_switch():
-          if edit_est_checkvarStatus3.get():
+          edit_est_scr = edit_est_psdata[12]
+          if edit_est_scr == '1':
+            edit_est_Button3.select()
             edit_est_stockentry["state"] = DISABLED
             edit_est_lowentry["state"] = DISABLED
             edit_est_wareentry["state"] = DISABLED
           else:
+            edit_est_Button3.deselect()
             edit_est_stockentry["state"] = NORMAL
             edit_est_lowentry["state"] = NORMAL
             edit_est_wareentry["state"] = NORMAL
-        edit_est_checkvarStatus3=BooleanVar()
-      
-        edit_est_Button3 = Checkbutton(edit_est_updateframe,variable = edit_est_checkvarStatus3,command=edit_est_switch, 
-                          text="This is a service(no stock control)", 
-                          onvalue =1 ,
-                          offvalue = 0,
-                          height=3)
+          
+          
 
-        edit_est_Button3.place(x=40,y=220)
+          
 
+          edit_est_text1=Label(edit_est_updateframe,text="Private notes(not appears on invoice):",pady=5,padx=10)
+          edit_est_text1.place(x=20,y=330)
+          edit_est_sctxt = scrolledtext.ScrolledText(edit_est_updateframe, undo=True,width=62,height=4)
+          edit_est_sctxt.place(x=32,y=358)
+          try:
+            edit_est_sctxt.insert("1.0", edit_est_psdata[16])
+          except:
+            pass
+
+          edit_est_okButton = Button(edit_est_innerFrame, text ="Ok",image=tick,width=70,compound = LEFT,command=edit_est_updateproducts_1)
+          edit_est_okButton.place(x=10, y=475)
+
+          edit_est_cancelButton = Button(edit_est_innerFrame,image=cancel,text="Cancel",width=70,compound = LEFT, command=lambda : edit_est_top.destroy())
+          edit_est_cancelButton.place(x=519, y=475)
+          
+          
+          edit_est_imageFrame = Frame(edit_est_tabb, relief=GROOVE,height=580)
+          edit_est_imageFrame.pack(side="top",fill=BOTH)
+
+          edit_est_browseimg=Label(edit_est_imageFrame,text=" Browse for product image file(recommended image type:JPG,size 480x320 pixels) ",bg='#f5f3f2')
+          edit_est_browseimg.place(x=15,y=35)
+
+          edit_est_browsebutton=Button(edit_est_imageFrame,text = 'Browse',command=edit_estupload_file_1)
+          edit_est_browsebutton.place(x=530,y=30,height=30,width=50)
+
+          try:
+            image = Image.open("images/"+edit_est_psdata[17])
+            resize_image = image.resize((350, 350))
+            image = ImageTk.PhotoImage(resize_image)
+            edit_est_b2 = Label(edit_est_imageFrame,image=image,width=350,height=350)
+            edit_est_b2.photo = image
+            edit_est_b2.place(x=130, y=80)
+            print(image)
+          except:
+            pass
+
+          edit_est_removeButton = Button(edit_est_imageFrame,image=cancel,text="Remove Product Image",width=150,compound = LEFT,command=lambda: edit_est_b2 .destroy())
+          edit_est_removeButton.place(x=410,y=460)
+
+                        
+        edit_estimate_enter10=Label(edit_estimate_newselection, text="Enter filter text").place(x=5, y=10)
+        edit_estimate_e10=Entry(edit_estimate_newselection, width=20).place(x=110, y=10)
+        # edit_estimate_text10=Label(edit_estimate_newselection, text="Filtered column").place(x=340, y=10)
+        # edit_estimate_e20=Entry(edit_estimate_newselection, width=20).place(x=450, y=10)
+        edit_estimate_cust_filter_button=Button(edit_estimate_newselection, text='Click Here')
+        edit_estimate_cust_filter_button.place(x=240, y=9,height=20,width=60)
+
+        edit_estimate_cusventtree1=ttk.Treeview(edit_estimate_newselection, height=25)
+        edit_estimate_cusventtree1["columns"]=["1","2","3", "4","5"]
+        edit_estimate_cusventtree1.column("#0", width=35)
+        edit_estimate_cusventtree1.column("1", width=160)
+        edit_estimate_cusventtree1.column("2", width=160)
+        edit_estimate_cusventtree1.column("3", width=140)
+        edit_estimate_cusventtree1.column("4", width=70)
+        edit_estimate_cusventtree1.column("5", width=70)
+        edit_estimate_cusventtree1.heading("#0",text="")
+        edit_estimate_cusventtree1.heading("1",text="ID/SKU")
+        edit_estimate_cusventtree1.heading("2",text="Product/Service Name")
+        edit_estimate_cusventtree1.heading("3",text="Unit price")
+        edit_estimate_cusventtree1.heading("4",text="Service")
+        edit_estimate_cusventtree1.heading("5",text="Stock")
+        edit_estimate_cusventtree1.tag_configure('green', foreground='green')
+        edit_estimate_cusventtree1.tag_configure('red', foreground='red')
+        edit_estimate_cusventtree1.tag_configure('blue', foreground='blue')
+        edit_estimate_cusventtree1.place(x=5, y=45)
         
 
-        def edit_est_stocknum(input):
-          if input.isdigit():
-            return True
-          elif input is "":
-            return True
-          else:
-            return False
-        edit_est_stockval = IntVar(edit_est_updateframe)
-        edit_est_stock1=Label(edit_est_updateframe,text="Stock:",pady=5,padx=10)
-        edit_est_stock1.place(x=90,y=260)
-        edit_est_stockentry = Entry(edit_est_updateframe,width=15,textvariable=edit_est_stockval)
-        edit_est_stockentry.place(x=150,y=265)
-        edit_est_stockentry.delete(0,'end')
-        edit_est_stockentry.insert(0, edit_est_psdata[13])
-        edit_est_sto = edit_est_updateframe.register(edit_est_stocknum)
-        edit_est_stockentry.config(validate="key",validatecommand=(edit_est_sto, '%S'))
-        
-
-        edit_est_lowval = IntVar(edit_est_updateframe)
-        edit_est_low1=Label(edit_est_updateframe,text="Low Stock Warning Limit:",pady=5,padx=10)
-        edit_est_low1.place(x=270,y=260)
-        edit_est_lowentry = Entry(edit_est_updateframe,width=15,textvariable=edit_est_lowval)
-        edit_est_lowentry.place(x=432,y=265)
-        edit_est_lowentry.delete(0,'end')
-        edit_est_lowentry.insert(0, edit_est_psdata[14])
-        edit_est_lowsto = edit_est_updateframe.register(edit_est_stocknum)
-        edit_est_lowentry.config(validate="key",validatecommand=(edit_est_lowsto, '%S'))
-        
-
-      
-        edit_est_ware1=Label(edit_est_updateframe,text="Warehouse:",pady=5,padx=10)
-        edit_est_ware1.place(x=60,y=290)
-        edit_est_wareentry = Entry(edit_est_updateframe,width=64)
-        edit_est_wareentry.place(x=150,y=295)
-        edit_est_wareentry.insert(0, edit_est_psdata[15])
-
-        edit_est_scr = edit_est_psdata[12]
-        if edit_est_scr == '1':
-          edit_est_Button3.select()
-          edit_est_stockentry["state"] = DISABLED
-          edit_est_lowentry["state"] = DISABLED
-          edit_est_wareentry["state"] = DISABLED
-        else:
-          edit_est_Button3.deselect()
-          edit_est_stockentry["state"] = NORMAL
-          edit_est_lowentry["state"] = NORMAL
-          edit_est_wareentry["state"] = NORMAL
-        
-        
-
-        
-
-        edit_est_text1=Label(edit_est_updateframe,text="Private notes(not appears on invoice):",pady=5,padx=10)
-        edit_est_text1.place(x=20,y=330)
-        edit_est_sctxt = scrolledtext.ScrolledText(edit_est_updateframe, undo=True,width=62,height=4)
-        edit_est_sctxt.place(x=32,y=358)
-        try:
-          edit_est_sctxt.insert("1.0", edit_est_psdata[16])
-        except:
-          pass
-
-        edit_est_okButton = Button(edit_est_innerFrame, text ="Ok",image=tick,width=70,compound = LEFT,command=edit_est_updateproducts_1)
-        edit_est_okButton.place(x=10, y=475)
-
-        edit_est_cancelButton = Button(edit_est_innerFrame,image=cancel,text="Cancel",width=70,compound = LEFT, command=lambda : edit_est_top.destroy())
-        edit_est_cancelButton.place(x=519, y=475)
-        
-        
-        edit_est_imageFrame = Frame(edit_est_tabb, relief=GROOVE,height=580)
-        edit_est_imageFrame.pack(side="top",fill=BOTH)
-
-        edit_est_browseimg=Label(edit_est_imageFrame,text=" Browse for product image file(recommended image type:JPG,size 480x320 pixels) ",bg='#f5f3f2')
-        edit_est_browseimg.place(x=15,y=35)
-
-        edit_est_browsebutton=Button(edit_est_imageFrame,text = 'Browse',command=edit_estupload_file_1)
-        edit_est_browsebutton.place(x=530,y=30,height=30,width=50)
-
-        try:
-          image = Image.open("images/"+edit_est_psdata[17])
-          resize_image = image.resize((350, 350))
-          image = ImageTk.PhotoImage(resize_image)
-          edit_est_b2 = Label(edit_est_imageFrame,image=image,width=350,height=350)
-          edit_est_b2.photo = image
-          edit_est_b2.place(x=130, y=80)
-          print(image)
-        except:
-          pass
-
-        edit_est_removeButton = Button(edit_est_imageFrame,image=cancel,text="Remove Product Image",width=150,compound = LEFT,command=lambda: edit_est_b2 .destroy())
-        edit_est_removeButton.place(x=410,y=460)
-
-                      
-      edit_estimate_enter10=Label(edit_estimate_newselection, text="Enter filter text").place(x=5, y=10)
-      edit_estimate_e10=Entry(edit_estimate_newselection, width=20).place(x=110, y=10)
-      # edit_estimate_text10=Label(edit_estimate_newselection, text="Filtered column").place(x=340, y=10)
-      # edit_estimate_e20=Entry(edit_estimate_newselection, width=20).place(x=450, y=10)
-      edit_estimate_cust_filter_button=Button(edit_estimate_newselection, text='Click Here')
-      edit_estimate_cust_filter_button.place(x=240, y=9,height=20,width=60)
-
-      edit_estimate_cusventtree1=ttk.Treeview(edit_estimate_newselection, height=25)
-      edit_estimate_cusventtree1["columns"]=["1","2","3", "4","5"]
-      edit_estimate_cusventtree1.column("#0", width=35)
-      edit_estimate_cusventtree1.column("1", width=160)
-      edit_estimate_cusventtree1.column("2", width=160)
-      edit_estimate_cusventtree1.column("3", width=140)
-      edit_estimate_cusventtree1.column("4", width=70)
-      edit_estimate_cusventtree1.column("5", width=70)
-      edit_estimate_cusventtree1.heading("#0",text="")
-      edit_estimate_cusventtree1.heading("1",text="ID/SKU")
-      edit_estimate_cusventtree1.heading("2",text="Product/Service Name")
-      edit_estimate_cusventtree1.heading("3",text="Unit price")
-      edit_estimate_cusventtree1.heading("4",text="Service")
-      edit_estimate_cusventtree1.heading("5",text="Stock")
-      edit_estimate_cusventtree1.tag_configure('green', foreground='green')
-      edit_estimate_cusventtree1.tag_configure('red', foreground='red')
-      edit_estimate_cusventtree1.tag_configure('blue', foreground='blue')
-      edit_estimate_cusventtree1.place(x=5, y=45)
-      
-
-      countp = 0
-      sql = 'select * from Productservice'
-      fbcursor.execute(sql)
-      estprodata = fbcursor.fetchall()
-      for i in estprodata:
-        if i[12] == '1':
-          servi = '🗹'
-        else:
-          servi = ''
-        sql = "select currencysign,currsignplace from company"
-        fbcursor.execute(sql)
-        estcurrsymb = fbcursor.fetchone()
-        if not estcurrsymb: 
-          if i[13] > i[14]:
-            edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('green',))
-            countp += 1              
-          elif i[12] == '1':
-            edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('blue',))
-            countp += 1
-          else:
-            edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('red',))
-            countp += 1
-                  
-        elif estcurrsymb[1] == "before amount":
-          if (i[13]) > (i[14]):
-            edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('green',))
-            countp += 1
-          elif i[12] == '1':
-            edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('blue',))
-            countp += 1
-          else:
-            edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('red',))
-            countp += 1
-
-        elif estcurrsymb[1] == "before amount with space":
-          if (i[13]) > (i[14]):
-            edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('green',))
-            countp += 1
-          elif i[12] == '1':
-            edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('blue',))
-            countp += 1
-          else:
-            edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('red',))
-            countp += 1
-
-        elif estcurrsymb[1] == "after amount":
-          if (i[13]) > (i[14]):
-            edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('green',))
-            countp += 1
-          elif i[12] == '1':
-            edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('blue',))
-            countp += 1
-          else:
-            edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('red',))
-            countp += 1
-
-        elif estcurrsymb[1] == "after amount with space":
-          if (i[13]) > (i[14]):
-            edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('green',))
-            countp += 1
-          elif i[12] == '1':
-            edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('blue',))
-            countp += 1
-          else:
-            edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('red',))
-            countp += 1
-
-
-
-      edit_estimate_ctegorytree1=ttk.Treeview(edit_estimate_newselection, height=27)
-      edit_estimate_ctegorytree1["columns"]=["1"]
-      edit_estimate_ctegorytree1.column("#0", width=35, minwidth=20)
-      edit_estimate_ctegorytree1.column("1", width=205, minwidth=25, anchor=CENTER)    
-      edit_estimate_ctegorytree1.heading("#0",text="", anchor=W)
-      edit_estimate_ctegorytree1.heading("1",text="View filter by category", anchor=CENTER)
-      edit_estimate_ctegorytree1.place(x=660, y=45)
-      def edit_est_items_selected(event):
-        selected_indices = edit_cust_fil_cat_list_1.curselection()
-        selected_filter = ",".join([edit_cust_fil_cat_list_1.get(i) for i in selected_indices])
-
+        countp = 0
         sql = 'select * from Productservice'
         fbcursor.execute(sql)
-        pandsdata1 = fbcursor.fetchall()
-        psql = "select * from Productservice where serviceornot=%s"
-        val = ('0', )
-        fbcursor.execute(psql, val)
-        pdata1 = fbcursor.fetchall()
-
-        ssql = "select * from Productservice where serviceornot=%s"
-        val = ('1', )
-        fbcursor.execute(ssql, val)
-        sdata1 = fbcursor.fetchall()
-
-        if selected_filter == "View all records":
-          for record in edit_estimate_cusventtree1.get_children():
-            edit_estimate_cusventtree1.delete(record)
-          countp = 0
-          for i in pandsdata1:
-            if i[12] == '1':
-              servi = '🗹'                     #'Active'
+        estprodata = fbcursor.fetchall()
+        for i in estprodata:
+          if i[12] == '1':
+            servi = '🗹'
+          else:
+            servi = ''
+          sql = "select currencysign,currsignplace from company"
+          fbcursor.execute(sql)
+          estcurrsymb = fbcursor.fetchone()
+          if not estcurrsymb: 
+            if i[13] > i[14]:
+              edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('green',))
+              countp += 1              
+            elif i[12] == '1':
+              edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('blue',))
+              countp += 1
             else:
-              servi = ' '                         #'Inactive'
-            sql = "select currencysign,currsignplace from company"
-            fbcursor.execute(sql)
-            estcurrsymb = fbcursor.fetchone()
-            if not estcurrsymb: 
-              if i[13] > i[14]:
-                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('green',))
-                countp += 1              
-              elif i[12] == '1':
-                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('blue',))
-                countp += 1
-              else:
-                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('red',))
-                countp += 1
-                      
-            elif estcurrsymb[1] == "before amount":
-              if (i[13]) > (i[14]):
-                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('green',))
-                countp += 1
-              elif i[12] == '1':
-                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('blue',))
-                countp += 1
-              else:
-                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('red',))
-                countp += 1
-
-            elif estcurrsymb[1] == "before amount with space":
-              if (i[13]) > (i[14]):
-                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('green',))
-                countp += 1
-              elif i[12] == '1':
-                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('blue',))
-                countp += 1
-              else:
-                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('red',))
-                countp += 1
-
-            elif estcurrsymb[1] == "after amount":
-              if (i[13]) > (i[14]):
-                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('green',))
-                countp += 1
-              elif i[12] == '1':
-                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('blue',))
-                countp += 1
-              else:
-                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('red',))
-                countp += 1
-
-            elif estcurrsymb[1] == "after amount with space":
-              if (i[13]) > (i[14]):
-                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('green',))
-                countp += 1
-              elif i[12] == '1':
-                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('blue',))
-                countp += 1
-              else:
-                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('red',))
-                countp += 1
-
-        elif selected_filter == "View all products":
-          for record in edit_estimate_cusventtree1.get_children():
-            edit_estimate_cusventtree1.delete(record)
-          countp = 0
-          for i in pdata1:
-            if i[12] == '1':
-              servi = '🗹'                   #'Active'
+              edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('red',))
+              countp += 1
+                    
+          elif estcurrsymb[1] == "before amount":
+            if (i[13]) > (i[14]):
+              edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('green',))
+              countp += 1
+            elif i[12] == '1':
+              edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('blue',))
+              countp += 1
             else:
-              servi = ' '                    #'Inactive'
-            sql = "select currencysign,currsignplace from company"
-            fbcursor.execute(sql)
-            estcurrsymb = fbcursor.fetchone()
-            if not estcurrsymb: 
-              if i[13] > i[14]:
-                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('green',))
-                countp += 1              
-              elif i[12] == '1':
-                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('blue',))
-                countp += 1
-              else:
-                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('red',))
-                countp += 1
-                      
-            elif estcurrsymb[1] == "before amount":
-              if (i[13]) > (i[14]):
-                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('green',))
-                countp += 1
-              elif i[12] == '1':
-                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('blue',))
-                countp += 1
-              else:
-                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('red',))
-                countp += 1
+              edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('red',))
+              countp += 1
 
-            elif estcurrsymb[1] == "before amount with space":
-              if (i[13]) > (i[14]):
-                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('green',))
-                countp += 1
-              elif i[12] == '1':
-                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('blue',))
-                countp += 1
-              else:
-                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('red',))
-                countp += 1
-
-            elif estcurrsymb[1] == "after amount":
-              if (i[13]) > (i[14]):
-                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('green',))
-                countp += 1
-              elif i[12] == '1':
-                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('blue',))
-                countp += 1
-              else:
-                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('red',))
-                countp += 1
-
-            elif estcurrsymb[1] == "after amount with space":
-              if (i[13]) > (i[14]):
-                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('green',))
-                countp += 1
-              elif i[12] == '1':
-                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('blue',))
-                countp += 1
-              else:
-                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('red',))
-                countp += 1
-        elif selected_filter == "View all services":
-          for record in edit_estimate_cusventtree1.get_children():
-            edit_estimate_cusventtree1.delete(record)
-          countp = 0
-          for i in sdata1:
-            if i[12] == '1':
-              servi = '🗹'             #'Active'
+          elif estcurrsymb[1] == "before amount with space":
+            if (i[13]) > (i[14]):
+              edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('green',))
+              countp += 1
+            elif i[12] == '1':
+              edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('blue',))
+              countp += 1
             else:
-              servi = ' '              #'Inactive'
-            sql = "select currencysign,currsignplace from company"
-            fbcursor.execute(sql)
-            estcurrsymb = fbcursor.fetchone()
-            if not estcurrsymb: 
-              if i[13] > i[14]:
-                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('green',))
-                countp += 1              
-              elif i[12] == '1':
-                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('blue',))
-                countp += 1
-              else:
-                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('red',))
-                countp += 1
-                      
-            elif estcurrsymb[1] == "before amount":
-              if (i[13]) > (i[14]):
-                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('green',))
-                countp += 1
-              elif i[12] == '1':
-                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('blue',))
-                countp += 1
-              else:
-                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('red',))
-                countp += 1
+              edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('red',))
+              countp += 1
 
-            elif estcurrsymb[1] == "before amount with space":
-              if (i[13]) > (i[14]):
-                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('green',))
-                countp += 1
-              elif i[12] == '1':
-                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('blue',))
-                countp += 1
-              else:
-                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('red',))
-                countp += 1
-
-            elif estcurrsymb[1] == "after amount":
-              if (i[13]) > (i[14]):
-                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('green',))
-                countp += 1
-              elif i[12] == '1':
-                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('blue',))
-                countp += 1
-              else:
-                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('red',))
-                countp += 1
-
-            elif estcurrsymb[1] == "after amount with space":
-              if (i[13]) > (i[14]):
-                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('green',))
-                countp += 1
-              elif i[12] == '1':
-                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('blue',))
-                countp += 1
-              else:
-                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('red',))
-                countp += 1
-
-      edit_cust_fil_cat_list_1 = Listbox(edit_estimate_newselection,height=34,width=40,bg="white",activestyle="dotbox",fg="black",highlightbackground="white")
-      edit_cust_fil_cat_list_1.insert(0,"View all records")
-      edit_cust_fil_cat_list_1.insert(1,"View all products")
-      edit_cust_fil_cat_list_1.insert(2,"View all services")
-      edit_cust_fil_cat_list_1.place(x=660,y=63)
-      edit_cust_fil_cat_list_1.bind('<<ListboxSelect>>',edit_est_items_selected)
-      edit_est_stockok = Label(edit_estimate_newselection,text="Green: Stock is Ok",foreground="green").place(x =15,y =580)
-      edit_est_stocko = Label(edit_estimate_newselection,text="Red: Limit <= Low Stock Limit",foreground="red").place(x =136,y=580)
-      edit_est_stock = Label(edit_estimate_newselection,text="Blue: Service,no Stock Control",foreground="blue").place(x =335,y =580)
-
-      edit_estimate_scrollbar10 = Scrollbar(edit_estimate_newselection)
-      edit_estimate_scrollbar10.place(x=640, y=45, height=520)
-      edit_estimate_scrollbar10.config( command=edit_estimate_cusventtree1.yview )
-
-      def edit_estselepro():
-        global estpriceview
-        edit_estpriceview = Label(edit_estimate_listFrame,bg="#f5f3f2")
-        edit_estpriceview.place(x=850,y=200,width=78,height=18)
-        edit_proskuid = edit_estimate_cusventtree1.item(edit_estimate_cusventtree1.focus())["values"][0]
-        sql = "select * from Productservice where sku = %s"
-        val = (edit_proskuid,)
-        fbcursor.execute(sql,val)
-        prosele = fbcursor.fetchone()
-        sql = "select * from company"
-        fbcursor.execute(sql)
-        create_maintree_insert = fbcursor.fetchone()
-        if prosele[10] == '1':
-          tax1 = 'yes'
-        else:
-          tax1 = ''
-        if prosele[19] == '1':
-          tax2 = 'yes'
-        else:
-          tax2 = ''
-        if not create_maintree_insert:
-          edit_estimate_tree.insert(parent='', index='end',text='', values=(prosele[2],prosele[4],prosele[5],prosele[7],1,prosele[8],tax1,prosele[7]*1))
-
-        elif create_maintree_insert[12] == "1":
-          edit_estimate_tree.insert(parent='', index='end',text='', values=(prosele[2],prosele[4],prosele[5],prosele[7],1,prosele[8],prosele[7]*1))
-          extracs = 0.0
-          discou = 0.0
-          total = 0.0
-          for child in edit_estimate_tree.get_children():
-            total += float(edit_estimate_tree.item(child, 'values')[6])
-          discou = (total*float(edit_estimates_disrate.get())/100)
-          extracs = (extracs+float(edit_estimates_excost.get()))
-          edit_estimate_costtt.config(text=edit_estimates_excost.get())
-          edit_estimate_discounttt1.config(text=discou)
-          edit_estpriceview.config(text=total)
-          edit_estimate_orderrr1.config(text=total-discou+extracs)
-          edit_estimate_balancee1.config(text=total-discou+extracs)
-          edit_estimate_subbb1.config(text=total-discou)
-        elif create_maintree_insert[12] == "2":
-          edit_estimate_tree.insert(parent='', index='end',text='', values=(prosele[2],prosele[4],prosele[5],prosele[7],1,prosele[8],tax1,prosele[7]*1))
-          extracs = 0.0
-          discou = 0.0
-          total = 0.0
-          for child in edit_estimate_tree.get_children():
-            total += float(edit_estimate_tree.item(child, 'values')[7])
-          discou = (total*float(edit_estimates_disrate.get())/100)
-          extracs = (extracs+float(edit_estimates_excost.get()))
-          edit_estimate_costtt.config(text=edit_estimates_excost.get())
-          edit_estimate_discounttt1.config(text=discou)
-          edit_estpriceview.config(text=total)
-          edit_estimate_subbb1.config(text=total-discou)
-
-          tot = 0.0
-          totaltax1 = 0.0
-          for child in edit_estimate_tree.get_children():
-            checktax1 = list(edit_estimate_tree.item(child, 'values'))
-            if checktax1[6] == "yes":
-              totaltax1 =(totaltax1 + float(checktax1[7]))
-              edit_estimate_ttax1label.config(text=(float(totaltax1)*float(edit_estimates_tax1.get())/100))
-              tot = (float(totaltax1)*float(edit_estimates_tax1.get())/100)
+          elif estcurrsymb[1] == "after amount":
+            if (i[13]) > (i[14]):
+              edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('green',))
+              countp += 1
+            elif i[12] == '1':
+              edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('blue',))
+              countp += 1
             else:
-              pass
-          edit_estimate_orderrr1.config(text=total+tot-discou+extracs)
-          edit_estimate_balancee1.config(text=total+tot-discou+extracs)
-            
-        elif create_maintree_insert[12] == "3":
-          edit_estimate_tree.insert(parent='', index='end',text='', values=(prosele[2],prosele[4],prosele[5],prosele[7],1,prosele[8],tax1,tax2,prosele[7]*1))
-          extracs = 0.0
-          discou = 0.0
-          total = 0.0
-          for child in edit_estimate_tree.get_children():
-            total += float(edit_estimate_tree.item(child, 'values')[8])
-          extracs = (extracs+float(edit_estimates_excost.get()))
-          edit_estimate_costtt.config(text=edit_estimates_excost.get())
-          discou = (total*float(edit_estimates_disrate.get())/100)
-          edit_estimate_discounttt1.config(text=discou)
-          edit_estpriceview.config(text=total)
-          edit_estimate_subbb1.config(text=total-discou)
-            
-          tot = 0.0
-          totaltax1 = 0.0
-          for child in edit_estimate_tree.get_children():
-            checktax1 = list(edit_estimate_tree.item(child, 'values'))
-            if checktax1[6] == "yes":
-              totaltax1 =(totaltax1 + float(checktax1[8]))
-              edit_estimate_ttax1label.config(text=(float(totaltax1)*float(edit_estimates_tax1.get())/100))
-              tot = (float(totaltax1)*float(edit_estimates_tax1.get())/100)
+              edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('red',))
+              countp += 1
+
+          elif estcurrsymb[1] == "after amount with space":
+            if (i[13]) > (i[14]):
+              edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('green',))
+              countp += 1
+            elif i[12] == '1':
+              edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('blue',))
+              countp += 1
             else:
-              pass
-          
-          tot2 = 0.0
-          totaltax2 = 0.0
-          for child in edit_estimate_tree.get_children():
-            checktax1 = list(edit_estimate_tree.item(child, 'values'))
-            if checktax1[7] == "yes":
-              totaltax2 =(totaltax2 + float(checktax1[8]))
-              edit_estimate_ttax2label.config(text=(float(totaltax2)*float(edit_estimates_tax2.get())/100))
+              edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('red',))
+              countp += 1
+
+
+
+        edit_estimate_ctegorytree1=ttk.Treeview(edit_estimate_newselection, height=27)
+        edit_estimate_ctegorytree1["columns"]=["1"]
+        edit_estimate_ctegorytree1.column("#0", width=35, minwidth=20)
+        edit_estimate_ctegorytree1.column("1", width=205, minwidth=25, anchor=CENTER)    
+        edit_estimate_ctegorytree1.heading("#0",text="", anchor=W)
+        edit_estimate_ctegorytree1.heading("1",text="View filter by category", anchor=CENTER)
+        edit_estimate_ctegorytree1.place(x=660, y=45)
+        def edit_est_items_selected(event):
+          selected_indices = edit_cust_fil_cat_list_1.curselection()
+          selected_filter = ",".join([edit_cust_fil_cat_list_1.get(i) for i in selected_indices])
+
+          sql = 'select * from Productservice'
+          fbcursor.execute(sql)
+          pandsdata1 = fbcursor.fetchall()
+          psql = "select * from Productservice where serviceornot=%s"
+          val = ('0', )
+          fbcursor.execute(psql, val)
+          pdata1 = fbcursor.fetchall()
+
+          ssql = "select * from Productservice where serviceornot=%s"
+          val = ('1', )
+          fbcursor.execute(ssql, val)
+          sdata1 = fbcursor.fetchall()
+
+          if selected_filter == "View all records":
+            for record in edit_estimate_cusventtree1.get_children():
+              edit_estimate_cusventtree1.delete(record)
+            countp = 0
+            for i in pandsdata1:
+              if i[12] == '1':
+                servi = '🗹'                     #'Active'
+              else:
+                servi = ' '                         #'Inactive'
+              sql = "select currencysign,currsignplace from company"
+              fbcursor.execute(sql)
+              estcurrsymb = fbcursor.fetchone()
+              if not estcurrsymb: 
+                if i[13] > i[14]:
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('green',))
+                  countp += 1              
+                elif i[12] == '1':
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('blue',))
+                  countp += 1
+                else:
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('red',))
+                  countp += 1
+                        
+              elif estcurrsymb[1] == "before amount":
+                if (i[13]) > (i[14]):
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('green',))
+                  countp += 1
+                elif i[12] == '1':
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('blue',))
+                  countp += 1
+                else:
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('red',))
+                  countp += 1
+
+              elif estcurrsymb[1] == "before amount with space":
+                if (i[13]) > (i[14]):
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('green',))
+                  countp += 1
+                elif i[12] == '1':
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('blue',))
+                  countp += 1
+                else:
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('red',))
+                  countp += 1
+
+              elif estcurrsymb[1] == "after amount":
+                if (i[13]) > (i[14]):
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('green',))
+                  countp += 1
+                elif i[12] == '1':
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('blue',))
+                  countp += 1
+                else:
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('red',))
+                  countp += 1
+
+              elif estcurrsymb[1] == "after amount with space":
+                if (i[13]) > (i[14]):
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('green',))
+                  countp += 1
+                elif i[12] == '1':
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('blue',))
+                  countp += 1
+                else:
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('red',))
+                  countp += 1
+
+          elif selected_filter == "View all products":
+            for record in edit_estimate_cusventtree1.get_children():
+              edit_estimate_cusventtree1.delete(record)
+            countp = 0
+            for i in pdata1:
+              if i[12] == '1':
+                servi = '🗹'                   #'Active'
+              else:
+                servi = ' '                    #'Inactive'
+              sql = "select currencysign,currsignplace from company"
+              fbcursor.execute(sql)
+              estcurrsymb = fbcursor.fetchone()
+              if not estcurrsymb: 
+                if i[13] > i[14]:
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('green',))
+                  countp += 1              
+                elif i[12] == '1':
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('blue',))
+                  countp += 1
+                else:
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('red',))
+                  countp += 1
+                        
+              elif estcurrsymb[1] == "before amount":
+                if (i[13]) > (i[14]):
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('green',))
+                  countp += 1
+                elif i[12] == '1':
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('blue',))
+                  countp += 1
+                else:
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('red',))
+                  countp += 1
+
+              elif estcurrsymb[1] == "before amount with space":
+                if (i[13]) > (i[14]):
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('green',))
+                  countp += 1
+                elif i[12] == '1':
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('blue',))
+                  countp += 1
+                else:
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('red',))
+                  countp += 1
+
+              elif estcurrsymb[1] == "after amount":
+                if (i[13]) > (i[14]):
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('green',))
+                  countp += 1
+                elif i[12] == '1':
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('blue',))
+                  countp += 1
+                else:
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('red',))
+                  countp += 1
+
+              elif estcurrsymb[1] == "after amount with space":
+                if (i[13]) > (i[14]):
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('green',))
+                  countp += 1
+                elif i[12] == '1':
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('blue',))
+                  countp += 1
+                else:
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('red',))
+                  countp += 1
+          elif selected_filter == "View all services":
+            for record in edit_estimate_cusventtree1.get_children():
+              edit_estimate_cusventtree1.delete(record)
+            countp = 0
+            for i in sdata1:
+              if i[12] == '1':
+                servi = '🗹'             #'Active'
+              else:
+                servi = ' '              #'Inactive'
+              sql = "select currencysign,currsignplace from company"
+              fbcursor.execute(sql)
+              estcurrsymb = fbcursor.fetchone()
+              if not estcurrsymb: 
+                if i[13] > i[14]:
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('green',))
+                  countp += 1              
+                elif i[12] == '1':
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('blue',))
+                  countp += 1
+                else:
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('red',))
+                  countp += 1
+                        
+              elif estcurrsymb[1] == "before amount":
+                if (i[13]) > (i[14]):
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('green',))
+                  countp += 1
+                elif i[12] == '1':
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('blue',))
+                  countp += 1
+                else:
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('red',))
+                  countp += 1
+
+              elif estcurrsymb[1] == "before amount with space":
+                if (i[13]) > (i[14]):
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('green',))
+                  countp += 1
+                elif i[12] == '1':
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('blue',))
+                  countp += 1
+                else:
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('red',))
+                  countp += 1
+
+              elif estcurrsymb[1] == "after amount":
+                if (i[13]) > (i[14]):
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('green',))
+                  countp += 1
+                elif i[12] == '1':
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('blue',))
+                  countp += 1
+                else:
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('red',))
+                  countp += 1
+
+              elif estcurrsymb[1] == "after amount with space":
+                if (i[13]) > (i[14]):
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('green',))
+                  countp += 1
+                elif i[12] == '1':
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('blue',))
+                  countp += 1
+                else:
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('red',))
+                  countp += 1
+
+        edit_cust_fil_cat_list_1 = Listbox(edit_estimate_newselection,height=34,width=40,bg="white",activestyle="dotbox",fg="black",highlightbackground="white")
+        edit_cust_fil_cat_list_1.insert(0,"View all records")
+        edit_cust_fil_cat_list_1.insert(1,"View all products")
+        edit_cust_fil_cat_list_1.insert(2,"View all services")
+        edit_cust_fil_cat_list_1.place(x=660,y=63)
+        edit_cust_fil_cat_list_1.bind('<<ListboxSelect>>',edit_est_items_selected)
+        edit_est_stockok = Label(edit_estimate_newselection,text="Green: Stock is Ok",foreground="green").place(x =15,y =580)
+        edit_est_stocko = Label(edit_estimate_newselection,text="Red: Limit <= Low Stock Limit",foreground="red").place(x =136,y=580)
+        edit_est_stock = Label(edit_estimate_newselection,text="Blue: Service,no Stock Control",foreground="blue").place(x =335,y =580)
+
+        edit_estimate_scrollbar10 = Scrollbar(edit_estimate_newselection)
+        edit_estimate_scrollbar10.place(x=640, y=45, height=520)
+        edit_estimate_scrollbar10.config( command=edit_estimate_cusventtree1.yview )
+
+        def edit_estselepro():
+          global estpriceview
+          edit_estpriceview = Label(edit_estimate_listFrame,bg="#f5f3f2")
+          edit_estpriceview.place(x=850,y=200,width=78,height=18)
+          edit_proskuid = edit_estimate_cusventtree1.item(edit_estimate_cusventtree1.focus())["values"][0]
+          sql = "select * from Productservice where sku = %s"
+          val = (edit_proskuid,)
+          fbcursor.execute(sql,val)
+          prosele = fbcursor.fetchone()
+          sql = "select * from company"
+          fbcursor.execute(sql)
+          create_maintree_insert = fbcursor.fetchone()
+          if prosele[10] == '1':
+            tax1 = 'yes'
+          else:
+            tax1 = ''
+          if prosele[19] == '1':
+            tax2 = 'yes'
+          else:
+            tax2 = ''
+          if not create_maintree_insert:
+            edit_estimate_tree.insert(parent='', index='end',text='', values=(prosele[2],prosele[4],prosele[5],prosele[7],1,prosele[8],tax1,prosele[7]*1))
+
+          elif create_maintree_insert[12] == "1":
+            edit_estimate_tree.insert(parent='', index='end',text='', values=(prosele[2],prosele[4],prosele[5],prosele[7],1,prosele[8],prosele[7]*1))
+            extracs = 0.0
+            discou = 0.0
+            total = 0.0
+            for child in edit_estimate_tree.get_children():
+              total += float(edit_estimate_tree.item(child, 'values')[6])
+            discou = (total*float(edit_estimates_disrate.get())/100)
+            extracs = (extracs+float(edit_estimates_excost.get()))
+            edit_estimate_costtt.config(text=edit_estimates_excost.get())
+            edit_estimate_discounttt1.config(text=discou)
+            edit_estpriceview.config(text=total)
+            edit_estimate_orderrr1.config(text=total-discou+extracs)
+            edit_estimate_balancee1.config(text=total-discou+extracs)
+            edit_estimate_subbb1.config(text=total-discou)
+          elif create_maintree_insert[12] == "2":
+            edit_estimate_tree.insert(parent='', index='end',text='', values=(prosele[2],prosele[4],prosele[5],prosele[7],1,prosele[8],tax1,prosele[7]*1))
+            extracs = 0.0
+            discou = 0.0
+            total = 0.0
+            for child in edit_estimate_tree.get_children():
+              total += float(edit_estimate_tree.item(child, 'values')[7])
+            discou = (total*float(edit_estimates_disrate.get())/100)
+            extracs = (extracs+float(edit_estimates_excost.get()))
+            edit_estimate_costtt.config(text=edit_estimates_excost.get())
+            edit_estimate_discounttt1.config(text=discou)
+            edit_estpriceview.config(text=total)
+            edit_estimate_subbb1.config(text=total-discou)
+
+            tot = 0.0
+            totaltax1 = 0.0
+            for child in edit_estimate_tree.get_children():
+              checktax1 = list(edit_estimate_tree.item(child, 'values'))
+              if checktax1[6] == "yes":
+                totaltax1 =(totaltax1 + float(checktax1[7]))
+                edit_estimate_ttax1label.config(text=(float(totaltax1)*float(edit_estimates_tax1.get())/100))
+                tot = (float(totaltax1)*float(edit_estimates_tax1.get())/100)
+              else:
+                pass
+            edit_estimate_orderrr1.config(text=total+tot-discou+extracs)
+            edit_estimate_balancee1.config(text=total+tot-discou+extracs)
               
-              tot2 = (float(totaltax2)*float(edit_estimates_tax2.get())/100)
-            else:
-              pass
+          elif create_maintree_insert[12] == "3":
+            edit_estimate_tree.insert(parent='', index='end',text='', values=(prosele[2],prosele[4],prosele[5],prosele[7],1,prosele[8],tax1,tax2,prosele[7]*1))
+            extracs = 0.0
+            discou = 0.0
+            total = 0.0
+            for child in edit_estimate_tree.get_children():
+              total += float(edit_estimate_tree.item(child, 'values')[8])
+            extracs = (extracs+float(edit_estimates_excost.get()))
+            edit_estimate_costtt.config(text=edit_estimates_excost.get())
+            discou = (total*float(edit_estimates_disrate.get())/100)
+            edit_estimate_discounttt1.config(text=discou)
+            edit_estpriceview.config(text=total)
+            edit_estimate_subbb1.config(text=total-discou)
+              
+            tot = 0.0
+            totaltax1 = 0.0
+            for child in edit_estimate_tree.get_children():
+              checktax1 = list(edit_estimate_tree.item(child, 'values'))
+              if checktax1[6] == "yes":
+                totaltax1 =(totaltax1 + float(checktax1[8]))
+                edit_estimate_ttax1label.config(text=(float(totaltax1)*float(edit_estimates_tax1.get())/100))
+                tot = (float(totaltax1)*float(edit_estimates_tax1.get())/100)
+              else:
+                pass
+            
+            tot2 = 0.0
+            totaltax2 = 0.0
+            for child in edit_estimate_tree.get_children():
+              checktax1 = list(edit_estimate_tree.item(child, 'values'))
+              if checktax1[7] == "yes":
+                totaltax2 =(totaltax2 + float(checktax1[8]))
+                edit_estimate_ttax2label.config(text=(float(totaltax2)*float(edit_estimates_tax2.get())/100))
+                
+                tot2 = (float(totaltax2)*float(edit_estimates_tax2.get())/100)
+              else:
+                pass
 
-          edit_estimate_orderrr1.config(text=total+tot+tot2-discou+extracs)
-          edit_estimate_balancee1.config(text=total+tot+tot2-discou+extracs)
-        
-        edit_estimate_newselection.destroy()
-    
+            edit_estimate_orderrr1.config(text=total+tot+tot2-discou+extracs)
+            edit_estimate_balancee1.config(text=total+tot+tot2-discou+extracs)
+          
+          edit_estimate_newselection.destroy()
+      
 
-      edit_estimate_btn11=Button(edit_estimate_newselection,compound = LEFT,image=tick ,text="ok", width=60,command=edit_estselepro)
-      edit_estimate_btn11.place(x=15, y=610)
-      edit_estimate_btn11=Button(edit_estimate_newselection,compound = LEFT,image=tick , text="Edit product/Service", width=150,command=est_edit_product_1).place(x=250, y=610)
-      edit_estimate_btn11=Button(edit_estimate_newselection,compound = LEFT,image=tick , text="Add product/Service", width=150,command=edit_estimate_product).place(x=435, y=610)
-      edit_estimate_btn11=Button(edit_estimate_newselection,compound = LEFT,image=cancel ,text="Cancel", width=60).place(x=740, y=610)
+        edit_estimate_btn11=Button(edit_estimate_newselection,compound = LEFT,image=tick ,text="ok", width=60,command=edit_estselepro)
+        edit_estimate_btn11.place(x=15, y=610)
+        edit_estimate_btn11=Button(edit_estimate_newselection,compound = LEFT,image=tick , text="Edit product/Service", width=150,command=est_edit_product_1).place(x=250, y=610)
+        edit_estimate_btn11=Button(edit_estimate_newselection,compound = LEFT,image=tick , text="Add product/Service", width=150,command=edit_estimate_product).place(x=435, y=610)
+        edit_estimate_btn11=Button(edit_estimate_newselection,compound = LEFT,image=cancel ,text="Cancel", width=60).place(x=740, y=610)
+      else:
+        messagebox.showwarning("F-Billing Revolution 2022", "Customer is required, please select customer\n before adding line item to estimates.")
+      
 
 
     
@@ -16642,18 +17668,80 @@ def mainpage():
 
 
     edit_estimate_orderdate=Label(edit_estimate_labelframe,text=""+est_str3.get()).place(x=5,y=33)
-    edit_estimate_ee02=DateEntry(edit_estimate_labelframe,width=20)
-    edit_estimate_ee02.place(x=150,y=33)
-    edit_estimate_ee02.delete(0,'end')
-    edit_estimate_ee02.insert(0, edit_est_data[2])
+    # edit_estimate_ee02=DateEntry(edit_estimate_labelframe,width=20)
+    # edit_estimate_ee02.place(x=150,y=33)
+    # edit_estimate_ee02.delete(0,'end')
+    # edit_estimate_ee02.insert(0, edit_est_data[2])
 
     edit_estimate_checkvarStatus5=IntVar()
     edit_estimate_duedate=Checkbutton(edit_estimate_labelframe,variable = edit_estimate_checkvarStatus5,text=""+est_str4.get(),onvalue =0 ,offvalue = 1,command=est_due_check_1)
     edit_estimate_duedate.place(x=5,y=62)
-    edit_estimate_ee03=DateEntry(edit_estimate_labelframe,width=20)
+    # edit_estimate_ee03=DateEntry(edit_estimate_labelframe,width=20)
+    # edit_estimate_ee03.place(x=150,y=62)
+    # edit_estimate_ee03.delete(0,'end')
+    # edit_estimate_ee03.insert(0, edit_est_data[3])
+
+    comp_sql3 = "SELECT * FROM company"
+    fbcursor.execute(comp_sql3,)
+    comp_data3 = fbcursor.fetchone()
+    if comp_data3[10] == "mm-dd-yyyy":
+      edit_estimate_ee02=DateEntry(edit_estimate_labelframe,width=20,date_pattern="mm-dd-yyyy")
+      edit_estimate_ee02.delete(0,'end')
+      edit_estimate_ee02.insert(0, edit_est_data[2])
+      edit_estimate_ee03=DateEntry(edit_estimate_labelframe,width=20,date_pattern="mm-dd-yyyy")
+      edit_estimate_ee03.delete(0,'end')
+      edit_estimate_ee03.insert(0, edit_est_data[3])
+    elif comp_data3[10] == "dd-mm-yyyy":
+      edit_estimate_ee02=DateEntry(edit_estimate_labelframe,width=20,date_pattern="dd-mm-yyyy")
+      edit_estimate_ee02.delete(0,'end')
+      edit_estimate_ee02.insert(0, edit_est_data[2])
+      edit_estimate_ee03=DateEntry(edit_estimate_labelframe,width=20,date_pattern="dd-mm-yyyy")
+      edit_estimate_ee03.delete(0,'end')
+      edit_estimate_ee03.insert(0, edit_est_data[3])
+    elif comp_data3[10] == "yyyy.mm.dd":
+      edit_estimate_ee02=DateEntry(edit_estimate_labelframe,width=20,date_pattern="yyyy.mm.dd")
+      edit_estimate_ee02.delete(0,'end')
+      edit_estimate_ee02.insert(0, edit_est_data[2])
+      edit_estimate_ee03=DateEntry(edit_estimate_labelframe,width=20,date_pattern="yyyy.mm.dd")
+      edit_estimate_ee03.delete(0,'end')
+      edit_estimate_ee03.insert(0, edit_est_data[3])
+    elif comp_data3[10] == "mm/dd/yyyy":
+      edit_estimate_ee02=DateEntry(edit_estimate_labelframe,width=20,date_pattern="mm/dd/yyyy")
+      edit_estimate_ee02.delete(0,'end')
+      edit_estimate_ee02.insert(0, edit_est_data[2])
+      edit_estimate_ee03=DateEntry(edit_estimate_labelframe,width=20,date_pattern="mm/dd/yyyy")
+      edit_estimate_ee03.delete(0,'end')
+      edit_estimate_ee03.insert(0, edit_est_data[3])
+    elif comp_data3[10] == "dd/mm/yyyy":
+      edit_estimate_ee02=DateEntry(edit_estimate_labelframe,width=20,date_pattern="dd/mm/yyyy")
+      edit_estimate_ee02.delete(0,'end')
+      edit_estimate_ee02.insert(0, edit_est_data[2])
+      edit_estimate_ee03=DateEntry(edit_estimate_labelframe,width=20,date_pattern="dd/mm/yyyy")
+      edit_estimate_ee03.delete(0,'end')
+      edit_estimate_ee03.insert(0, edit_est_data[3])
+    elif comp_data3[10] == "dd.mm.yyyy":
+      edit_estimate_ee02=DateEntry(edit_estimate_labelframe,width=20,date_pattern="dd.mm.yyyy")
+      edit_estimate_ee02.delete(0,'end')
+      edit_estimate_ee02.insert(0, edit_est_data[2])
+      edit_estimate_ee03=DateEntry(edit_estimate_labelframe,width=20,date_pattern="dd.mm.yyyy")
+      edit_estimate_ee03.delete(0,'end')
+      edit_estimate_ee03.insert(0, edit_est_data[3])
+    elif comp_data3[10] == "yyyy/mm/dd":
+      edit_estimate_ee02=DateEntry(edit_estimate_labelframe,width=20,date_pattern="yyyy/mm/dd")
+      edit_estimate_ee02.delete(0,'end')
+      edit_estimate_ee02.insert(0, edit_est_data[2])
+      edit_estimate_ee03=DateEntry(edit_estimate_labelframe,width=20,date_pattern="yyyy/mm/dd")
+      edit_estimate_ee03.delete(0,'end')
+      edit_estimate_ee03.insert(0, edit_est_data[3])
+    else:
+      edit_estimate_ee02=DateEntry(edit_estimate_labelframe,width=20)
+      edit_estimate_ee02.delete(0,'end')
+      edit_estimate_ee02.insert(0, edit_est_data[2])
+      edit_estimate_ee03=DateEntry(edit_estimate_labelframe,width=20) 
+      edit_estimate_ee03.delete(0,'end')
+      edit_estimate_ee03.insert(0, edit_est_data[3])
+    edit_estimate_ee02.place(x=150,y=33)
     edit_estimate_ee03.place(x=150,y=62)
-    edit_estimate_ee03.delete(0,'end')
-    edit_estimate_ee03.insert(0, edit_est_data[3])
 
     est_term_sql_1 = "SELECT terms_of_payment FROM terms_of_payment"
     fbcursor.execute(est_term_sql_1,)
@@ -16823,9 +17911,17 @@ def mainpage():
     edit_estimate_labelfram1 = LabelFrame(edit_estimate_orderFrame,text="",font=("arial",15))
     edit_estimate_labelfram1.place(x=1,y=1,width=800,height=170)
 
+    est_extracost_sql = "SELECT extra_cost_name	FROM extra_cost_name"
+    fbcursor.execute(est_extracost_sql,)
+    est_extracost_data = fbcursor.fetchall()
+    exdata1 = []
+    for i in est_extracost_data:
+      exdata1.append(i[0])
+
     edit_estimates_cost1=Label(edit_estimate_labelfram1,text="Extra cost name").place(x=2,y=5)
-    edit_estimates_e1=ttk.Combobox(edit_estimate_labelfram1, value="",width=20)
+    edit_estimates_e1=ttk.Combobox(edit_estimate_labelfram1, value=exdata1,width=20)
     edit_estimates_e1.place(x=115,y=5)
+    edit_estimates_e1.bind("<<ComboboxSelected>>")
     edit_estimates_e1.delete(0, END)
     edit_estimates_e1.insert(0, edit_est_data[11])
 
@@ -16947,8 +18043,8 @@ def mainpage():
         total_cost += (price - discount_rate) + exc
         edit_estimate_discounttt.config(text= str(dis_rate) + "" +"% Discount")
         edit_estimate_totalll1.config(text="" +"0.00")
-        edit_estimate_ttax1label.config(text="" +"0.00")
-        edit_estimate_ttax2label.config(text="" +"0.00")
+        # edit_estimate_ttax1label.config(text="" +"0.00")
+        # edit_estimate_ttax2label.config(text="" +"0.00")
         edit_estimate_discounttt1.config(text=round(discount_rate,2))
         sub_tot = round((price - discount_rate),2)
         edit_estimate_subbb1.config(text=sub_tot)
@@ -16976,7 +18072,7 @@ def mainpage():
         total_cost += (tx_calc + tx_calc1) + exc 
         edit_estimate_discounttt.config(text= str(dis_rate) + "" +"% Discount")
         edit_estimate_totalll1.config(text="" +"0.00")
-        edit_estimate_ttax2label.config(text="" +"0.00")
+        # edit_estimate_ttax2label.config(text="" +"0.00")
         edit_estimate_discounttt1.config(text=round(discount_rate,2))
         sub_tot = round(((price + p) - discount_rate),2)
         edit_estimate_subbb1.config(text=sub_tot)
@@ -28174,9 +29270,11 @@ def mainpage():
     edit_estimates_draft=Label(edit_estimate_statusfrme, text=""+edit_est_data[4],font=("arial", 15, "bold"), fg="grey")
     edit_estimates_draft.place(x=50, y=3)
     edit_estimates_on1=Label(edit_estimate_statusfrme, text="Emailed on:").place( y=50)
-    edit_estimates_nev1=Label(edit_estimate_statusfrme, text="Never").place(x=100,y=50)
+    edit_estimates_nev1=Label(edit_estimate_statusfrme, text="Never")
+    edit_estimates_nev1.place(x=100,y=50)
     edit_estimates_on2=Label(edit_estimate_statusfrme, text="Printed on:").place( y=90)
-    edit_estimates_nev2=Label(edit_estimate_statusfrme, text="Never").place(x=100,y=90)
+    edit_estimates_nev2=Label(edit_estimate_statusfrme, text="Never")
+    edit_estimates_nev2.place(x=100,y=90)
 
     estedit_header_sql = "SELECT headerandfooter FROM header_and_footer"
     fbcursor.execute(estedit_header_sql,)
@@ -28235,14 +29333,63 @@ def mainpage():
       edit_estimates_e61.insert("1.0", edit_est_data[32])
     except:
       pass
+    
+    def edit_attach_file():
+      global file,file_type
+      file_type = [('png files','.png'),('jpg files','.jpg'),('PDF', '.pdf',),('all files','.')]
+      file = filedialog.askopenfilename(initialdir="/",filetypes=file_type)
+      shutil.copyfile(file, os.getcwd()+'/images/'+file.split('/')[-1])
+      file_size = convertion(os.path.getsize(file))
+      edit_doc_tree.insert(parent='',index='end',iid=file.split('/')[-1],text='',values=('',file.split('/')[-1],file_size))
+      
+
+    #################### size convertion of files############################
+    def convertion(B):
+      BYTE = float(B)
+      KB = float(1024)
+      MB = float(KB**2)
+
+      if BYTE < KB:
+        return '{0} {1}'.format(BYTE,'Bytes' if 0 == B > 1 else 'Byte')
+      elif KB <= BYTE < MB:
+        return '{0:.2f} KB'.format(BYTE / KB)
+      elif MB <= BYTE:
+        return '{0:.2f} MB'.format(BYTE / MB)
+    ############### delete file #################
+    def edit_delete_file():
+      selected_doc_item = edit_doc_tree.selection()[0]
+      edit_doc_tree.delete(selected_doc_item)
+
+
+    ############## show file ###############
+
+    def show_sel_file(event):
+      selected_file = edit_doc_tree.item(edit_doc_tree.focus())["values"][1]
+      show = Toplevel()
+      show.geometry("700x500")
+      show.title("View Files")
+      if selected_file.lower().endswith(('.png','.jpg')):
+        open_image = Image.open("images/"+selected_file)
+        resize_img = open_image.resize((700,500))
+        img = ImageTk.PhotoImage(resize_img)
+        image = Label(show,image=img)
+        image.photo = img
+        image.pack()
+      else:
+        with open("images/"+selected_file,mode='r',encoding="utf-8",errors="ignore") as none_img:
+          data = none_img.read()
+          image = Label(show,text=data)
+          image.pack()
+    
+
+    edit_doc_plus_btn=Button(edit_estimate_documentFrame,text="+",width=2,height=2,command=edit_attach_file)
+    edit_doc_plus_btn.place(x=5,y=10)
+    edit_doc_minus_btn=Button(edit_estimate_documentFrame,height=2,width=2,text="-",command=edit_delete_file)
+    edit_doc_minus_btn.place(x=5,y=60)
+    # doc_txt_label=Label(estimate_documentFrame,text="Attached documents or image files.If you attach large email then email taken long time to send").place(x=50,y=10)
 
     
 
-    edit_doc_plus_btn=Button(edit_estimate_documentFrame,text="+",width=2,height=2)
-    edit_doc_plus_btn.place(x=5,y=10)
-    edit_doc_minus_btn=Button(edit_estimate_documentFrame,height=2,width=2,text="-")
-    edit_doc_minus_btn.place(x=5,y=60)
-    # doc_txt_label=Label(estimate_documentFrame,text="Attached documents or image files.If you attach large email then email taken long time to send").place(x=50,y=10)
     global edit_doc_tree
     edit_doc_tree=ttk.Treeview(edit_estimate_documentFrame, height=5)
     edit_doc_tree["columns"]=["1","2","3"]
@@ -28256,6 +29403,19 @@ def mainpage():
     edit_doc_tree.heading("3",text="Filesize")  
     edit_doc_tree.place(x=50, y=10)
     #edit_doc_tree.bind('<Double-Button-1>',show_sel_file)
+
+    for record in edit_doc_tree.get_children():
+      edit_doc_tree.delete(record)
+    doc_sql = "SELECT * FROM documents WHERE estimate_number=%s"
+    doc_val = (edit_est_fetch,)
+    fbcursor.execute(doc_sql,doc_val)
+    doc_details = fbcursor.fetchall()
+    print(doc_details)
+    countdoc = 0
+    for doc in doc_details:
+      file_size_3 = est_check_convertion(os.path.getsize("images/"+doc[6]))
+      edit_doc_tree.insert(parent='',index='end',iid=doc,text='',values=('',doc[6],file_size_3))
+    countdoc += 1
   
 
     edit_estimate_fir4Frame1=Frame(edit_estimate_pop,height=190,width=210,bg="#f5f3f2")
@@ -35904,7 +37064,7 @@ def mainpage():
       ordertotalinput=0
       j = 0
       for i in fbcursor:
-       est_tree.insert(parent='', index='end', iid=i, text='', values=(i[0], i[1], i[2], i[3], i[4],i[5], i[6], i[7], i[8]))
+       est_tree.insert(parent='', index='end', iid=i, text='', values=('',i[1],i[2],i[3],i[18],i[4],i[5],i[6],i[7],i[8]))
       for line in est_tree.get_children():
         idsave1=est_tree.item(line)['values'][9]
       ordertotalinput += idsave1
@@ -39985,12 +41145,6 @@ def mainpage():
           messagebox.destroy()
     
 
-  #delete orders  
-  def estimate_dele():  
-    messagebox.askyesno("Are you sure to delete this Estimate?")
-
-
-
 
   #search in orders  
   def estimate_search(): 
@@ -40052,62 +41206,6 @@ def mainpage():
             est_tree.insert(parent='',index='end',iid=i,text='',values=('',i[1],i[2],i[3],i[18],i[4],i[5],i[6],i[7],i[8]))
             count_cus +=1
           estimate_etop.destroy() 
-        elif estimate_my_n1.get() == 'Status':
-          fnd_sql="select * from estimate where status=%s"
-          fnd_sql_val=(estimate_e_n.get(),)
-          fbcursor.execute(fnd_sql,fnd_sql_val)
-          htj=fbcursor.fetchall()
-          for record in est_tree.get_children():
-            est_tree.delete(record)
-          count_cus=0
-
-          for i in htj:
-            
-            est_tree.insert(parent='',index='end',iid=i,text='',values=('',i[1],i[2],i[3],i[18],i[4],i[5],i[6],i[7],i[8]))
-            count_cus +=1
-          estimate_etop.destroy() 
-        elif estimate_my_n1.get() == 'Emailed on':
-          fnd_sql="select * from estimate where emailon=%s"
-          fnd_sql_val=(estimate_e_n.get(),)
-          fbcursor.execute(fnd_sql,fnd_sql_val)
-          htj=fbcursor.fetchall()
-          for record in est_tree.get_children():
-            est_tree.delete(record)
-          count_cus=0
-
-          for i in htj:
-            
-            est_tree.insert(parent='',index='end',iid=i,text='',values=('',i[1],i[2],i[3],i[18],i[4],i[5],i[6],i[7],i[8]))
-            count_cus +=1
-          estimate_etop.destroy() 
-        elif estimate_my_n1.get() == 'Printed on':
-          fnd_sql="select * from estimate where printon=%s"
-          fnd_sql_val=(estimate_e_n.get(),)
-          fbcursor.execute(fnd_sql,fnd_sql_val)
-          htj=fbcursor.fetchall()
-          for record in est_tree.get_children():
-            est_tree.delete(record)
-          count_cus=0
-
-          for i in htj:
-            
-            est_tree.insert(parent='',index='end',iid=i,text='',values=('',i[1],i[2],i[3],i[18],i[4],i[5],i[6],i[7],i[8]))
-            count_cus +=1
-          estimate_etop.destroy() 
-        elif estimate_my_n1.get() == 'SMS on':
-          fnd_sql="select * from estimate where smson=%s"
-          fnd_sql_val=(estimate_e_n.get(),)
-          fbcursor.execute(fnd_sql,fnd_sql_val)
-          htj=fbcursor.fetchall()
-          for record in est_tree.get_children():
-            est_tree.delete(record)
-          count_cus=0
-
-          for i in htj:
-            
-            est_tree.insert(parent='',index='end',iid=i,text='',values=('',i[1],i[2],i[3],i[18],i[4],i[5],i[6],i[7],i[8]))
-            count_cus +=1
-          estimate_etop.destroy() 
         elif estimate_my_n1.get() == 'Estimate total':
           fnd_sql="select * from estimate where esttot=%s"
           fnd_sql_val=(estimate_e_n.get(),)
@@ -40149,7 +41247,7 @@ def mainpage():
       estimate_findin1=Label(estimate_etop,text="Find in:",pady=5,padx=10).place(x=5,y=76)
       estimate_my_n1 = StringVar()
       estimate_findIN = ttk.Combobox(estimate_etop, width = 30, textvariable = estimate_my_n1 )
-      estimate_findIN['values'] = ('Estimate#', 'Estimate date', 'Due date','Customer name','Status','Emailed on', 'Printed on', 'SMS on','Estimate total','<<All>>')                       
+      estimate_findIN['values'] = ('Estimate#', 'Estimate date', 'Due date','Customer name','Estimate total','<<All>>')                       
       estimate_findIN.place(x=90,y=83)
       estimate_findIN.current(0)
 
@@ -40192,17 +41290,41 @@ def mainpage():
   estimate_orderLabel.pack(side="left")
 
   def delete_estimate():
-    delmess = messagebox.askyesno("Delete Estimate", "Are you sure to delete this Estimate?")
-  #   if delmess == True:
-  #     itemid = est_tree.item(est_tree.focus())["values"][0]
-  #     print(itemid)
-  #     sql = 'DELETE FROM estimate WHERE estimate_number=%s'
-  #     val = (itemid,)
-  #     fbcursor.execute(sql, val)
-  #     fbilldb.commit()
-  #     est_tree.delete(est_tree.selection()[0])
-  #   else:
-  #     pass
+    try:
+      est_id=est_tree.item(est_tree.focus())["values"][1]
+      print(est_id)
+      messagebox.askyesno("Delete Estimate", "["+ str(est_id) +"]\n" + "Are you sure to delete this Estimate?")
+      sql="DELETE FROM estimate WHERE estimate_number=%s"
+      val=(est_id,)
+      fbcursor.execute(sql,val)
+      fbilldb.commit()
+      #est_tree.selection_set(1)
+
+      sp_sql="DELETE FROM storingproduct WHERE estimate_number=%s"
+      sp_val=(est_id,)
+      fbcursor.execute(sp_sql,sp_val)
+      fbilldb.commit()
+
+      doc_sql="DELETE FROM documents WHERE estimate_number=%s"
+      doc_val=(est_id,)
+      fbcursor.execute(doc_sql,doc_val)
+      fbilldb.commit()
+
+
+      for record in est_tree.get_children():
+        est_tree.delete(record)
+      sql="select * from estimate"
+      fbcursor.execute(sql)
+      est_val=fbcursor.fetchall()
+      count_cus=0
+
+      for i in est_val:
+        est_tree.insert(parent='', index='end', iid=count_cus, text='', values=('',i[1],i[2],i[3],i[18],i[4],i[5],i[6],i[7],i[8]))
+        count_cus +=1
+    except:
+      pass
+
+  
 
 
 
@@ -40395,23 +41517,83 @@ def mainpage():
     sql = 'select * from company'
     fbcursor.execute(sql)
     est_check_protax = fbcursor.fetchone()
-    counto = 0
-    if not est_check_protax:
-      for i in est_storingproduct:
-        esttree.insert(parent='',index='end',text='',values=('',i[2],i[6],i[7],i[8],i[9],i[13]))
-        counto += 1
-    elif est_check_protax[12] == '1':
-      for i in est_storingproduct:
-        esttree.insert(parent='',index='end',text='',values=('',i[2],i[6],i[7],i[8],i[9],i[13]))
-        counto += 1
-    elif est_check_protax[12] == '2':
-      for i in est_storingproduct:
-        esttree.insert(parent='',index='end',text='',values=('',i[2],i[6],i[7],i[8],i[9],i[11],i[13]))
-        counto += 1
-    elif est_check_protax[12] == '3':
-      for i in est_storingproduct:
-        esttree.insert(parent='',index='end',text='',values=('',i[2],i[6],i[7],i[8],i[9],i[11],i[12],i[13]))
-        counto += 1
+
+    sql = "select currsignplace,currencysign from company"
+    fbcursor.execute(sql)
+    est_symbolcheck_3 = fbcursor.fetchone()
+
+    if est_symbolcheck_3[0] == "before amount":
+      counto = 0
+      if not est_check_protax:
+        for i in est_storingproduct:
+          esttree.insert(parent='',index='end',text='',values=('',i[2],i[6],i[7],i[8],i[9],est_symbolcheck_3[1]+str(i[13])))
+          counto += 1
+      elif est_check_protax[12] == '1':
+        for i in est_storingproduct:
+          esttree.insert(parent='',index='end',text='',values=('',i[2],i[6],i[7],i[8],i[9],est_symbolcheck_3[1]+str(i[13])))
+          counto += 1
+      elif est_check_protax[12] == '2':
+        for i in est_storingproduct:
+          esttree.insert(parent='',index='end',text='',values=('',i[2],i[6],i[7],i[8],i[9],i[11],est_symbolcheck_3[1]+str(i[13])))
+          counto += 1
+      elif est_check_protax[12] == '3':
+        for i in est_storingproduct:
+          esttree.insert(parent='',index='end',text='',values=('',i[2],i[6],i[7],i[8],i[9],i[11],i[12],est_symbolcheck_3[1]+str(i[13])))
+          counto += 1
+    elif est_symbolcheck_3[0] == "before amount with space":
+      counto = 0
+      if not est_check_protax:
+        for i in est_storingproduct:
+          esttree.insert(parent='',index='end',text='',values=('',i[2],i[6],i[7],i[8],i[9],est_symbolcheck_3[1]+" "+str(i[13])))
+          counto += 1
+      elif est_check_protax[12] == '1':
+        for i in est_storingproduct:
+          esttree.insert(parent='',index='end',text='',values=('',i[2],i[6],i[7],i[8],i[9],est_symbolcheck_3[1]+" "+str(i[13])))
+          counto += 1
+      elif est_check_protax[12] == '2':
+        for i in est_storingproduct:
+          esttree.insert(parent='',index='end',text='',values=('',i[2],i[6],i[7],i[8],i[9],i[11],est_symbolcheck_3[1]+" "+str(i[13])))
+          counto += 1
+      elif est_check_protax[12] == '3':
+        for i in est_storingproduct:
+          esttree.insert(parent='',index='end',text='',values=('',i[2],i[6],i[7],i[8],i[9],i[11],i[12],est_symbolcheck_3[1]+" "+str(i[13])))
+          counto += 1
+    elif est_symbolcheck_3[0] == "after amount":
+      counto = 0
+      if not est_check_protax:
+        for i in est_storingproduct:
+          esttree.insert(parent='',index='end',text='',values=('',i[2],i[6],i[7],i[8],i[9],str(i[13])+est_symbolcheck_3[1]))
+          counto += 1
+      elif est_check_protax[12] == '1':
+        for i in est_storingproduct:
+          esttree.insert(parent='',index='end',text='',values=('',i[2],i[6],i[7],i[8],i[9],str(i[13])+est_symbolcheck_3[1]))
+          counto += 1
+      elif est_check_protax[12] == '2':
+        for i in est_storingproduct:
+          esttree.insert(parent='',index='end',text='',values=('',i[2],i[6],i[7],i[8],i[9],i[11],str(i[13])+est_symbolcheck_3[1]))
+          counto += 1
+      elif est_check_protax[12] == '3':
+        for i in est_storingproduct:
+          esttree.insert(parent='',index='end',text='',values=('',i[2],i[6],i[7],i[8],i[9],i[11],i[12],str(i[13])+est_symbolcheck_3[1]))
+          counto += 1
+    elif est_symbolcheck_3[0] == "after amount with space":
+      counto = 0
+      if not est_check_protax:
+        for i in est_storingproduct:
+          esttree.insert(parent='',index='end',text='',values=('',i[2],i[6],i[7],i[8],i[9],str(i[13])+" "+est_symbolcheck_3[1]))
+          counto += 1
+      elif est_check_protax[12] == '1':
+        for i in est_storingproduct:
+          esttree.insert(parent='',index='end',text='',values=('',i[2],i[6],i[7],i[8],i[9],str(i[13])+" "+est_symbolcheck_3[1]))
+          counto += 1
+      elif est_check_protax[12] == '2':
+        for i in est_storingproduct:
+          esttree.insert(parent='',index='end',text='',values=('',i[2],i[6],i[7],i[8],i[9],i[11],str(i[13])+" "+est_symbolcheck_3[1]))
+          counto += 1
+      elif est_check_protax[12] == '3':
+        for i in est_storingproduct:
+          esttree.insert(parent='',index='end',text='',values=('',i[2],i[6],i[7],i[8],i[9],i[11],i[12],str(i[13])+" "+est_symbolcheck_3[1]))
+          counto += 1
 
   ############----------Private note display---------###########
   
@@ -40491,17 +41673,105 @@ def mainpage():
       est_tree.column(10, width = 160)
       est_tree.bind('<ButtonRelease-1>',est_view_details)
 
+      est_total_label=Label(self.left_frame,bg="#f5f3f2",anchor="w")
+      est_total_label.place(x=1200,y=300,width=135,height=18)
+
       sql = "SELECT * FROM estimate"
       fbcursor.execute(sql)
       estimate_records = fbcursor.fetchall()
 
-      count = 0
-      for i in estimate_records:
-        if True:
-          est_tree.insert(parent='',index='end',iid=i,text='',values=('',i[1],i[2],i[3],i[18],i[4],i[5],i[6],i[7],i[8]))
-        else:
-          pass
-      count += 1
+      sql = "select currsignplace,currencysign from company"
+      fbcursor.execute(sql)
+      est_symbolcheck_2 = fbcursor.fetchone()
+
+      if est_symbolcheck_2[0] == "before amount":
+
+        count = 0
+        for i in estimate_records:
+          if True:
+            est_tree.insert(parent='',index='end',iid=i,text='',values=('',i[1],i[2],i[3],i[18],i[4],i[5],i[6],i[7],est_symbolcheck_2[1]+str(i[8])))
+          else:
+            pass
+        count += 1
+      elif est_symbolcheck_2[0] == "before amount with space":
+
+        count = 0
+        for i in estimate_records:
+          if True:
+            est_tree.insert(parent='',index='end',iid=i,text='',values=('',i[1],i[2],i[3],i[18],i[4],i[5],i[6],i[7],est_symbolcheck_2[1]+" "+str(i[8])))
+          else:
+            pass
+        count += 1
+      elif est_symbolcheck_2[0] == "after amount":
+
+        count = 0
+        for i in estimate_records:
+          if True:
+            est_tree.insert(parent='',index='end',iid=i,text='',values=('',i[1],i[2],i[3],i[18],i[4],i[5],i[6],i[7],str(i[8])+est_symbolcheck_2[1]))
+          else:
+            pass
+        count += 1
+      elif est_symbolcheck_2[0] == "after amount with space":
+
+        count = 0
+        for i in estimate_records:
+          if True:
+            est_tree.insert(parent='',index='end',iid=i,text='',values=('',i[1],i[2],i[3],i[18],i[4],i[5],i[6],i[7],str(i[8])+" "+est_symbolcheck_2[1]))
+          else:
+            pass
+        count += 1
+      
+      ######### hide total sum #############
+      def est_hidetotsum():
+        estimate_productLabell.config(text="Show totals\nSum",command=est_showtotsum)
+        est_total_label.config(text='')
+        
+
+      ######### show total sum #############
+      def est_showtotsum():
+        estimate_productLabell.config(text="Hide totals\nSum",command=est_hidetotsum)
+
+        sql = "select * from company"
+        fbcursor.execute(sql)
+        comp_data = fbcursor.fetchone()
+
+        it = []
+        
+        for i in est_tree.get_children():
+          invtot = est_tree.item(i,'values')[9]
+          if comp_data[7] == "before amount":
+            it.append(invtot.split(str(comp_data[6]))[-1])
+            
+          if comp_data[7] == "after amount":
+            it.append(invtot.split(str(comp_data[6]))[0])
+            
+          if comp_data[7] == "before amount with space":
+            it.append(invtot.split(' ')[-1])
+            
+          if comp_data[7] == "after amount with space":
+            it.append(invtot.split(' ')[0])
+            
+
+        total_invtot = 0.0
+        
+        for a in it:
+          total_invtot += float(a)
+        
+        if comp_data[7] == "before amount":
+          est_total_label.config(text=comp_data[6] + str(round(total_invtot,2)))
+          
+        elif comp_data[7] == "after amount":
+          est_total_label.config(text=str(round(total_invtot,2)) + comp_data[6])
+          
+        elif comp_data[7] == "before amount  with space":
+          est_total_label.config(text=comp_data[6] + " " + str(round(total_invtot,2)))
+          
+        elif comp_data[7] == "after amount with space":
+          est_total_label.config(text=str(round(total_invtot,2)) + " " + comp_data[6])
+         
+
+      
+
 
       scrollbar = Scrollbar(self.left_frame)
       scrollbar.place(x=990+330+15, y=0, height=300+20)
@@ -40532,13 +41802,13 @@ def mainpage():
         esttree.heading(5, text="Price")
         esttree.heading(6, text="QTY")
         esttree.heading(7, text="Line Total")   
-        esttree.column(1, width = 50)
-        esttree.column(2, width = 270)
-        esttree.column(3, width = 250)
+        esttree.column(1, width = 80)
+        esttree.column(2, width = 295)
+        esttree.column(3, width = 275)
         esttree.column(4, width = 300)
-        esttree.column(5, width = 130)
+        esttree.column(5, width = 155)
         esttree.column(6, width = 100)
-        esttree.column(7, width = 100)
+        esttree.column(7, width = 135)
         
       elif tax_data[12] == "1":
         esttree = ttk.Treeview(tab1, columns = (1,2,3,4,5,6,7,), height = 15, show = "headings")
@@ -40549,13 +41819,13 @@ def mainpage():
         esttree.heading(5, text="Price")
         esttree.heading(6, text="QTY")
         esttree.heading(7, text="Line Total")   
-        esttree.column(1, width = 50)
-        esttree.column(2, width = 270)
-        esttree.column(3, width = 250)
+        esttree.column(1, width = 80)
+        esttree.column(2, width = 295)
+        esttree.column(3, width = 275)
         esttree.column(4, width = 300)
-        esttree.column(5, width = 130)
+        esttree.column(5, width = 155)
         esttree.column(6, width = 100)
-        esttree.column(7, width = 100)
+        esttree.column(7, width = 135)
         
       elif tax_data[12] == "2":
         esttree = ttk.Treeview(tab1, columns = (1,2,3,4,5,6,7,8,), height = 15, show = "headings")
@@ -40592,9 +41862,9 @@ def mainpage():
         esttree.column(3, width = 250)
         esttree.column(4, width = 300)
         esttree.column(5, width = 130)
-        esttree.column(6, width = 100)
-        esttree.column(7, width = 100)
-        esttree.column(8, width = 100)
+        esttree.column(6, width = 75)
+        esttree.column(7, width = 75)
+        esttree.column(8, width = 75)
         esttree.column(9, width = 150)
       esttree.pack(side = 'top')
 
