@@ -1501,1277 +1501,1283 @@ def mainpage():
       sql='SELECT * FROM estimate WHERE businessname=%s'
       val=(businessname,)
       fbcursor.execute(sql,val)
-      if fbcursor.fetchone()is not None:
-        estimate_newselection=Toplevel()
-        estimate_newselection.title("Select Customer")
-        estimate_newselection.geometry("930x650+240+10")
-        estimate_newselection.resizable(False, False)
-
-
-        #add new product
-        def estimate_product():  
-          estimate_top = Toplevel()  
-          estimate_top.title("Add a new Product/Service")
-          estimate_p2 = PhotoImage(file = 'images/fbicon.png')
-          estimate_top.iconphoto(False, estimate_p2)
-        
-          estimate_top.geometry("600x550+390+15")
-          estimate_tabControl = ttk.Notebook(estimate_top)
-          estimate_s = ttk.Style()
-          estimate_s.theme_use('default')
-          estimate_s.configure('TNotebook.Tab', background="#999999",padding=10,bd=0)
-
-
-          estimate_tab1 = ttk.Frame(estimate_tabControl)
-          estimate_tab2 = ttk.Frame(estimate_tabControl)
-        
-          estimate_tabControl.add(estimate_tab1,compound = LEFT, text ='Product/Service')
-          estimate_tabControl.add(estimate_tab2,compound = LEFT, text ='Product Image')
-        
-          estimate_tabControl.pack(expand = 1, fill ="both")
-
-          global filename
-          filename = ""
-
-          def este_upload_file():
-            global filename,img, b2
-            f_types =[('Png files','*.png'),('Jpg Files', '*.jpg'),('PDF', '*.pdf',)]
-            filename = filedialog.askopenfilename(filetypes=f_types)
-            shutil.copyfile(filename, os.getcwd()+'/images/'+filename.split('/')[-1])
-            image = Image.open(filename)
-            resize_image = image.resize((350, 350))
-            img = ImageTk.PhotoImage(resize_image)
-            b2 = Button(estimate_imageFrame,image=img)
-            b2.place(x=130, y=80)
-
-          
-          def est_addproducts():
-            global img , filename 
-            sku = estimate_codeentry.get()
-            status = estimate_checkvarStatus.get()
-            catgory = estimate_n.get()
-            name = estimate_nameentry.get()
-            description = estimate_desentry.get()
-            unitprice = estimate_uval.get()
-            peices = estimate_pcsentry.get()
-            cost = estimate_costval.get()
-            price_cost = estimate_priceval.get()
-            taxable = estimate_checkvarStatus2.get()
-            tax2 = estimate_checkvarStatus_2.get()
-            nostockcontrol = estimate_checkvarStatus3.get()
-            stock = estimate_stockentry.get()
-            lowstock = estimate_lowentry.get()
-            warehouse = estimate_wareentry.get()
-            pnotes = estimate_txt.get("1.0",'end-1c')
-            entries = [sku,name, unitprice, cost]
-            entri = []
-            for i in entries:
-              if i == '':
-                entri.append(i)
-            if len(entri) == 0:
-              sql = 'select * from Productservice where sku = %s or name = %s'
-              val  = (sku, name)
-              fbcursor.execute(sql, val)
-              fbcursor.fetchall()
-              row_count = fbcursor.rowcount
-              if row_count == 0:
-                if filename == "":
-                  sql = 'insert into Productservice(sku, category, name, description, status, unitprice, peices, cost, taxable, priceminuscost, serviceornot, stock, stocklimit, warehouse, privatenote,tax2) values(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s)'
-                  val = (sku, catgory, name, description, status, unitprice, peices, cost, taxable, price_cost, nostockcontrol, stock, lowstock, warehouse, pnotes,tax2)
-                  fbcursor.execute(sql, val)
-                  fbilldb.commit()
-                else:
-                  file = shutil.copyfile(filename, os.getcwd()+'/images/'+filename.split('/')[-1])
-                  sql = 'insert into Productservice(sku, category, name, description, status, unitprice, peices, cost, taxable, priceminuscost, serviceornot, stock, stocklimit, warehouse, image, privatenote,tax2) values(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s)'
-                  val = (sku, catgory, name, description, status, unitprice, peices, cost, taxable, price_cost, nostockcontrol, stock, lowstock, warehouse, filename.split('/')[-1], pnotes,tax2)
-                  fbcursor.execute(sql, val)
-                  fbilldb.commit()
-              else:
-                messagebox.showinfo("Alert", "Entry with same name or SKU already exists.\nTry again.")
-                estimate_top.destroy()
-
-              for record in estimate_cusventtree1.get_children():
-                estimate_cusventtree1.delete(record)
-              fbcursor.execute("select *  from Productservice")
-              est_pandsdata = fbcursor.fetchall()
-              countp = 0
-              for i in est_pandsdata:
-                if i[12] == '1':
-                  servi = '🗹'
-                else:
-                  servi = ''
-                sql = "select currencysign,currsignplace from company"
-                fbcursor.execute(sql)
-                estcurrsymb = fbcursor.fetchone()
-                if not estcurrsymb: 
-                  if i[13] > i[14]:
-                    estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('green',))
-                    countp += 1              
-                  elif i[12] == '1':
-                    estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('blue',))
-                    countp += 1
-                  else:
-                    estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('red',))
-                    countp += 1
-                          
-                elif estcurrsymb[1] == "before amount":
-                  if (i[13]) > (i[14]):
-                    estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('green',))
-                    countp += 1
-                  elif i[12] == '1':
-                    estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('blue',))
-                    countp += 1
-                  else:
-                    estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('red',))
-                    countp += 1
-
-                elif estcurrsymb[1] == "before amount with space":
-                  if (i[13]) > (i[14]):
-                    estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('green',))
-                    countp += 1
-                  elif i[12] == '1':
-                    estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('blue',))
-                    countp += 1
-                  else:
-                    estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('red',))
-                    countp += 1
-
-                elif estcurrsymb[1] == "after amount":
-                  if (i[13]) > (i[14]):
-                    estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('green',))
-                    countp += 1
-                  elif i[12] == '1':
-                    estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('blue',))
-                    countp += 1
-                  else:
-                    estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('red',))
-                    countp += 1
-
-                elif estcurrsymb[1] == "after amount with space":
-                  if (i[13]) > (i[14]):
-                    estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('green',))
-                    countp += 1
-                  elif i[12] == '1':
-                    estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('blue',))
-                    countp += 1
-                  else:
-                    estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('red',))
-                    countp += 1
-
-              estimate_top.destroy()
-    
       
-          estimate_innerFrame = Frame(estimate_tab1,bg="#f5f3f2", relief=GROOVE)
-          estimate_innerFrame.pack(side="top",fill=BOTH)
-
-          estimate_Customerlabelframe = LabelFrame(estimate_innerFrame,text="Product/Service",width=580,height=455)
-          estimate_Customerlabelframe.pack(side="top",fill=BOTH,padx=10,pady=(10,45))
-
-          fbcursor.execute("SELECT * FROM Productservice ORDER BY sku DESC LIMIT 1")
-          skuin = fbcursor.fetchone()
-
-          estimate_code1=Label(estimate_Customerlabelframe,text="Code or SKU:",fg="blue",pady=10,padx=10)
-          estimate_code1.place(x=20,y=0)
-          estimate_codeentry = Entry(estimate_Customerlabelframe,width=35)
-          estimate_codeentry.place(x=120,y=8)
-
-          estimate_checkvarStatus=IntVar()
-          estimate_status1=Label(estimate_Customerlabelframe,text="Status:")
-          estimate_status1.place(x=400,y=8)
-          estimate_Button1 = Checkbutton(estimate_Customerlabelframe,
-                            variable = estimate_checkvarStatus,text="Active",compound="right",
-                            onvalue =1,
-                            offvalue = 0,
-                          
-                            width = 10)
-
-          estimate_Button1.place(x=450,y=5)
-
-          estimate_category1=Label(estimate_Customerlabelframe,text="Category:",pady=5,padx=10)
-          estimate_category1.place(x=20,y=40)
-          estimate_n = StringVar()
-          estimate_country0 = ttk.Combobox(estimate_Customerlabelframe, width = 40, textvariable = estimate_n )
-          estimate_country0['values'] = ('Default')
-          estimate_country0.place(x=120,y=45)
-          estimate_country0.insert(0, 'Default')
+      estimate_newselection=Toplevel()
+      estimate_newselection.title("Select Customer")
+      estimate_newselection.geometry("930x650+240+10")
+      estimate_newselection.resizable(False, False)
 
 
-          estimate_name81=Label(estimate_Customerlabelframe,text="Name :",fg="blue",pady=5,padx=10)
-          estimate_name81.place(x=20,y=70)
-          estimate_nameentry = Entry(estimate_Customerlabelframe,width=60)
-          estimate_nameentry.place(x=120,y=75)
-
-          estimate_des1=Label(estimate_Customerlabelframe,text="Description :",pady=5,padx=10)
-          estimate_des1.place(x=20,y=100)
-          estimate_desentry = Entry(estimate_Customerlabelframe,width=60)
-          estimate_desentry.place(x=120,y=105)
-          def est_prdoucts_cal(S,d):
-            if d == '1': #insert
-              if not S in ['.','0','1','2','3','4','5','6','7','8','9']:
-                return False
-              return True
-            if d.isdigit():
-              return True
+      #add new product
+      def estimate_product():  
+        estimate_top = Toplevel()  
+        estimate_top.title("Add a new Product/Service")
+        estimate_p2 = PhotoImage(file = 'images/fbicon.png')
+        estimate_top.iconphoto(False, estimate_p2)
+      
+        estimate_top.geometry("600x550+390+15")
+        estimate_tabControl = ttk.Notebook(estimate_top)
+        estimate_s = ttk.Style()
+        estimate_s.theme_use('default')
+        estimate_s.configure('TNotebook.Tab', background="#999999",padding=10,bd=0)
 
 
-          estimate_uval = StringVar()(value="0")
-          estimate_unit1=Label(estimate_Customerlabelframe,text="Unit Price:",fg="blue",pady=5,padx=10)
-          estimate_unit1.place(x=20,y=130)
-          estimate_unitentry = Entry(estimate_Customerlabelframe,width=20,textvariable=estimate_uval)
-          estimate_unitentry.place(x=120,y=135)
-          est_cal_unit = (estimate_Customerlabelframe.register(est_prdoucts_cal),'%S','%d')
-          estimate_unitentry.config(validate='key',validatecommand=(est_cal_unit),justify='right')
+        estimate_tab1 = ttk.Frame(estimate_tabControl)
+        estimate_tab2 = ttk.Frame(estimate_tabControl)
+      
+        estimate_tabControl.add(estimate_tab1,compound = LEFT, text ='Product/Service')
+        estimate_tabControl.add(estimate_tab2,compound = LEFT, text ='Product Image')
+      
+        estimate_tabControl.pack(expand = 1, fill ="both")
 
-          # estimate_pcsval = IntVar(estimate_Customerlabelframe, value='$0.00')
-          estimate_pcs1=Label(estimate_Customerlabelframe,text="Pcs/Weight:",fg="blue",pady=5,padx=10)
-          estimate_pcs1.place(x=330,y=135)
-          estimate_pcsentry = Entry(estimate_Customerlabelframe,width=20)
-          estimate_pcsentry.place(x=420,y=140)
-
-          estimate_costval = StringVar(value="0")
-          estimate_cost1=Label(estimate_Customerlabelframe,text="Cost:",pady=5,padx=10)
-          estimate_cost1.place(x=20,y=160)
-          estimate_costentry = Entry(estimate_Customerlabelframe,width=20,textvariable=estimate_costval)
-          estimate_costentry.place(x=120,y=165)
-          est_cal_cost = (estimate_Customerlabelframe.register(est_prdoucts_cal),'%S','%d')
-          estimate_costentry.config(validate='key',validatecommand=(est_cal_cost),justify='right')
-
-
-          def est_set_label(name, index, mode):
-            est_copr = float(estimate_uval.get()) - float(estimate_costval.get())
-            estimate_priceval.set(str(est_copr))
-
-
-          estimate_priceval = StringVar()
-          estimate_price1=Label(estimate_Customerlabelframe,text="(Price Cost):",pady=5,padx=10)
-          estimate_price1.place(x=20,y=190)
-          estimate_priceentry = Entry(estimate_Customerlabelframe,width=20,textvariable=estimate_priceval,state=DISABLED,disabledbackground="white",disabledforeground="black")
-          estimate_priceentry.config(justify="right")
-          estimate_priceentry.place(x=120,y=195)
-
-
-          estimate_uval.trace('w', est_set_label)
-          estimate_costval.trace('w', est_set_label)
-
-          sql = "select taxtype from company"
-          fbcursor.execute(sql)
-          est_taxchoose = fbcursor.fetchone()
-
-          estimate_checkvarStatus2=IntVar()
+        global filename
+        filename = ""
         
-          estimate_Button92 = Checkbutton(estimate_Customerlabelframe,variable = estimate_checkvarStatus2,
-                            text="Taxable Tax1rate",compound="right",
-                            onvalue =1 ,
-                            offvalue = 0,
-                            height=2,
-                            width = 12)
 
-          #estimate_Button92.place(x=415,y=170)
-
-          estimate_checkvarStatus_2=IntVar()
+        def este_upload_file():
+          global filename,img, b2
+          f_types =[('Png files','*.png'),('Jpg Files', '*.jpg'),('PDF', '*.pdf',)]
+          filename = filedialog.askopenfilename(filetypes=f_types)
+          shutil.copyfile(filename, os.getcwd()+'/images/'+filename.split('/')[-1])
+          image = Image.open(filename)
+          resize_image = image.resize((300, 300))
+          img = ImageTk.PhotoImage(resize_image)
+          b2 = Button(estimate_imageFrame,image=img)
+          b2.place(x=130, y=80)
+         
+          
         
-          estimate_Button_92 = Checkbutton(estimate_Customerlabelframe,variable = estimate_checkvarStatus_2,
-                            text="Taxable Tax2rate",compound="right",
-                            onvalue =1,
-                            offvalue =0,
-                            height=2,
-                            width = 12)
-
-          #estimate_Button_92.place(x=415,y=210)
-          if not est_taxchoose:
-            pass
-          elif est_taxchoose[0] == '1':
-            estimate_Button92.place_forget()
-            estimate_Button_92.place_forget()
-          elif est_taxchoose[0] == '2':
-            estimate_Button92.place(x=415,y=170)
-            estimate_Button_92.place_forget()
-          elif est_taxchoose[0] == '3':
-            estimate_Button92.place(x=415,y=170)
-            estimate_Button_92.place(x=415,y=210)
-
-          def est_switch():
-            if estimate_checkvarStatus3.get():
-              estimate_stockentry["state"] = DISABLED
-              estimate_lowentry["state"] = DISABLED
-              estimate_wareentry["state"] = DISABLED
-            else:
-              estimate_stockentry["state"] = NORMAL
-              estimate_lowentry["state"] = NORMAL
-              estimate_wareentry["state"] = NORMAL
-          
-          estimate_checkvarStatus3=BooleanVar()
-          estimate_Button93 = Checkbutton(estimate_Customerlabelframe,variable = estimate_checkvarStatus3,command=est_switch, 
-                            text="This is a service(no stock control)",
-                            onvalue =1 ,
-                            offvalue =0,
-                            height=3)
-          estimate_Button93.place(x=40,y=220)
-
-          def est_stocknum(input):
-            if input.isdigit():
-              return True
-            elif input is "":
-              return True
-            else:
-              return False
-
-
-          
-          estimate_stock1=Label(estimate_Customerlabelframe,text="Stock:",pady=5,padx=10)
-          estimate_stock1.place(x=90,y=260)
-          estimate_stockentry = Entry(estimate_Customerlabelframe,width=15)
-          estimate_stockentry.place(x=150,y=265)
-          est_sto = estimate_Customerlabelframe.register(est_stocknum)
-          estimate_stockentry.config(validate="key",validatecommand=(est_sto, '%S'))
-
-          
-          estimate_low1=Label(estimate_Customerlabelframe,text="Low Stock Warning Limit:",pady=5,padx=10)
-          estimate_low1.place(x=270,y=260)
-          estimate_lowentry = Entry(estimate_Customerlabelframe,width=10)
-          estimate_lowentry.place(x=432,y=265)
-          est_lowsto = estimate_Customerlabelframe.register(est_stocknum)
-          estimate_lowentry.config(validate="key",validatecommand=(est_lowsto, '%S'))
-
-        
-          estimate_ware1=Label(estimate_Customerlabelframe,text="Warehouse:",pady=5,padx=10)
-          estimate_ware1.place(x=60,y=290)
-          estimate_wareentry = Entry(estimate_Customerlabelframe,width=50)
-          estimate_wareentry.place(x=150,y=295)
-
-          estimate_text10=Label(estimate_Customerlabelframe,text="Private notes(not appears on invoice):",pady=5,padx=10)
-          estimate_text10.place(x=20,y=330)
-
-          estimate_txt = scrolledtext.ScrolledText(estimate_Customerlabelframe, undo=True,width=62,height=4)
-          estimate_txt.place(x=32,y=358)
-
-
-
-
-          estimate_okButton = Button(estimate_innerFrame,compound = LEFT,image=tick , text ="Ok",width=60,command=est_addproducts)
-          estimate_okButton.place(x=10,y=475)
-
-          def est_closetab():
-            estimate_top.destroy()
-
-
-          estimate_cancelButton = Button(estimate_innerFrame,compound = LEFT,image=cancel ,text="Cancel",width=60,command=est_closetab)
-          estimate_cancelButton.place(x=519,y=475)
-
-          estimate_imageFrame = Frame(estimate_tab2, relief=GROOVE,height=580)
-          estimate_imageFrame.pack(side="top",fill=BOTH)
-          
-
-          estimate_browseimg=Label(estimate_imageFrame,text=" Browse for product image file(recommended image type:JPG,size 480x320 pixels) ",bg='#f5f3f2')
-          estimate_browseimg.place(x=15,y=35)
-
-          estimate_browsebutton=Button(estimate_imageFrame,text = 'Browse',command=este_upload_file)
-          estimate_browsebutton.place(x=520,y=30,height=30,width=50)
-          
-          estimate_removeButton = Button(estimate_imageFrame,compound = LEFT,image=cancel, text ="Remove Product Image",width=150, command=lambda: b2.destroy())
-          estimate_removeButton.place(x=400,y=450)
-        
-        # ###---------------Edit product-----------------###    
-        def est_edit_product(): 
-          edit_est_itemid = estimate_cusventtree1.item(estimate_cusventtree1.focus())["values"][0]  
-          global filename
-          filename = ""
-        
-          def edit_estupload_file():
-            global filename,img, b2
-            f_types =[('Png files','*.png'),('Jpg Files', '*.jpg')]
-            filename = filedialog.askopenfilename(filetypes=f_types)
-            shutil.copyfile(filename, os.getcwd()+'/images/'+filename.split('/')[-1])
-            image = Image.open(filename)
-            resize_image = image.resize((350, 350))
-            img = ImageTk.PhotoImage(resize_image)
-            edit_est_b2 = Button(edit_est_imageFrame,image=img)
-            edit_est_b2.place(x=130, y=80)
-          
-          def edit_est_updateproducts():
-            global img , filename 
-            sku = edit_est_codeentry.get()
-            status = edit_est_checkvarStatus.get()
-            catgory = edit_est_n.get()
-            name = edit_est_nameentry.get()
-            description = edit_est_desentry.get()
-            unitprice = edit_est_uval.get()
-            peices = edit_est_pcsentry.get()
-            cost = edit_est_costval.get()
-            price_cost = edit_est_priceval.get()
-            taxable = edit_est_checkvarStatus2.get()
-            tax2 = edit_est_checkvarStatustax2.get()
-            nostockcontrol = edit_est_checkvarStatus3.get()
-            stock = edit_est_stockval.get()
-            lowstock = edit_est_lowval.get()
-            warehouse = edit_est_wareentry.get()
-            pnotes = edit_est_sctxt.get("1.0", 'end-1c')
-            entries = [sku, name, unitprice, cost]
-            entri = []
-            for i in entries:
-              if i == '':
-                entri.append(i)
-            if len(entri) == 0:
+        def est_addproducts():
+          global img , filename 
+          sku = estimate_codeentry.get()
+          status = estimate_checkvarStatus.get()
+          catgory = estimate_n.get()
+          name = estimate_nameentry.get()
+          description = estimate_desentry.get()
+          unitprice = estimate_uval.get()
+          peices = estimate_pcsentry.get()
+          cost = estimate_costval.get()
+          price_cost = estimate_priceval.get()
+          taxable = estimate_checkvarStatus2.get()
+          tax2 = estimate_checkvarStatus_2.get()
+          nostockcontrol = estimate_checkvarStatus3.get()
+          stock = estimate_stockentry.get()
+          lowstock = estimate_lowentry.get()
+          warehouse = estimate_wareentry.get()
+          pnotes = estimate_txt.get("1.0",'end-1c')
+          entries = [sku,name, unitprice, cost]
+          entri = []
+          for i in entries:
+            if i == '':
+              entri.append(i)
+          if len(entri) == 0:
+            sql = 'select * from Productservice where sku = %s or name = %s'
+            val  = (sku, name)
+            fbcursor.execute(sql, val)
+            fbcursor.fetchall()
+            row_count = fbcursor.rowcount
+            if row_count == 0:
               if filename == "":
-                print("hello")
-                sql = "update Productservice set sku=%s, category=%s, name=%s, description=%s, status=%s, unitprice=%s, peices=%s, cost=%s, taxable=%s, priceminuscost=%s, serviceornot=%s, stock=%s, stocklimit=%s, warehouse=%s, privatenote=%s,tax2=%s where sku = %s"
-                val = (sku, catgory, name, description, status, unitprice, peices, cost, taxable, price_cost, nostockcontrol, stock, lowstock, warehouse, pnotes,tax2, edit_est_itemid)
+                sql = 'insert into Productservice(sku, category, name, description, status, unitprice, peices, cost, taxable, priceminuscost, serviceornot, stock, stocklimit, warehouse, privatenote,tax2) values(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s)'
+                val = (sku, catgory, name, description, status, unitprice, peices, cost, taxable, price_cost, nostockcontrol, stock, lowstock, warehouse, pnotes,tax2)
                 fbcursor.execute(sql, val)
                 fbilldb.commit()
               else:
-                print("hai")
                 file = shutil.copyfile(filename, os.getcwd()+'/images/'+filename.split('/')[-1])
-                sql = "update Productservice set category=%s, name=%s, description=%s, status=%s, unitprice=%s, peices=%s, cost=%s, taxable=%s, priceminuscost=%s, serviceornot=%s, stock=%s, stocklimit=%s, warehouse=%s, image=%s, privatenote=%s,tax2=%s where sku = %s"
-                val = (catgory, name, description, status, unitprice, peices, cost, taxable, price_cost, nostockcontrol, stock, lowstock, warehouse,filename.split('/')[-1], pnotes,tax2, edit_est_itemid)
+                sql = 'insert into Productservice(sku, category, name, description, status, unitprice, peices, cost, taxable, priceminuscost, serviceornot, stock, stocklimit, warehouse, image, privatenote,tax2) values(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s)'
+                val = (sku, catgory, name, description, status, unitprice, peices, cost, taxable, price_cost, nostockcontrol, stock, lowstock, warehouse, filename.split('/')[-1], pnotes,tax2)
                 fbcursor.execute(sql, val)
                 fbilldb.commit()
-              for record in estimate_cusventtree1.get_children():
-                estimate_cusventtree1.delete(record)
-              fbcursor.execute("select *  from Productservice")
-              edit_est_pandsdata = fbcursor.fetchall()
-              countp = 0
-              for i in edit_est_pandsdata:
-                if i[12] == '1':
-                  servi = '🗹'
-                else:
-                  servi = ''
-                sql = "select currencysign,currsignplace from company"
-                fbcursor.execute(sql)
-                estcurrsymb = fbcursor.fetchone()
-                if not estcurrsymb: 
-                  if i[13] > i[14]:
-                    estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('green',))
-                    countp += 1              
-                  elif i[12] == '1':
-                    estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('blue',))
-                    countp += 1
-                  else:
-                    estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('red',))
-                    countp += 1
-                          
-                elif estcurrsymb[1] == "before amount":
-                  if (i[13]) > (i[14]):
-                    estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('green',))
-                    countp += 1
-                  elif i[12] == '1':
-                    estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('blue',))
-                    countp += 1
-                  else:
-                    estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('red',))
-                    countp += 1
-
-                elif estcurrsymb[1] == "before amount with space":
-                  if (i[13]) > (i[14]):
-                    estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('green',))
-                    countp += 1
-                  elif i[12] == '1':
-                    estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('blue',))
-                    countp += 1
-                  else:
-                    estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('red',))
-                    countp += 1
-
-                elif estcurrsymb[1] == "after amount":
-                  if (i[13]) > (i[14]):
-                    estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('green',))
-                    countp += 1
-                  elif i[12] == '1':
-                    estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('blue',))
-                    countp += 1
-                  else:
-                    estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('red',))
-                    countp += 1
-
-                elif estcurrsymb[1] == "after amount with space":
-                  if (i[13]) > (i[14]):
-                    estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('green',))
-                    countp += 1
-                  elif i[12] == '1':
-                    estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('blue',))
-                    countp += 1
-                  else:
-                    estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('red',))
-                    countp += 1
-              edit_est_top.destroy()
             else:
-              messagebox.showinfo("F-Billing Revolution", "Fields name or SKU entered is already in database.")
-              edit_est_top.destroy()
-              
+              messagebox.showinfo("Alert", "Entry with same name or SKU already exists.\nTry again.")
+              estimate_top.destroy()
 
-          sql = "select * from Productservice where sku = %s"
-          val = (edit_est_itemid, )
-          fbcursor.execute(sql, val)
-          edit_est_psdata = fbcursor.fetchone()
-          print(edit_est_itemid)
-          edit_est_top = Toplevel()  
-          edit_est_top.title("Edit Product/Service details")
-          p3 = PhotoImage(file = 'images/fbicon.png')
-          edit_est_top.iconphoto(False, p3)
-          edit_est_top.geometry("600x550+350+15")
-          tabControl = ttk.Notebook(edit_est_top)
-          s = ttk.Style()
-          s.theme_use('default')
-          s.configure('TNotebook.Tab', background="#999999", width=50, padding=10,bd=0)
+            for record in estimate_cusventtree1.get_children():
+              estimate_cusventtree1.delete(record)
+            fbcursor.execute("select *  from Productservice")
+            est_pandsdata = fbcursor.fetchall()
+            countp = 0
+            for i in est_pandsdata:
+              if i[12] == '1':
+                servi = '🗹'
+              else:
+                servi = ''
+              sql = "select currencysign,currsignplace from company"
+              fbcursor.execute(sql)
+              estcurrsymb = fbcursor.fetchone()
+              if not estcurrsymb: 
+                if i[13] > i[14]:
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('green',))
+                  countp += 1              
+                elif i[12] == '1':
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('blue',))
+                  countp += 1
+                else:
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('red',))
+                  countp += 1
+                        
+              elif estcurrsymb[1] == "before amount":
+                if (i[13]) > (i[14]):
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('green',))
+                  countp += 1
+                elif i[12] == '1':
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('blue',))
+                  countp += 1
+                else:
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('red',))
+                  countp += 1
 
-          edit_est_taba = ttk.Frame(tabControl)
-          edit_est_tabb = ttk.Frame(tabControl)
-          
-          tabControl.add(edit_est_taba,compound = LEFT, text ='Product/Service')
-          tabControl.add(edit_est_tabb,compound = LEFT, text ='Product Image')
-          
-          tabControl.pack(expand = 1, fill ="both")
-          
-          edit_est_innerFrame = Frame(edit_est_taba,bg="#f5f3f2", relief=GROOVE)
-          edit_est_innerFrame.pack(side="top",fill=BOTH)
+              elif estcurrsymb[1] == "before amount with space":
+                if (i[13]) > (i[14]):
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('green',))
+                  countp += 1
+                elif i[12] == '1':
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('blue',))
+                  countp += 1
+                else:
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('red',))
+                  countp += 1
 
-          edit_est_updateframe = LabelFrame(edit_est_innerFrame,text="Product/Service",width=580,height=455)
-          edit_est_updateframe.pack(side="top",fill=BOTH,padx=10,pady=(10,45))
+              elif estcurrsymb[1] == "after amount":
+                if (i[13]) > (i[14]):
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('green',))
+                  countp += 1
+                elif i[12] == '1':
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('blue',))
+                  countp += 1
+                else:
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('red',))
+                  countp += 1
 
-          edit_est_code1=Label(edit_est_updateframe,text="Code or SKU:",fg="blue",pady=10,padx=10)
-          edit_est_code1.place(x=20,y=0)
-          edit_est_codeentry = Entry(edit_est_updateframe,width=35)
-          edit_est_codeentry.place(x=120,y=8)
-          edit_est_codeentry.insert(0, edit_est_psdata[2])
+              elif estcurrsymb[1] == "after amount with space":
+                if (i[13]) > (i[14]):
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('green',))
+                  countp += 1
+                elif i[12] == '1':
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('blue',))
+                  countp += 1
+                else:
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('red',))
+                  countp += 1
 
-          edit_est_checkvarStatus=IntVar()
-          edit_est_status1=Label(edit_est_updateframe,text="Status:")
-          edit_est_status1.place(x=400,y=8)
-          edit_est_Button1 = Checkbutton(edit_est_updateframe, 
-                            variable = edit_est_checkvarStatus,text="Active",compound="right",
-                            onvalue =1,
-                            offvalue =0,
-                            width = 10)
-          edit_est_Button1.place(x=450,y=5)
-          edit_est_sta = edit_est_psdata[6]
-          if edit_est_sta == '1':
-            edit_est_Button1.select()
-          else:
-            edit_est_Button1.deselect()
+            estimate_top.destroy()
+  
+    
+        estimate_innerFrame = Frame(estimate_tab1,bg="#f5f3f2", relief=GROOVE)
+        estimate_innerFrame.pack(side="top",fill=BOTH)
+
+        estimate_Customerlabelframe = LabelFrame(estimate_innerFrame,text="Product/Service",width=580,height=455)
+        estimate_Customerlabelframe.pack(side="top",fill=BOTH,padx=10,pady=(10,45))
+
+        fbcursor.execute("SELECT * FROM Productservice ORDER BY sku DESC LIMIT 1")
+        skuin = fbcursor.fetchone()
+
+        estimate_code1=Label(estimate_Customerlabelframe,text="Code or SKU:",fg="blue",pady=10,padx=10)
+        estimate_code1.place(x=20,y=0)
+        estimate_codeentry = Entry(estimate_Customerlabelframe,width=35)
+        estimate_codeentry.place(x=120,y=8)
+
+        estimate_checkvarStatus=IntVar()
+        estimate_status1=Label(estimate_Customerlabelframe,text="Status:")
+        estimate_status1.place(x=400,y=8)
+        estimate_Button1 = Checkbutton(estimate_Customerlabelframe,
+                          variable = estimate_checkvarStatus,text="Active",compound="right",
+                          onvalue =1,
+                          offvalue = 0,
+                        
+                          width = 10)
+
+        estimate_Button1.place(x=450,y=5)
+
+        estimate_category1=Label(estimate_Customerlabelframe,text="Category:",pady=5,padx=10)
+        estimate_category1.place(x=20,y=40)
+        estimate_n = StringVar()
+        estimate_country0 = ttk.Combobox(estimate_Customerlabelframe, width = 40, textvariable = estimate_n )
+        estimate_country0['values'] = ('Default')
+        estimate_country0.place(x=120,y=45)
+        estimate_country0.insert(0, 'Default')
 
 
+        estimate_name81=Label(estimate_Customerlabelframe,text="Name :",fg="blue",pady=5,padx=10)
+        estimate_name81.place(x=20,y=70)
+        estimate_nameentry = Entry(estimate_Customerlabelframe,width=60)
+        estimate_nameentry.place(x=120,y=75)
 
-          edit_est_category1=Label(edit_est_updateframe,text="Category:",pady=5,padx=10)
-          edit_est_category1.place(x=20,y=40)
-          edit_est_n = StringVar() 
-          edit_est_category = Entry(edit_est_updateframe,width=40,textvariable=edit_est_n) 
-          edit_est_category.insert(0, edit_est_psdata[3])
-          edit_est_category = ttk.Combobox(edit_est_updateframe, width = 40, textvariable = edit_est_n )
-          edit_est_category['values'] = ('Default')
-          edit_est_category.place(x=120,y=45)
-          #edit_est_category.insert(0, 'Default')
+        estimate_des1=Label(estimate_Customerlabelframe,text="Description :",pady=5,padx=10)
+        estimate_des1.place(x=20,y=100)
+        estimate_desentry = Entry(estimate_Customerlabelframe,width=60)
+        estimate_desentry.place(x=120,y=105)
+        def est_prdoucts_cal(S,d):
+          if d == '1': #insert
+            if not S in ['.','0','1','2','3','4','5','6','7','8','9']:
+              return False
+            return True
+          if d.isdigit():
+            return True
 
 
+        estimate_uval = StringVar()                        #(value="0")
+        estimate_unit1=Label(estimate_Customerlabelframe,text="Unit Price:",fg="blue",pady=5,padx=10)
+        estimate_unit1.place(x=20,y=130)
+        estimate_unitentry = Entry(estimate_Customerlabelframe,width=20,textvariable=estimate_uval)
+        estimate_unitentry.place(x=120,y=135)
+        est_cal_unit = (estimate_Customerlabelframe.register(est_prdoucts_cal),'%S','%d')
+        estimate_unitentry.config(validate='key',validatecommand=(est_cal_unit),justify='right')
 
-          edit_est_name1=Label(edit_est_updateframe,text="Name :",fg="blue",pady=5,padx=10)
-          edit_est_name1.place(x=20,y=70)
-          edit_est_nameentry = Entry(edit_est_updateframe,width=70)
-          edit_est_nameentry.place(x=120,y=75)
-          edit_est_nameentry.insert(0, edit_est_psdata[4])
+        # estimate_pcsval = IntVar(estimate_Customerlabelframe, value='$0.00')
+        estimate_pcs1=Label(estimate_Customerlabelframe,text="Pcs/Weight:",fg="blue",pady=5,padx=10)
+        estimate_pcs1.place(x=330,y=135)
+        estimate_pcsentry = Entry(estimate_Customerlabelframe,width=20)
+        estimate_pcsentry.place(x=420,y=140)
 
-          edit_est_des1=Label(edit_est_updateframe,text="Description :",pady=5,padx=10)
-          edit_est_des1.place(x=20,y=100)
-          edit_est_desentry = Entry(edit_est_updateframe,width=70)
-          edit_est_desentry.place(x=120,y=105)
-          edit_est_desentry.insert(0, edit_est_psdata[5])
+        estimate_costval = StringVar(value="0")
+        estimate_cost1=Label(estimate_Customerlabelframe,text="Cost:",pady=5,padx=10)
+        estimate_cost1.place(x=20,y=160)
+        estimate_costentry = Entry(estimate_Customerlabelframe,width=20,textvariable=estimate_costval)
+        estimate_costentry.place(x=120,y=165)
+        est_cal_cost = (estimate_Customerlabelframe.register(est_prdoucts_cal),'%S','%d')
+        estimate_costentry.config(validate='key',validatecommand=(est_cal_cost),justify='right')
 
-          def edit_est_set_label(name, index, mode):
-            edit_est_priceval.set(float(edit_est_uval.get()) - float(edit_est_costval.get()))
 
-          def edit_est_prdoucts_cal(S,d):
-            if d == '1': #insert
-              if not S in ['.','0','1','2','3','4','5','6','7','8','9']:
-                return False
-              return True
-            if d.isdigit():
-              return True
-          
-          edit_est_unit1=Label(edit_est_updateframe,text="Unit Price:",fg="blue",pady=5,padx=10)
-          edit_est_unit1.place(x=20,y=130)
-          
-          edit_est_uval = StringVar()
-          edit_est_unitentry = Entry(edit_est_updateframe,width=20,textvariable=edit_est_uval)
-          edit_est_unitentry.place(x=120,y=135)
-          edit_est_unitentry.delete(0,'end')
-          edit_est_unitentry.insert(0, edit_est_psdata[7])
-          edit_est_cal_unit = (edit_est_updateframe.register(edit_est_prdoucts_cal),'%S','%d')
-          edit_est_unitentry.config(validate='key',validatecommand=(edit_est_cal_unit),justify='right')
-          
+        def est_set_label(name, index, mode):
+          est_copr = float(estimate_uval.get()) - float(estimate_costval.get())
+          estimate_priceval.set(str(est_copr))
 
-          edit_est_pcsval = IntVar()
-          edit_est_pcs1=Label(edit_est_updateframe,text="Pcs/Weight:",fg="blue",pady=5,padx=10)
-          edit_est_pcs1.place(x=330,y=135)
-          edit_est_pcsentry = Entry(edit_est_updateframe,width=20,textvariable=edit_est_pcsval)
-          edit_est_pcsentry.place(x=420,y=140)
-          edit_est_pcsentry.delete(0,'end')
-          edit_est_pcsentry.insert(0, edit_est_psdata[8])
-          
 
-          edit_est_costval = StringVar()
-          edit_est_cost1=Label(edit_est_updateframe,text="Cost:",pady=5,padx=10)
-          edit_est_cost1.place(x=20,y=160)
-          edit_est_costentry = Entry(edit_est_updateframe,width=20,textvariable=edit_est_costval)
-          edit_est_costentry.place(x=120,y=165)
-          edit_est_costentry.delete(0, END)
-          edit_est_costentry.insert(0, edit_est_psdata[9])
-          edit_est_cal_cost = (edit_est_updateframe.register(edit_est_prdoucts_cal),'%S','%d')
-          edit_est_costentry.config(validate='key',validatecommand=(edit_est_cal_cost),justify='right')
-          
+        estimate_priceval = StringVar()
+        estimate_price1=Label(estimate_Customerlabelframe,text="(Price Cost):",pady=5,padx=10)
+        estimate_price1.place(x=20,y=190)
+        estimate_priceentry = Entry(estimate_Customerlabelframe,width=20,textvariable=estimate_priceval,state=DISABLED,disabledbackground="white",disabledforeground="black")
+        estimate_priceentry.config(justify="right")
+        estimate_priceentry.place(x=120,y=195)
 
-          edit_est_priceval = StringVar()
-          edit_est_price1=Label(edit_est_updateframe,text="(Price-Cost):",pady=5,padx=10)
-          edit_est_price1.place(x=20,y=190)
-          edit_est_priceentry = Entry(edit_est_updateframe,width=20,textvariable=edit_est_priceval,state=DISABLED,disabledbackground="white",disabledforeground="black")
-          edit_est_priceentry.config(justify="right")
-          edit_est_priceentry.place(x=120,y=195)
-          edit_est_priceentry.delete(0,'end')
-          edit_est_priceentry.insert(0, edit_est_psdata[11])
 
-          edit_est_uval.trace('w', edit_est_set_label)
-          edit_est_costval.trace('w', edit_est_set_label)
-          
+        estimate_uval.trace('w', est_set_label)
+        estimate_costval.trace('w', est_set_label)
 
-          edit_est_checkvarStatus2=IntVar()
-        
-          edit_est_Button2 = Checkbutton(edit_est_updateframe,variable = edit_est_checkvarStatus2, 
-                            text="Taxable Tax1rate",compound="right",
-                            onvalue =1 ,
-                            offvalue =0,
-                            height=2,
-                            width = 12)
-          
-          edit_est_checkvarStatustax2=IntVar()
-          edit_est_Buttontax2 = Checkbutton(edit_est_updateframe,variable = edit_est_checkvarStatustax2, 
-                          text="Taxable Tax2rate",compound="right",
+        sql = "select taxtype from company"
+        fbcursor.execute(sql)
+        est_taxchoose = fbcursor.fetchone()
+
+        estimate_checkvarStatus2=IntVar()
+      
+        estimate_Button92 = Checkbutton(estimate_Customerlabelframe,variable = estimate_checkvarStatus2,
+                          text="Taxable Tax1rate",compound="right",
                           onvalue =1 ,
                           offvalue = 0,
                           height=2,
                           width = 12)
-          
-          sql = "select taxtype from company"
-          fbcursor.execute(sql)
-          edit_est_taxchoose = fbcursor.fetchone()
-          if not edit_est_taxchoose:
-            pass
-          elif edit_est_taxchoose[0] == '1':
-            edit_est_Button2.place_forget()
-            edit_est_Buttontax2.place_forget()
-          elif edit_est_taxchoose[0] == '2':
-            edit_est_Button2.place(x=415,y=170)
-            edit_est_Buttontax2.place_forget()
-          elif edit_est_taxchoose[0] == '3':
-            edit_est_Button2.place(x=415,y=170)
-            edit_est_Buttontax2.place(x=415,y=210)
+
+        #estimate_Button92.place(x=415,y=170)
+
+        estimate_checkvarStatus_2=IntVar()
+      
+        estimate_Button_92 = Checkbutton(estimate_Customerlabelframe,variable = estimate_checkvarStatus_2,
+                          text="Taxable Tax2rate",compound="right",
+                          onvalue =1,
+                          offvalue =0,
+                          height=2,
+                          width = 12)
+
+        #estimate_Button_92.place(x=415,y=210)
+        if not est_taxchoose:
+          pass
+        elif est_taxchoose[0] == '1':
+          estimate_Button92.place_forget()
+          estimate_Button_92.place_forget()
+        elif est_taxchoose[0] == '2':
+          estimate_Button92.place(x=415,y=170)
+          estimate_Button_92.place_forget()
+        elif est_taxchoose[0] == '3':
+          estimate_Button92.place(x=415,y=170)
+          estimate_Button_92.place(x=415,y=210)
+
+        def est_switch():
+          if estimate_checkvarStatus3.get():
+            estimate_stockentry["state"] = DISABLED
+            estimate_lowentry["state"] = DISABLED
+            estimate_wareentry["state"] = DISABLED
+          else:
+            estimate_stockentry["state"] = NORMAL
+            estimate_lowentry["state"] = NORMAL
+            estimate_wareentry["state"] = NORMAL
+        
+        estimate_checkvarStatus3=BooleanVar()
+        estimate_Button93 = Checkbutton(estimate_Customerlabelframe,variable = estimate_checkvarStatus3,command=est_switch, 
+                          text="This is a service(no stock control)",
+                          onvalue =1 ,
+                          offvalue =0,
+                          height=3)
+        estimate_Button93.place(x=40,y=220)
+
+        def est_stocknum(input):
+          if input.isdigit():
+            return True
+          elif input is "":
+            return True
+          else:
+            return False
+
+
+        
+        estimate_stock1=Label(estimate_Customerlabelframe,text="Stock:",pady=5,padx=10)
+        estimate_stock1.place(x=90,y=260)
+        estimate_stockentry = Entry(estimate_Customerlabelframe,width=15)
+        estimate_stockentry.place(x=150,y=265)
+        est_sto = estimate_Customerlabelframe.register(est_stocknum)
+        estimate_stockentry.config(validate="key",validatecommand=(est_sto, '%S'))
+
+        
+        estimate_low1=Label(estimate_Customerlabelframe,text="Low Stock Warning Limit:",pady=5,padx=10)
+        estimate_low1.place(x=270,y=260)
+        estimate_lowentry = Entry(estimate_Customerlabelframe,width=10)
+        estimate_lowentry.place(x=432,y=265)
+        est_lowsto = estimate_Customerlabelframe.register(est_stocknum)
+        estimate_lowentry.config(validate="key",validatecommand=(est_lowsto, '%S'))
 
       
-          edit_est_tax = edit_est_psdata[10]
-          if edit_est_tax == '1':
-            edit_est_Button2.select()
-          else:
-            edit_est_Button2.deselect()
+        estimate_ware1=Label(estimate_Customerlabelframe,text="Warehouse:",pady=5,padx=10)
+        estimate_ware1.place(x=60,y=290)
+        estimate_wareentry = Entry(estimate_Customerlabelframe,width=50)
+        estimate_wareentry.place(x=150,y=295)
 
-          if edit_est_psdata[19] == '1':
-            edit_est_Buttontax2.select()
-          else:
-            edit_est_Buttontax2.deselect()
+        estimate_text10=Label(estimate_Customerlabelframe,text="Private notes(not appears on invoice):",pady=5,padx=10)
+        estimate_text10.place(x=20,y=330)
 
-          def edit_est_switch():
-            if edit_est_checkvarStatus3.get():
-              edit_est_stockentry["state"] = DISABLED
-              edit_est_lowentry["state"] = DISABLED
-              edit_est_wareentry["state"] = DISABLED
-            else:
-              edit_est_stockentry["state"] = NORMAL
-              edit_est_lowentry["state"] = NORMAL
-              edit_est_wareentry["state"] = NORMAL
-          edit_est_checkvarStatus3=BooleanVar()
+        estimate_txt = scrolledtext.ScrolledText(estimate_Customerlabelframe, undo=True,width=62,height=4)
+        estimate_txt.place(x=32,y=358)
+
+
+
+
+        estimate_okButton = Button(estimate_innerFrame,compound = LEFT,image=tick , text ="Ok",width=60,command=est_addproducts)
+        estimate_okButton.place(x=10,y=475)
+
+        def est_closetab():
+          estimate_top.destroy()
+
+
+        estimate_cancelButton = Button(estimate_innerFrame,compound = LEFT,image=cancel ,text="Cancel",width=60,command=est_closetab)
+        estimate_cancelButton.place(x=519,y=475)
+
+        estimate_imageFrame = Frame(estimate_tab2, relief=GROOVE,height=580)
+        estimate_imageFrame.pack(side="top",fill=BOTH)
         
-          edit_est_Button3 = Checkbutton(edit_est_updateframe,variable = edit_est_checkvarStatus3,command=edit_est_switch, 
-                            text="This is a service(no stock control)", 
-                            onvalue =1 ,
-                            offvalue = 0,
-                            height=3)
 
-          edit_est_Button3.place(x=40,y=220)
+        estimate_browseimg=Label(estimate_imageFrame,text=" Browse for product image file(recommended image type:JPG,size 480x320 pixels) ",bg='#f5f3f2')
+        estimate_browseimg.place(x=15,y=35)
 
+        estimate_browsebutton=Button(estimate_imageFrame,text = 'Browse',command=este_upload_file)
+        estimate_browsebutton.place(x=520,y=30,height=30,width=50)
+
+        
+
+        
+        estimate_removeButton = Button(estimate_imageFrame,compound = LEFT,image=cancel, text ="Remove Product Image",width=150, command=lambda: b2.destroy())
+        estimate_removeButton.place(x=400,y=450)
+      
+      # ###---------------Edit product-----------------###    
+      def est_edit_product(): 
+        edit_est_itemid = estimate_cusventtree1.item(estimate_cusventtree1.focus())["values"][0]  
+        global filename
+        filename = ""
+      
+        def edit_estupload_file():
+          global filename,img, b2
+          f_types =[('Png files','*.png'),('Jpg Files', '*.jpg')]
+          filename = filedialog.askopenfilename(filetypes=f_types)
+          shutil.copyfile(filename, os.getcwd()+'/images/'+filename.split('/')[-1])
+          image = Image.open(filename)
+          resize_image = image.resize((300, 300))
+          img = ImageTk.PhotoImage(resize_image)
+          edit_est_b2 = Button(edit_est_imageFrame,image=img)
+          edit_est_b2.place(x=130, y=80)
           
-
-          def edit_est_stocknum(input):
-            if input.isdigit():
-              return True
-            elif input is "":
-              return True
+          
+        
+        def edit_est_updateproducts():
+          global img , filename 
+          sku = edit_est_codeentry.get()
+          status = edit_est_checkvarStatus.get()
+          catgory = edit_est_n.get()
+          name = edit_est_nameentry.get()
+          description = edit_est_desentry.get()
+          unitprice = edit_est_uval.get()
+          peices = edit_est_pcsentry.get()
+          cost = edit_est_costval.get()
+          price_cost = edit_est_priceval.get()
+          taxable = edit_est_checkvarStatus2.get()
+          tax2 = edit_est_checkvarStatustax2.get()
+          nostockcontrol = edit_est_checkvarStatus3.get()
+          stock = edit_est_stockval.get()
+          lowstock = edit_est_lowval.get()
+          warehouse = edit_est_wareentry.get()
+          pnotes = edit_est_sctxt.get("1.0", 'end-1c')
+          entries = [sku, name, unitprice, cost]
+          entri = []
+          for i in entries:
+            if i == '':
+              entri.append(i)
+          if len(entri) == 0:
+            if filename == "":
+              print("hello")
+              sql = "update Productservice set sku=%s, category=%s, name=%s, description=%s, status=%s, unitprice=%s, peices=%s, cost=%s, taxable=%s, priceminuscost=%s, serviceornot=%s, stock=%s, stocklimit=%s, warehouse=%s, privatenote=%s,tax2=%s where sku = %s"
+              val = (sku, catgory, name, description, status, unitprice, peices, cost, taxable, price_cost, nostockcontrol, stock, lowstock, warehouse, pnotes,tax2, edit_est_itemid)
+              fbcursor.execute(sql, val)
+              fbilldb.commit()
             else:
+              print("hai")
+              file = shutil.copyfile(filename, os.getcwd()+'/images/'+filename.split('/')[-1])
+              sql = "update Productservice set category=%s, name=%s, description=%s, status=%s, unitprice=%s, peices=%s, cost=%s, taxable=%s, priceminuscost=%s, serviceornot=%s, stock=%s, stocklimit=%s, warehouse=%s, image=%s, privatenote=%s,tax2=%s where sku = %s"
+              val = (catgory, name, description, status, unitprice, peices, cost, taxable, price_cost, nostockcontrol, stock, lowstock, warehouse,filename.split('/')[-1], pnotes,tax2, edit_est_itemid)
+              fbcursor.execute(sql, val)
+              fbilldb.commit()
+            for record in estimate_cusventtree1.get_children():
+              estimate_cusventtree1.delete(record)
+            fbcursor.execute("select *  from Productservice")
+            edit_est_pandsdata = fbcursor.fetchall()
+            countp = 0
+            for i in edit_est_pandsdata:
+              if i[12] == '1':
+                servi = '🗹'
+              else:
+                servi = ''
+              sql = "select currencysign,currsignplace from company"
+              fbcursor.execute(sql)
+              estcurrsymb = fbcursor.fetchone()
+              if not estcurrsymb: 
+                if i[13] > i[14]:
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('green',))
+                  countp += 1              
+                elif i[12] == '1':
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('blue',))
+                  countp += 1
+                else:
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('red',))
+                  countp += 1
+                        
+              elif estcurrsymb[1] == "before amount":
+                if (i[13]) > (i[14]):
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('green',))
+                  countp += 1
+                elif i[12] == '1':
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('blue',))
+                  countp += 1
+                else:
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('red',))
+                  countp += 1
+
+              elif estcurrsymb[1] == "before amount with space":
+                if (i[13]) > (i[14]):
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('green',))
+                  countp += 1
+                elif i[12] == '1':
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('blue',))
+                  countp += 1
+                else:
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('red',))
+                  countp += 1
+
+              elif estcurrsymb[1] == "after amount":
+                if (i[13]) > (i[14]):
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('green',))
+                  countp += 1
+                elif i[12] == '1':
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('blue',))
+                  countp += 1
+                else:
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('red',))
+                  countp += 1
+
+              elif estcurrsymb[1] == "after amount with space":
+                if (i[13]) > (i[14]):
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('green',))
+                  countp += 1
+                elif i[12] == '1':
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('blue',))
+                  countp += 1
+                else:
+                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('red',))
+                  countp += 1
+            edit_est_top.destroy()
+          else:
+            messagebox.showinfo("F-Billing Revolution", "Fields name or SKU entered is already in database.")
+            edit_est_top.destroy()
+            
+
+        sql = "select * from Productservice where sku = %s"
+        val = (edit_est_itemid, )
+        fbcursor.execute(sql, val)
+        edit_est_psdata = fbcursor.fetchone()
+        print(edit_est_itemid)
+        edit_est_top = Toplevel()  
+        edit_est_top.title("Edit Product/Service details")
+        p3 = PhotoImage(file = 'images/fbicon.png')
+        edit_est_top.iconphoto(False, p3)
+        edit_est_top.geometry("600x550+350+15")
+        tabControl = ttk.Notebook(edit_est_top)
+        s = ttk.Style()
+        s.theme_use('default')
+        s.configure('TNotebook.Tab', background="#999999", width=50, padding=10,bd=0)
+
+        edit_est_taba = ttk.Frame(tabControl)
+        edit_est_tabb = ttk.Frame(tabControl)
+        
+        tabControl.add(edit_est_taba,compound = LEFT, text ='Product/Service')
+        tabControl.add(edit_est_tabb,compound = LEFT, text ='Product Image')
+        
+        tabControl.pack(expand = 1, fill ="both")
+        
+        edit_est_innerFrame = Frame(edit_est_taba,bg="#f5f3f2", relief=GROOVE)
+        edit_est_innerFrame.pack(side="top",fill=BOTH)
+
+        edit_est_updateframe = LabelFrame(edit_est_innerFrame,text="Product/Service",width=580,height=455)
+        edit_est_updateframe.pack(side="top",fill=BOTH,padx=10,pady=(10,45))
+
+        edit_est_code1=Label(edit_est_updateframe,text="Code or SKU:",fg="blue",pady=10,padx=10)
+        edit_est_code1.place(x=20,y=0)
+        edit_est_codeentry = Entry(edit_est_updateframe,width=35)
+        edit_est_codeentry.place(x=120,y=8)
+        edit_est_codeentry.insert(0, edit_est_psdata[2])
+
+        edit_est_checkvarStatus=IntVar()
+        edit_est_status1=Label(edit_est_updateframe,text="Status:")
+        edit_est_status1.place(x=400,y=8)
+        edit_est_Button1 = Checkbutton(edit_est_updateframe, 
+                          variable = edit_est_checkvarStatus,text="Active",compound="right",
+                          onvalue =1,
+                          offvalue =0,
+                          width = 10)
+        edit_est_Button1.place(x=450,y=5)
+        edit_est_sta = edit_est_psdata[6]
+        if edit_est_sta == '1':
+          edit_est_Button1.select()
+        else:
+          edit_est_Button1.deselect()
+
+
+
+        edit_est_category1=Label(edit_est_updateframe,text="Category:",pady=5,padx=10)
+        edit_est_category1.place(x=20,y=40)
+        edit_est_n = StringVar() 
+        edit_est_category = Entry(edit_est_updateframe,width=40,textvariable=edit_est_n) 
+        edit_est_category.insert(0, edit_est_psdata[3])
+        edit_est_category = ttk.Combobox(edit_est_updateframe, width = 40, textvariable = edit_est_n )
+        edit_est_category['values'] = ('Default')
+        edit_est_category.place(x=120,y=45)
+        #edit_est_category.insert(0, 'Default')
+
+
+
+        edit_est_name1=Label(edit_est_updateframe,text="Name :",fg="blue",pady=5,padx=10)
+        edit_est_name1.place(x=20,y=70)
+        edit_est_nameentry = Entry(edit_est_updateframe,width=70)
+        edit_est_nameentry.place(x=120,y=75)
+        edit_est_nameentry.insert(0, edit_est_psdata[4])
+
+        edit_est_des1=Label(edit_est_updateframe,text="Description :",pady=5,padx=10)
+        edit_est_des1.place(x=20,y=100)
+        edit_est_desentry = Entry(edit_est_updateframe,width=70)
+        edit_est_desentry.place(x=120,y=105)
+        edit_est_desentry.insert(0, edit_est_psdata[5])
+
+        def edit_est_set_label(name, index, mode):
+          edit_est_priceval.set(float(edit_est_uval.get()) - float(edit_est_costval.get()))
+
+        def edit_est_prdoucts_cal(S,d):
+          if d == '1': #insert
+            if not S in ['.','0','1','2','3','4','5','6','7','8','9']:
               return False
-          edit_est_stockval = IntVar(edit_est_updateframe)
-          edit_est_stock1=Label(edit_est_updateframe,text="Stock:",pady=5,padx=10)
-          edit_est_stock1.place(x=90,y=260)
-          edit_est_stockentry = Entry(edit_est_updateframe,width=15,textvariable=edit_est_stockval)
-          edit_est_stockentry.place(x=150,y=265)
-          edit_est_stockentry.delete(0,'end')
-          edit_est_stockentry.insert(0, edit_est_psdata[13])
-          edit_est_sto = edit_est_updateframe.register(edit_est_stocknum)
-          edit_est_stockentry.config(validate="key",validatecommand=(edit_est_sto, '%S'))
-          
-
-          edit_est_lowval = IntVar(edit_est_updateframe)
-          edit_est_low1=Label(edit_est_updateframe,text="Low Stock Warning Limit:",pady=5,padx=10)
-          edit_est_low1.place(x=270,y=260)
-          edit_est_lowentry = Entry(edit_est_updateframe,width=15,textvariable=edit_est_lowval)
-          edit_est_lowentry.place(x=432,y=265)
-          edit_est_lowentry.delete(0,'end')
-          edit_est_lowentry.insert(0, edit_est_psdata[14])
-          edit_est_lowsto = edit_est_updateframe.register(edit_est_stocknum)
-          edit_est_lowentry.config(validate="key",validatecommand=(edit_est_lowsto, '%S'))
-          
-
+            return True
+          if d.isdigit():
+            return True
         
-          edit_est_ware1=Label(edit_est_updateframe,text="Warehouse:",pady=5,padx=10)
-          edit_est_ware1.place(x=60,y=290)
-          edit_est_wareentry = Entry(edit_est_updateframe,width=64)
-          edit_est_wareentry.place(x=150,y=295)
-          edit_est_wareentry.insert(0, edit_est_psdata[15])
+        edit_est_unit1=Label(edit_est_updateframe,text="Unit Price:",fg="blue",pady=5,padx=10)
+        edit_est_unit1.place(x=20,y=130)
+        
+        edit_est_uval = StringVar()
+        edit_est_unitentry = Entry(edit_est_updateframe,width=20,textvariable=edit_est_uval)
+        edit_est_unitentry.place(x=120,y=135)
+        edit_est_unitentry.delete(0,'end')
+        edit_est_unitentry.insert(0, edit_est_psdata[7])
+        edit_est_cal_unit = (edit_est_updateframe.register(edit_est_prdoucts_cal),'%S','%d')
+        edit_est_unitentry.config(validate='key',validatecommand=(edit_est_cal_unit),justify='right')
+        
 
-          edit_est_scr = edit_est_psdata[12]
-          if edit_est_scr == '1':
-            edit_est_Button3.select()
+        edit_est_pcsval = IntVar()
+        edit_est_pcs1=Label(edit_est_updateframe,text="Pcs/Weight:",fg="blue",pady=5,padx=10)
+        edit_est_pcs1.place(x=330,y=135)
+        edit_est_pcsentry = Entry(edit_est_updateframe,width=20,textvariable=edit_est_pcsval)
+        edit_est_pcsentry.place(x=420,y=140)
+        edit_est_pcsentry.delete(0,'end')
+        edit_est_pcsentry.insert(0, edit_est_psdata[8])
+        
+
+        edit_est_costval = StringVar()
+        edit_est_cost1=Label(edit_est_updateframe,text="Cost:",pady=5,padx=10)
+        edit_est_cost1.place(x=20,y=160)
+        edit_est_costentry = Entry(edit_est_updateframe,width=20,textvariable=edit_est_costval)
+        edit_est_costentry.place(x=120,y=165)
+        edit_est_costentry.delete(0, END)
+        edit_est_costentry.insert(0, edit_est_psdata[9])
+        edit_est_cal_cost = (edit_est_updateframe.register(edit_est_prdoucts_cal),'%S','%d')
+        edit_est_costentry.config(validate='key',validatecommand=(edit_est_cal_cost),justify='right')
+        
+
+        edit_est_priceval = StringVar()
+        edit_est_price1=Label(edit_est_updateframe,text="(Price-Cost):",pady=5,padx=10)
+        edit_est_price1.place(x=20,y=190)
+        edit_est_priceentry = Entry(edit_est_updateframe,width=20,textvariable=edit_est_priceval,state=DISABLED,disabledbackground="white",disabledforeground="black")
+        edit_est_priceentry.config(justify="right")
+        edit_est_priceentry.place(x=120,y=195)
+        edit_est_priceentry.delete(0,'end')
+        edit_est_priceentry.insert(0, edit_est_psdata[11])
+
+        edit_est_uval.trace('w', edit_est_set_label)
+        edit_est_costval.trace('w', edit_est_set_label)
+        
+
+        edit_est_checkvarStatus2=IntVar()
+      
+        edit_est_Button2 = Checkbutton(edit_est_updateframe,variable = edit_est_checkvarStatus2, 
+                          text="Taxable Tax1rate",compound="right",
+                          onvalue =1 ,
+                          offvalue =0,
+                          height=2,
+                          width = 12)
+        
+        edit_est_checkvarStatustax2=IntVar()
+        edit_est_Buttontax2 = Checkbutton(edit_est_updateframe,variable = edit_est_checkvarStatustax2, 
+                        text="Taxable Tax2rate",compound="right",
+                        onvalue =1 ,
+                        offvalue = 0,
+                        height=2,
+                        width = 12)
+        
+        sql = "select taxtype from company"
+        fbcursor.execute(sql)
+        edit_est_taxchoose = fbcursor.fetchone()
+        if not edit_est_taxchoose:
+          pass
+        elif edit_est_taxchoose[0] == '1':
+          edit_est_Button2.place_forget()
+          edit_est_Buttontax2.place_forget()
+        elif edit_est_taxchoose[0] == '2':
+          edit_est_Button2.place(x=415,y=170)
+          edit_est_Buttontax2.place_forget()
+        elif edit_est_taxchoose[0] == '3':
+          edit_est_Button2.place(x=415,y=170)
+          edit_est_Buttontax2.place(x=415,y=210)
+
+    
+        edit_est_tax = edit_est_psdata[10]
+        if edit_est_tax == '1':
+          edit_est_Button2.select()
+        else:
+          edit_est_Button2.deselect()
+
+        if edit_est_psdata[19] == '1':
+          edit_est_Buttontax2.select()
+        else:
+          edit_est_Buttontax2.deselect()
+
+        def edit_est_switch():
+          if edit_est_checkvarStatus3.get():
             edit_est_stockentry["state"] = DISABLED
             edit_est_lowentry["state"] = DISABLED
             edit_est_wareentry["state"] = DISABLED
           else:
-            edit_est_Button3.deselect()
             edit_est_stockentry["state"] = NORMAL
             edit_est_lowentry["state"] = NORMAL
             edit_est_wareentry["state"] = NORMAL
-          
-          
-
-          
-
-          edit_est_text1=Label(edit_est_updateframe,text="Private notes(not appears on invoice):",pady=5,padx=10)
-          edit_est_text1.place(x=20,y=330)
-          edit_est_sctxt = scrolledtext.ScrolledText(edit_est_updateframe, undo=True,width=62,height=4)
-          edit_est_sctxt.place(x=32,y=358)
-          try:
-            edit_est_sctxt.insert("1.0", edit_est_psdata[16])
-          except:
-            pass
-
-          edit_est_okButton = Button(edit_est_innerFrame, text ="Ok",image=tick,width=70,compound = LEFT,command=edit_est_updateproducts)
-          edit_est_okButton.place(x=10, y=475)
-
-          edit_est_cancelButton = Button(edit_est_innerFrame,image=cancel,text="Cancel",width=70,compound = LEFT, command=lambda : edit_est_top.destroy())
-          edit_est_cancelButton.place(x=519, y=475)
-          
-          
-          edit_est_imageFrame = Frame(edit_est_tabb, relief=GROOVE,height=580)
-          edit_est_imageFrame.pack(side="top",fill=BOTH)
-          # for record in estimate_cusventtree1.get_children():
-          #   estimate_cusventtree1.delete(record)
-          # doc_sql1 = "SELECT * FROM productservice WHERE sku=%s"
-          # doc_val1 = (edit_est_itemid,)
-          # fbcursor.execute(doc_sql1,doc_val1)
-          # doc_details1 = fbcursor.fetchall()
-          # print(doc_details1)
-          # countdocc = 0
-          # for doc1 in doc_details1:
-          #   file_size_31 = est_check_convertion(os.path.getsize("images/"+doc1[17]))
-          #   estimate_cusventtree1.insert(parent='',index='end',iid=doc1,text='',values=('',doc1[17],file_size_31))
-          # countdocc += 1
-
-          edit_est_browseimg=Label(edit_est_imageFrame,text=" Browse for product image file(recommended image type:JPG,size 480x320 pixels) ",bg='#f5f3f2')
-          edit_est_browseimg.place(x=15,y=35)
-
-          edit_est_browsebutton=Button(edit_est_imageFrame,text = 'Browse',command=edit_estupload_file)
-          edit_est_browsebutton.place(x=530,y=30,height=30,width=50)
-
-          try:
-            image = Image.open("images/"+edit_est_psdata[17])
-            resize_image = image.resize((350, 350))
-            image = ImageTk.PhotoImage(resize_image)
-            edit_est_b2 = Label(edit_est_imageFrame,image=image,width=350,height=350)
-            edit_est_b2.photo = image
-            edit_est_b2.place(x=130, y=80)
-            print(image)
-          except:
-            pass
-
-          edit_est_removeButton = Button(edit_est_imageFrame,image=cancel,text="Remove Product Image",width=150,compound = LEFT,command=lambda: edit_est_b2 .destroy())
-          edit_est_removeButton.place(x=410,y=460)
-        # except:
-        #   try:
-        #     edit_est_top.destroy()
-        #   except:
-        #     pass
-          #messagebox.showerror('F-Billing Revolution', 'Select a record to edit.')
-    
-
-
-                
-        
-        estimate_enter10=Label(estimate_newselection, text="Enter filter text").place(x=5, y=10)
-        estimate_e10=Entry(estimate_newselection, width=20)
-        estimate_e10.place(x=110, y=10)
-        # estimate_text10=Label(estimate_newselection, text="Filtered column").place(x=340, y=10)
-        # estimate_e20=Entry(estimate_newselection, width=20).place(x=450, y=10)
-        estimate_pro_filter_button=Button(estimate_newselection, text='Click Here')
-        estimate_pro_filter_button.place(x=240, y=9,height=20,width=60)
-
-        
-        
-        global estimate_cusventtree1
-        estimate_cusventtree1=ttk.Treeview(estimate_newselection, height=25)
-        estimate_cusventtree1["columns"]=["1","2","3", "4","5"]
-        estimate_cusventtree1.column("#0", width=35)
-        estimate_cusventtree1.column("1", width=160)
-        estimate_cusventtree1.column("2", width=160)
-        estimate_cusventtree1.column("3", width=140)
-        estimate_cusventtree1.column("4", width=70)
-        estimate_cusventtree1.column("5", width=70)
-        estimate_cusventtree1.heading("#0",text="")
-        estimate_cusventtree1.heading("1",text="ID/SKU")
-        estimate_cusventtree1.heading("2",text="Product/Service Name")
-        estimate_cusventtree1.heading("3",text="Unit price")
-        estimate_cusventtree1.heading("4",text="Service")
-        estimate_cusventtree1.heading("5",text="Stock")
-        estimate_cusventtree1.tag_configure('green', foreground='green')
-        estimate_cusventtree1.tag_configure('red', foreground='red')
-        estimate_cusventtree1.tag_configure('blue', foreground='blue')
+        edit_est_checkvarStatus3=BooleanVar()
       
-        countp = 0
+        edit_est_Button3 = Checkbutton(edit_est_updateframe,variable = edit_est_checkvarStatus3,command=edit_est_switch, 
+                          text="This is a service(no stock control)", 
+                          onvalue =1 ,
+                          offvalue = 0,
+                          height=3)
+
+        edit_est_Button3.place(x=40,y=220)
+
+        
+
+        def edit_est_stocknum(input):
+          if input.isdigit():
+            return True
+          elif input is "":
+            return True
+          else:
+            return False
+        edit_est_stockval = IntVar(edit_est_updateframe)
+        edit_est_stock1=Label(edit_est_updateframe,text="Stock:",pady=5,padx=10)
+        edit_est_stock1.place(x=90,y=260)
+        edit_est_stockentry = Entry(edit_est_updateframe,width=15,textvariable=edit_est_stockval)
+        edit_est_stockentry.place(x=150,y=265)
+        edit_est_stockentry.delete(0,'end')
+        edit_est_stockentry.insert(0, edit_est_psdata[13])
+        edit_est_sto = edit_est_updateframe.register(edit_est_stocknum)
+        edit_est_stockentry.config(validate="key",validatecommand=(edit_est_sto, '%S'))
+        
+
+        edit_est_lowval = IntVar(edit_est_updateframe)
+        edit_est_low1=Label(edit_est_updateframe,text="Low Stock Warning Limit:",pady=5,padx=10)
+        edit_est_low1.place(x=270,y=260)
+        edit_est_lowentry = Entry(edit_est_updateframe,width=15,textvariable=edit_est_lowval)
+        edit_est_lowentry.place(x=432,y=265)
+        edit_est_lowentry.delete(0,'end')
+        edit_est_lowentry.insert(0, edit_est_psdata[14])
+        edit_est_lowsto = edit_est_updateframe.register(edit_est_stocknum)
+        edit_est_lowentry.config(validate="key",validatecommand=(edit_est_lowsto, '%S'))
+        
+
+      
+        edit_est_ware1=Label(edit_est_updateframe,text="Warehouse:",pady=5,padx=10)
+        edit_est_ware1.place(x=60,y=290)
+        edit_est_wareentry = Entry(edit_est_updateframe,width=64)
+        edit_est_wareentry.place(x=150,y=295)
+        edit_est_wareentry.insert(0, edit_est_psdata[15])
+
+        edit_est_scr = edit_est_psdata[12]
+        if edit_est_scr == '1':
+          edit_est_Button3.select()
+          edit_est_stockentry["state"] = DISABLED
+          edit_est_lowentry["state"] = DISABLED
+          edit_est_wareentry["state"] = DISABLED
+        else:
+          edit_est_Button3.deselect()
+          edit_est_stockentry["state"] = NORMAL
+          edit_est_lowentry["state"] = NORMAL
+          edit_est_wareentry["state"] = NORMAL
+        
+        
+
+        
+
+        edit_est_text1=Label(edit_est_updateframe,text="Private notes(not appears on invoice):",pady=5,padx=10)
+        edit_est_text1.place(x=20,y=330)
+        edit_est_sctxt = scrolledtext.ScrolledText(edit_est_updateframe, undo=True,width=62,height=4)
+        edit_est_sctxt.place(x=32,y=358)
+        try:
+          edit_est_sctxt.insert("1.0", edit_est_psdata[16])
+        except:
+          pass
+
+        edit_est_okButton = Button(edit_est_innerFrame, text ="Ok",image=tick,width=70,compound = LEFT,command=edit_est_updateproducts)
+        edit_est_okButton.place(x=10, y=475)
+
+        edit_est_cancelButton = Button(edit_est_innerFrame,image=cancel,text="Cancel",width=70,compound = LEFT, command=lambda : edit_est_top.destroy())
+        edit_est_cancelButton.place(x=519, y=475)
+        
+        
+        edit_est_imageFrame = Frame(edit_est_tabb, relief=GROOVE,height=580)
+        edit_est_imageFrame.pack(side="top",fill=BOTH)
+        # for record in estimate_cusventtree1.get_children():
+        #   estimate_cusventtree1.delete(record)
+        # doc_sql1 = "SELECT * FROM productservice WHERE sku=%s"
+        # doc_val1 = (edit_est_itemid,)
+        # fbcursor.execute(doc_sql1,doc_val1)
+        # doc_details1 = fbcursor.fetchall()
+        # print(doc_details1)
+        # countdocc = 0
+        # for doc1 in doc_details1:
+        #   file_size_31 = est_check_convertion(os.path.getsize("images/"+doc1[17]))
+        #   estimate_cusventtree1.insert(parent='',index='end',iid=doc1,text='',values=('',doc1[17],file_size_31))
+        # countdocc += 1
+
+        edit_est_browseimg=Label(edit_est_imageFrame,text=" Browse for product image file(recommended image type:JPG,size 480x320 pixels) ",bg='#f5f3f2')
+        edit_est_browseimg.place(x=15,y=35)
+
+        edit_est_browsebutton=Button(edit_est_imageFrame,text = 'Browse',command=edit_estupload_file)
+        edit_est_browsebutton.place(x=530,y=30,height=30,width=50)
+
+        try:
+          image = Image.open("images/"+edit_est_psdata[17])
+          resize_image = image.resize((300, 300))
+          image = ImageTk.PhotoImage(resize_image)
+          edit_est_b2 = Label(edit_est_imageFrame,image=image,width=350,height=350)
+          edit_est_b2.photo = image
+          edit_est_b2.place(x=130, y=80)
+          print(image)
+          
+        except:
+          pass
+
+
+
+        edit_est_removeButton = Button(edit_est_imageFrame,image=cancel,text="Remove Product Image",width=150,compound = LEFT,command=lambda: edit_est_b2 .destroy())
+        edit_est_removeButton.place(x=410,y=460)
+      # except:
+      #   try:
+      #     edit_est_top.destroy()
+      #   except:
+      #     pass
+        #messagebox.showerror('F-Billing Revolution', 'Select a record to edit.')
+  
+
+
+              
+      
+      estimate_enter10=Label(estimate_newselection, text="Enter filter text").place(x=5, y=10)
+      estimate_e10=Entry(estimate_newselection, width=20)
+      estimate_e10.place(x=110, y=10)
+      # estimate_text10=Label(estimate_newselection, text="Filtered column").place(x=340, y=10)
+      # estimate_e20=Entry(estimate_newselection, width=20).place(x=450, y=10)
+      estimate_pro_filter_button=Button(estimate_newselection, text='Click Here')
+      estimate_pro_filter_button.place(x=240, y=9,height=20,width=60)
+
+      
+      
+      global estimate_cusventtree1
+      estimate_cusventtree1=ttk.Treeview(estimate_newselection, height=25)
+      estimate_cusventtree1["columns"]=["1","2","3", "4","5"]
+      estimate_cusventtree1.column("#0", width=35)
+      estimate_cusventtree1.column("1", width=160)
+      estimate_cusventtree1.column("2", width=160)
+      estimate_cusventtree1.column("3", width=140)
+      estimate_cusventtree1.column("4", width=70)
+      estimate_cusventtree1.column("5", width=70)
+      estimate_cusventtree1.heading("#0",text="")
+      estimate_cusventtree1.heading("1",text="ID/SKU")
+      estimate_cusventtree1.heading("2",text="Product/Service Name")
+      estimate_cusventtree1.heading("3",text="Unit price")
+      estimate_cusventtree1.heading("4",text="Service")
+      estimate_cusventtree1.heading("5",text="Stock")
+      estimate_cusventtree1.tag_configure('green', foreground='green')
+      estimate_cusventtree1.tag_configure('red', foreground='red')
+      estimate_cusventtree1.tag_configure('blue', foreground='blue')
+    
+      countp = 0
+      sql = 'select * from Productservice'
+      fbcursor.execute(sql)
+      estprodata = fbcursor.fetchall()
+      for i in estprodata:
+        if i[12] == '1':
+          servi = '🗹'
+        else:
+          servi = ''
+        sql = "select currencysign,currsignplace from company"
+        fbcursor.execute(sql)
+        estcurrsymb = fbcursor.fetchone()
+        if not estcurrsymb: 
+          if i[13] > i[14]:
+            estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('green',))
+            countp += 1              
+          elif i[12] == '1':
+            estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('blue',))
+            countp += 1
+          else:
+            estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('red',))
+            countp += 1
+                  
+        elif estcurrsymb[1] == "before amount":
+          if (i[13]) > (i[14]):
+            estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('green',))
+            countp += 1
+          elif i[12] == '1':
+            estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('blue',))
+            countp += 1
+          else:
+            estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('red',))
+            countp += 1
+
+        elif estcurrsymb[1] == "before amount with space":
+          if (i[13]) > (i[14]):
+            estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('green',))
+            countp += 1
+          elif i[12] == '1':
+            estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('blue',))
+            countp += 1
+          else:
+            estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('red',))
+            countp += 1
+
+        elif estcurrsymb[1] == "after amount":
+          if (i[13]) > (i[14]):
+            estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('green',))
+            countp += 1
+          elif i[12] == '1':
+            estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('blue',))
+            countp += 1
+          else:
+            estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('red',))
+            countp += 1
+
+        elif estcurrsymb[1] == "after amount with space":
+          if (i[13]) > (i[14]):
+            estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('green',))
+            countp += 1
+          elif i[12] == '1':
+            estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('blue',))
+            countp += 1
+          else:
+            estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('red',))
+            countp += 1
+      estimate_cusventtree1.place(x=5, y=45)
+      
+
+      estimate_ctegorytree1=ttk.Treeview(estimate_newselection, height=25)
+      estimate_ctegorytree1["columns"]=["1"]
+      estimate_ctegorytree1.column("#0", width=35, minwidth=20)
+      estimate_ctegorytree1.column("1", width=205, minwidth=25, anchor=CENTER)    
+      estimate_ctegorytree1.heading("#0",text="", anchor=W)
+      estimate_ctegorytree1.heading("1",text="View filter by category", anchor=CENTER)
+      estimate_ctegorytree1.place(x=660, y=45)
+      def est_items_selected(event):
+        selected_indices = est_fil_cat_list.curselection()
+        selected_filter = ",".join([est_fil_cat_list.get(i) for i in selected_indices])
+
         sql = 'select * from Productservice'
         fbcursor.execute(sql)
-        estprodata = fbcursor.fetchall()
-        for i in estprodata:
-          if i[12] == '1':
-            servi = '🗹'
-          else:
-            servi = ''
-          sql = "select currencysign,currsignplace from company"
-          fbcursor.execute(sql)
-          estcurrsymb = fbcursor.fetchone()
-          if not estcurrsymb: 
-            if i[13] > i[14]:
-              estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('green',))
-              countp += 1              
-            elif i[12] == '1':
-              estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('blue',))
-              countp += 1
-            else:
-              estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('red',))
-              countp += 1
-                    
-          elif estcurrsymb[1] == "before amount":
-            if (i[13]) > (i[14]):
-              estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('green',))
-              countp += 1
-            elif i[12] == '1':
-              estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('blue',))
-              countp += 1
-            else:
-              estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('red',))
-              countp += 1
+        pandsdata = fbcursor.fetchall()
+        psql = "select * from Productservice where serviceornot=%s"
+        val = ('0', )
+        fbcursor.execute(psql, val)
+        pdata = fbcursor.fetchall()
 
-          elif estcurrsymb[1] == "before amount with space":
-            if (i[13]) > (i[14]):
-              estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('green',))
-              countp += 1
-            elif i[12] == '1':
-              estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('blue',))
-              countp += 1
-            else:
-              estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('red',))
-              countp += 1
+        ssql = "select * from Productservice where serviceornot=%s"
+        val = ('1', )
+        fbcursor.execute(ssql, val)
+        sdata = fbcursor.fetchall()
 
-          elif estcurrsymb[1] == "after amount":
-            if (i[13]) > (i[14]):
-              estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('green',))
-              countp += 1
-            elif i[12] == '1':
-              estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('blue',))
-              countp += 1
+        if selected_filter == "View all records":
+          for record in estimate_cusventtree1.get_children():
+            estimate_cusventtree1.delete(record)
+          countp = 0
+          for i in pandsdata:
+            if i[12] == '1':
+              servi = '🗹'                     #'Active'
             else:
-              estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('red',))
-              countp += 1
+              servi = ' '                         #'Inactive'
+            sql = "select currencysign,currsignplace from company"
+            fbcursor.execute(sql)
+            estcurrsymb = fbcursor.fetchone()
+            if not estcurrsymb: 
+              if i[13] > i[14]:
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('green',))
+                countp += 1              
+              elif i[12] == '1':
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('blue',))
+                countp += 1
+              else:
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('red',))
+                countp += 1
+                      
+            elif estcurrsymb[1] == "before amount":
+              if (i[13]) > (i[14]):
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('green',))
+                countp += 1
+              elif i[12] == '1':
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('blue',))
+                countp += 1
+              else:
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('red',))
+                countp += 1
 
-          elif estcurrsymb[1] == "after amount with space":
-            if (i[13]) > (i[14]):
-              estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('green',))
-              countp += 1
-            elif i[12] == '1':
-              estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('blue',))
-              countp += 1
+            elif estcurrsymb[1] == "before amount with space":
+              if (i[13]) > (i[14]):
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('green',))
+                countp += 1
+              elif i[12] == '1':
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('blue',))
+                countp += 1
+              else:
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('red',))
+                countp += 1
+
+            elif estcurrsymb[1] == "after amount":
+              if (i[13]) > (i[14]):
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('green',))
+                countp += 1
+              elif i[12] == '1':
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('blue',))
+                countp += 1
+              else:
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('red',))
+                countp += 1
+
+            elif estcurrsymb[1] == "after amount with space":
+              if (i[13]) > (i[14]):
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('green',))
+                countp += 1
+              elif i[12] == '1':
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('blue',))
+                countp += 1
+              else:
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('red',))
+                countp += 1
+
+        elif selected_filter == "View all products":
+          for record in estimate_cusventtree1.get_children():
+            estimate_cusventtree1.delete(record)
+          countp = 0
+          for i in pdata:
+            if i[12] == '1':
+              servi = '🗹'                   #'Active'
             else:
-              estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('red',))
-              countp += 1
-        estimate_cusventtree1.place(x=5, y=45)
+              servi = ' '                    #'Inactive'
+            sql = "select currencysign,currsignplace from company"
+            fbcursor.execute(sql)
+            estcurrsymb = fbcursor.fetchone()
+            if not estcurrsymb: 
+              if i[13] > i[14]:
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('green',))
+                countp += 1              
+              elif i[12] == '1':
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('blue',))
+                countp += 1
+              else:
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('red',))
+                countp += 1
+                      
+            elif estcurrsymb[1] == "before amount":
+              if (i[13]) > (i[14]):
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('green',))
+                countp += 1
+              elif i[12] == '1':
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('blue',))
+                countp += 1
+              else:
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('red',))
+                countp += 1
+
+            elif estcurrsymb[1] == "before amount with space":
+              if (i[13]) > (i[14]):
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('green',))
+                countp += 1
+              elif i[12] == '1':
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('blue',))
+                countp += 1
+              else:
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('red',))
+                countp += 1
+
+            elif estcurrsymb[1] == "after amount":
+              if (i[13]) > (i[14]):
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('green',))
+                countp += 1
+              elif i[12] == '1':
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('blue',))
+                countp += 1
+              else:
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('red',))
+                countp += 1
+
+            elif estcurrsymb[1] == "after amount with space":
+              if (i[13]) > (i[14]):
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('green',))
+                countp += 1
+              elif i[12] == '1':
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('blue',))
+                countp += 1
+              else:
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('red',))
+                countp += 1
+        elif selected_filter == "View all services":
+          for record in estimate_cusventtree1.get_children():
+            estimate_cusventtree1.delete(record)
+          countp = 0
+          for i in sdata:
+            if i[12] == '1':
+              servi = '🗹'             #'Active'
+            else:
+              servi = ' '              #'Inactive'
+            sql = "select currencysign,currsignplace from company"
+            fbcursor.execute(sql)
+            estcurrsymb = fbcursor.fetchone()
+            if not estcurrsymb: 
+              if i[13] > i[14]:
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('green',))
+                countp += 1              
+              elif i[12] == '1':
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('blue',))
+                countp += 1
+              else:
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('red',))
+                countp += 1
+                      
+            elif estcurrsymb[1] == "before amount":
+              if (i[13]) > (i[14]):
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('green',))
+                countp += 1
+              elif i[12] == '1':
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('blue',))
+                countp += 1
+              else:
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('red',))
+                countp += 1
+
+            elif estcurrsymb[1] == "before amount with space":
+              if (i[13]) > (i[14]):
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('green',))
+                countp += 1
+              elif i[12] == '1':
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('blue',))
+                countp += 1
+              else:
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('red',))
+                countp += 1
+
+            elif estcurrsymb[1] == "after amount":
+              if (i[13]) > (i[14]):
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('green',))
+                countp += 1
+              elif i[12] == '1':
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('blue',))
+                countp += 1
+              else:
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('red',))
+                countp += 1
+
+            elif estcurrsymb[1] == "after amount with space":
+              if (i[13]) > (i[14]):
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('green',))
+                countp += 1
+              elif i[12] == '1':
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('blue',))
+                countp += 1
+              else:
+                estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('red',))
+                countp += 1
+
+      est_fil_cat_list = Listbox(estimate_newselection,height=34,width=40,bg="white",activestyle="dotbox",fg="black",highlightbackground="white")
+      est_fil_cat_list.insert(0,"View all records")
+      est_fil_cat_list.insert(1,"View all products")
+      est_fil_cat_list.insert(2,"View all services")
+      est_fil_cat_list.place(x=660,y=63)
+      est_fil_cat_list.bind('<<ListboxSelect>>',est_items_selected)
+      est_stockok = Label(estimate_newselection,text="Green: Stock is Ok",foreground="green").place(x =15,y =580)
+      est_stocko = Label(estimate_newselection,text="Red: Limit <= Low Stock Limit",foreground="red").place(x =136,y=580)
+      est_stock = Label(estimate_newselection,text="Blue: Service,no Stock Control",foreground="blue").place(x =335,y =580)
+
+
+      estimate_scrollbar10 = Scrollbar(estimate_newselection)
+      estimate_scrollbar10.place(x=640, y=45, height=520)
+      estimate_scrollbar10.config( command=estimate_cusventtree1.yview )
+
+      def estselepro():
+        global estpriceview
+        estpriceview = Label(estimate_listFrame,bg="#f5f3f2")
+        estpriceview.place(x=850,y=200,width=78,height=18)
+        proskuid = estimate_cusventtree1.item(estimate_cusventtree1.focus())["values"][0]
+        sql = "select * from Productservice where sku = %s"
+        val = (proskuid,)
+        fbcursor.execute(sql,val)
+        prosele = fbcursor.fetchone()
+        sql = "select * from company"
+        fbcursor.execute(sql)
+        create_maintree_insert = fbcursor.fetchone()
+        if prosele[10] == '1':
+          tax1 = 'yes'
+        else:
+          tax1 = ''
+        if prosele[19] == '1':
+          tax2 = 'yes'
+        else:
+          tax2 = ''
         
+        if not create_maintree_insert:
+          estimate_tree.insert(parent='', index='end',text='', values=(prosele[2],prosele[4],prosele[5],prosele[7],1,prosele[8],tax1,prosele[7]*1))
 
-        estimate_ctegorytree1=ttk.Treeview(estimate_newselection, height=25)
-        estimate_ctegorytree1["columns"]=["1"]
-        estimate_ctegorytree1.column("#0", width=35, minwidth=20)
-        estimate_ctegorytree1.column("1", width=205, minwidth=25, anchor=CENTER)    
-        estimate_ctegorytree1.heading("#0",text="", anchor=W)
-        estimate_ctegorytree1.heading("1",text="View filter by category", anchor=CENTER)
-        estimate_ctegorytree1.place(x=660, y=45)
-        def est_items_selected(event):
-          selected_indices = est_fil_cat_list.curselection()
-          selected_filter = ",".join([est_fil_cat_list.get(i) for i in selected_indices])
-
-          sql = 'select * from Productservice'
-          fbcursor.execute(sql)
-          pandsdata = fbcursor.fetchall()
-          psql = "select * from Productservice where serviceornot=%s"
-          val = ('0', )
-          fbcursor.execute(psql, val)
-          pdata = fbcursor.fetchall()
-
-          ssql = "select * from Productservice where serviceornot=%s"
-          val = ('1', )
-          fbcursor.execute(ssql, val)
-          sdata = fbcursor.fetchall()
-
-          if selected_filter == "View all records":
-            for record in estimate_cusventtree1.get_children():
-              estimate_cusventtree1.delete(record)
-            countp = 0
-            for i in pandsdata:
-              if i[12] == '1':
-                servi = '🗹'                     #'Active'
-              else:
-                servi = ' '                         #'Inactive'
-              sql = "select currencysign,currsignplace from company"
-              fbcursor.execute(sql)
-              estcurrsymb = fbcursor.fetchone()
-              if not estcurrsymb: 
-                if i[13] > i[14]:
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('green',))
-                  countp += 1              
-                elif i[12] == '1':
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('blue',))
-                  countp += 1
-                else:
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('red',))
-                  countp += 1
-                        
-              elif estcurrsymb[1] == "before amount":
-                if (i[13]) > (i[14]):
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('green',))
-                  countp += 1
-                elif i[12] == '1':
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('blue',))
-                  countp += 1
-                else:
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('red',))
-                  countp += 1
-
-              elif estcurrsymb[1] == "before amount with space":
-                if (i[13]) > (i[14]):
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('green',))
-                  countp += 1
-                elif i[12] == '1':
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('blue',))
-                  countp += 1
-                else:
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('red',))
-                  countp += 1
-
-              elif estcurrsymb[1] == "after amount":
-                if (i[13]) > (i[14]):
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('green',))
-                  countp += 1
-                elif i[12] == '1':
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('blue',))
-                  countp += 1
-                else:
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('red',))
-                  countp += 1
-
-              elif estcurrsymb[1] == "after amount with space":
-                if (i[13]) > (i[14]):
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('green',))
-                  countp += 1
-                elif i[12] == '1':
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('blue',))
-                  countp += 1
-                else:
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('red',))
-                  countp += 1
-
-          elif selected_filter == "View all products":
-            for record in estimate_cusventtree1.get_children():
-              estimate_cusventtree1.delete(record)
-            countp = 0
-            for i in pdata:
-              if i[12] == '1':
-                servi = '🗹'                   #'Active'
-              else:
-                servi = ' '                    #'Inactive'
-              sql = "select currencysign,currsignplace from company"
-              fbcursor.execute(sql)
-              estcurrsymb = fbcursor.fetchone()
-              if not estcurrsymb: 
-                if i[13] > i[14]:
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('green',))
-                  countp += 1              
-                elif i[12] == '1':
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('blue',))
-                  countp += 1
-                else:
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('red',))
-                  countp += 1
-                        
-              elif estcurrsymb[1] == "before amount":
-                if (i[13]) > (i[14]):
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('green',))
-                  countp += 1
-                elif i[12] == '1':
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('blue',))
-                  countp += 1
-                else:
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('red',))
-                  countp += 1
-
-              elif estcurrsymb[1] == "before amount with space":
-                if (i[13]) > (i[14]):
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('green',))
-                  countp += 1
-                elif i[12] == '1':
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('blue',))
-                  countp += 1
-                else:
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('red',))
-                  countp += 1
-
-              elif estcurrsymb[1] == "after amount":
-                if (i[13]) > (i[14]):
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('green',))
-                  countp += 1
-                elif i[12] == '1':
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('blue',))
-                  countp += 1
-                else:
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('red',))
-                  countp += 1
-
-              elif estcurrsymb[1] == "after amount with space":
-                if (i[13]) > (i[14]):
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('green',))
-                  countp += 1
-                elif i[12] == '1':
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('blue',))
-                  countp += 1
-                else:
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('red',))
-                  countp += 1
-          elif selected_filter == "View all services":
-            for record in estimate_cusventtree1.get_children():
-              estimate_cusventtree1.delete(record)
-            countp = 0
-            for i in sdata:
-              if i[12] == '1':
-                servi = '🗹'             #'Active'
-              else:
-                servi = ' '              #'Inactive'
-              sql = "select currencysign,currsignplace from company"
-              fbcursor.execute(sql)
-              estcurrsymb = fbcursor.fetchone()
-              if not estcurrsymb: 
-                if i[13] > i[14]:
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('green',))
-                  countp += 1              
-                elif i[12] == '1':
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('blue',))
-                  countp += 1
-                else:
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('red',))
-                  countp += 1
-                        
-              elif estcurrsymb[1] == "before amount":
-                if (i[13]) > (i[14]):
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('green',))
-                  countp += 1
-                elif i[12] == '1':
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('blue',))
-                  countp += 1
-                else:
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('red',))
-                  countp += 1
-
-              elif estcurrsymb[1] == "before amount with space":
-                if (i[13]) > (i[14]):
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('green',))
-                  countp += 1
-                elif i[12] == '1':
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('blue',))
-                  countp += 1
-                else:
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('red',))
-                  countp += 1
-
-              elif estcurrsymb[1] == "after amount":
-                if (i[13]) > (i[14]):
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('green',))
-                  countp += 1
-                elif i[12] == '1':
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('blue',))
-                  countp += 1
-                else:
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('red',))
-                  countp += 1
-
-              elif estcurrsymb[1] == "after amount with space":
-                if (i[13]) > (i[14]):
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('green',))
-                  countp += 1
-                elif i[12] == '1':
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('blue',))
-                  countp += 1
-                else:
-                  estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('red',))
-                  countp += 1
-
-        est_fil_cat_list = Listbox(estimate_newselection,height=34,width=40,bg="white",activestyle="dotbox",fg="black",highlightbackground="white")
-        est_fil_cat_list.insert(0,"View all records")
-        est_fil_cat_list.insert(1,"View all products")
-        est_fil_cat_list.insert(2,"View all services")
-        est_fil_cat_list.place(x=660,y=63)
-        est_fil_cat_list.bind('<<ListboxSelect>>',est_items_selected)
-        est_stockok = Label(estimate_newselection,text="Green: Stock is Ok",foreground="green").place(x =15,y =580)
-        est_stocko = Label(estimate_newselection,text="Red: Limit <= Low Stock Limit",foreground="red").place(x =136,y=580)
-        est_stock = Label(estimate_newselection,text="Blue: Service,no Stock Control",foreground="blue").place(x =335,y =580)
-
-
-        estimate_scrollbar10 = Scrollbar(estimate_newselection)
-        estimate_scrollbar10.place(x=640, y=45, height=520)
-        estimate_scrollbar10.config( command=estimate_cusventtree1.yview )
-
-        def estselepro():
-          global estpriceview
-          estpriceview = Label(estimate_listFrame,bg="#f5f3f2")
-          estpriceview.place(x=850,y=200,width=78,height=18)
-          proskuid = estimate_cusventtree1.item(estimate_cusventtree1.focus())["values"][0]
-          sql = "select * from Productservice where sku = %s"
-          val = (proskuid,)
-          fbcursor.execute(sql,val)
-          prosele = fbcursor.fetchone()
-          sql = "select * from company"
-          fbcursor.execute(sql)
-          create_maintree_insert = fbcursor.fetchone()
-          if prosele[10] == '1':
-            tax1 = 'yes'
-          else:
-            tax1 = ''
-          if prosele[19] == '1':
-            tax2 = 'yes'
-          else:
-            tax2 = ''
+        elif create_maintree_insert[12] == "1":
           
-          if not create_maintree_insert:
-            estimate_tree.insert(parent='', index='end',text='', values=(prosele[2],prosele[4],prosele[5],prosele[7],1,prosele[8],tax1,prosele[7]*1))
-
-          elif create_maintree_insert[12] == "1":
-            
-            estimate_tree.insert(parent='', index='end',text='', values=(prosele[2],prosele[4],prosele[5],prosele[7],1,prosele[8],prosele[7]*1))
+          estimate_tree.insert(parent='', index='end',text='', values=(prosele[2],prosele[4],prosele[5],prosele[7],1,prosele[8],prosele[7]*1))
+        
+          extracs = 0.0
+          discou = 0.0
+          total = 0.0
+          for child in estimate_tree.get_children():
+            total += float(estimate_tree.item(child, 'values')[6])
+          discou = (total*float(estimates_discount2.get())/100)
+          extracs = (extracs+float(estimates_cost3.get()))
+          estimate_costtt.config(text=estimates_cost3.get())
+          estimate_discounttt1.config(text=discou)
+          estpriceview.config(text=total)
+          estimate_total1.config(text=total-discou+extracs)
+          estimate_balancee1.config(text=total-discou+extracs)
+          estimate_subbb1.config(text=total-discou)
           
-            extracs = 0.0
-            discou = 0.0
-            total = 0.0
-            for child in estimate_tree.get_children():
-              total += float(estimate_tree.item(child, 'values')[6])
-            discou = (total*float(estimates_discount2.get())/100)
-            extracs = (extracs+float(estimates_cost3.get()))
-            estimate_costtt.config(text=estimates_cost3.get())
-            estimate_discounttt1.config(text=discou)
-            estpriceview.config(text=total)
-            estimate_total1.config(text=total-discou+extracs)
-            estimate_balancee1.config(text=total-discou+extracs)
-            estimate_subbb1.config(text=total-discou)
-            
-          elif create_maintree_insert[12] == "2":
-            estimate_tree.insert(parent='', index='end',text='', values=(prosele[2],prosele[4],prosele[5],prosele[7],1,prosele[8],tax1,prosele[7]*1))
-            extracs = 0.0
-            discou = 0.0
-            total = 0.0
-            for child in estimate_tree.get_children():
-              total += float(estimate_tree.item(child, 'values')[7])
-            discou = (total*float(estimates_discount2.get())/100)
-            extracs = (extracs+float(estimates_cost3.get()))
-            estimate_costtt.config(text=estimates_cost3.get())
-            estimate_discounttt1.config(text=discou)
-            estpriceview.config(text=total)
-            estimate_subbb1.config(text=total-discou)
+        elif create_maintree_insert[12] == "2":
+          estimate_tree.insert(parent='', index='end',text='', values=(prosele[2],prosele[4],prosele[5],prosele[7],1,prosele[8],tax1,prosele[7]*1))
+          extracs = 0.0
+          discou = 0.0
+          total = 0.0
+          for child in estimate_tree.get_children():
+            total += float(estimate_tree.item(child, 'values')[7])
+          discou = (total*float(estimates_discount2.get())/100)
+          extracs = (extracs+float(estimates_cost3.get()))
+          estimate_costtt.config(text=estimates_cost3.get())
+          estimate_discounttt1.config(text=discou)
+          estpriceview.config(text=total)
+          estimate_subbb1.config(text=total-discou)
 
-            tot = 0.0
-            totaltax1 = 0.0
-            for child in estimate_tree.get_children():
-              checktax1 = list(estimate_tree.item(child, 'values'))
-              if checktax1[6] == "yes":
-                totaltax1 =(totaltax1 + float(checktax1[7]))
-                estimate_ttax1.config(text=(float(totaltax1)*float(estimates_tax4.get())/100))
-                tot = (float(totaltax1)*float(estimates_tax4.get())/100)
-              else:
-                pass
-            estimate_total1.config(text=total+tot-discou+extracs)
-            estimate_balancee1.config(text=total+tot-discou+extracs)
+          tot = 0.0
+          totaltax1 = 0.0
+          for child in estimate_tree.get_children():
+            checktax1 = list(estimate_tree.item(child, 'values'))
+            if checktax1[6] == "yes":
+              totaltax1 =(totaltax1 + float(checktax1[7]))
+              estimate_ttax1.config(text=float(totaltax1)*float(estimates_tax4.get())/100)
+              tot = (float(totaltax1)*float(estimates_tax4.get())/100)
+            else:
+              pass
+          estimate_total1.config(text=total+tot-discou+extracs)
+          estimate_balancee1.config(text=total+tot-discou+extracs)
+            
+        elif create_maintree_insert[12] == "3":
+          estimate_tree.insert(parent='', index='end',text='', values=(prosele[2],prosele[4],prosele[5],prosele[7],1,prosele[8],tax1,tax2,prosele[7]*1))
+          extracs = 0.0
+          discou = 0.0
+          total = 0.0
+          for child in estimate_tree.get_children():
+            total += float(estimate_tree.item(child, 'values')[8])
+          extracs = (extracs+float(estimates_cost3.get()))
+          estimate_costtt.config(text=estimates_cost3.get())
+          discou = (total*float(estimates_discount2.get())/100)
+          estimate_discounttt1.config(text=discou)
+          estpriceview.config(text=total)
+          estimate_subbb1.config(text=total-discou)
+            
+          tot = 0.0
+          totaltax1 = 0.0
+          for child in estimate_tree.get_children():
+            checktax1 = list(estimate_tree.item(child, 'values'))
+            if checktax1[6] == "yes":
+              totaltax1 =(totaltax1 + float(checktax1[8]))
+              estimate_ttax1.config(text=(float(totaltax1)*float(estimates_tax4.get())/100))
+              tot = (float(totaltax1)*float(estimates_tax4.get())/100)
+            else:
+              pass
+          
+          tot2 = 0.0
+          totaltax2 = 0.0
+          for child in estimate_tree.get_children():
+            checktax1 = list(estimate_tree.item(child, 'values'))
+            if checktax1[7] == "yes":
+              totaltax2 =(totaltax2 + float(checktax1[8]))
+              estimate_ttax2.config(text=(float(totaltax2)*float(estimates_tax5.get())/100))
               
-          elif create_maintree_insert[12] == "3":
-            estimate_tree.insert(parent='', index='end',text='', values=(prosele[2],prosele[4],prosele[5],prosele[7],1,prosele[8],tax1,tax2,prosele[7]*1))
-            extracs = 0.0
-            discou = 0.0
-            total = 0.0
-            for child in estimate_tree.get_children():
-              total += float(estimate_tree.item(child, 'values')[8])
-            extracs = (extracs+float(estimates_cost3.get()))
-            estimate_costtt.config(text=estimates_cost3.get())
-            discou = (total*float(estimates_discount2.get())/100)
-            estimate_discounttt1.config(text=discou)
-            estpriceview.config(text=total)
-            estimate_subbb1.config(text=total-discou)
-              
-            tot = 0.0
-            totaltax1 = 0.0
-            for child in estimate_tree.get_children():
-              checktax1 = list(estimate_tree.item(child, 'values'))
-              if checktax1[6] == "yes":
-                totaltax1 =(totaltax1 + float(checktax1[8]))
-                estimate_ttax1.config(text=(float(totaltax1)*float(estimates_tax4.get())/100))
-                tot = (float(totaltax1)*float(estimates_tax4.get())/100)
-              else:
-                pass
-            
-            tot2 = 0.0
-            totaltax2 = 0.0
-            for child in estimate_tree.get_children():
-              checktax1 = list(estimate_tree.item(child, 'values'))
-              if checktax1[7] == "yes":
-                totaltax2 =(totaltax2 + float(checktax1[8]))
-                estimate_ttax2.config(text=(float(totaltax2)*float(estimates_tax5.get())/100))
-                
-                tot2 = (float(totaltax2)*float(estimates_tax5.get())/100)
-              else:
-                pass
+              tot2 = (float(totaltax2)*float(estimates_tax5.get())/100)
+            else:
+              pass
 
-            estimate_total1.config(text=total+tot+tot2-discou+extracs)
-            estimate_balancee1.config(text=total+tot+tot2-discou+extracs)
-          
-          estimate_newselection.destroy()
+          estimate_total1.config(text=total+tot+tot2-discou+extracs)
+          estimate_balancee1.config(text=total+tot+tot2-discou+extracs)
         
+        estimate_newselection.destroy()
+      
+      
         
-          
 
-        estimate_btn11=Button(estimate_newselection,compound = LEFT,image=tick ,text="ok", width=60, command=estselepro).place(x=15, y=610)
-        estimate_btn11=Button(estimate_newselection,compound = LEFT,image=tick , text="Edit product/Service", width=150,command=est_edit_product).place(x=250, y=610)
-        estimate_btnadd=Button(estimate_newselection,compound = LEFT,image=tick , text="Add product/Service", width=150,command=estimate_product)
-        estimate_btnadd.place(x=435, y=610)
-        estimate_btn11=Button(estimate_newselection,compound = LEFT,image=cancel ,text="Cancel", width=60).place(x=740, y=610)
-      else:
-        messagebox.showwarning("F-Billing Revolution 2022", "Customer is required, please select customer\n before adding line item to estimates.")
-
-
-
-    
-
-    
+      estimate_btn11=Button(estimate_newselection,compound = LEFT,image=tick ,text="ok", width=60, command=estselepro).place(x=15, y=610)
+      estimate_btn11=Button(estimate_newselection,compound = LEFT,image=tick , text="Edit product/Service", width=150,command=est_edit_product).place(x=250, y=610)
+      estimate_btnadd=Button(estimate_newselection,compound = LEFT,image=tick , text="Add product/Service", width=150,command=estimate_product)
+      estimate_btnadd.place(x=435, y=610)
+      estimate_btn11=Button(estimate_newselection,compound = LEFT,image=cancel ,text="Cancel", width=60).place(x=740, y=610)
+      # else:
+      #   messagebox.showwarning("F-Billing Revolution 2022", "Customer is required, please select customer\n before adding line item to estimates.")
+      # #   pass
+   
     #sms notification
     def estimate_sms1():
       estimate_send_SMS=Toplevel()
@@ -3386,7 +3392,7 @@ def mainpage():
         estimate_totalpaid1.config(text="" +"0.00")
         estimate_discounttt1.config(text=round(discount_rate,2))
         sub_tot = round(((price + p1 + p2 + p3) - discount_rate),2)
-        estimate_subbb1.config(text="" + str(sub_tot))
+        estimate_subbb1.config(text=sub_tot)
         estimate_ttax1.config(text=round((tax1_rate + tax2_rate),2))
         estimate_ttax2.config(text=round((tax3_rate + tax4_rate),2))
         estimate_costtt.config(text=round(exc,2))
@@ -3482,7 +3488,7 @@ def mainpage():
         estimate_totalpaid1.config(text="" +"0.00")
         estimate_discounttt1.config(text=round(discount_rate,2))
         sub_tot = round(((price + p1 + p2 + p3) - discount_rate),2)
-        estimate_subbb1.config(text="" + str(sub_tot))
+        estimate_subbb1.config(text=sub_tot)
         estimate_ttax1.config(text=round((tax1_rate + tax2_rate),2))
         estimate_ttax2.config(text=round((tax3_rate + tax4_rate),2))
         estimate_costtt.config(text=round(exc,2))
@@ -14214,26 +14220,50 @@ def mainpage():
       for i in lst_data:
         if len(i.strip()[1:-1])>1:
         # print(i[0],"IMAGE")
-          with open('images/'+ i.strip()[1:-1], "rb") as attachment:
+          if (i.strip()[1:-1]).lower().endswith(('.png','.jpg','.jpeg')):
+            with open('images/'+ i.strip()[1:-1], "rb") as attachment:
               # MIME attachment is a binary file for that content type "application/octet-stream" is used
-            part = MIMEBase("application", "octet-stream")
-            part.set_payload(attachment.read())
-          # encode into base64 
-            encoders.encode_base64(part)
-            part.add_header('Content-Disposition', "attachment; filename= %s" % 'images/'+ i.strip()[1:-1]) 
+              part = MIMEBase("application", "octet-stream")
+              part.set_payload(attachment.read())
+            # encode into base64 
+              encoders.encode_base64(part)
+              part.add_header('Content-Disposition', "attachment; filename= %s" % 'images/'+ i.strip()[1:-1]) 
 
         # attach the instance 'part' to instance 'message' 
-            msg_1.attach(part)
+              msg_1.attach(part)
         # message_body = email_body.get()
+        else:
+            with open('estimate/'+ i.strip()[1:-1], "rb") as attachment:
+      
+              cus_part = MIMEBase("application", "octet-stream")
+              cus_part.set_payload(attachment.read())
+
+              encoders.encode_base64(cus_part)
+              cus_part.add_header('Content-Disposition', "attachment; filename= %s" % 'estimate/'+ i.strip()[1:-1]) 
+
+  
+              msg_1.attach(cus_part)
 
       server_1.sendmail(email_from.get(),estimate_emailtoent.get(),msg_1.as_string())
       server_1.sendmail(email_from.get(), carbcopy_info_1,msg_1.as_string())
       print("message sent")
     def est_empsfile_image_1(event):
+      # import win32api
+      # try:
+      #   global yawn
+      #   for i in  estimate_htcodeframe.curselection():
+      #     print("hloo", estimate_htcodeframe.get(i))
+      #     yawn= estimate_htcodeframe.get(i)   
+      #     if yawn.lower().endswith(('.png','.jpg','.jpeg')):
+      #       win32api.ShellExecute(0,"",os.getcwd()+"/images/"+yawn,None,".",0)
+      #     else:
+      #       win32api.ShellExecute(0,"",os.getcwd()+"/estimate/"+yawn,None,".",0)    
+      # except:
+      #   pass 
       global yawn
       for i in  estimate_htcodeframe.curselection():
         print("hloo", estimate_htcodeframe.get(i))
-        yawn= estimate_htcodeframe.get(i)        
+        yawn= estimate_htcodeframe.get(i)   
         edit_window_img = Toplevel()
         edit_window_img.title("View Image")
         edit_window_img.geometry("700x500")
@@ -14243,6 +14273,18 @@ def mainpage():
         psimage = Label(edit_window_img,image=image)
         psimage.photo = image
         psimage.pack()
+    def cus_file(event):
+      try:
+        all_items = estimate_htcodeframe.get(0, END) # tuple with text of all items in Listbox
+        sel_idx = estimate_htcodeframe.curselection() # tuple with indexes of selected items
+        sel_list = [all_items[item] for item in sel_idx]
+        
+        if sel_list[0]=='Estimate_Report.pdf':
+          win32api.ShellExecute(0,"",cus_filenamezrrr,None,".",0)
+        else:
+          win32api.ShellExecute(0,"",filenamez,None,".",0)
+      except:
+        pass
 
     def est_UploadAction_1(event=None):
       global filenamez
@@ -14251,12 +14293,7489 @@ def mainpage():
       shutil.copyfile(filenamez, os.getcwd()+'/images/'+filenamez.split('/')[-1])
       estimate_htcodeframe.insert(0, filenamez.split('/')[-1])
 
+      shutil.copyfile(filenamez, os.getcwd()+'/estimate/'+filenamez.split('/')[-1])
+      estimate_htcodeframe.insert(0, filenamez.split('/')[-1]) 
+
     def estimate_emailord_create():
+
+      if estimates_etemplate.get() == 'Professional 1 (logo on left side)':
+        from reportlab.pdfgen import canvas 
+        pdf = canvas.Canvas("estimate/Estimate_Report.pdf", pagesize=letter)
+        
+
+        sql_company = "SELECT * from company"
+        fbcursor.execute(sql_company)
+        company= fbcursor.fetchone()
+        print(company)
+        
+        pdf.drawCentredString(302,770, " "+estimates_etitletext.get())
+        pdf.drawCentredString(302,475, " "+estimates_eheader_text.get())
+        
+
+        pdf.drawImage("images/"+company[13],30,655,width=200,height=90)
+
+        pdf.drawString(30,635, " "+est_str2.get())
+        pdf.drawString(30,620, " "+est_str3.get())
+        pdf.drawString(30,605, " "+est_str4.get())
+        pdf.drawString(31,590, "Terms")
+        pdf.drawString(31,575, "Order ref.#")
+
+        pdf.drawString(140,635, " "+estimate_number_entry.get())
+        pdf.drawString(140,620, " "+str(estimate_date_entry.get_date()))
+        pdf.drawString(140,605, " "+str(estimate_duedate_entry.get_date()))
+        pdf.drawString(140,590, " "+estimate_eterms.get())
+        pdf.drawString(140,575, " "+estimate_ee11.get())
+
+        # pdf.setFont('Helvetica-underline',12)
+        pdf.drawString(60,550, " "+est_str5.get())
+        pdf.line(60,548,112,548)
+        pdf.drawString(300,550, "Ship to")
+        pdf.line(300,548,338,548)
+
+        pdf.drawString(60,535, " "+estimate_combo_name1.get())
+        pdf.drawString(300,535, " "+estimate_shipto3.get())
+
+        text1=""+estimate_addresstext2.get("1.0",END)
+        wraped_text1="\n".join(wrap(text1,40))
+        a=wraped_text1.split('\n')      
+        addr = len(a)
+        if addr > 0:
+          pdf.drawString(60,520,a[0])
+          if addr > 1:
+            pdf.drawString(60,505,a[1])
+            if addr > 2:
+              pdf.drawString(60,490,a[2])
+              if addr > 3:
+                pdf.drawString(60,475,a[3])
+              else:
+                pass
+            else:
+              pass
+          else:
+            pass
+        else:
+          pass
+        
+        text2=""+estimate_ship_address4.get("1.0",END)
+        wraped_text2="\n".join(wrap(text2,40))
+        a1=wraped_text2.split('\n')      
+        addr1 = len(a1)
+        if addr1 > 0:
+          pdf.drawString(300,520,a1[0])
+          if addr1 > 1:
+            pdf.drawString(300,505,a1[1])
+            if addr1 > 2:
+              pdf.drawString(300,490,a1[2])
+              if addr1 > 3:
+                pdf.drawString(300,475,a1[3])
+              else:
+                pass
+            else:
+              pass
+          else:
+            pass
+        else:
+          pass
+        
+
+        pdf.setFont('Helvetica-Bold',12)
+        pdf.drawAlignedString(580,745, company[1])
+        pdf.setFont('Helvetica',12)
+        text=company[2]
+        wraped_text="\n".join(wrap(text,30))
+        print(wraped_text)
+        htg=wraped_text.split('\n') 
+        vg=len(htg)
+        if vg>0:
+          pdf.drawAlignedString(582,730,htg[0])
+          if vg>1:
+            pdf.drawAlignedString(582,715,htg[1])
+            if vg>2:
+              pdf.drawAlignedString(582,700,htg[2])
+              if vg>3:
+                pdf.drawAlignedString(582,685,htg[3])
+              else:
+                pass
+            else:
+              pass
+          else:
+            pass
+        else:
+          pass     
+      
+
+        pdf.drawAlignedString(582,660, company[4])
+        pdf.setFont('Helvetica-Bold',16)
+        pdf.drawAlignedString(582,620, " "+est_str1.get())
+
+        pdf.setFont('Helvetica',12)
+
+        sql = "select * from company"
+        fbcursor.execute(sql)
+        est_taxcheck_1 = fbcursor.fetchone()
+
+        sql = "select currsignplace,currencysign from company"
+        fbcursor.execute(sql)
+        est_symbolcheck_1 = fbcursor.fetchone()
+
+        pdf.setLineWidth(.3)
+        pdf.line(30,470,30,450)
+        pdf.line(580,470,580,450)
+        pdf.line(130,470,130,450)
+        pdf.line(310,470,310,450) #vertical lines
+        pdf.line(400,470,400,450)
+        pdf.line(490,470,490,450)
+        #------------------------#
+        pdf.line(30,450,580,450)
+        pdf.line(30,470,580,470)
+
+        pdf.drawString(60,455,"ID/SKU")
+        pdf.drawString(140,455,"Product/Service")
+        pdf.drawString(332,455,"Quantity")
+        pdf.drawString(420,455,"Unit Price")
+        pdf.drawString(523,455,"Price")
+
+        y1 = 430 
+        y2 = 430
+        v1 = 450
+        v2 = 430
+        for i in estimate_tree.get_children():
+          if y1 <= 12:
+            pdf.showPage()
+            y1 = 730
+            y2 = 730
+            v1 = 750
+            v2 = 730
+            pdf.line(30,y1,580,y2)
+            pdf.line(30,y1+20,580,y2+20)
+          pdf.line(30,y1,580,y2)
+          if company[12] == "1":
+            pdf.drawString(34,y1+5,estimate_tree.item(i,'value')[0])
+            pdf.drawString(150,y1+5,estimate_tree.item(i,'value')[1])
+            pdf.drawString(332,y1+5,estimate_tree.item(i,'value')[4])
+            pdf.drawRightString(470,y1+5,estimate_tree.item(i,'value')[3])
+            pdf.drawRightString(563,y1+5,estimate_tree.item(i,'value')[6])
+            y1 -= 20
+            y2 -= 20
+            pdf.line(30,v1,30,v2)
+            pdf.line(580,v1,580,v2)
+            pdf.line(130,v1,130,v2)
+            pdf.line(310,v1,310,v2) #vertical lines
+            pdf.line(400,v1,400,v2)
+            pdf.line(490,v1,490,v2)
+            v1 -= 20
+            v2 -= 20
+          elif company[12] == "2":
+            pdf.drawString(34,y1+5,estimate_tree.item(i,'value')[0])
+            pdf.drawString(150,y1+5,estimate_tree.item(i,'value')[1])
+            pdf.drawString(332,y1+5,estimate_tree.item(i,'value')[4])
+            pdf.drawRightString(470,y1+5,estimate_tree.item(i,'value')[3])
+            pdf.drawRightString(563,y1+5,estimate_tree.item(i,'value')[7])
+            y1 -= 20
+            y2 -= 20
+            pdf.line(30,v1,30,v2)
+            pdf.line(580,v1,580,v2)
+            pdf.line(130,v1,130,v2)
+            pdf.line(310,v1,310,v2) #vertical lines
+            pdf.line(400,v1,400,v2)
+            pdf.line(490,v1,490,v2)
+            v1 -= 20
+            v2 -= 20
+          elif company[12] == "3":
+            pdf.drawString(34,y1+5,estimate_tree.item(i,'value')[0])
+            pdf.drawString(150,y1+5,estimate_tree.item(i,'value')[1])
+            pdf.drawString(332,y1+5,estimate_tree.item(i,'value')[4])
+            pdf.drawRightString(470,y1+5,estimate_tree.item(i,'value')[3])
+            pdf.drawRightString(563,y1+5,estimate_tree.item(i,'value')[8])
+            y1 -= 20
+            y2 -= 20
+            pdf.line(30,v1,30,v2)
+            pdf.line(580,v1,580,v2)
+            pdf.line(130,v1,130,v2)
+            pdf.line(310,v1,310,v2) #vertical lines
+            pdf.line(400,v1,400,v2)
+            pdf.line(490,v1,490,v2)
+            v1 -= 20
+            v2 -= 20
+        calc_y1 = y1
+        calc_y2 = y2
+        if company[12] == "1":
+          if calc_y1-100 <=40:
+            pdf.showPage()
+            calc_y1 = 730
+            calc_y2 = 730
+            pdf.line(350,calc_y1-60,350,calc_y1+20)
+            pdf.line(580,calc_y1-60,580,calc_y1+20)
+            #pdf.line(465,calc_y1-60,465,calc_y1+20)
+            pdf.line(490,calc_y1-60,490,calc_y1+20)
+            #-----------------------------------
+            pdf.line(350,calc_y1,580,calc_y2)
+            pdf.line(350,calc_y1-20,580,calc_y2-20)
+            pdf.line(350,calc_y1-40,580,calc_y2-40)
+            pdf.line(350,calc_y1-60,580,calc_y2-60)
+            if est_symbolcheck_1[0] == "before amount":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+str(estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+str(estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+str(estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+str(estimate_total1.cget("text")))
+
+              text3=""+estimates_ecomments.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')      
+              
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-125,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-140,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-155,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-170,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "before amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+" "+str(estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+" "+str(estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+" "+str(estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+" "+str(estimate_total1.cget("text")))
+
+              text3=""+estimates_ecomments.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')      
+              
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-125,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-140,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-155,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-170,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "after amount":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(estimate_discounttt1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(estimate_subbb1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(estimate_costtt.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,str(estimate_total1.cget("text"))+""+comcursign.get())
+
+              text3=""+estimates_ecomments.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')      
+              
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-125,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-140,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-155,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-170,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "after amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(estimate_discounttt1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(estimate_subbb1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(estimate_costtt.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,str(estimate_total1.cget("text"))+" "+""+comcursign.get())
+
+              text3=""+estimates_ecomments.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')      
+              
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-125,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-140,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-155,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-170,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+          else:
+            pdf.line(350,calc_y1-60,350,calc_y1+20)
+            pdf.line(580,calc_y1-60,580,calc_y1+20)
+            #pdf.line(465,calc_y1-60,465,calc_y1+20)
+            pdf.line(490,calc_y1-60,490,calc_y1+20)
+            #-----------------------------------
+            pdf.line(350,calc_y1,580,calc_y2)
+            pdf.line(350,calc_y1-20,580,calc_y2-20)
+            pdf.line(350,calc_y1-40,580,calc_y2-40)
+            pdf.line(350,calc_y1-60,580,calc_y2-60)
+            if est_symbolcheck_1[0] == "before amount":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+str(estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+str(estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+str(estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+str(estimate_total1.cget("text")))
+
+              text3=""+estimates_ecomments.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')    
+
+              if calc_y1-170 <= 40:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-125,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-140,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-155,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-170,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "before amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+" "+str(estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+" "+str(estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+" "+str(estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+" "+str(estimate_total1.cget("text")))
+              
+              text3=""+estimates_ecomments.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')    
+
+              if calc_y1-170 <= 40:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-125,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-140,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-155,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-170,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "after amount":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(estimate_discounttt1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(estimate_subbb1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(estimate_costtt.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,str(estimate_total1.cget("text"))+""+comcursign.get())
+
+              text3=""+estimates_ecomments.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')    
+
+              if calc_y1-170 <= 40:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-125,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-140,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-155,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-170,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "after amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(estimate_discounttt1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(estimate_subbb1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(estimate_costtt.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,str(estimate_total1.cget("text"))+" "+""+comcursign.get())
+
+              text3=""+estimates_ecomments.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')    
+
+              if calc_y1-170 <= 40:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-125,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-140,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-155,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-170,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+        elif company[12] == "2":
+          if calc_y1-120 <= 40:
+            pdf.showPage()
+            calc_y1 = 730
+            calc_y2 = 730
+            pdf.line(350,calc_y1-80,350,calc_y1+20)
+            pdf.line(580,calc_y1-80,580,calc_y1+20)
+            pdf.line(490,calc_y1-80,490,calc_y1+20)
+            #-----------------------------------
+            pdf.line(350,calc_y1+20,580,calc_y2+20)
+            pdf.line(350,calc_y1,580,calc_y2)
+            pdf.line(350,calc_y1-20,580,calc_y2-20)
+            pdf.line(350,calc_y1-40,580,calc_y2-40)
+            pdf.line(350,calc_y1-60,580,calc_y2-60)
+            pdf.line(350,calc_y1-80,580,calc_y2-80)
+            if est_symbolcheck_1[0] == "before amount":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+str(estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+str(estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+str(estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+str(estimate_ttax1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+str(estimate_total1.cget("text")))
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-145,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-160,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-175,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-190,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "before amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+" "+str(estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+" "+str(estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+" "+str(estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+" "+str(estimate_ttax1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+" "+str(estimate_total1.cget("text")))
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-145,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-160,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-175,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-190,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "after amount":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(estimate_discounttt1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(estimate_subbb1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(estimate_costtt.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(estimate_ttax1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,str(estimate_total1.cget("text"))+""+comcursign.get())
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-145,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-160,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-175,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-190,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "after amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(estimate_discounttt1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(estimate_subbb1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(estimate_costtt.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(estimate_ttax1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,str(estimate_total1.cget("text"))+" "+""+comcursign.get())
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-145,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-160,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-175,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-190,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+          else:
+            pdf.line(350,calc_y1-80,350,calc_y1+20)
+            pdf.line(580,calc_y1-80,580,calc_y1+20)
+            pdf.line(490,calc_y1-80,490,calc_y1+20)
+            #-----------------------------------
+            pdf.line(350,calc_y1+20,580,calc_y2+20)
+            pdf.line(350,calc_y1,580,calc_y2)
+            pdf.line(350,calc_y1-20,580,calc_y2-20)
+            pdf.line(350,calc_y1-40,580,calc_y2-40)
+            pdf.line(350,calc_y1-60,580,calc_y2-60)
+            pdf.line(350,calc_y1-80,580,calc_y2-80)
+            if est_symbolcheck_1[0] == "before amount":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+str(estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+str(estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+str(estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+str(estimate_ttax1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+str(estimate_total1.cget("text")))
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-190 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-145,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-160,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-175,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-190,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "before amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+" "+str(estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+" "+str(estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+" "+str(estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+" "+str(estimate_ttax1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+" "+str(estimate_total1.cget("text")))
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-190 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-145,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-160,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-175,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-190,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "after amount":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(estimate_discounttt1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(estimate_subbb1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(estimate_costtt.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(estimate_ttax1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,str(estimate_total1.cget("text"))+""+comcursign.get())
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-190 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-145,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-160,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-175,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-190,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "after amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(estimate_discounttt1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(estimate_subbb1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(estimate_costtt.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(estimate_ttax1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,str(estimate_total1.cget("text"))+" "+""+comcursign.get())
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-190 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-145,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-160,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-175,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-190,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+        elif company[12] == "3":
+          if calc_y1-140 <= 40:
+            pdf.showPage()
+            calc_y1 = 730
+            calc_y2 = 730
+            pdf.line(350,calc_y1-100,350,calc_y1+20)
+            pdf.line(580,calc_y1-100,580,calc_y1+20)
+            pdf.line(490,calc_y1-100,490,calc_y1+20)
+            #-----------------------------------
+            pdf.line(350,calc_y1,580,calc_y2)
+            pdf.line(350,calc_y1-20,580,calc_y2-20)
+            pdf.line(350,calc_y1-40,580,calc_y2-40)
+            pdf.line(350,calc_y1-60,580,calc_y2-60)
+            pdf.line(350,calc_y1-80,580,calc_y2-80)
+            pdf.line(350,calc_y1-100,580,calc_y2-100)
+            if est_symbolcheck_1[0] == "before amount":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+str(estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+str(estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+str(estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+str(estimate_ttax1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+str(estimate_ttax2.cget("text")))
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,""+comcursign.get()+str(estimate_total1.cget("text")))
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-165,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-180,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-195,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-210,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "before amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+" "+str(estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+" "+str(estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+" "+str(estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+" "+str(estimate_ttax1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+" "+str(estimate_ttax2.cget("text")))
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,""+comcursign.get()+" "+str(estimate_total1.cget("text")))
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-165,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-180,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-195,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-210,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "after amount":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(estimate_discounttt1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(estimate_subbb1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(estimate_costtt.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(estimate_ttax1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,str(estimate_ttax2.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,str(estimate_total1.cget("text"))+""+comcursign.get())
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-165,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-180,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-195,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-210,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "after amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(estimate_discounttt1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(estimate_subbb1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(estimate_costtt.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(estimate_ttax1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,str(estimate_ttax2.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,str(estimate_total1.cget("text"))+" "+""+comcursign.get())
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-165,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-180,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-195,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-210,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass 
+          else:
+            pdf.line(350,calc_y1-100,350,calc_y1+20)
+            pdf.line(580,calc_y1-100,580,calc_y1+20)
+            pdf.line(490,calc_y1-100,490,calc_y1+20)
+            #-----------------------------------
+            pdf.line(350,calc_y1,580,calc_y2)
+            pdf.line(350,calc_y1-20,580,calc_y2-20)
+            pdf.line(350,calc_y1-40,580,calc_y2-40)
+            pdf.line(350,calc_y1-60,580,calc_y2-60)
+            pdf.line(350,calc_y1-80,580,calc_y2-80)
+            pdf.line(350,calc_y1-100,580,calc_y2-100)
+            if est_symbolcheck_1[0] == "before amount":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+str(estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+str(estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+str(estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+str(estimate_ttax1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+str(estimate_ttax2.cget("text")))
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,""+comcursign.get()+str(estimate_total1.cget("text")))
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-210 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-165,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-180,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-195,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-210,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "before amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+" "+str(estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+" "+str(estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+" "+str(estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+" "+str(estimate_ttax1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+" "+str(estimate_ttax2.cget("text")))
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,""+comcursign.get()+" "+str(estimate_total1.cget("text")))
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-210 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-165,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-180,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-195,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-210,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "after amount":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(estimate_discounttt1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(estimate_subbb1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(estimate_costtt.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(estimate_ttax1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,str(estimate_ttax2.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,str(estimate_total1.cget("text"))+""+comcursign.get())
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-210 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-165,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-180,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-195,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-210,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "after amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(estimate_discounttt1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(estimate_subbb1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(estimate_costtt.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(estimate_ttax1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,str(estimate_ttax2.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,str(estimate_total1.cget("text"))+" "+""+comcursign.get())
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-210 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-165,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-180,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-195,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-210,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+
+        if (calc_y1-170)-115 <= 10 or (calc_y1-190)-115 <= 10 or (calc_y1-210)-115 <= 10:
+          pdf.drawCentredString(302,115, "Terms and Conditions")
+          pdf.line(30,110,580,110)
+          text4=""+estimates_eterm_text.get("1.0","end-1c")
+          wraped_text4="\n".join(wrap(text4,102))
+          t=wraped_text4.split('\n')      
+          term = len(t)
+          if term > 0:
+            pdf.drawString(32,95,t[0])
+            if term > 1:
+              pdf.drawString(32,80,t[1])
+              if term > 2:
+                pdf.drawString(32,65,t[2])
+                if term > 3:
+                  pdf.drawString(32,50,t[3])
+                else:
+                  pass
+              else:
+                pass
+            else:
+              pass
+          else:
+            pass
+          
+          pdf.drawString(32,30, "Sales Person:")
+          pdf.drawString(115,30, " "+estimates_sales6.get())
+          pdf.drawString(32,12, " "+estimates_efooter_text.get())
+        else:
+          pdf.drawCentredString(302,115, "Terms and Conditions")
+          pdf.line(30,110,580,110)
+          text4=""+estimates_eterm_text.get("1.0","end-1c")
+          wraped_text4="\n".join(wrap(text4,102))
+          t=wraped_text4.split('\n')      
+          term = len(t)
+          if term > 0:
+            pdf.drawString(32,95,t[0])
+            if term > 1:
+              pdf.drawString(32,80,t[1])
+              if term > 2:
+                pdf.drawString(32,65,t[2])
+                if term > 3:
+                  pdf.drawString(32,50,t[3])
+                else:
+                  pass
+              else:
+                pass
+            else:
+              pass
+          else:
+            pass
+          
+          pdf.drawString(32,30, "Sales Person:")
+          pdf.drawString(115,30, " "+estimates_sales6.get())
+          pdf.drawString(32,12, " "+estimates_efooter_text.get())
+          
+        
+        pdf.save()
+        #win32api.ShellExecute(0,"","estimate\Estimate_Report.pdf",None,".",0) 
+      elif estimates_etemplate.get() == 'Professional 2 (logo on right side)': 
+        from reportlab.pdfgen import canvas 
+        pdf = canvas.Canvas("estimate/Estimate_Report.pdf", pagesize=letter)
+        
+
+        sql_company = "SELECT * from company"
+        fbcursor.execute(sql_company)
+        company= fbcursor.fetchone()
+        print(company)
+        
+        pdf.setFont('Helvetica',12)
+        pdf.drawCentredString(302,770, " "+estimates_etitletext.get())
+
+        pdf.drawCentredString(302,475, " "+estimates_eheader_text.get())
+
+
+        pdf.drawImage("images/"+company[13],380,665,width=200,height=90)
+
+        pdf.drawString(340,635, " "+est_str2.get())
+        pdf.drawString(340,620, " "+est_str3.get())
+        pdf.drawString(340,605, " "+est_str4.get())
+        pdf.drawString(341,590, "Terms")
+        pdf.drawString(341,575, "Order ref.#")
+
+        pdf.drawString(450,635, " "+estimate_number_entry.get())
+        pdf.drawString(450,620, " "+str(estimate_date_entry.get_date()))
+        pdf.drawString(450,605, " "+str(estimate_duedate_entry.get_date()))
+        pdf.drawString(450,590, " "+estimate_eterms.get())
+        pdf.drawString(450,575, " "+estimate_ee11.get())
+
+        # pdf.setFont('Helvetica-underline',12)
+        pdf.drawString(60,550, " "+est_str5.get())
+        pdf.line(60,548,112,548)
+        pdf.drawString(300,550, "Ship to")
+        pdf.line(300,548,338,548)
+
+        pdf.drawString(60,535, " "+estimate_combo_name1.get())
+        pdf.drawString(300,535, " "+estimate_shipto3.get())
+
+        text1=""+estimate_addresstext2.get("1.0",END)
+        wraped_text1="\n".join(wrap(text1,40))
+        a=wraped_text1.split('\n')      
+        addr = len(a)
+        if addr > 0:
+          pdf.drawString(60,520,a[0])
+          if addr > 1:
+            pdf.drawString(60,505,a[1])
+            if addr > 2:
+              pdf.drawString(60,490,a[2])
+              if addr > 3:
+                pdf.drawString(60,475,a[3])
+              else:
+                pass
+            else:
+              pass
+          else:
+            pass
+        else:
+          pass
+        
+        text2=""+estimate_ship_address4.get("1.0",END)
+        wraped_text2="\n".join(wrap(text2,40))
+        a1=wraped_text2.split('\n')      
+        addr1 = len(a1)
+        if addr1 > 0:
+          pdf.drawString(300,520,a1[0])
+          if addr1 > 1:
+            pdf.drawString(300,505,a1[1])
+            if addr1 > 2:
+              pdf.drawString(300,490,a1[2])
+              if addr1 > 3:
+                pdf.drawString(300,475,a1[3])
+              else:
+                pass
+            else:
+              pass
+          else:
+            pass
+        else:
+          pass
+        
+
+        pdf.setFont('Helvetica-Bold',12)
+        pdf.drawString(30,745, company[1])
+        pdf.setFont('Helvetica',12)
+        text=company[2]
+        wraped_text="\n".join(wrap(text,30))
+        print(wraped_text)
+        htg=wraped_text.split('\n') 
+        vg=len(htg)
+        if vg>0:
+          pdf.drawString(30,730,htg[0])
+          if vg>1:
+            pdf.drawString(30,715,htg[1])
+            if vg>2:
+              pdf.drawString(30,700,htg[2])
+              if vg>3:
+                pdf.drawString(30,685,htg[3])
+              else:
+                pass
+            else:
+              pass
+          else:
+            pass
+        else:
+          pass     
+      
+
+        pdf.drawString(30,660, company[4])
+        pdf.setFont('Helvetica-Bold',16)
+        pdf.drawString(30,620, " "+est_str1.get())
+
+        pdf.setFont('Helvetica',12)
+
+        sql = "select * from company"
+        fbcursor.execute(sql)
+        est_taxcheck_1 = fbcursor.fetchone()
+
+        sql = "select currsignplace,currencysign from company"
+        fbcursor.execute(sql)
+        est_symbolcheck_1 = fbcursor.fetchone()
+
+        pdf.setLineWidth(.3)
+        pdf.line(30,470,30,450)
+        pdf.line(580,470,580,450)
+        pdf.line(130,470,130,450)
+        pdf.line(310,470,310,450) #vertical lines
+        pdf.line(400,470,400,450)
+        pdf.line(490,470,490,450)
+        #------------------------#
+        pdf.line(30,450,580,450)
+        pdf.line(30,470,580,470)
+
+        pdf.drawString(60,455,"ID/SKU")
+        pdf.drawString(140,455,"Product/Service")
+        pdf.drawString(332,455,"Quantity")
+        pdf.drawString(420,455,"Unit Price")
+        pdf.drawString(523,455,"Price")
+
+        y1 = 430 
+        y2 = 430
+        v1 = 450
+        v2 = 430
+        for i in estimate_tree.get_children():
+          if y1 <= 12:
+            pdf.showPage()
+            y1 = 730
+            y2 = 730
+            v1 = 750
+            v2 = 730
+            pdf.line(30,y1,580,y2)
+            pdf.line(30,y1+20,580,y2+20)
+          pdf.line(30,y1,580,y2)
+          if company[12] == "1":
+            pdf.drawString(34,y1+5,estimate_tree.item(i,'value')[0])
+            pdf.drawString(150,y1+5,estimate_tree.item(i,'value')[1])
+            pdf.drawString(332,y1+5,estimate_tree.item(i,'value')[4])
+            pdf.drawRightString(470,y1+5,estimate_tree.item(i,'value')[3])
+            pdf.drawRightString(563,y1+5,estimate_tree.item(i,'value')[6])
+            y1 -= 20
+            y2 -= 20
+            pdf.line(30,v1,30,v2)
+            pdf.line(580,v1,580,v2)
+            pdf.line(130,v1,130,v2)
+            pdf.line(310,v1,310,v2) #vertical lines
+            pdf.line(400,v1,400,v2)
+            pdf.line(490,v1,490,v2)
+            v1 -= 20
+            v2 -= 20
+          elif company[12] == "2":
+            pdf.drawString(34,y1+5,estimate_tree.item(i,'value')[0])
+            pdf.drawString(150,y1+5,estimate_tree.item(i,'value')[1])
+            pdf.drawString(332,y1+5,estimate_tree.item(i,'value')[4])
+            pdf.drawRightString(470,y1+5,estimate_tree.item(i,'value')[3])
+            pdf.drawRightString(563,y1+5,estimate_tree.item(i,'value')[7])
+            y1 -= 20
+            y2 -= 20
+            pdf.line(30,v1,30,v2)
+            pdf.line(580,v1,580,v2)
+            pdf.line(130,v1,130,v2)
+            pdf.line(310,v1,310,v2) #vertical lines
+            pdf.line(400,v1,400,v2)
+            pdf.line(490,v1,490,v2)
+            v1 -= 20
+            v2 -= 20
+          elif company[12] == "3":
+            pdf.drawString(34,y1+5,estimate_tree.item(i,'value')[0])
+            pdf.drawString(150,y1+5,estimate_tree.item(i,'value')[1])
+            pdf.drawString(332,y1+5,estimate_tree.item(i,'value')[4])
+            pdf.drawRightString(470,y1+5,estimate_tree.item(i,'value')[3])
+            pdf.drawRightString(563,y1+5,estimate_tree.item(i,'value')[8])
+            y1 -= 20
+            y2 -= 20
+            pdf.line(30,v1,30,v2)
+            pdf.line(580,v1,580,v2)
+            pdf.line(130,v1,130,v2)
+            pdf.line(310,v1,310,v2) #vertical lines
+            pdf.line(400,v1,400,v2)
+            pdf.line(490,v1,490,v2)
+            v1 -= 20
+            v2 -= 20
+        calc_y1 = y1
+        calc_y2 = y2
+        if company[12] == "1":
+          if calc_y1-100 <=40:
+            pdf.showPage()
+            calc_y1 = 730
+            calc_y2 = 730
+            pdf.line(350,calc_y1-60,350,calc_y1+20)
+            pdf.line(580,calc_y1-60,580,calc_y1+20)
+            #pdf.line(465,calc_y1-60,465,calc_y1+20)
+            pdf.line(490,calc_y1-60,490,calc_y1+20)
+            #-----------------------------------
+            pdf.line(350,calc_y1,580,calc_y2)
+            pdf.line(350,calc_y1-20,580,calc_y2-20)
+            pdf.line(350,calc_y1-40,580,calc_y2-40)
+            pdf.line(350,calc_y1-60,580,calc_y2-60)
+            if est_symbolcheck_1[0] == "before amount":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+str(estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+str(estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+str(estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+str(estimate_total1.cget("text")))
+
+              text3=""+estimates_ecomments.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')      
+              
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-125,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-140,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-155,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-170,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "before amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+" "+str(estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+" "+str(estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+" "+str(estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+" "+str(estimate_total1.cget("text")))
+
+              text3=""+estimates_ecomments.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')      
+              
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-125,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-140,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-155,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-170,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "after amount":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(estimate_discounttt1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(estimate_subbb1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(estimate_costtt.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,str(estimate_total1.cget("text"))+""+comcursign.get())
+
+              text3=""+estimates_ecomments.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')      
+              
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-125,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-140,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-155,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-170,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "after amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(estimate_discounttt1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(estimate_subbb1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(estimate_costtt.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,str(estimate_total1.cget("text"))+" "+""+comcursign.get())
+
+              text3=""+estimates_ecomments.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')      
+              
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-125,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-140,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-155,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-170,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+          else:
+            pdf.line(350,calc_y1-60,350,calc_y1+20)
+            pdf.line(580,calc_y1-60,580,calc_y1+20)
+            #pdf.line(465,calc_y1-60,465,calc_y1+20)
+            pdf.line(490,calc_y1-60,490,calc_y1+20)
+            #-----------------------------------
+            pdf.line(350,calc_y1,580,calc_y2)
+            pdf.line(350,calc_y1-20,580,calc_y2-20)
+            pdf.line(350,calc_y1-40,580,calc_y2-40)
+            pdf.line(350,calc_y1-60,580,calc_y2-60)
+            if est_symbolcheck_1[0] == "before amount":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+str(estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+str(estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+str(estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+str(estimate_total1.cget("text")))
+
+              text3=""+estimates_ecomments.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')    
+
+              if calc_y1-170 <= 40:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-125,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-140,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-155,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-170,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "before amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+" "+str(estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+" "+str(estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+" "+str(estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+" "+str(estimate_total1.cget("text")))
+              
+              text3=""+estimates_ecomments.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')    
+
+              if calc_y1-170 <= 40:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-125,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-140,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-155,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-170,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "after amount":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(estimate_discounttt1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(estimate_subbb1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(estimate_costtt.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,str(estimate_total1.cget("text"))+""+comcursign.get())
+
+              text3=""+estimates_ecomments.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')    
+
+              if calc_y1-170 <= 40:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-125,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-140,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-155,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-170,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "after amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(estimate_discounttt1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(estimate_subbb1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(estimate_costtt.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,str(estimate_total1.cget("text"))+" "+""+comcursign.get())
+
+              text3=""+estimates_ecomments.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')    
+
+              if calc_y1-170 <= 40:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-125,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-140,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-155,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-170,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+        elif company[12] == "2":
+          if calc_y1-120 <= 40:
+            pdf.showPage()
+            calc_y1 = 730
+            calc_y2 = 730
+            pdf.line(350,calc_y1-80,350,calc_y1+20)
+            pdf.line(580,calc_y1-80,580,calc_y1+20)
+            pdf.line(490,calc_y1-80,490,calc_y1+20)
+            #-----------------------------------
+            pdf.line(350,calc_y1+20,580,calc_y2+20)
+            pdf.line(350,calc_y1,580,calc_y2)
+            pdf.line(350,calc_y1-20,580,calc_y2-20)
+            pdf.line(350,calc_y1-40,580,calc_y2-40)
+            pdf.line(350,calc_y1-60,580,calc_y2-60)
+            pdf.line(350,calc_y1-80,580,calc_y2-80)
+            if est_symbolcheck_1[0] == "before amount":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+str(estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+str(estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+str(estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+str(estimate_ttax1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+str(estimate_total1.cget("text")))
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-145,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-160,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-175,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-190,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "before amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+" "+str(estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+" "+str(estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+" "+str(estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+" "+str(estimate_ttax1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+" "+str(estimate_total1.cget("text")))
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-145,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-160,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-175,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-190,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "after amount":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(estimate_discounttt1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(estimate_subbb1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(estimate_costtt.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(estimate_ttax1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,str(estimate_total1.cget("text"))+""+comcursign.get())
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-145,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-160,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-175,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-190,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "after amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(estimate_discounttt1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(estimate_subbb1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(estimate_costtt.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(estimate_ttax1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,str(estimate_total1.cget("text"))+" "+""+comcursign.get())
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-145,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-160,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-175,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-190,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+          else:
+            pdf.line(350,calc_y1-80,350,calc_y1+20)
+            pdf.line(580,calc_y1-80,580,calc_y1+20)
+            pdf.line(490,calc_y1-80,490,calc_y1+20)
+            #-----------------------------------
+            pdf.line(350,calc_y1+20,580,calc_y2+20)
+            pdf.line(350,calc_y1,580,calc_y2)
+            pdf.line(350,calc_y1-20,580,calc_y2-20)
+            pdf.line(350,calc_y1-40,580,calc_y2-40)
+            pdf.line(350,calc_y1-60,580,calc_y2-60)
+            pdf.line(350,calc_y1-80,580,calc_y2-80)
+            if est_symbolcheck_1[0] == "before amount":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+str(estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+str(estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+str(estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+str(estimate_ttax1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+str(estimate_total1.cget("text")))
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-190 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-145,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-160,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-175,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-190,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "before amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+" "+str(estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+" "+str(estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+" "+str(estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+" "+str(estimate_ttax1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+" "+str(estimate_total1.cget("text")))
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-190 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-145,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-160,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-175,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-190,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "after amount":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(estimate_discounttt1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(estimate_subbb1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(estimate_costtt.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(estimate_ttax1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,str(estimate_total1.cget("text"))+""+comcursign.get())
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-190 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-145,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-160,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-175,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-190,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "after amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(estimate_discounttt1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(estimate_subbb1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(estimate_costtt.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(estimate_ttax1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,str(estimate_total1.cget("text"))+" "+""+comcursign.get())
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-190 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-145,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-160,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-175,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-190,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+        elif company[12] == "3":
+          if calc_y1-140 <= 40:
+            pdf.showPage()
+            calc_y1 = 730
+            calc_y2 = 730
+            pdf.line(350,calc_y1-100,350,calc_y1+20)
+            pdf.line(580,calc_y1-100,580,calc_y1+20)
+            pdf.line(490,calc_y1-100,490,calc_y1+20)
+            #-----------------------------------
+            pdf.line(350,calc_y1,580,calc_y2)
+            pdf.line(350,calc_y1-20,580,calc_y2-20)
+            pdf.line(350,calc_y1-40,580,calc_y2-40)
+            pdf.line(350,calc_y1-60,580,calc_y2-60)
+            pdf.line(350,calc_y1-80,580,calc_y2-80)
+            pdf.line(350,calc_y1-100,580,calc_y2-100)
+            if est_symbolcheck_1[0] == "before amount":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+str(estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+str(estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+str(estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+str(estimate_ttax1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+str(estimate_ttax2.cget("text")))
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,""+comcursign.get()+str(estimate_total1.cget("text")))
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-165,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-180,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-195,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-210,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "before amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+" "+str(estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+" "+str(estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+" "+str(estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+" "+str(estimate_ttax1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+" "+str(estimate_ttax2.cget("text")))
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,""+comcursign.get()+" "+str(estimate_total1.cget("text")))
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-165,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-180,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-195,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-210,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "after amount":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(estimate_discounttt1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(estimate_subbb1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(estimate_costtt.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(estimate_ttax1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,str(estimate_ttax2.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,str(estimate_total1.cget("text"))+""+comcursign.get())
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-165,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-180,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-195,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-210,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "after amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(estimate_discounttt1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(estimate_subbb1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(estimate_costtt.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(estimate_ttax1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,str(estimate_ttax2.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,str(estimate_total1.cget("text"))+" "+""+comcursign.get())
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-165,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-180,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-195,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-210,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass 
+          else:
+            pdf.line(350,calc_y1-100,350,calc_y1+20)
+            pdf.line(580,calc_y1-100,580,calc_y1+20)
+            pdf.line(490,calc_y1-100,490,calc_y1+20)
+            #-----------------------------------
+            pdf.line(350,calc_y1,580,calc_y2)
+            pdf.line(350,calc_y1-20,580,calc_y2-20)
+            pdf.line(350,calc_y1-40,580,calc_y2-40)
+            pdf.line(350,calc_y1-60,580,calc_y2-60)
+            pdf.line(350,calc_y1-80,580,calc_y2-80)
+            pdf.line(350,calc_y1-100,580,calc_y2-100)
+            if est_symbolcheck_1[0] == "before amount":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+str(estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+str(estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+str(estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+str(estimate_ttax1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+str(estimate_ttax2.cget("text")))
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,""+comcursign.get()+str(estimate_total1.cget("text")))
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-210 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-165,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-180,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-195,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-210,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "before amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+" "+str(estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+" "+str(estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+" "+str(estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+" "+str(estimate_ttax1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+" "+str(estimate_ttax2.cget("text")))
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,""+comcursign.get()+" "+str(estimate_total1.cget("text")))
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-210 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-165,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-180,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-195,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-210,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "after amount":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(estimate_discounttt1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(estimate_subbb1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(estimate_costtt.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(estimate_ttax1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,str(estimate_ttax2.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,str(estimate_total1.cget("text"))+""+comcursign.get())
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-210 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-165,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-180,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-195,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-210,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "after amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(estimate_discounttt1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(estimate_subbb1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(estimate_costtt.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(estimate_ttax1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,str(estimate_ttax2.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,str(estimate_total1.cget("text"))+" "+""+comcursign.get())
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-210 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-165,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-180,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-195,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-210,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+                
+        if (calc_y1-170)-115 <= 10 or (calc_y1-190)-115 <= 10 or (calc_y1-210)-115 <= 10:
+          pdf.drawCentredString(302,115, "Terms and Conditions")
+          pdf.line(30,110,580,110)
+          text4=""+estimates_eterm_text.get("1.0","end-1c")
+          wraped_text4="\n".join(wrap(text4,102))
+          t=wraped_text4.split('\n')      
+          term = len(t)
+          if term > 0:
+            pdf.drawString(32,95,t[0])
+            if term > 1:
+              pdf.drawString(32,80,t[1])
+              if term > 2:
+                pdf.drawString(32,65,t[2])
+                if term > 3:
+                  pdf.drawString(32,50,t[3])
+                else:
+                  pass
+              else:
+                pass
+            else:
+              pass
+          else:
+            pass
+          
+          pdf.drawString(32,30, "Sales Person:")
+          pdf.drawString(115,30, " "+estimates_sales6.get())
+          pdf.drawString(32,12, " "+estimates_efooter_text.get())
+        else:
+          pdf.drawCentredString(302,115, "Terms and Conditions")
+          pdf.line(30,110,580,110)
+          text4=""+estimates_eterm_text.get("1.0","end-1c")
+          wraped_text4="\n".join(wrap(text4,102))
+          t=wraped_text4.split('\n')      
+          term = len(t)
+          if term > 0:
+            pdf.drawString(32,95,t[0])
+            if term > 1:
+              pdf.drawString(32,80,t[1])
+              if term > 2:
+                pdf.drawString(32,65,t[2])
+                if term > 3:
+                  pdf.drawString(32,50,t[3])
+                else:
+                  pass
+              else:
+                pass
+            else:
+              pass
+          else:
+            pass
+          
+          pdf.drawString(32,30, "Sales Person:")
+          pdf.drawString(115,30, " "+estimates_sales6.get())
+          pdf.drawString(32,12, " "+estimates_efooter_text.get())
+          
+        
+        pdf.save()
+        #win32api.ShellExecute(0,"","estimate\Estimate_Report.pdf",None,".",0) 
+      elif estimates_etemplate.get() == 'Simplified 1 (logo on left side)':
+        from reportlab.pdfgen import canvas 
+        pdf = canvas.Canvas("estimate/Estimate_Report.pdf", pagesize=letter)
+        
+
+        sql_company = "SELECT * from company"
+        fbcursor.execute(sql_company)
+        company= fbcursor.fetchone()
+        print(company)
+        
+        pdf.drawCentredString(302,770, " "+estimates_etitletext.get())
+        pdf.drawCentredString(302,475, " "+estimates_eheader_text.get())
+        
+
+        pdf.drawImage("images/"+company[13],30,655,width=200,height=90)
+
+        pdf.drawString(30,635, " "+est_str2.get())
+        pdf.drawString(30,620, " "+est_str3.get())
+        pdf.drawString(30,605, " "+est_str4.get())
+        pdf.drawString(31,590, "Terms")
+        pdf.drawString(31,575, "Order ref.#")
+
+        pdf.drawString(140,635, " "+estimate_number_entry.get())
+        pdf.drawString(140,620, " "+str(estimate_date_entry.get_date()))
+        pdf.drawString(140,605, " "+str(estimate_duedate_entry.get_date()))
+        pdf.drawString(140,590, " "+estimate_eterms.get())
+        pdf.drawString(140,575, " "+estimate_ee11.get())
+
+        # pdf.setFont('Helvetica-underline',12)
+        pdf.drawString(60,550, " "+est_str5.get())
+        pdf.line(60,548,112,548)
+        pdf.drawString(300,550, "Ship to")
+        pdf.line(300,548,338,548)
+
+        pdf.drawString(60,535, " "+estimate_combo_name1.get())
+        pdf.drawString(300,535, " "+estimate_shipto3.get())
+
+        text1=""+estimate_addresstext2.get("1.0",END)
+        wraped_text1="\n".join(wrap(text1,40))
+        a=wraped_text1.split('\n')      
+        addr = len(a)
+        if addr > 0:
+          pdf.drawString(60,520,a[0])
+          if addr > 1:
+            pdf.drawString(60,505,a[1])
+            if addr > 2:
+              pdf.drawString(60,490,a[2])
+              if addr > 3:
+                pdf.drawString(60,475,a[3])
+              else:
+                pass
+            else:
+              pass
+          else:
+            pass
+        else:
+          pass
+        
+        text2=""+estimate_ship_address4.get("1.0",END)
+        wraped_text2="\n".join(wrap(text2,40))
+        a1=wraped_text2.split('\n')      
+        addr1 = len(a1)
+        if addr1 > 0:
+          pdf.drawString(300,520,a1[0])
+          if addr1 > 1:
+            pdf.drawString(300,505,a1[1])
+            if addr1 > 2:
+              pdf.drawString(300,490,a1[2])
+              if addr1 > 3:
+                pdf.drawString(300,475,a1[3])
+              else:
+                pass
+            else:
+              pass
+          else:
+            pass
+        else:
+          pass
+        
+
+        pdf.setFont('Helvetica-Bold',12)
+        pdf.drawAlignedString(580,745, company[1])
+        pdf.setFont('Helvetica',12)
+        text=company[2]
+        wraped_text="\n".join(wrap(text,30))
+        print(wraped_text)
+        htg=wraped_text.split('\n') 
+        vg=len(htg)
+        if vg>0:
+          pdf.drawAlignedString(582,730,htg[0])
+          if vg>1:
+            pdf.drawAlignedString(582,715,htg[1])
+            if vg>2:
+              pdf.drawAlignedString(582,700,htg[2])
+              if vg>3:
+                pdf.drawAlignedString(582,685,htg[3])
+              else:
+                pass
+            else:
+              pass
+          else:
+            pass
+        else:
+          pass     
+      
+
+        pdf.drawAlignedString(582,660, company[4])
+        pdf.setFont('Helvetica-Bold',16)
+        pdf.drawAlignedString(582,620, " "+est_str1.get())
+
+        pdf.setFont('Helvetica',12)
+
+        sql = "select * from company"
+        fbcursor.execute(sql)
+        est_taxcheck_1 = fbcursor.fetchone()
+
+        sql = "select currsignplace,currencysign from company"
+        fbcursor.execute(sql)
+        est_symbolcheck_1 = fbcursor.fetchone()
+
+        pdf.setLineWidth(.3)
+        pdf.line(30,470,30,450)
+        pdf.line(580,470,580,450)
+        #pdf.line(130,470,130,450)
+        #pdf.line(310,470,310,450) #vertical lines
+        pdf.line(400,470,400,450)
+        pdf.line(490,470,490,450)
+        #------------------------#
+        pdf.line(30,450,580,450)
+        pdf.line(30,470,580,470)
+
+        #pdf.drawString(60,455,"ID/SKU")
+        pdf.drawString(150,455,"Product/Service")
+        #pdf.drawString(332,455,"Quantity")
+        pdf.drawString(420,455,"Quantity")
+        pdf.drawString(523,455,"Price")
+
+        y1 = 430 
+        y2 = 430
+        v1 = 450
+        v2 = 430
+        for i in estimate_tree.get_children():
+          if y1 <= 12:
+            pdf.showPage()
+            y1 = 730
+            y2 = 730
+            v1 = 750
+            v2 = 730
+            pdf.line(30,y1,580,y2)
+            pdf.line(30,y1+20,580,y2+20)
+          pdf.line(30,y1,580,y2)
+          if company[12] == "1":
+            #pdf.drawString(34,y1+5,estimate_tree.item(i,'value')[0])
+            pdf.drawString(34,y1+5,estimate_tree.item(i,'value')[1])
+            #pdf.drawString(332,y1+5,estimate_tree.item(i,'value')[4])
+            pdf.drawString(450,y1+5,estimate_tree.item(i,'value')[4])
+            pdf.drawRightString(563,y1+5,estimate_tree.item(i,'value')[6])
+            y1 -= 20
+            y2 -= 20
+            pdf.line(30,v1,30,v2)
+            pdf.line(580,v1,580,v2)
+            #pdf.line(130,v1,130,v2)
+            #pdf.line(310,v1,310,v2) #vertical lines
+            pdf.line(400,v1,400,v2)
+            pdf.line(490,v1,490,v2)
+            v1 -= 20
+            v2 -= 20
+          elif company[12] == "2":
+            #pdf.drawString(34,y1+5,estimate_tree.item(i,'value')[0])
+            pdf.drawString(34,y1+5,estimate_tree.item(i,'value')[1])
+            #pdf.drawString(332,y1+5,estimate_tree.item(i,'value')[4])
+            pdf.drawString(450,y1+5,estimate_tree.item(i,'value')[4])
+            pdf.drawRightString(563,y1+5,estimate_tree.item(i,'value')[7])
+            y1 -= 20
+            y2 -= 20
+            pdf.line(30,v1,30,v2)
+            pdf.line(580,v1,580,v2)
+            #pdf.line(130,v1,130,v2)
+            #pdf.line(310,v1,310,v2) #vertical lines
+            pdf.line(400,v1,400,v2)
+            pdf.line(490,v1,490,v2)
+            v1 -= 20
+            v2 -= 20
+          elif company[12] == "3":
+            #pdf.drawString(34,y1+5,estimate_tree.item(i,'value')[0])
+            pdf.drawString(34,y1+5,estimate_tree.item(i,'value')[1])
+            #pdf.drawString(332,y1+5,estimate_tree.item(i,'value')[4])
+            pdf.drawString(450,y1+5,estimate_tree.item(i,'value')[4])
+            pdf.drawRightString(563,y1+5,estimate_tree.item(i,'value')[8])
+            y1 -= 20
+            y2 -= 20
+            pdf.line(30,v1,30,v2)
+            pdf.line(580,v1,580,v2)
+            #pdf.line(130,v1,130,v2)
+            #pdf.line(310,v1,310,v2) #vertical lines
+            pdf.line(400,v1,400,v2)
+            pdf.line(490,v1,490,v2)
+            v1 -= 20
+            v2 -= 20
+        calc_y1 = y1
+        calc_y2 = y2
+        if company[12] == "1":
+          if calc_y1-100 <=40:
+            pdf.showPage()
+            calc_y1 = 730
+            calc_y2 = 730
+            pdf.line(350,calc_y1-60,350,calc_y1+20)
+            pdf.line(580,calc_y1-60,580,calc_y1+20)
+            #pdf.line(465,calc_y1-60,465,calc_y1+20)
+            pdf.line(490,calc_y1-60,490,calc_y1+20)
+            #-----------------------------------
+            pdf.line(350,calc_y1,580,calc_y2)
+            pdf.line(350,calc_y1-20,580,calc_y2-20)
+            pdf.line(350,calc_y1-40,580,calc_y2-40)
+            pdf.line(350,calc_y1-60,580,calc_y2-60)
+            if est_symbolcheck_1[0] == "before amount":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+str(estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+str(estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+str(estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+str(estimate_total1.cget("text")))
+
+              text3=""+estimates_ecomments.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')      
+              
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-125,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-140,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-155,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-170,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "before amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+" "+str(estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+" "+str(estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+" "+str(estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+" "+str(estimate_total1.cget("text")))
+
+              text3=""+estimates_ecomments.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')      
+              
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-125,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-140,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-155,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-170,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "after amount":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(estimate_discounttt1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(estimate_subbb1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(estimate_costtt.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,str(estimate_total1.cget("text"))+""+comcursign.get())
+
+              text3=""+estimates_ecomments.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')      
+              
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-125,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-140,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-155,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-170,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "after amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(estimate_discounttt1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(estimate_subbb1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(estimate_costtt.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,str(estimate_total1.cget("text"))+" "+""+comcursign.get())
+
+              text3=""+estimates_ecomments.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')      
+              
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-125,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-140,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-155,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-170,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+          else:
+            pdf.line(350,calc_y1-60,350,calc_y1+20)
+            pdf.line(580,calc_y1-60,580,calc_y1+20)
+            #pdf.line(465,calc_y1-60,465,calc_y1+20)
+            pdf.line(490,calc_y1-60,490,calc_y1+20)
+            #-----------------------------------
+            pdf.line(350,calc_y1,580,calc_y2)
+            pdf.line(350,calc_y1-20,580,calc_y2-20)
+            pdf.line(350,calc_y1-40,580,calc_y2-40)
+            pdf.line(350,calc_y1-60,580,calc_y2-60)
+            if est_symbolcheck_1[0] == "before amount":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+str(estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+str(estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+str(estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+str(estimate_total1.cget("text")))
+
+              text3=""+estimates_ecomments.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')    
+
+              if calc_y1-170 <= 40:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-125,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-140,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-155,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-170,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "before amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+" "+str(estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+" "+str(estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+" "+str(estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+" "+str(estimate_total1.cget("text")))
+              
+              text3=""+estimates_ecomments.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')    
+
+              if calc_y1-170 <= 40:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-125,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-140,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-155,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-170,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "after amount":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(estimate_discounttt1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(estimate_subbb1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(estimate_costtt.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,str(estimate_total1.cget("text"))+""+comcursign.get())
+
+              text3=""+estimates_ecomments.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')    
+
+              if calc_y1-170 <= 40:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-125,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-140,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-155,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-170,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "after amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(estimate_discounttt1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(estimate_subbb1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(estimate_costtt.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,str(estimate_total1.cget("text"))+" "+""+comcursign.get())
+
+              text3=""+estimates_ecomments.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')    
+
+              if calc_y1-170 <= 40:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-125,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-140,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-155,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-170,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+        elif company[12] == "2":
+          if calc_y1-120 <= 40:
+            pdf.showPage()
+            calc_y1 = 730
+            calc_y2 = 730
+            pdf.line(350,calc_y1-80,350,calc_y1+20)
+            pdf.line(580,calc_y1-80,580,calc_y1+20)
+            pdf.line(490,calc_y1-80,490,calc_y1+20)
+            #-----------------------------------
+            pdf.line(350,calc_y1+20,580,calc_y2+20)
+            pdf.line(350,calc_y1,580,calc_y2)
+            pdf.line(350,calc_y1-20,580,calc_y2-20)
+            pdf.line(350,calc_y1-40,580,calc_y2-40)
+            pdf.line(350,calc_y1-60,580,calc_y2-60)
+            pdf.line(350,calc_y1-80,580,calc_y2-80)
+            if est_symbolcheck_1[0] == "before amount":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+str(estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+str(estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+str(estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+str(estimate_ttax1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+str(estimate_total1.cget("text")))
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-145,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-160,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-175,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-190,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "before amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+" "+str(estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+" "+str(estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+" "+str(estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+" "+str(estimate_ttax1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+" "+str(estimate_total1.cget("text")))
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-145,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-160,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-175,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-190,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "after amount":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(estimate_discounttt1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(estimate_subbb1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(estimate_costtt.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(estimate_ttax1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,str(estimate_total1.cget("text"))+""+comcursign.get())
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-145,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-160,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-175,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-190,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "after amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(estimate_discounttt1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(estimate_subbb1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(estimate_costtt.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(estimate_ttax1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,str(estimate_total1.cget("text"))+" "+""+comcursign.get())
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-145,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-160,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-175,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-190,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+          else:
+            pdf.line(350,calc_y1-80,350,calc_y1+20)
+            pdf.line(580,calc_y1-80,580,calc_y1+20)
+            pdf.line(490,calc_y1-80,490,calc_y1+20)
+            #-----------------------------------
+            pdf.line(350,calc_y1+20,580,calc_y2+20)
+            pdf.line(350,calc_y1,580,calc_y2)
+            pdf.line(350,calc_y1-20,580,calc_y2-20)
+            pdf.line(350,calc_y1-40,580,calc_y2-40)
+            pdf.line(350,calc_y1-60,580,calc_y2-60)
+            pdf.line(350,calc_y1-80,580,calc_y2-80)
+            if est_symbolcheck_1[0] == "before amount":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+str(estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+str(estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+str(estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+str(estimate_ttax1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+str(estimate_total1.cget("text")))
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-190 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-145,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-160,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-175,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-190,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "before amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+" "+str(estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+" "+str(estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+" "+str(estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+" "+str(estimate_ttax1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+" "+str(estimate_total1.cget("text")))
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-190 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-145,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-160,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-175,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-190,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "after amount":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(estimate_discounttt1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(estimate_subbb1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(estimate_costtt.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(estimate_ttax1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,str(estimate_total1.cget("text"))+""+comcursign.get())
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-190 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-145,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-160,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-175,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-190,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "after amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(estimate_discounttt1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(estimate_subbb1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(estimate_costtt.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(estimate_ttax1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,str(estimate_total1.cget("text"))+" "+""+comcursign.get())
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-190 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-145,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-160,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-175,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-190,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+        elif company[12] == "3":
+          if calc_y1-140 <= 40:
+            pdf.showPage()
+            calc_y1 = 730
+            calc_y2 = 730
+            pdf.line(350,calc_y1-100,350,calc_y1+20)
+            pdf.line(580,calc_y1-100,580,calc_y1+20)
+            pdf.line(490,calc_y1-100,490,calc_y1+20)
+            #-----------------------------------
+            pdf.line(350,calc_y1,580,calc_y2)
+            pdf.line(350,calc_y1-20,580,calc_y2-20)
+            pdf.line(350,calc_y1-40,580,calc_y2-40)
+            pdf.line(350,calc_y1-60,580,calc_y2-60)
+            pdf.line(350,calc_y1-80,580,calc_y2-80)
+            pdf.line(350,calc_y1-100,580,calc_y2-100)
+            if est_symbolcheck_1[0] == "before amount":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+str(estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+str(estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+str(estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+str(estimate_ttax1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+str(estimate_ttax2.cget("text")))
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,""+comcursign.get()+str(estimate_total1.cget("text")))
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-165,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-180,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-195,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-210,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "before amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+" "+str(estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+" "+str(estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+" "+str(estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+" "+str(estimate_ttax1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+" "+str(estimate_ttax2.cget("text")))
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,""+comcursign.get()+" "+str(estimate_total1.cget("text")))
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-165,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-180,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-195,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-210,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "after amount":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(estimate_discounttt1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(estimate_subbb1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(estimate_costtt.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(estimate_ttax1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,str(estimate_ttax2.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,str(estimate_total1.cget("text"))+""+comcursign.get())
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-165,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-180,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-195,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-210,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "after amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(estimate_discounttt1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(estimate_subbb1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(estimate_costtt.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(estimate_ttax1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,str(estimate_ttax2.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,str(estimate_total1.cget("text"))+" "+""+comcursign.get())
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-165,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-180,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-195,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-210,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass 
+          else:
+            pdf.line(350,calc_y1-100,350,calc_y1+20)
+            pdf.line(580,calc_y1-100,580,calc_y1+20)
+            pdf.line(490,calc_y1-100,490,calc_y1+20)
+            #-----------------------------------
+            pdf.line(350,calc_y1,580,calc_y2)
+            pdf.line(350,calc_y1-20,580,calc_y2-20)
+            pdf.line(350,calc_y1-40,580,calc_y2-40)
+            pdf.line(350,calc_y1-60,580,calc_y2-60)
+            pdf.line(350,calc_y1-80,580,calc_y2-80)
+            pdf.line(350,calc_y1-100,580,calc_y2-100)
+            if est_symbolcheck_1[0] == "before amount":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+str(estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+str(estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+str(estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+str(estimate_ttax1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+str(estimate_ttax2.cget("text")))
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,""+comcursign.get()+str(estimate_total1.cget("text")))
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-210 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-165,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-180,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-195,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-210,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "before amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+" "+str(estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+" "+str(estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+" "+str(estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+" "+str(estimate_ttax1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+" "+str(estimate_ttax2.cget("text")))
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,""+comcursign.get()+" "+str(estimate_total1.cget("text")))
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-210 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-165,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-180,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-195,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-210,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "after amount":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(estimate_discounttt1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(estimate_subbb1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(estimate_costtt.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(estimate_ttax1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,str(estimate_ttax2.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,str(estimate_total1.cget("text"))+""+comcursign.get())
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-210 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-165,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-180,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-195,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-210,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "after amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(estimate_discounttt1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(estimate_subbb1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(estimate_costtt.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(estimate_ttax1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,str(estimate_ttax2.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,str(estimate_total1.cget("text"))+" "+""+comcursign.get())
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-210 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-165,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-180,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-195,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-210,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+
+        if (calc_y1-170)-115 <= 10 or (calc_y1-190)-115 <= 10 or (calc_y1-210)-115 <= 10:
+          pdf.drawCentredString(302,115, "Terms and Conditions")
+          pdf.line(30,110,580,110)
+          text4=""+estimates_eterm_text.get("1.0","end-1c")
+          wraped_text4="\n".join(wrap(text4,102))
+          t=wraped_text4.split('\n')      
+          term = len(t)
+          if term > 0:
+            pdf.drawString(32,95,t[0])
+            if term > 1:
+              pdf.drawString(32,80,t[1])
+              if term > 2:
+                pdf.drawString(32,65,t[2])
+                if term > 3:
+                  pdf.drawString(32,50,t[3])
+                else:
+                  pass
+              else:
+                pass
+            else:
+              pass
+          else:
+            pass
+          
+          pdf.drawString(32,30, "Sales Person:")
+          pdf.drawString(115,30, " "+estimates_sales6.get())
+          pdf.drawString(32,12, " "+estimates_efooter_text.get())
+        else:
+          pdf.drawCentredString(302,115, "Terms and Conditions")
+          pdf.line(30,110,580,110)
+          text4=""+estimates_eterm_text.get("1.0","end-1c")
+          wraped_text4="\n".join(wrap(text4,102))
+          t=wraped_text4.split('\n')      
+          term = len(t)
+          if term > 0:
+            pdf.drawString(32,95,t[0])
+            if term > 1:
+              pdf.drawString(32,80,t[1])
+              if term > 2:
+                pdf.drawString(32,65,t[2])
+                if term > 3:
+                  pdf.drawString(32,50,t[3])
+                else:
+                  pass
+              else:
+                pass
+            else:
+              pass
+          else:
+            pass
+          
+          pdf.drawString(32,30, "Sales Person:")
+          pdf.drawString(115,30, " "+estimates_sales6.get())
+          pdf.drawString(32,12, " "+estimates_efooter_text.get())
+          
+        
+        pdf.save()
+        #win32api.ShellExecute(0,"","estimate\Estimate_Report.pdf",None,".",0)  
+      elif estimates_etemplate.get() == 'Simplified 2 (logo on right side)': 
+        from reportlab.pdfgen import canvas 
+        pdf = canvas.Canvas("estimate/Estimate_Report.pdf", pagesize=letter)
+
+        sql_company = "SELECT * from company"
+        fbcursor.execute(sql_company)
+        company= fbcursor.fetchone()
+        print(company)
+        
+        pdf.setFont('Helvetica',12)
+        pdf.drawCentredString(302,770, " "+estimates_etitletext.get())
+
+        pdf.drawCentredString(302,475, " "+estimates_eheader_text.get())
+
+
+        pdf.drawImage("images/"+company[13],380,665,width=200,height=90)
+
+        pdf.drawString(340,635, " "+est_str2.get())
+        pdf.drawString(340,620, " "+est_str3.get())
+        pdf.drawString(340,605, " "+est_str4.get())
+        pdf.drawString(341,590, "Terms")
+        pdf.drawString(341,575, "Order ref.#")
+
+        pdf.drawString(450,635, " "+estimate_number_entry.get())
+        pdf.drawString(450,620, " "+str(estimate_date_entry.get_date()))
+        pdf.drawString(450,605, " "+str(estimate_duedate_entry.get_date()))
+        pdf.drawString(450,590, " "+estimate_eterms.get())
+        pdf.drawString(450,575, " "+estimate_ee11.get())
+
+        # pdf.setFont('Helvetica-underline',12)
+        pdf.drawString(60,550, " "+est_str5.get())
+        pdf.line(60,548,112,548)
+        pdf.drawString(300,550, "Ship to")
+        pdf.line(300,548,338,548)
+
+        pdf.drawString(60,535, " "+estimate_combo_name1.get())
+        pdf.drawString(300,535, " "+estimate_shipto3.get())
+
+        text1=""+estimate_addresstext2.get("1.0",END)
+        wraped_text1="\n".join(wrap(text1,40))
+        a=wraped_text1.split('\n')      
+        addr = len(a)
+        if addr > 0:
+          pdf.drawString(60,520,a[0])
+          if addr > 1:
+            pdf.drawString(60,505,a[1])
+            if addr > 2:
+              pdf.drawString(60,490,a[2])
+              if addr > 3:
+                pdf.drawString(60,475,a[3])
+              else:
+                pass
+            else:
+              pass
+          else:
+            pass
+        else:
+          pass
+        
+        text2=""+estimate_ship_address4.get("1.0",END)
+        wraped_text2="\n".join(wrap(text2,40))
+        a1=wraped_text2.split('\n')      
+        addr1 = len(a1)
+        if addr1 > 0:
+          pdf.drawString(300,520,a1[0])
+          if addr1 > 1:
+            pdf.drawString(300,505,a1[1])
+            if addr1 > 2:
+              pdf.drawString(300,490,a1[2])
+              if addr1 > 3:
+                pdf.drawString(300,475,a1[3])
+              else:
+                pass
+            else:
+              pass
+          else:
+            pass
+        else:
+          pass
+        
+
+        pdf.setFont('Helvetica-Bold',12)
+        pdf.drawString(30,745, company[1])
+        pdf.setFont('Helvetica',12)
+        text=company[2]
+        wraped_text="\n".join(wrap(text,30))
+        print(wraped_text)
+        htg=wraped_text.split('\n') 
+        vg=len(htg)
+        if vg>0:
+          pdf.drawString(30,730,htg[0])
+          if vg>1:
+            pdf.drawString(30,715,htg[1])
+            if vg>2:
+              pdf.drawString(30,700,htg[2])
+              if vg>3:
+                pdf.drawString(30,685,htg[3])
+              else:
+                pass
+            else:
+              pass
+          else:
+            pass
+        else:
+          pass     
+      
+
+        pdf.drawString(30,660, company[4])
+        pdf.setFont('Helvetica-Bold',16)
+        pdf.drawString(30,620, " "+est_str1.get())
+
+        pdf.setFont('Helvetica',12)
+
+        sql = "select * from company"
+        fbcursor.execute(sql)
+        est_taxcheck_1 = fbcursor.fetchone()
+
+        sql = "select currsignplace,currencysign from company"
+        fbcursor.execute(sql)
+        est_symbolcheck_1 = fbcursor.fetchone()
+
+        pdf.setLineWidth(.3)
+        pdf.line(30,470,30,450)
+        pdf.line(580,470,580,450)
+        #pdf.line(130,470,130,450)
+        #pdf.line(310,470,310,450) #vertical lines
+        pdf.line(400,470,400,450)
+        pdf.line(490,470,490,450)
+        #------------------------#
+        pdf.line(30,450,580,450)
+        pdf.line(30,470,580,470)
+
+        #pdf.drawString(60,455,"ID/SKU")
+        pdf.drawString(150,455,"Product/Service")
+        #pdf.drawString(332,455,"Quantity")
+        pdf.drawString(420,455,"Quantity")
+        pdf.drawString(523,455,"Price")
+
+        y1 = 430 
+        y2 = 430
+        v1 = 450
+        v2 = 430
+        for i in estimate_tree.get_children():
+          if y1 <= 12:
+            pdf.showPage()
+            y1 = 730
+            y2 = 730
+            v1 = 750
+            v2 = 730
+            pdf.line(30,y1,580,y2)
+            pdf.line(30,y1+20,580,y2+20)
+          pdf.line(30,y1,580,y2)
+          if company[12] == "1":
+            #pdf.drawString(34,y1+5,estimate_tree.item(i,'value')[0])
+            pdf.drawString(34,y1+5,estimate_tree.item(i,'value')[1])
+            #pdf.drawString(332,y1+5,estimate_tree.item(i,'value')[4])
+            pdf.drawString(450,y1+5,estimate_tree.item(i,'value')[4])
+            pdf.drawRightString(563,y1+5,estimate_tree.item(i,'value')[6])
+            y1 -= 20
+            y2 -= 20
+            pdf.line(30,v1,30,v2)
+            pdf.line(580,v1,580,v2)
+            #pdf.line(130,v1,130,v2)
+            #pdf.line(310,v1,310,v2) #vertical lines
+            pdf.line(400,v1,400,v2)
+            pdf.line(490,v1,490,v2)
+            v1 -= 20
+            v2 -= 20
+          elif company[12] == "2":
+            #pdf.drawString(34,y1+5,estimate_tree.item(i,'value')[0])
+            pdf.drawString(34,y1+5,estimate_tree.item(i,'value')[1])
+            #pdf.drawString(332,y1+5,estimate_tree.item(i,'value')[4])
+            pdf.drawString(450,y1+5,estimate_tree.item(i,'value')[4])
+            pdf.drawRightString(563,y1+5,estimate_tree.item(i,'value')[7])
+            y1 -= 20
+            y2 -= 20
+            pdf.line(30,v1,30,v2)
+            pdf.line(580,v1,580,v2)
+            #pdf.line(130,v1,130,v2)
+            #pdf.line(310,v1,310,v2) #vertical lines
+            pdf.line(400,v1,400,v2)
+            pdf.line(490,v1,490,v2)
+            v1 -= 20
+            v2 -= 20
+          elif company[12] == "3":
+            #pdf.drawString(34,y1+5,estimate_tree.item(i,'value')[0])
+            pdf.drawString(34,y1+5,estimate_tree.item(i,'value')[1])
+            #pdf.drawString(332,y1+5,estimate_tree.item(i,'value')[4])
+            pdf.drawString(450,y1+5,estimate_tree.item(i,'value')[4])
+            pdf.drawRightString(563,y1+5,estimate_tree.item(i,'value')[8])
+            y1 -= 20
+            y2 -= 20
+            pdf.line(30,v1,30,v2)
+            pdf.line(580,v1,580,v2)
+            #pdf.line(130,v1,130,v2)
+            #pdf.line(310,v1,310,v2) #vertical lines
+            pdf.line(400,v1,400,v2)
+            pdf.line(490,v1,490,v2)
+            v1 -= 20
+            v2 -= 20
+        calc_y1 = y1
+        calc_y2 = y2
+        if company[12] == "1":
+          if calc_y1-100 <=40:
+            pdf.showPage()
+            calc_y1 = 730
+            calc_y2 = 730
+            pdf.line(350,calc_y1-60,350,calc_y1+20)
+            pdf.line(580,calc_y1-60,580,calc_y1+20)
+            #pdf.line(465,calc_y1-60,465,calc_y1+20)
+            pdf.line(490,calc_y1-60,490,calc_y1+20)
+            #-----------------------------------
+            pdf.line(350,calc_y1,580,calc_y2)
+            pdf.line(350,calc_y1-20,580,calc_y2-20)
+            pdf.line(350,calc_y1-40,580,calc_y2-40)
+            pdf.line(350,calc_y1-60,580,calc_y2-60)
+            if est_symbolcheck_1[0] == "before amount":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+str(estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+str(estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+str(estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+str(estimate_total1.cget("text")))
+
+              text3=""+estimates_ecomments.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')      
+              
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-125,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-140,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-155,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-170,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "before amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+" "+str(estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+" "+str(estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+" "+str(estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+" "+str(estimate_total1.cget("text")))
+
+              text3=""+estimates_ecomments.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')      
+              
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-125,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-140,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-155,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-170,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "after amount":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(estimate_discounttt1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(estimate_subbb1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(estimate_costtt.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,str(estimate_total1.cget("text"))+""+comcursign.get())
+
+              text3=""+estimates_ecomments.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')      
+              
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-125,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-140,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-155,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-170,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "after amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(estimate_discounttt1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(estimate_subbb1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(estimate_costtt.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,str(estimate_total1.cget("text"))+" "+""+comcursign.get())
+
+              text3=""+estimates_ecomments.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')      
+              
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-125,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-140,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-155,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-170,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+          else:
+            pdf.line(350,calc_y1-60,350,calc_y1+20)
+            pdf.line(580,calc_y1-60,580,calc_y1+20)
+            #pdf.line(465,calc_y1-60,465,calc_y1+20)
+            pdf.line(490,calc_y1-60,490,calc_y1+20)
+            #-----------------------------------
+            pdf.line(350,calc_y1,580,calc_y2)
+            pdf.line(350,calc_y1-20,580,calc_y2-20)
+            pdf.line(350,calc_y1-40,580,calc_y2-40)
+            pdf.line(350,calc_y1-60,580,calc_y2-60)
+            if est_symbolcheck_1[0] == "before amount":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+str(estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+str(estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+str(estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+str(estimate_total1.cget("text")))
+
+              text3=""+estimates_ecomments.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')    
+
+              if calc_y1-170 <= 40:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-125,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-140,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-155,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-170,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "before amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+" "+str(estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+" "+str(estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+" "+str(estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+" "+str(estimate_total1.cget("text")))
+              
+              text3=""+estimates_ecomments.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')    
+
+              if calc_y1-170 <= 40:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-125,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-140,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-155,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-170,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "after amount":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(estimate_discounttt1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(estimate_subbb1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(estimate_costtt.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,str(estimate_total1.cget("text"))+""+comcursign.get())
+
+              text3=""+estimates_ecomments.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')    
+
+              if calc_y1-170 <= 40:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-125,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-140,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-155,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-170,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "after amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(estimate_discounttt1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(estimate_subbb1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(estimate_costtt.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,str(estimate_total1.cget("text"))+" "+""+comcursign.get())
+
+              text3=""+estimates_ecomments.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')    
+
+              if calc_y1-170 <= 40:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-125,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-140,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-155,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-170,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+        elif company[12] == "2":
+          if calc_y1-120 <= 40:
+            pdf.showPage()
+            calc_y1 = 730
+            calc_y2 = 730
+            pdf.line(350,calc_y1-80,350,calc_y1+20)
+            pdf.line(580,calc_y1-80,580,calc_y1+20)
+            pdf.line(490,calc_y1-80,490,calc_y1+20)
+            #-----------------------------------
+            pdf.line(350,calc_y1+20,580,calc_y2+20)
+            pdf.line(350,calc_y1,580,calc_y2)
+            pdf.line(350,calc_y1-20,580,calc_y2-20)
+            pdf.line(350,calc_y1-40,580,calc_y2-40)
+            pdf.line(350,calc_y1-60,580,calc_y2-60)
+            pdf.line(350,calc_y1-80,580,calc_y2-80)
+            if est_symbolcheck_1[0] == "before amount":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+str(estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+str(estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+str(estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+str(estimate_ttax1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+str(estimate_total1.cget("text")))
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-145,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-160,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-175,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-190,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "before amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+" "+str(estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+" "+str(estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+" "+str(estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+" "+str(estimate_ttax1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+" "+str(estimate_total1.cget("text")))
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-145,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-160,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-175,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-190,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "after amount":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(estimate_discounttt1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(estimate_subbb1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(estimate_costtt.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(estimate_ttax1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,str(estimate_total1.cget("text"))+""+comcursign.get())
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-145,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-160,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-175,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-190,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "after amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(estimate_discounttt1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(estimate_subbb1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(estimate_costtt.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(estimate_ttax1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,str(estimate_total1.cget("text"))+" "+""+comcursign.get())
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-145,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-160,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-175,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-190,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+          else:
+            pdf.line(350,calc_y1-80,350,calc_y1+20)
+            pdf.line(580,calc_y1-80,580,calc_y1+20)
+            pdf.line(490,calc_y1-80,490,calc_y1+20)
+            #-----------------------------------
+            pdf.line(350,calc_y1+20,580,calc_y2+20)
+            pdf.line(350,calc_y1,580,calc_y2)
+            pdf.line(350,calc_y1-20,580,calc_y2-20)
+            pdf.line(350,calc_y1-40,580,calc_y2-40)
+            pdf.line(350,calc_y1-60,580,calc_y2-60)
+            pdf.line(350,calc_y1-80,580,calc_y2-80)
+            if est_symbolcheck_1[0] == "before amount":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+str(estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+str(estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+str(estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+str(estimate_ttax1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+str(estimate_total1.cget("text")))
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-190 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-145,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-160,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-175,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-190,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "before amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+" "+str(estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+" "+str(estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+" "+str(estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+" "+str(estimate_ttax1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+" "+str(estimate_total1.cget("text")))
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-190 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-145,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-160,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-175,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-190,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "after amount":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(estimate_discounttt1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(estimate_subbb1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(estimate_costtt.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(estimate_ttax1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,str(estimate_total1.cget("text"))+""+comcursign.get())
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-190 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-145,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-160,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-175,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-190,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "after amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(estimate_discounttt1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(estimate_subbb1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(estimate_costtt.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(estimate_ttax1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,str(estimate_total1.cget("text"))+" "+""+comcursign.get())
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-190 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-145,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-160,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-175,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-190,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+        elif company[12] == "3":
+          if calc_y1-140 <= 40:
+            pdf.showPage()
+            calc_y1 = 730
+            calc_y2 = 730
+            pdf.line(350,calc_y1-100,350,calc_y1+20)
+            pdf.line(580,calc_y1-100,580,calc_y1+20)
+            pdf.line(490,calc_y1-100,490,calc_y1+20)
+            #-----------------------------------
+            pdf.line(350,calc_y1,580,calc_y2)
+            pdf.line(350,calc_y1-20,580,calc_y2-20)
+            pdf.line(350,calc_y1-40,580,calc_y2-40)
+            pdf.line(350,calc_y1-60,580,calc_y2-60)
+            pdf.line(350,calc_y1-80,580,calc_y2-80)
+            pdf.line(350,calc_y1-100,580,calc_y2-100)
+            if est_symbolcheck_1[0] == "before amount":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+str(estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+str(estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+str(estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+str(estimate_ttax1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+str(estimate_ttax2.cget("text")))
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,""+comcursign.get()+str(estimate_total1.cget("text")))
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-165,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-180,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-195,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-210,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "before amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+" "+str(estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+" "+str(estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+" "+str(estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+" "+str(estimate_ttax1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+" "+str(estimate_ttax2.cget("text")))
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,""+comcursign.get()+" "+str(estimate_total1.cget("text")))
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-165,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-180,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-195,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-210,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "after amount":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(estimate_discounttt1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(estimate_subbb1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(estimate_costtt.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(estimate_ttax1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,str(estimate_ttax2.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,str(estimate_total1.cget("text"))+""+comcursign.get())
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-165,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-180,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-195,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-210,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "after amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(estimate_discounttt1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(estimate_subbb1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(estimate_costtt.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(estimate_ttax1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,str(estimate_ttax2.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,str(estimate_total1.cget("text"))+" "+""+comcursign.get())
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-165,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-180,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-195,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-210,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass 
+          else:
+            pdf.line(350,calc_y1-100,350,calc_y1+20)
+            pdf.line(580,calc_y1-100,580,calc_y1+20)
+            pdf.line(490,calc_y1-100,490,calc_y1+20)
+            #-----------------------------------
+            pdf.line(350,calc_y1,580,calc_y2)
+            pdf.line(350,calc_y1-20,580,calc_y2-20)
+            pdf.line(350,calc_y1-40,580,calc_y2-40)
+            pdf.line(350,calc_y1-60,580,calc_y2-60)
+            pdf.line(350,calc_y1-80,580,calc_y2-80)
+            pdf.line(350,calc_y1-100,580,calc_y2-100)
+            if est_symbolcheck_1[0] == "before amount":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+str(estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+str(estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+str(estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+str(estimate_ttax1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+str(estimate_ttax2.cget("text")))
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,""+comcursign.get()+str(estimate_total1.cget("text")))
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-210 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-165,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-180,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-195,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-210,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "before amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+" "+str(estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+" "+str(estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+" "+str(estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+" "+str(estimate_ttax1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+" "+str(estimate_ttax2.cget("text")))
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,""+comcursign.get()+" "+str(estimate_total1.cget("text")))
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-210 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-165,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-180,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-195,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-210,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "after amount":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(estimate_discounttt1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(estimate_subbb1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(estimate_costtt.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(estimate_ttax1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,str(estimate_ttax2.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,str(estimate_total1.cget("text"))+""+comcursign.get())
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-210 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-165,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-180,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-195,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-210,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "after amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(estimate_discounttt1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(estimate_subbb1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(estimate_costtt.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(estimate_ttax1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,str(estimate_ttax2.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,str(estimate_total1.cget("text"))+" "+""+comcursign.get())
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-210 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-165,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-180,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-195,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-210,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+
+        if (calc_y1-170)-115 <= 10 or (calc_y1-190)-115 <= 10 or (calc_y1-210)-115 <= 10:
+          pdf.drawCentredString(302,115, "Terms and Conditions")
+          pdf.line(30,110,580,110)
+          text4=""+estimates_eterm_text.get("1.0","end-1c")
+          wraped_text4="\n".join(wrap(text4,102))
+          t=wraped_text4.split('\n')      
+          term = len(t)
+          if term > 0:
+            pdf.drawString(32,95,t[0])
+            if term > 1:
+              pdf.drawString(32,80,t[1])
+              if term > 2:
+                pdf.drawString(32,65,t[2])
+                if term > 3:
+                  pdf.drawString(32,50,t[3])
+                else:
+                  pass
+              else:
+                pass
+            else:
+              pass
+          else:
+            pass
+          
+          pdf.drawString(32,30, "Sales Person:")
+          pdf.drawString(115,30, " "+estimates_sales6.get())
+          pdf.drawString(32,12, " "+estimates_efooter_text.get())
+        else:
+          pdf.drawCentredString(302,115, "Terms and Conditions")
+          pdf.line(30,110,580,110)
+          text4=""+estimates_eterm_text.get("1.0","end-1c")
+          wraped_text4="\n".join(wrap(text4,102))
+          t=wraped_text4.split('\n')      
+          term = len(t)
+          if term > 0:
+            pdf.drawString(32,95,t[0])
+            if term > 1:
+              pdf.drawString(32,80,t[1])
+              if term > 2:
+                pdf.drawString(32,65,t[2])
+                if term > 3:
+                  pdf.drawString(32,50,t[3])
+                else:
+                  pass
+              else:
+                pass
+            else:
+              pass
+          else:
+            pass
+          
+          pdf.drawString(32,30, "Sales Person:")
+          pdf.drawString(115,30, " "+estimates_sales6.get())
+          pdf.drawString(32,12, " "+estimates_efooter_text.get())
+          
+        
+        pdf.save()
+        #win32api.ShellExecute(0,"","estimate\Estimate_Report.pdf",None,".",0)  
+        
+
+        
+      elif estimates_etemplate.get() == 'Business Classic': 
+        from reportlab.pdfgen import canvas 
+        pdf = canvas.Canvas("estimate/Estimate_Report.pdf", pagesize=letter)
+        
+
+        sql_company = "SELECT * from company"
+        fbcursor.execute(sql_company)
+        company= fbcursor.fetchone()
+        print(company)
+        pdf.setStrokeColorRGB(255,10,0)
+        pdf.line(30,762,580,762)
+        pdf.setFont('Helvetica',12)
+        pdf.drawCentredString(302,770,estimates_etitletext.get())
+        pdf.drawCentredString(302,585,estimates_eheader_text.get())
+        pdf.drawImage("images/"+company[13],30,660,width=200,height=90)
+
+        pdf.setFont('Helvetica-Bold',12)
+        pdf.drawString(240,735, company[1])
+        pdf.setFont('Helvetica',12)
+        text=company[2]
+        wraped_text="\n".join(wrap(text,30))
+        htg=wraped_text.split('\n')
+            
+        vg=len(htg)
+        if vg>0:
+          pdf.drawString(240,720,htg[0])
+          if vg>1:
+            pdf.drawString(240,705,htg[1])
+            if vg>2:
+              pdf.drawString(240,690,htg[2])
+              if vg>3:
+                pdf.drawString(240,675,htg[3])
+              else:
+                pass
+            else:
+              pass
+          else:
+            pass
+        else:
+          pass
+
+        pdf.drawString(240,650, company[4])
+
+        pdf.drawString(390,665, " "+est_str2.get())
+        pdf.drawString(390,650, " "+est_str3.get())
+        pdf.drawString(390,635, " "+est_str4.get())
+  
+        pdf.drawString(480,665, " "+estimate_number_entry.get())
+        pdf.drawString(480,650, " "+str(estimate_date_entry.get_date()))
+        pdf.drawString(480,635, " "+str(estimate_duedate_entry.get_date()))
+
+        pdf.drawString(390,735, " "+estimate_shipto3.get())
+
+        text2=""+estimate_ship_address4.get("1.0",END)
+        wraped_text2="\n".join(wrap(text2,30))
+        a1=wraped_text2.split('\n')      
+        addr = len(a1)
+        if addr > 0:
+          pdf.drawString(390,720,a1[0])
+          if addr > 1:
+            pdf.drawString(390,705,a1[1])
+            if addr > 2:
+              pdf.drawString(390,590,a1[2])
+              if addr > 3:
+                pdf.drawString(390,575,a1[3])
+              else:
+                pass
+            else:
+              pass
+          else:
+            pass
+        else:
+          pass
+
+        pdf.setStrokeColorRGB(0,0,0)
+        pdf.setLineWidth(.3)
+       
+        pdf.setFont('Helvetica',12)
+
+        sql = "select * from company"
+        fbcursor.execute(sql)
+        est_taxcheck_1 = fbcursor.fetchone()
+
+        sql = "select currsignplace,currencysign from company"
+        fbcursor.execute(sql)
+        est_symbolcheck_1 = fbcursor.fetchone()
+
+        pdf.setLineWidth(.3)
+        pdf.line(30,470,30,450)
+        pdf.line(580,470,580,450)
+        pdf.line(190,470,190,450)
+        pdf.line(310,470,310,450) #vertical lines
+        pdf.line(400,470,400,450)
+        pdf.line(490,470,490,450)
+        #------------------------#
+        pdf.line(30,450,580,450)
+        pdf.line(30,470,580,470)
+
+        pdf.drawString(60,455,"Product/Service")
+        pdf.drawString(220,455,"Description")
+        pdf.drawString(332,455,"Unit Price")
+        pdf.drawString(420,455,"Quantity")
+        pdf.drawString(523,455,"Price")
+
+        y1 = 430 
+        y2 = 430
+        v1 = 450
+        v2 = 430
+        for i in estimate_tree.get_children():
+          if y1 <= 12:
+            pdf.showPage()
+            y1 = 730
+            y2 = 730
+            v1 = 750
+            v2 = 730
+            pdf.line(30,y1,580,y2)
+            pdf.line(30,y1+20,580,y2+20)
+          pdf.line(30,y1,580,y2)
+          if company[12] == "1":
+            pdf.drawString(34,y1+5,estimate_tree.item(i,'value')[1])
+            pdf.drawString(210,y1+5,estimate_tree.item(i,'value')[2])
+            pdf.drawString(332,y1+5,estimate_tree.item(i,'value')[3])
+            pdf.drawString(450,y1+5,estimate_tree.item(i,'value')[4])
+            pdf.drawRightString(563,y1+5,estimate_tree.item(i,'value')[6])
+            y1 -= 20
+            y2 -= 20
+            pdf.line(30,v1,30,v2)
+            pdf.line(580,v1,580,v2)
+            pdf.line(190,v1,190,v2)
+            pdf.line(310,v1,310,v2) #vertical lines
+            pdf.line(400,v1,400,v2)
+            pdf.line(490,v1,490,v2)
+            v1 -= 20
+            v2 -= 20
+          elif company[12] == "2":
+            pdf.drawString(34,y1+5,estimate_tree.item(i,'value')[1])
+            pdf.drawString(210,y1+5,estimate_tree.item(i,'value')[2])
+            pdf.drawString(332,y1+5,estimate_tree.item(i,'value')[3])
+            pdf.drawString(450,y1+5,estimate_tree.item(i,'value')[4])
+            pdf.drawRightString(563,y1+5,estimate_tree.item(i,'value')[7])
+            y1 -= 20
+            y2 -= 20
+            pdf.line(30,v1,30,v2)
+            pdf.line(580,v1,580,v2)
+            pdf.line(190,v1,190,v2)
+            pdf.line(310,v1,310,v2) #vertical lines
+            pdf.line(400,v1,400,v2)
+            pdf.line(490,v1,490,v2)
+            v1 -= 20
+            v2 -= 20
+          elif company[12] == "3":
+            pdf.drawString(34,y1+5,estimate_tree.item(i,'value')[1])
+            pdf.drawString(210,y1+5,estimate_tree.item(i,'value')[2])
+            pdf.drawString(332,y1+5,estimate_tree.item(i,'value')[3])
+            pdf.drawString(450,y1+5,estimate_tree.item(i,'value')[4])
+            pdf.drawRightString(563,y1+5,estimate_tree.item(i,'value')[8])
+            y1 -= 20
+            y2 -= 20
+            pdf.line(30,v1,30,v2)
+            pdf.line(580,v1,580,v2)
+            pdf.line(190,v1,190,v2)
+            pdf.line(310,v1,310,v2) #vertical lines
+            pdf.line(400,v1,400,v2)
+            pdf.line(490,v1,490,v2)
+            v1 -= 20
+            v2 -= 20
+        calc_y1 = y1
+        calc_y2 = y2
+        if company[12] == "1":
+          if calc_y1-100 <=40:
+            pdf.showPage()
+            calc_y1 = 730
+            calc_y2 = 730
+            pdf.line(350,calc_y1-60,350,calc_y1+20)
+            pdf.line(580,calc_y1-60,580,calc_y1+20)
+            #pdf.line(465,calc_y1-60,465,calc_y1+20)
+            pdf.line(490,calc_y1-60,490,calc_y1+20)
+            #-----------------------------------
+            pdf.line(350,calc_y1,580,calc_y2)
+            pdf.line(350,calc_y1-20,580,calc_y2-20)
+            pdf.line(350,calc_y1-40,580,calc_y2-40)
+            pdf.line(350,calc_y1-60,580,calc_y2-60)
+            if est_symbolcheck_1[0] == "before amount":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+str(estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+str(estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+str(estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+str(estimate_total1.cget("text")))
+              pdf.setStrokeColorRGB(255,10,0)
+              pdf.line(30,(calc_y1-130),580,(calc_y1-130))
+
+              text3=""+estimates_ecomments.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')      
+              
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-125,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-140,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-155,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-170,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "before amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+" "+str(estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+" "+str(estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+" "+str(estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+" "+str(estimate_total1.cget("text")))
+              pdf.setStrokeColorRGB(255,10,0)
+              pdf.line(30,(calc_y1-130),580,(calc_y1-130))
+
+              text3=""+estimates_ecomments.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')      
+              
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-125,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-140,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-155,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-170,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "after amount":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(estimate_discounttt1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(estimate_subbb1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(estimate_costtt.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,str(estimate_total1.cget("text"))+""+comcursign.get())
+              pdf.setStrokeColorRGB(255,10,0)
+              pdf.line(30,(calc_y1-130),580,(calc_y1-130))
+
+              text3=""+estimates_ecomments.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')      
+              
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-125,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-140,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-155,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-170,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "after amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(estimate_discounttt1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(estimate_subbb1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(estimate_costtt.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,str(estimate_total1.cget("text"))+" "+""+comcursign.get())
+              pdf.setStrokeColorRGB(255,10,0)
+              pdf.line(30,(calc_y1-130),580,(calc_y1-130))
+
+              text3=""+estimates_ecomments.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')      
+              
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-125,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-140,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-155,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-170,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+          else:
+            pdf.line(350,calc_y1-60,350,calc_y1+20)
+            pdf.line(580,calc_y1-60,580,calc_y1+20)
+            #pdf.line(465,calc_y1-60,465,calc_y1+20)
+            pdf.line(490,calc_y1-60,490,calc_y1+20)
+            #-----------------------------------
+            pdf.line(350,calc_y1,580,calc_y2)
+            pdf.line(350,calc_y1-20,580,calc_y2-20)
+            pdf.line(350,calc_y1-40,580,calc_y2-40)
+            pdf.line(350,calc_y1-60,580,calc_y2-60)
+            if est_symbolcheck_1[0] == "before amount":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+str(estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+str(estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+str(estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+str(estimate_total1.cget("text")))
+              pdf.setStrokeColorRGB(255,10,0)
+              pdf.line(30,(calc_y1-130),580,(calc_y1-130))
+
+              text3=""+estimates_ecomments.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')    
+
+              if calc_y1-170 <= 40:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-125,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-140,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-155,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-170,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "before amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+" "+str(estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+" "+str(estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+" "+str(estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+" "+str(estimate_total1.cget("text")))
+              pdf.setStrokeColorRGB(255,10,0)
+              pdf.line(30,(calc_y1-130),580,(calc_y1-130))
+              
+              text3=""+estimates_ecomments.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')    
+
+              if calc_y1-170 <= 40:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-125,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-140,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-155,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-170,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "after amount":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(estimate_discounttt1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(estimate_subbb1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(estimate_costtt.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,str(estimate_total1.cget("text"))+""+comcursign.get())
+              pdf.setStrokeColorRGB(255,10,0)
+              pdf.line(30,(calc_y1-130),580,(calc_y1-130))
+
+              text3=""+estimates_ecomments.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')    
+
+              if calc_y1-170 <= 40:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-125,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-140,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-155,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-170,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "after amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(estimate_discounttt1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(estimate_subbb1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(estimate_costtt.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,str(estimate_total1.cget("text"))+" "+""+comcursign.get())
+              pdf.setStrokeColorRGB(255,10,0)
+              pdf.line(30,(calc_y1-130),580,(calc_y1-130))
+
+              text3=""+estimates_ecomments.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')    
+
+              if calc_y1-170 <= 40:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-125,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-140,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-155,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-170,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+        elif company[12] == "2":
+          if calc_y1-120 <= 40:
+            pdf.showPage()
+            calc_y1 = 730
+            calc_y2 = 730
+            pdf.line(350,calc_y1-80,350,calc_y1+20)
+            pdf.line(580,calc_y1-80,580,calc_y1+20)
+            pdf.line(490,calc_y1-80,490,calc_y1+20)
+            #-----------------------------------
+            pdf.line(350,calc_y1+20,580,calc_y2+20)
+            pdf.line(350,calc_y1,580,calc_y2)
+            pdf.line(350,calc_y1-20,580,calc_y2-20)
+            pdf.line(350,calc_y1-40,580,calc_y2-40)
+            pdf.line(350,calc_y1-60,580,calc_y2-60)
+            pdf.line(350,calc_y1-80,580,calc_y2-80)
+            if est_symbolcheck_1[0] == "before amount":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+str(estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+str(estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+str(estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+str(estimate_ttax1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+str(estimate_total1.cget("text")))
+              pdf.setStrokeColorRGB(255,10,0)
+              pdf.line(30,(calc_y1-130),580,(calc_y1-130))
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-145,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-160,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-175,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-190,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "before amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+" "+str(estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+" "+str(estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+" "+str(estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+" "+str(estimate_ttax1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+" "+str(estimate_total1.cget("text")))
+              pdf.setStrokeColorRGB(255,10,0)
+              pdf.line(30,(calc_y1-130),580,(calc_y1-130))
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-145,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-160,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-175,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-190,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "after amount":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(estimate_discounttt1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(estimate_subbb1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(estimate_costtt.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(estimate_ttax1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,str(estimate_total1.cget("text"))+""+comcursign.get())
+              pdf.setStrokeColorRGB(255,10,0)
+              pdf.line(30,(calc_y1-130),580,(calc_y1-130))
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-145,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-160,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-175,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-190,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "after amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(estimate_discounttt1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(estimate_subbb1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(estimate_costtt.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(estimate_ttax1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,str(estimate_total1.cget("text"))+" "+""+comcursign.get())
+              pdf.setStrokeColorRGB(255,10,0)
+              pdf.line(30,(calc_y1-130),580,(calc_y1-130))
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-145,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-160,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-175,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-190,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+          else:
+            pdf.line(350,calc_y1-80,350,calc_y1+20)
+            pdf.line(580,calc_y1-80,580,calc_y1+20)
+            pdf.line(490,calc_y1-80,490,calc_y1+20)
+            #-----------------------------------
+            pdf.line(350,calc_y1+20,580,calc_y2+20)
+            pdf.line(350,calc_y1,580,calc_y2)
+            pdf.line(350,calc_y1-20,580,calc_y2-20)
+            pdf.line(350,calc_y1-40,580,calc_y2-40)
+            pdf.line(350,calc_y1-60,580,calc_y2-60)
+            pdf.line(350,calc_y1-80,580,calc_y2-80)
+            if est_symbolcheck_1[0] == "before amount":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+str(estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+str(estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+str(estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+str(estimate_ttax1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+str(estimate_total1.cget("text")))
+              pdf.setStrokeColorRGB(255,10,0)
+              pdf.line(30,(calc_y1-130),580,(calc_y1-130))
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-190 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-145,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-160,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-175,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-190,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "before amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+" "+str(estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+" "+str(estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+" "+str(estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+" "+str(estimate_ttax1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+" "+str(estimate_total1.cget("text")))
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-190 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-145,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-160,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-175,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-190,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "after amount":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(estimate_discounttt1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(estimate_subbb1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(estimate_costtt.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(estimate_ttax1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,str(estimate_total1.cget("text"))+""+comcursign.get())
+              pdf.setStrokeColorRGB(255,10,0)
+              pdf.line(30,(calc_y1-130),580,(calc_y1-130))
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-190 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-145,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-160,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-175,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-190,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "after amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(estimate_discounttt1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(estimate_subbb1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(estimate_costtt.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(estimate_ttax1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,str(estimate_total1.cget("text"))+" "+""+comcursign.get())
+              pdf.setStrokeColorRGB(255,10,0)
+              pdf.line(30,(calc_y1-130),580,(calc_y1-130))
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-190 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-145,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-160,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-175,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-190,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+        elif company[12] == "3":
+          if calc_y1-140 <= 40:
+            pdf.showPage()
+            calc_y1 = 730
+            calc_y2 = 730
+            pdf.line(350,calc_y1-100,350,calc_y1+20)
+            pdf.line(580,calc_y1-100,580,calc_y1+20)
+            pdf.line(490,calc_y1-100,490,calc_y1+20)
+            #-----------------------------------
+            pdf.line(350,calc_y1,580,calc_y2)
+            pdf.line(350,calc_y1-20,580,calc_y2-20)
+            pdf.line(350,calc_y1-40,580,calc_y2-40)
+            pdf.line(350,calc_y1-60,580,calc_y2-60)
+            pdf.line(350,calc_y1-80,580,calc_y2-80)
+            pdf.line(350,calc_y1-100,580,calc_y2-100)
+            if est_symbolcheck_1[0] == "before amount":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+str(estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+str(estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+str(estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+str(estimate_ttax1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+str(estimate_ttax2.cget("text")))
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,""+comcursign.get()+str(estimate_total1.cget("text")))
+              pdf.setStrokeColorRGB(255,10,0)
+              pdf.line(30,(calc_y1-130),580,(calc_y1-130))
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-165,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-180,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-195,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-210,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "before amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+" "+str(estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+" "+str(estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+" "+str(estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+" "+str(estimate_ttax1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+" "+str(estimate_ttax2.cget("text")))
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,""+comcursign.get()+" "+str(estimate_total1.cget("text")))
+              pdf.setStrokeColorRGB(255,10,0)
+              pdf.line(30,(calc_y1-130),580,(calc_y1-130))
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-165,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-180,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-195,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-210,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "after amount":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(estimate_discounttt1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(estimate_subbb1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(estimate_costtt.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(estimate_ttax1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,str(estimate_ttax2.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,str(estimate_total1.cget("text"))+""+comcursign.get())
+
+              pdf.setStrokeColorRGB(255,10,0)
+              pdf.line(30,(calc_y1-130),580,(calc_y1-130))
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-165,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-180,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-195,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-210,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "after amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(estimate_discounttt1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(estimate_subbb1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(estimate_costtt.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(estimate_ttax1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,str(estimate_ttax2.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,str(estimate_total1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.setStrokeColorRGB(255,10,0)
+              pdf.line(30,(calc_y1-130),580,(calc_y1-130))
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-165,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-180,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-195,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-210,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass 
+          else:
+            pdf.line(350,calc_y1-100,350,calc_y1+20)
+            pdf.line(580,calc_y1-100,580,calc_y1+20)
+            pdf.line(490,calc_y1-100,490,calc_y1+20)
+            #-----------------------------------
+            pdf.line(350,calc_y1,580,calc_y2)
+            pdf.line(350,calc_y1-20,580,calc_y2-20)
+            pdf.line(350,calc_y1-40,580,calc_y2-40)
+            pdf.line(350,calc_y1-60,580,calc_y2-60)
+            pdf.line(350,calc_y1-80,580,calc_y2-80)
+            pdf.line(350,calc_y1-100,580,calc_y2-100)
+            if est_symbolcheck_1[0] == "before amount":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+str(estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+str(estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+str(estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+str(estimate_ttax1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+str(estimate_ttax2.cget("text")))
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,""+comcursign.get()+str(estimate_total1.cget("text")))
+
+              pdf.setStrokeColorRGB(255,10,0)
+              pdf.line(30,(calc_y1-130),580,(calc_y1-130))
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-210 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-165,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-180,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-195,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-210,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "before amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+" "+str(estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+" "+str(estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+" "+str(estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+" "+str(estimate_ttax1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+" "+str(estimate_ttax2.cget("text")))
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,""+comcursign.get()+" "+str(estimate_total1.cget("text")))
+
+              pdf.setStrokeColorRGB(255,10,0)
+              pdf.line(30,(calc_y1-130),580,(calc_y1-130))
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-210 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-165,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-180,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-195,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-210,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "after amount":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(estimate_discounttt1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(estimate_subbb1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(estimate_costtt.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(estimate_ttax1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,str(estimate_ttax2.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,str(estimate_total1.cget("text"))+""+comcursign.get())
+
+              pdf.setStrokeColorRGB(255,10,0)
+              pdf.line(30,(calc_y1-130),580,(calc_y1-130))
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-210 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-165,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-180,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-195,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-210,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "after amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(estimates_discount2.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(estimate_discounttt1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(estimate_subbb1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,estimates_costname1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(estimate_costtt.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(estimate_ttax1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,str(estimate_ttax2.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,str(estimate_total1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.setStrokeColorRGB(255,10,0)
+              pdf.line(30,(calc_y1-130),580,(calc_y1-130))
+
+
+              comment_text = estimates_ecomments.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-210 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-165,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-180,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-195,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-210,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+
+        if (calc_y1-170)-115 <= 10 or (calc_y1-190)-115 <= 10 or (calc_y1-210)-115 <= 10:
+          pdf.drawCentredString(302,115, "Terms and Conditions")
+          pdf.setStrokeColorRGB(255,10,0)
+          pdf.line(30,110,580,110)
+          text4=""+estimates_eterm_text.get("1.0","end-1c")
+          wraped_text4="\n".join(wrap(text4,102))
+          t=wraped_text4.split('\n')      
+          term = len(t)
+          if term > 0:
+            pdf.drawString(32,95,t[0])
+            if term > 1:
+              pdf.drawString(32,80,t[1])
+              if term > 2:
+                pdf.drawString(32,65,t[2])
+                if term > 3:
+                  pdf.drawString(32,50,t[3])
+                else:
+                  pass
+              else:
+                pass
+            else:
+              pass
+          else:
+            pass
+          
+          pdf.drawString(32,30, "Sales Person:")
+          pdf.drawString(115,30, " "+estimates_sales6.get())
+          pdf.drawString(32,12, " "+estimates_efooter_text.get())
+        else:
+          pdf.drawCentredString(302,115, "Terms and Conditions")
+          pdf.setStrokeColorRGB(255,10,0)
+          pdf.line(30,110,580,110)
+          text4=""+estimates_eterm_text.get("1.0","end-1c")
+          wraped_text4="\n".join(wrap(text4,102))
+          t=wraped_text4.split('\n')      
+          term = len(t)
+          if term > 0:
+            pdf.drawString(32,95,t[0])
+            if term > 1:
+              pdf.drawString(32,80,t[1])
+              if term > 2:
+                pdf.drawString(32,65,t[2])
+                if term > 3:
+                  pdf.drawString(32,50,t[3])
+                else:
+                  pass
+              else:
+                pass
+            else:
+              pass
+          else:
+            pass
+          
+          pdf.drawString(32,30, "Sales Person:")
+          pdf.drawString(115,30, " "+estimates_sales6.get())
+          pdf.drawString(32,12, " "+estimates_efooter_text.get())
+          
+        
+        pdf.save()
       estimate_mailDetail=Toplevel()
       estimate_mailDetail.title("E-Mail")
       estimate_ep2 = PhotoImage(file = "images/fbicon.png")
       estimate_mailDetail.iconphoto(False, estimate_ep2)
       estimate_mailDetail.geometry("1030x550+150+120")
+      # global est_data
+      # est_no = est_tree.item(est_tree.focus())["values"][1]
+      # sql = "SELECT * FROM estimate WHERE estimate_number=%s"
+      # val = (est_no,)
+      # fbcursor.execute(sql,val)
+      # est_data = fbcursor.fetchone()
       
         
       estimate_mystyle = ttk.Style()
@@ -14555,10 +22074,21 @@ def mainpage():
     
       estimate_attachlbframe=LabelFrame(estimate_email_Frame,text="Attachment(s)", height=365, width=280)
       estimate_attachlbframe.place(x=740, y=5)
+
       estframe = StringVar()
       estimate_htcodeframe=Listbox(estimate_attachlbframe, height=13, width=43, bg="white",listvariable=estframe)
+      
+      global cus_filenamezrrr
+      cus_filenamezrrr ="estimate\Estimate_Report.pdf"
+      wraped_text="/".join(wrap(cus_filenamezrrr,17))
+      hrt=wraped_text.split('/')
+      estimate_htcodeframe.insert(0,hrt[1])
+
       estimate_htcodeframe.place(x=5, y=5)
-      estimate_htcodeframe.bind('<Double-Button-1>',est_empsfile_image_1)
+      estimate_htcodeframe.bind('<Double-Button-1>' , cus_file)
+
+
+
       estimate_lbl_btn_info=Label(estimate_attachlbframe, text="Double click on attachment to view")
       estimate_lbl_btn_info.place(x=30, y=230)
       estimate_e_btn17=Button(estimate_attachlbframe,compound = LEFT,width=20,text="Add attacment file...",command=est_UploadAction_1)
@@ -14594,11 +22124,13 @@ def mainpage():
     estimate_w4.pack(side="left", padx=5)
 
     def on_click():
-      text.set("Accepted")
+      estimates_draft.config(text="Accepted",fg="green")
+      estimates_draft.place(x=40, y=3)
         
 
     def eston_click():
-      text.set("Declined")
+      estimates_draft.config(text="Declined",fg="red")
+      estimates_draft.place(x=40, y=3)
        
       
 
@@ -14631,10 +22163,10 @@ def mainpage():
     
     estimate_statusfrme = LabelFrame(estimate_labelfram1,text="Status",font=("arial",15))
     estimate_statusfrme.place(x=540,y=0,width=160,height=160)
-    text = StringVar()
-    text.set("Draft")
-    estimates_draft=Label(estimate_statusfrme,font=("arial", 15, "bold"), fg="grey",textvariable=text)
-    estimates_draft.place(x=50, y=3)
+    
+    estimates_draft=Label(estimate_statusfrme,font=("arial", 15, "bold"), fg="grey",text="Draft")
+    estimates_draft.place(x=47, y=3)
+
     estimates_on1=Label(estimate_statusfrme, text="Emailed on:").place( y=50)
     estimates_nev1=Label(estimate_statusfrme, text="Never")
     estimates_nev1.place(x=100,y=50)
@@ -14767,35 +22299,35 @@ def mainpage():
     tax_data = fbcursor.fetchone()
     estimate_discounttt=Label(estimate_summaryfrme, text="Discount")
 
-    estimate_discounttt1=Label(estimate_summaryfrme, text="$0.00")
+    estimate_discounttt1=Label(estimate_summaryfrme, text="0.00")
 
     estimate_subbb=Label(estimate_summaryfrme, text="Subtotal")
 
-    estimate_subbb1=Label(estimate_summaryfrme, text="$0.00")
+    estimate_subbb1=Label(estimate_summaryfrme, text="0.00")
 
     estimate_ttaax=Label(estimate_summaryfrme, text="Tax1")
                                                                            
-    estimate_ttax1=Label(estimate_summaryfrme, text="$0.00")
+    estimate_ttax1=Label(estimate_summaryfrme, text="0.00")
                                                                             
     estimate_ttaaax=Label(estimate_summaryfrme, text="Tax2")
                                                                             
-    estimate_ttax2=Label(estimate_summaryfrme, text="$0.00")
+    estimate_ttax2=Label(estimate_summaryfrme, text="0.00")
 
     estimate_costt=Label(estimate_summaryfrme, text="Extra cost")
 
-    estimate_costtt=Label(estimate_summaryfrme, text="$0.00")
+    estimate_costtt=Label(estimate_summaryfrme, text="0.00")
 
     estimate_total=Label(estimate_summaryfrme, text="Estimate total")
 
-    estimate_total1=Label(estimate_summaryfrme, text="$0.00")
+    estimate_total1=Label(estimate_summaryfrme, text="0.00")
 
     estimate_totalll=Label(estimate_summaryfrme, text="Total paid")
 
-    estimate_totalpaid1=Label(estimate_summaryfrme, text="$0.00")
+    estimate_totalpaid1=Label(estimate_summaryfrme, text="0.00")
 
     estimate_balancee=Label(estimate_summaryfrme, text="Balance")
 
-    estimate_balancee1=Label(estimate_summaryfrme, text="$0.00")
+    estimate_balancee1=Label(estimate_summaryfrme, text="0.00")
                                                                             
     if tax_data[12] == "1":
       estimate_discounttt.place(x=0 ,y=0)
@@ -14842,6 +22374,52 @@ def mainpage():
       estimate_totalpaid1.place(x=130 ,y=90)
       estimate_balancee.place(x=0 ,y=105)
       estimate_balancee1.place(x=130 ,y=105)
+
+    sql = "select taxtype from company"
+    fbcursor.execute(sql)
+    taxsummarysym = fbcursor.fetchone()
+    sql = "select currencysign,currsignplace from company"
+    fbcursor.execute(sql)
+    symbollabal = fbcursor.fetchone()
+    estimate_discounttt1_1=Label(estimate_summaryfrme, text=symbollabal[0])
+    estimate_subbb1_1=Label(estimate_summaryfrme, text=symbollabal[0])
+    estimate_ttax1_1=Label(estimate_summaryfrme, text=symbollabal[0])
+    estimate_ttax2_1=Label(estimate_summaryfrme, text=symbollabal[0])
+    estimate_costtt_1=Label(estimate_summaryfrme, text=symbollabal[0])
+    estimate_total1_1=Label(estimate_summaryfrme, text=symbollabal[0])
+    estimate_totalpaid1_1=Label(estimate_summaryfrme, text=symbollabal[0])
+    estimate_balancee1_1=Label(estimate_summaryfrme, text=symbollabal[0])
+    if not taxsummarysym:
+      estimate_discounttt1_1.place(x=105 ,y=0)
+      estimate_subbb1_1.place(x=105 ,y=15)
+      estimate_costtt_1.place(x=105 ,y=30)
+      estimate_total1_1.place(x=105 ,y=45)
+      estimate_totalpaid1_1.place(x=105 ,y=60)
+      estimate_balancee1_1.place(x=105 ,y=75)
+    elif taxsummarysym[0] == "1":
+      estimate_discounttt1_1.place(x=105 ,y=0)
+      estimate_subbb1_1.place(x=105 ,y=15)
+      estimate_costtt_1.place(x=105 ,y=30)
+      estimate_total1_1.place(x=105 ,y=45)
+      estimate_totalpaid1_1.place(x=105 ,y=60)
+      estimate_balancee1_1.place(x=105 ,y=75)
+    elif taxsummarysym[0] == "2":
+      estimate_discounttt1_1.place(x=105 ,y=0)
+      estimate_subbb1_1.place(x=105 ,y=15)
+      estimate_ttax1_1.place(x=105 ,y=30)
+      estimate_costtt_1.place(x=105 ,y=45)
+      estimate_total1_1.place(x=105 ,y=60)
+      estimate_totalpaid1_1.place(x=105 ,y=75)
+      estimate_balancee1_1.place(x=105 ,y=90)
+    elif taxsummarysym[0] == "3":
+      estimate_discounttt1_1.place(x=105 ,y=0)
+      estimate_subbb1_1.place(x=105 ,y=15)
+      estimate_ttax1_1.place(x=105 ,y=30)
+      estimate_ttax2_1.place(x=105 ,y=45)
+      estimate_costtt_1.place(x=105 ,y=60)
+      estimate_total1_1.place(x=105 ,y=75)
+      estimate_totalpaid1_1.place(x=105,y=90)
+      estimate_balancee1_1.place(x=105 ,y=105)
     
 
     #----------Line up-----------------#
@@ -14864,114 +22442,108 @@ def mainpage():
     estimate_btnup.place(x=150, y=0)
   ############################ End create new estimate #########################
   def edit_estimates_create():
-    # edit_est_fetch = est_tree.item(est_tree.focus())["values"][1]
-    # def edit_new_estimate():
-    #   #estidd = estimate_number_entry0.get()
-    #   estimate_number = edit_estimate_ee01.get()
-    #   estdate = edit_estimate_ee02.get_date()
-    #   duedate = edit_estimate_ee03.get_date()
-    #   status = edit_estimates_draft.cget("text")
-    #   emailon = edit_estimates_nev1.cget("text")
-    #   printon = edit_estimates_nev2.cget("text")
-    #   #smson = 
-    #   esttot =  edit_estimate_orderrr1.cget("text")
-    #   totpaid = edit_estimate_totalll1.cget("text")
-    #   balance = edit_estimate_balancee1.cget("text")
-    #   extracostname = edit_estimates_e1.get()
-    #   extracost = edit_estimates_excost.get()
-    #   template = edit_estimates_e5.get()
-    #   salesper =  edit_estimates_e6.get()
-    #   discourate = edit_estimates_disrate.get()
-    #   tax1 =  edit_estimates_tax1.get()
-    #   category = edit_estimates_e7.get()
-    #   businessname = edit_estimate_combo.get()
-    #   businessaddress = edit_estimate_ee2.get("1.0",END)
-    #   shipname = edit_estimate_ee3.get()
-    #   shipaddress =  edit_estimate_ee4.get("1.0",END)
-    #   cpemail = edit_estimate_ee5.get()
-    #   cpmobileforsms = edit_estimate_ee6.get()
-    #   title_text = edit_estimates_e01.get()
-    #   header_text = edit_estimates_e11.get()
-    #   footer_text = edit_estimates_e21.get()
-    #   term_of_payment = edit_estimate_ee04.get()
-    #   terms = edit_estimates_e51.get("1.0","end-1c")
-    #   comments = edit_estimates_e61.get("1.0","end-1c")
-    #   private_notes = edit_estimates_e41.get("1.0","end-1c")
-    #   tax2 = edit_estimates_tax2.get()
-    #   orderref = edit_estimate_ee11.get()
-    #   subtotal = edit_estimate_subbb1.cget("text")
-    #   extracostt = edit_estimate_costtt.cget("text")
-    #   discount = edit_estimate_discounttt1.cget("text")
-    #   ttax1 = edit_estimate_ttax1label.cget("text")
-    #   ttax2 = edit_estimate_ttax2label.cget("text")
-
-
-      
-
-    #   estimate_sql="update estimate set estimate_number=%s, estdate=%s, duedate=%s, status=%s, emailon=%s, printon=%s, esttot=%s, totpaid=%s, balance=%s,extracostname=%s, extracost=%s, template=%s, salesper=%s, discourate=%s, tax1=%s, category=%s, businessname=%s, businessaddress=%s, shipname=%s, shipaddress=%s, cpemail=%s, cpmobileforsms=%s, title_text=%s, header_text=%s, footer_text=%s, term_of_payment=%s, terms=%s, comments=%s, private_notes=%s, tax2=%s, orderref=%s, subtotal=%s, extracostt=%s, discount=%s, ttax1=%s, ttax2=%s"#adding values into db
-    #   estimate_val=(estimate_number,estdate,duedate,status,emailon,printon,esttot,totpaid,balance,extracostname,extracost,template, salesper,discourate,tax1, category,businessname,businessaddress,shipname, shipaddress,cpemail,cpmobileforsms,title_text, header_text, footer_text,term_of_payment,terms,comments,private_notes,tax2,orderref,subtotal,extracostt,discount,ttax1,ttax2 )
-    #   fbcursor.execute(estimate_sql,estimate_val)
-    #   fbilldb.commit()
-    #   #messagebox.showinfo("F-Billing Revolution","Estimate saved")
-
-   
-    #   sql = "select * from company"
-    #   fbcursor.execute(sql)
-    #   est_pro_ser = fbcursor.fetchone()
-    #   for child in edit_estimate_tree.get_children():
-    #     insert_estpro_ser = list(edit_estimate_tree.item(child, 'values'))
-    #     #print(insert_estpro_ser[7],insert_estpro_ser[6])
-    #     if not est_pro_ser:
-    #       # sql = 'insert into storingproduct(estimate_number,sku,name,description,unitprice,quantity,peices,price) values(%s,%s,%s,%s,%s,%s,%s,%s)'
-    #       sql="update storingproduct set estimate_number=%s, sku=%s, name=%s, description=%s, unitprice=%s, quantity=%s, peices=%s, price=%s"
-    #       val = (estimate_number,insert_estpro_ser[0],insert_estpro_ser[1],insert_estpro_ser[2],insert_estpro_ser[3],insert_estpro_ser[4],insert_estpro_ser[5],insert_estpro_ser[6])
-    #       fbcursor.execute(sql,val)
-    #       fbilldb.commit()
-    #     elif  est_pro_ser[12] == "1":
-    #       sql="update storingproduct set estimate_number=%s, sku=%s, name=%s, description=%s, unitprice=%s, quantity=%s, peices=%s, price=%s"
-    #       val = (estimate_number,insert_estpro_ser[0],insert_estpro_ser[1],insert_estpro_ser[2],insert_estpro_ser[3],insert_estpro_ser[4],insert_estpro_ser[5],insert_estpro_ser[6])
-    #       fbcursor.execute(sql,val)
-    #       fbilldb.commit()
-    #     elif est_pro_ser[12] == "2":
-    #       # sql = 'insert into storingproduct(estimate_number,sku,name,description,unitprice,quantity,peices,tax1,price) values(%s,%s,%s,%s,%s,%s,%s,%s,%s)'
-    #       sql="update storingproduct set estimate_number=%s, sku=%s, name=%s, description=%s, unitprice=%s, quantity=%s, peices=%s, tax1=%s, price=%s"
-    #       val = (estimate_number,insert_estpro_ser[0],insert_estpro_ser[1],insert_estpro_ser[2],insert_estpro_ser[3],insert_estpro_ser[4],insert_estpro_ser[5],insert_estpro_ser[6],insert_estpro_ser[7])
-    #       fbcursor.execute(sql,val)
-    #       fbilldb.commit()
-    #     elif est_pro_ser[12] == "3":
-    #       # sql = 'insert into storingproduct(estimate_number,sku,name,description,unitprice,quantity,peices,tax1,tax2,price) values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'
-    #       sql="update storingproduct set estimate_number=%s, sku=%s, name=%s, description=%s, unitprice=%s, quantity=%s, peices=%s, tax1=%s, tax2=%s, price=%s"
-    #       val = (estimate_number,insert_estpro_ser[0],insert_estpro_ser[1],insert_estpro_ser[2],insert_estpro_ser[3],insert_estpro_ser[4],insert_estpro_ser[5],insert_estpro_ser[6],insert_estpro_ser[7],insert_estpro_ser[8])
-    #       fbcursor.execute(sql,val)
-    #       fbilldb.commit()
-      
-    #   #---------------Documents Insert--------------#
-    #   for child in edit_doc_tree.get_children():
-    #     est_doc_list = list(edit_doc_tree.item(child, 'values'))
-    #     # sql = 'insert into documents(estimate_number,documents) values(%s,%s)'
-    #     sql="update documents set estimate_number=%s, documents=%s"
-    #     val = (estimate_number,est_doc_list[1])
-    #     fbcursor.execute(sql,val)
-    #     fbilldb.commit()
-      # #---------------Refresh insert tree--------------#
-      # for record in est_tree.get_children():
-      #   est_tree.delete(record)
-      # sql = "select * from estimate"
-      # fbcursor.execute(sql)
-      # est_refresh = fbcursor.fetchall()
-      # count0 = 0
-      # for i in est_refresh:
-      #   est_tree.insert(parent='', index='end', iid=count0, text='', values=('',i[1],i[2],i[3],i[18],i[4],i[5],i[6],i[7],i[8]))
-      #   count0 += 1
-      # edit_estimate_pop.destroy()
-
-    
-
     edit_estimate_pop=Toplevel(estimate_midFrame)
     edit_estimate_pop.title("Estimate")
     edit_estimate_pop.geometry("950x690+150+0")
     edit_est_fetch = est_tree.item(est_tree.focus())["values"][1]
 
+    def edit_new_estimate():
+      #estidd = estimate_number_entry0.get()
+      estimate_number = edit_estimate_ee01.get()
+      estdate = edit_estimate_ee02.get_date()
+      duedate = edit_estimate_ee03.get_date()
+      status = edit_estimates_draft.cget("text")
+      emailon = edit_estimates_nev1.cget("text")
+      printon = edit_estimates_nev2.cget("text")
+      #smson = 
+      esttot =  edit_estimate_orderrr1.cget("text")
+      totpaid = edit_estimate_totalll1.cget("text")
+      balance = edit_estimate_balancee1.cget("text")
+      extracostname = edit_estimates_e1.get()
+      extracost = edit_estimates_excost.get()
+      template = edit_estimates_e5.get()
+      salesper =  edit_estimates_e6.get()
+      discourate = edit_estimates_disrate.get()
+      tax1 =  edit_estimates_tax1.get()
+      category = edit_estimates_e7.get()
+      businessname = edit_estimate_combo.get()
+      businessaddress = edit_estimate_ee2.get("1.0",END)
+      shipname = edit_estimate_ee3.get()
+      shipaddress =  edit_estimate_ee4.get("1.0",END)
+      cpemail = edit_estimate_ee5.get()
+      cpmobileforsms = edit_estimate_ee6.get()
+      title_text = edit_estimates_e01.get()
+      header_text = edit_estimates_e11.get()
+      footer_text = edit_estimates_e21.get()
+      term_of_payment = edit_estimate_ee04.get()
+      terms = edit_estimates_e51.get("1.0","end-1c")
+      comments = edit_estimates_e61.get("1.0","end-1c")
+      private_notes = edit_estimates_e41.get("1.0","end-1c")
+      tax2 = edit_estimates_tax2.get()
+      orderref = edit_estimate_ee11.get()
+      subtotal = edit_estimate_subbb1.cget("text")
+      extracostt = edit_estimate_costtt.cget("text")
+      discount = edit_estimate_discounttt1.cget("text")
+      ttax1 = edit_estimate_ttax1label.cget("text")
+      ttax2 = edit_estimate_ttax2label.cget("text")
+
+
+      
+
+      estimate_sql="update estimate set estimate_number=%s, estdate=%s, duedate=%s, status=%s, emailon=%s, printon=%s, esttot=%s, totpaid=%s, balance=%s,extracostname=%s, extracost=%s, template=%s, salesper=%s, discourate=%s, tax1=%s, category=%s, businessname=%s, businessaddress=%s, shipname=%s, shipaddress=%s, cpemail=%s, cpmobileforsms=%s, title_text=%s, header_text=%s, footer_text=%s, term_of_payment=%s, terms=%s, comments=%s, private_notes=%s, tax2=%s, orderref=%s, subtotal=%s, extracostt=%s, discount=%s, ttax1=%s, ttax2=%s where estimate_number=%s"#adding values into db
+      estimate_val=(estimate_number,estdate,duedate,status,emailon,printon,esttot,totpaid,balance,extracostname,extracost,template, salesper,discourate,tax1, category,businessname,businessaddress,shipname, shipaddress,cpemail,cpmobileforsms,title_text, header_text, footer_text,term_of_payment,terms,comments,private_notes,tax2,orderref,subtotal,extracostt,discount,ttax1,ttax2,edit_est_fetch,)
+      fbcursor.execute(estimate_sql,estimate_val)
+      fbilldb.commit()
+      #messagebox.showinfo("F-Billing Revolution","Estimate saved")
+
+      sql = "select * from company"
+      fbcursor.execute(sql)
+      est_pro_ser = fbcursor.fetchone()
+      for child in edit_estimate_tree.get_children():
+        insert_estpro_ser = list(edit_estimate_tree.item(child, 'values'))
+        #print(insert_estpro_ser[7],insert_estpro_ser[6])
+        if not est_pro_ser:
+          sql = 'insert into storingproduct(estimate_number,sku,name,description,unitprice,quantity,peices,price) values(%s,%s,%s,%s,%s,%s,%s,%s)'
+          val = (estimate_number,insert_estpro_ser[0],insert_estpro_ser[1],insert_estpro_ser[2],insert_estpro_ser[3],insert_estpro_ser[4],insert_estpro_ser[5],insert_estpro_ser[6])
+          fbcursor.execute(sql,val)
+          fbilldb.commit()
+        elif  est_pro_ser[12] == "1":
+          sql = 'insert into storingproduct(estimate_number,sku,name,description,unitprice,quantity,peices,price) values(%s,%s,%s,%s,%s,%s,%s,%s)'
+          val = (estimate_number,insert_estpro_ser[0],insert_estpro_ser[1],insert_estpro_ser[2],insert_estpro_ser[3],insert_estpro_ser[4],insert_estpro_ser[5],insert_estpro_ser[6])
+          fbcursor.execute(sql,val)
+          fbilldb.commit()
+        elif est_pro_ser[12] == "2":
+          sql = 'insert into storingproduct(estimate_number,sku,name,description,unitprice,quantity,peices,tax1,price) values(%s,%s,%s,%s,%s,%s,%s,%s,%s)'
+          val = (estimate_number,insert_estpro_ser[0],insert_estpro_ser[1],insert_estpro_ser[2],insert_estpro_ser[3],insert_estpro_ser[4],insert_estpro_ser[5],insert_estpro_ser[6],insert_estpro_ser[7])
+          fbcursor.execute(sql,val)
+          fbilldb.commit()
+        elif est_pro_ser[12] == "3":
+          sql = 'insert into storingproduct(estimate_number,sku,name,description,unitprice,quantity,peices,tax1,tax2,price) values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'
+          val = (estimate_number,insert_estpro_ser[0],insert_estpro_ser[1],insert_estpro_ser[2],insert_estpro_ser[3],insert_estpro_ser[4],insert_estpro_ser[5],insert_estpro_ser[6],insert_estpro_ser[7],insert_estpro_ser[8])
+          fbcursor.execute(sql,val)
+          fbilldb.commit()
+      
+      #---------------Documents Insert--------------#
+      for child in edit_doc_tree.get_children():
+        est_doc_list = list(edit_doc_tree.item(child, 'values'))
+        sql = 'insert into documents(estimate_number,documents) values(%s,%s)'
+        val = (estimate_number,est_doc_list[1])
+        fbcursor.execute(sql,val)
+        fbilldb.commit()
+      #---------------Refresh insert tree--------------#
+      for record in est_tree.get_children():
+        est_tree.delete(record)
+      sql = "select * from estimate"
+      fbcursor.execute(sql)
+      est_refresh = fbcursor.fetchall()
+      count0 = 0
+      for i in est_refresh:
+        est_tree.insert(parent='', index='end', iid=count0, text='', values=('',i[1],i[2],i[3],i[18],i[4],i[5],i[6],i[7],i[8]))
+        count0 += 1
+      edit_estimate_pop.destroy()
+
+   
+  
     sql_edit = "SELECT * FROM estimate WHERE estimate_number=%s"
     val_edit = (edit_est_fetch,)
     fbcursor.execute(sql_edit, val_edit)
@@ -16117,1239 +23689,1242 @@ def mainpage():
       sql='SELECT * FROM estimate WHERE businessname=%s'
       val=(businessname,)
       fbcursor.execute(sql,val)
-      if fbcursor.fetchone()is not None:
-        edit_estimate_newselection=Toplevel()
-        edit_estimate_newselection.title("Select Customer")
-        edit_estimate_newselection.geometry("930x650+240+10")
-        edit_estimate_newselection.resizable(False, False)
+      
+      edit_estimate_newselection=Toplevel()
+      edit_estimate_newselection.title("Select Customer")
+      edit_estimate_newselection.geometry("930x650+240+10")
+      edit_estimate_newselection.resizable(False, False)
 
 
-        #add new product
-        def edit_estimate_product():  
-          edit_estimate_top = Toplevel()  
-          edit_estimate_top.title("Add a new Product/Service")
-          edit_estimate_p2 = PhotoImage(file = 'images/fbicon.png')
-          edit_estimate_top.iconphoto(False, edit_estimate_p2)
-        
-          edit_estimate_top.geometry("600x550+390+15")
-          edit_estimate_tabControl = ttk.Notebook(edit_estimate_top)
-          edit_estimate_s = ttk.Style()
-          edit_estimate_s.theme_use('default')
-          edit_estimate_s.configure('TNotebook.Tab', background="#999999",padding=10,bd=0)
+      #add new product
+      def edit_estimate_product():  
+        edit_estimate_top = Toplevel()  
+        edit_estimate_top.title("Add a new Product/Service")
+        edit_estimate_p2 = PhotoImage(file = 'images/fbicon.png')
+        edit_estimate_top.iconphoto(False, edit_estimate_p2)
+      
+        edit_estimate_top.geometry("600x550+390+15")
+        edit_estimate_tabControl = ttk.Notebook(edit_estimate_top)
+        edit_estimate_s = ttk.Style()
+        edit_estimate_s.theme_use('default')
+        edit_estimate_s.configure('TNotebook.Tab', background="#999999",padding=10,bd=0)
 
 
-          edit_estimate_tab1 = ttk.Frame(edit_estimate_tabControl)
-          edit_estimate_tab2 = ttk.Frame(edit_estimate_tabControl)
-        
-          edit_estimate_tabControl.add(edit_estimate_tab1,compound = LEFT, text ='Product/Service')
-          edit_estimate_tabControl.add(edit_estimate_tab2,compound = LEFT, text ='Product Image')
-        
-          edit_estimate_tabControl.pack(expand = 1, fill ="both")
+        edit_estimate_tab1 = ttk.Frame(edit_estimate_tabControl)
+        edit_estimate_tab2 = ttk.Frame(edit_estimate_tabControl)
+      
+        edit_estimate_tabControl.add(edit_estimate_tab1,compound = LEFT, text ='Product/Service')
+        edit_estimate_tabControl.add(edit_estimate_tab2,compound = LEFT, text ='Product Image')
+      
+        edit_estimate_tabControl.pack(expand = 1, fill ="both")
 
-          global filename
-          filename = ""
+        global filename
+        filename = ""
 
-          def este_upload_file_1():
-            global filename,img, b2
-            f_types =[('Png files','*.png'),('Jpg Files', '*.jpg'),('PDF', '*.pdf',)]
-            filename = filedialog.askopenfilename(filetypes=f_types)
-            shutil.copyfile(filename, os.getcwd()+'/images/'+filename.split('/')[-1])
-            image = Image.open(filename)
-            resize_image = image.resize((350, 350))
-            img = ImageTk.PhotoImage(resize_image)
-            b2 = Button(edit_estimate_imageFrame,image=img)
-            b2.place(x=130, y=80)
+        def este_upload_file_1():
+          global filename,img, b2
+          f_types =[('Png files','*.png'),('Jpg Files', '*.jpg'),('PDF', '*.pdf',)]
+          filename = filedialog.askopenfilename(filetypes=f_types)
+          shutil.copyfile(filename, os.getcwd()+'/images/'+filename.split('/')[-1])
+          image = Image.open(filename)
+          resize_image = image.resize((350, 350))
+          img = ImageTk.PhotoImage(resize_image)
+          b2 = Button(edit_estimate_imageFrame,image=img)
+          b2.place(x=130, y=80)
           
-          def est_addproducts_1():
-            global img , filename 
-            sku = edit_estimate_codeentry.get()
-            status = edit_estimate_checkvarStatus.get()
-            catgory = edit_estimate_n.get()
-            name = edit_estimate_nameentry.get()
-            description = edit_estimate_desentry.get()
-            unitprice = edit_estimate_uval.get()
-            peices = edit_estimate_pcsentry.get()
-            cost = edit_estimate_costval.get()
-            price_cost = edit_estimate_priceval.get()
-            taxable = edit_estimate_checkvarStatus2.get()
-            tax2 = edit_estimate_checkvarStatus_2.get()
-            nostockcontrol = edit_estimate_checkvarStatus3.get()
-            stock = edit_estimate_stockentry.get()
-            lowstock = edit_estimate_lowentry.get()
-            warehouse = edit_estimate_wareentry.get()
-            pnotes = edit_estimate_txt.get("1.0",'end-1c')
-            entries = [sku,name, unitprice, cost]
-            entri = []
-            for i in entries:
-              if i == '':
-                entri.append(i)
-            if len(entri) == 0:
-              sql = 'select * from Productservice where sku = %s or name = %s'
-              val  = (sku, name)
-              fbcursor.execute(sql, val)
-              fbcursor.fetchall()
-              row_count = fbcursor.rowcount
-              if row_count == 0:
-                if filename == "":
-                  sql = 'insert into Productservice(sku, category, name, description, status, unitprice, peices, cost, taxable, priceminuscost, serviceornot, stock, stocklimit, warehouse, privatenote,tax2) values(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s)'
-                  val = (sku, catgory, name, description, status, unitprice, peices, cost, taxable, price_cost, nostockcontrol, stock, lowstock, warehouse, pnotes,tax2)
-                  fbcursor.execute(sql, val)
-                  fbilldb.commit()
-                else:
-                  file = shutil.copyfile(filename, os.getcwd()+'/images/'+filename.split('/')[-1])
-                  sql = 'insert into Productservice(sku, category, name, description, status, unitprice, peices, cost, taxable, priceminuscost, serviceornot, stock, stocklimit, warehouse, image, privatenote,tax2) values(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s)'
-                  val = (sku, catgory, name, description, status, unitprice, peices, cost, taxable, price_cost, nostockcontrol, stock, lowstock, warehouse, filename.split('/')[-1], pnotes,tax2)
-                  fbcursor.execute(sql, val)
-                  fbilldb.commit()
-              else:
-                messagebox.showinfo("Alert", "Entry with same name or SKU already exists.\nTry again.")
-                edit_estimate_top.destroy()
-
-              for record in edit_estimate_cusventtree1.get_children():
-                edit_estimate_cusventtree1.delete(record)
-              fbcursor.execute("select *  from Productservice")
-              est_pandsdata = fbcursor.fetchall()
-              countp = 0
-              for i in est_pandsdata:
-                if i[12] == '1':
-                  servi = '🗹'
-                else:
-                  servi = ''
-                sql = "select currencysign,currsignplace from company"
-                fbcursor.execute(sql)
-                estcurrsymb = fbcursor.fetchone()
-                if not estcurrsymb: 
-                  if i[13] > i[14]:
-                    edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('green',))
-                    countp += 1              
-                  elif i[12] == '1':
-                    edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('blue',))
-                    countp += 1
-                  else:
-                    edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('red',))
-                    countp += 1
-                          
-                elif estcurrsymb[1] == "before amount":
-                  if (i[13]) > (i[14]):
-                    edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('green',))
-                    countp += 1
-                  elif i[12] == '1':
-                    edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('blue',))
-                    countp += 1
-                  else:
-                    edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('red',))
-                    countp += 1
-
-                elif estcurrsymb[1] == "before amount with space":
-                  if (i[13]) > (i[14]):
-                    edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('green',))
-                    countp += 1
-                  elif i[12] == '1':
-                    edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('blue',))
-                    countp += 1
-                  else:
-                    edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('red',))
-                    countp += 1
-
-                elif estcurrsymb[1] == "after amount":
-                  if (i[13]) > (i[14]):
-                    edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('green',))
-                    countp += 1
-                  elif i[12] == '1':
-                    edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('blue',))
-                    countp += 1
-                  else:
-                    edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('red',))
-                    countp += 1
-
-                elif estcurrsymb[1] == "after amount with space":
-                  if (i[13]) > (i[14]):
-                    edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('green',))
-                    countp += 1
-                  elif i[12] == '1':
-                    edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('blue',))
-                    countp += 1
-                  else:
-                    edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('red',))
-                    countp += 1
-
-              edit_estimate_top.destroy()
         
-          edit_estimate_innerFrame = Frame(edit_estimate_tab1,bg="#f5f3f2", relief=GROOVE)
-          edit_estimate_innerFrame.pack(side="top",fill=BOTH)
-
-          edit_estimate_Customerlabelframe = LabelFrame(edit_estimate_innerFrame,text="Product/Service",width=580,height=455)
-          edit_estimate_Customerlabelframe.pack(side="top",fill=BOTH,padx=10,pady=(10,45))
-
-          fbcursor.execute("SELECT * FROM Productservice ORDER BY sku DESC LIMIT 1")
-          skuin = fbcursor.fetchone()
-
-          edit_estimate_code1=Label(edit_estimate_Customerlabelframe,text="Code or SKU:",fg="blue",pady=10,padx=10)
-          edit_estimate_code1.place(x=20,y=0)
-          edit_estimate_codeentry = Entry(edit_estimate_Customerlabelframe,width=35)
-          edit_estimate_codeentry.place(x=120,y=8)
-
-          edit_estimate_checkvarStatus=IntVar()
-          edit_estimate_status1=Label(edit_estimate_Customerlabelframe,text="Status:")
-          edit_estimate_status1.place(x=400,y=8)
-          edit_estimate_Button1 = Checkbutton(edit_estimate_Customerlabelframe,
-                            variable = edit_estimate_checkvarStatus,text="Active",compound="right",
-                            onvalue =1,
-                            offvalue =0,
-                          
-                            width = 10)
-
-          edit_estimate_Button1.place(x=450,y=5)
-
-          edit_estimate_category1=Label(edit_estimate_Customerlabelframe,text="Category:",pady=5,padx=10)
-          edit_estimate_category1.place(x=20,y=40)
-          edit_estimate_n = StringVar()
-          edit_estimate_country0 = ttk.Combobox(edit_estimate_Customerlabelframe, width = 40, textvariable = edit_estimate_n )
-          
-          edit_estimate_country0['values'] = ('Default')
-          
-          edit_estimate_country0.place(x=120,y=45)
-          edit_estimate_country0.insert(0,'Default')
-
-
-          edit_estimate_name81=Label(edit_estimate_Customerlabelframe,text="Name :",fg="blue",pady=5,padx=10)
-          edit_estimate_name81.place(x=20,y=70)
-          edit_estimate_nameentry = Entry(edit_estimate_Customerlabelframe,width=60)
-          edit_estimate_nameentry.place(x=120,y=75)
-
-          edit_estimate_des1=Label(edit_estimate_Customerlabelframe,text="Description :",pady=5,padx=10)
-          edit_estimate_des1.place(x=20,y=100)
-          edit_estimate_desentry = Entry(edit_estimate_Customerlabelframe,width=60)
-          edit_estimate_desentry.place(x=120,y=105)
-
-          def editt_est_prdoucts_cal(S,d):
-            if d == '1': #insert
-              if not S in ['.','0','1','2','3','4','5','6','7','8','9']:
-                return False
-              return True
-            if d.isdigit():
-              return True
-              
-          edit_estimate_uval = StringVar()(value="0")
-          edit_estimate_unit1=Label(edit_estimate_Customerlabelframe,text="Unit Price:",fg="blue",pady=5,padx=10)
-          edit_estimate_unit1.place(x=20,y=130)
-          edit_estimate_unitentry = Entry(edit_estimate_Customerlabelframe,width=20,textvariable=edit_estimate_uval)
-          edit_estimate_unitentry.place(x=120,y=135)
-          editt_est_cal_unit = (edit_estimate_Customerlabelframe.register(editt_est_prdoucts_cal),'%S','%d')
-          edit_estimate_unitentry.config(validate='key',validatecommand=(editt_est_cal_unit),justify='right')
-
-          #edit_estimate_pcsval = StringVar(value="0")
-          edit_estimate_pcs1=Label(edit_estimate_Customerlabelframe,text="Pcs/Weight:",fg="blue",pady=5,padx=10)
-          edit_estimate_pcs1.place(x=330,y=135)
-          edit_estimate_pcsentry = Entry(edit_estimate_Customerlabelframe,width=20)
-          edit_estimate_pcsentry.place(x=420,y=140)
-
-          edit_estimate_costval = StringVar(value="0")
-          edit_estimate_cost1=Label(edit_estimate_Customerlabelframe,text="Cost:",pady=5,padx=10)
-          edit_estimate_cost1.place(x=20,y=160)
-          edit_estimate_costentry = Entry(edit_estimate_Customerlabelframe,width=20,textvariable=edit_estimate_costval)
-          edit_estimate_costentry.place(x=120,y=165)
-          editt_est_cal_cost = (edit_estimate_Customerlabelframe.register(editt_est_prdoucts_cal),'%S','%d')
-          edit_estimate_costentry.config(validate='key',validatecommand=(editt_est_cal_cost),justify='right')
-
-          def est_set_label_1(name, index, mode):
-            est_copr_1 = float(edit_estimate_uval.get()) - float(edit_estimate_costval.get())
-            edit_estimate_priceval.set(str(est_copr_1))
-
-          edit_estimate_priceval = StringVar()
-          edit_estimate_price1=Label(edit_estimate_Customerlabelframe,text="(Price Cost):",pady=5,padx=10)
-          edit_estimate_price1.place(x=20,y=190)
-          edit_estimate_priceentry = Entry(edit_estimate_Customerlabelframe,width=20,textvariable=edit_estimate_priceval,state=DISABLED,disabledbackground="white",disabledforeground="black")
-          edit_estimate_priceentry.config(justify="right")
-          edit_estimate_priceentry.place(x=120,y=195)
-
-          edit_estimate_uval.trace('w', est_set_label_1)
-          edit_estimate_costval.trace('w', est_set_label_1)
-
-          sql = "select taxtype from company"
-          fbcursor.execute(sql)
-          est_taxchoose_1 = fbcursor.fetchone()
-
-          edit_estimate_checkvarStatus2=IntVar()
-        
-          edit_estimate_Button92 = Checkbutton(edit_estimate_Customerlabelframe,variable = edit_estimate_checkvarStatus2,
-                            text="Taxable Tax1rate",compound="right",
-                            onvalue =1 ,
-                            offvalue = 0,
-                            height=2,
-                            width = 12)
-
-          #edit_estimate_Button92.place(x=415,y=170)
-
-          
-
-          edit_estimate_checkvarStatus_2=IntVar()
-
-          edit_estimate_Button_92 = Checkbutton(edit_estimate_Customerlabelframe,variable = edit_estimate_checkvarStatus_2,
-                            text="Taxable Tax2rate",compound="right",
-                            onvalue =1,
-                            offvalue =0,
-                            height=2,
-                            width = 12)
-
-          #edit_estimate_Button_92.place(x=415,y=210)
-          if not est_taxchoose_1:
-            pass
-          elif est_taxchoose_1[0] == '1':
-            edit_estimate_Button92.place_forget()
-            edit_estimate_Button_92.place_forget()
-          elif est_taxchoose_1[0] == '2':
-            edit_estimate_Button92.place(x=415,y=170)
-            edit_estimate_Button_92.place_forget()
-          elif est_taxchoose_1[0] == '3':
-            edit_estimate_Button92.place(x=415,y=170)
-            edit_estimate_Button_92.place(x=415,y=210)
-
-          def est_switch_1():
-            if edit_estimate_checkvarStatus3.get():
-              edit_estimate_stockentry["state"] = DISABLED
-              edit_estimate_lowentry["state"] = DISABLED
-              edit_estimate_wareentry["state"] = DISABLED
-            else:
-              edit_estimate_stockentry["state"] = NORMAL
-              edit_estimate_lowentry["state"] = NORMAL
-              edit_estimate_wareentry["state"] = NORMAL
-
-
-
-          edit_estimate_checkvarStatus3=BooleanVar()
-        
-          edit_estimate_Button93 = Checkbutton(edit_estimate_Customerlabelframe,variable = edit_estimate_checkvarStatus3,command=est_switch_1,
-                            text="This is a service(no stock control)",
-                            onvalue =1 ,
-                            offvalue = 0,
-                            height=3)
-
-          edit_estimate_Button93.place(x=40,y=220)
-
-          def est_stocknum_1(input):
-            if input.isdigit():
-              return True
-            elif input is "":
-              return True
-            else:
-              return False
-
-
-          edit_estimate_stock1=Label(edit_estimate_Customerlabelframe,text="Stock:",pady=5,padx=10)
-          edit_estimate_stock1.place(x=90,y=260)
-          edit_estimate_stockentry = Entry(edit_estimate_Customerlabelframe,width=15)
-          edit_estimate_stockentry.place(x=150,y=265)
-          est_sto_1 = edit_estimate_Customerlabelframe.register(est_stocknum_1)
-          edit_estimate_stockentry.config(validate="key",validatecommand=(est_sto_1, '%S'))
-
-          
-          edit_estimate_low1=Label(edit_estimate_Customerlabelframe,text="Low Stock Warning Limit:",pady=5,padx=10)
-          edit_estimate_low1.place(x=300,y=260)
-          edit_estimate_lowentry = Entry(edit_estimate_Customerlabelframe,width=10)
-          edit_estimate_lowentry.place(x=495,y=265)
-          est_lowsto_1 = edit_estimate_Customerlabelframe.register(est_stocknum_1)
-          edit_estimate_lowentry.config(validate="key",validatecommand=(est_lowsto_1, '%S'))
-
-        
-          edit_estimate_ware1=Label(edit_estimate_Customerlabelframe,text="Warehouse:",pady=5,padx=10)
-          edit_estimate_ware1.place(x=60,y=290)
-          edit_estimate_wareentry = Entry(edit_estimate_Customerlabelframe,width=50)
-          edit_estimate_wareentry.place(x=150,y=295)
-
-          edit_estimate_text10=Label(edit_estimate_Customerlabelframe,text="Private notes(not appears on invoice):",pady=5,padx=10)
-          edit_estimate_text10.place(x=20,y=330)
-
-          edit_estimate_txt = scrolledtext.ScrolledText(edit_estimate_Customerlabelframe, undo=True,width=62,height=4)
-          edit_estimate_txt.place(x=32,y=358)
-
-
-          edit_estimate_okButton = Button(edit_estimate_innerFrame,compound = LEFT,image=tick , text ="Ok",width=60,command=est_addproducts_1)
-          edit_estimate_okButton.place(x=10,y=475)
-
-          def est_closetab_1():
-            edit_estimate_top.destroy()
-
-          edit_estimate_cancelButton = Button(edit_estimate_innerFrame,compound = LEFT,image=cancel ,text="Cancel",width=60,command=est_closetab_1)
-          edit_estimate_cancelButton.place(x=519,y=475)
-
-          edit_estimate_imageFrame = Frame(edit_estimate_tab2, relief=GROOVE,height=580)
-          edit_estimate_imageFrame.pack(side="top",fill=BOTH)
-
-          edit_estimate_browseimg=Label(edit_estimate_imageFrame,text=" Browse for product image file(recommended image type:JPG,size 480x320 pixels) ",bg='#f5f3f2')
-          edit_estimate_browseimg.place(x=15,y=35)
-
-          edit_estimate_browsebutton=Button(edit_estimate_imageFrame,text = 'Browse',command=este_upload_file_1)
-          edit_estimate_browsebutton.place(x=520,y=30,height=30,width=50)
-          
-          edit_estimate_removeButton = Button(edit_estimate_imageFrame,compound = LEFT,image=cancel, text ="Remove Product Image",width=150,command=lambda: b2.destroy())
-          edit_estimate_removeButton.place(x=400,y=450)
-
-      # ###---------------Edit product-----------------###    
-        def est_edit_product_1(): 
-          edit_est_itemid = edit_estimate_cusventtree1.item(edit_estimate_cusventtree1.focus())["values"][0]  
-          global filename
-          filename = ""
-        
-          def edit_estupload_file_1():
-            global filename,img, b2
-            f_types =[('Png files','*.png'),('Jpg Files', '*.jpg')]
-            filename = filedialog.askopenfilename(filetypes=f_types)
-            shutil.copyfile(filename, os.getcwd()+'/images/'+filename.split('/')[-1])
-            image = Image.open(filename)
-            resize_image = image.resize((350, 350))
-            img = ImageTk.PhotoImage(resize_image)
-            edit_est_b2 = Button(edit_est_imageFrame,image=img)
-            edit_est_b2.place(x=130, y=80)
-          
-          def edit_est_updateproducts_1():
-            global img , filename 
-            sku = edit_est_codeentry.get()
-            status = edit_est_checkvarStatus.get()
-            catgory = edit_est_n.get()
-            name = edit_est_nameentry.get()
-            description = edit_est_desentry.get()
-            unitprice = edit_est_uval.get()
-            peices = edit_est_pcsentry.get()
-            cost = edit_est_costval.get()
-            price_cost = edit_est_priceval.get()
-            taxable = edit_est_checkvarStatus2.get()
-            tax2 = edit_est_checkvarStatustax2.get()
-            nostockcontrol = edit_est_checkvarStatus3.get()
-            stock = edit_est_stockval.get()
-            lowstock = edit_est_lowval.get()
-            warehouse = edit_est_wareentry.get()
-            pnotes = edit_est_sctxt.get("1.0", 'end-1c')
-            entries = [sku, name, unitprice, cost]
-            entri = []
-            for i in entries:
-              if i == '':
-                entri.append(i)
-            if len(entri) == 0:
+        def est_addproducts_1():
+          global img , filename 
+          sku = edit_estimate_codeentry.get()
+          status = edit_estimate_checkvarStatus.get()
+          catgory = edit_estimate_n.get()
+          name = edit_estimate_nameentry.get()
+          description = edit_estimate_desentry.get()
+          unitprice = edit_estimate_uval.get()
+          peices = edit_estimate_pcsentry.get()
+          cost = edit_estimate_costval.get()
+          price_cost = edit_estimate_priceval.get()
+          taxable = edit_estimate_checkvarStatus2.get()
+          tax2 = edit_estimate_checkvarStatus_2.get()
+          nostockcontrol = edit_estimate_checkvarStatus3.get()
+          stock = edit_estimate_stockentry.get()
+          lowstock = edit_estimate_lowentry.get()
+          warehouse = edit_estimate_wareentry.get()
+          pnotes = edit_estimate_txt.get("1.0",'end-1c')
+          entries = [sku,name, unitprice, cost]
+          entri = []
+          for i in entries:
+            if i == '':
+              entri.append(i)
+          if len(entri) == 0:
+            sql = 'select * from Productservice where sku = %s or name = %s'
+            val  = (sku, name)
+            fbcursor.execute(sql, val)
+            fbcursor.fetchall()
+            row_count = fbcursor.rowcount
+            if row_count == 0:
               if filename == "":
-                print("hello")
-                sql = "update Productservice set sku=%s, category=%s, name=%s, description=%s, status=%s, unitprice=%s, peices=%s, cost=%s, taxable=%s, priceminuscost=%s, serviceornot=%s, stock=%s, stocklimit=%s, warehouse=%s, privatenote=%s,tax2=%s where sku = %s"
-                val = (sku, catgory, name, description, status, unitprice, peices, cost, taxable, price_cost, nostockcontrol, stock, lowstock, warehouse, pnotes,tax2, edit_est_itemid)
+                sql = 'insert into Productservice(sku, category, name, description, status, unitprice, peices, cost, taxable, priceminuscost, serviceornot, stock, stocklimit, warehouse, privatenote,tax2) values(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s)'
+                val = (sku, catgory, name, description, status, unitprice, peices, cost, taxable, price_cost, nostockcontrol, stock, lowstock, warehouse, pnotes,tax2)
                 fbcursor.execute(sql, val)
                 fbilldb.commit()
               else:
-                print("hai")
                 file = shutil.copyfile(filename, os.getcwd()+'/images/'+filename.split('/')[-1])
-                sql = "update Productservice set category=%s, name=%s, description=%s, status=%s, unitprice=%s, peices=%s, cost=%s, taxable=%s, priceminuscost=%s, serviceornot=%s, stock=%s, stocklimit=%s, warehouse=%s, image=%s, privatenote=%s,tax2=%s where sku = %s"
-                val = (catgory, name, description, status, unitprice, peices, cost, taxable, price_cost, nostockcontrol, stock, lowstock, warehouse,filename.split('/')[-1], pnotes,tax2, edit_est_itemid)
+                sql = 'insert into Productservice(sku, category, name, description, status, unitprice, peices, cost, taxable, priceminuscost, serviceornot, stock, stocklimit, warehouse, image, privatenote,tax2) values(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s)'
+                val = (sku, catgory, name, description, status, unitprice, peices, cost, taxable, price_cost, nostockcontrol, stock, lowstock, warehouse, filename.split('/')[-1], pnotes,tax2)
                 fbcursor.execute(sql, val)
                 fbilldb.commit()
-              for record in edit_estimate_cusventtree1.get_children():
-                edit_estimate_cusventtree1.delete(record)
-              fbcursor.execute("select *  from Productservice")
-              edit_est_pandsdata = fbcursor.fetchall()
-              countp = 0
-              for i in edit_est_pandsdata:
-                if i[12] == '1':
-                  servi = '🗹'
-                else:
-                  servi = ''
-                sql = "select currencysign,currsignplace from company"
-                fbcursor.execute(sql)
-                estcurrsymb = fbcursor.fetchone()
-                if not estcurrsymb: 
-                  if i[13] > i[14]:
-                    edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('green',))
-                    countp += 1              
-                  elif i[12] == '1':
-                    edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('blue',))
-                    countp += 1
-                  else:
-                    edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('red',))
-                    countp += 1
-                          
-                elif estcurrsymb[1] == "before amount":
-                  if (i[13]) > (i[14]):
-                    edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('green',))
-                    countp += 1
-                  elif i[12] == '1':
-                    edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('blue',))
-                    countp += 1
-                  else:
-                    edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('red',))
-                    countp += 1
-
-                elif estcurrsymb[1] == "before amount with space":
-                  if (i[13]) > (i[14]):
-                    edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('green',))
-                    countp += 1
-                  elif i[12] == '1':
-                    edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('blue',))
-                    countp += 1
-                  else:
-                    edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('red',))
-                    countp += 1
-
-                elif estcurrsymb[1] == "after amount":
-                  if (i[13]) > (i[14]):
-                    edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('green',))
-                    countp += 1
-                  elif i[12] == '1':
-                    edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('blue',))
-                    countp += 1
-                  else:
-                    edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('red',))
-                    countp += 1
-
-                elif estcurrsymb[1] == "after amount with space":
-                  if (i[13]) > (i[14]):
-                    edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('green',))
-                    countp += 1
-                  elif i[12] == '1':
-                    edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('blue',))
-                    countp += 1
-                  else:
-                    edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('red',))
-                    countp += 1
-              edit_est_top.destroy()
             else:
-              messagebox.showinfo("F-Billing Revolution", "Fields name or SKU entered is already in database.")
-              edit_est_top.destroy()
-              
+              messagebox.showinfo("Alert", "Entry with same name or SKU already exists.\nTry again.")
+              edit_estimate_top.destroy()
 
-          sql = "select * from Productservice where sku = %s"
-          val = (edit_est_itemid, )
-          fbcursor.execute(sql, val)
-          edit_est_psdata = fbcursor.fetchone()
-          print(edit_est_itemid)
-          edit_est_top = Toplevel()  
-          edit_est_top.title("Edit Product/Service details")
-          p3 = PhotoImage(file = 'images/fbicon.png')
-          edit_est_top.iconphoto(False, p3)
-          edit_est_top.geometry("600x550+350+15")
-          tabControl = ttk.Notebook(edit_est_top)
-          s = ttk.Style()
-          s.theme_use('default')
-          s.configure('TNotebook.Tab', background="#999999", width=50, padding=10,bd=0)
+            for record in edit_estimate_cusventtree1.get_children():
+              edit_estimate_cusventtree1.delete(record)
+            fbcursor.execute("select *  from Productservice")
+            est_pandsdata = fbcursor.fetchall()
+            countp = 0
+            for i in est_pandsdata:
+              if i[12] == '1':
+                servi = '🗹'
+              else:
+                servi = ''
+              sql = "select currencysign,currsignplace from company"
+              fbcursor.execute(sql)
+              estcurrsymb = fbcursor.fetchone()
+              if not estcurrsymb: 
+                if i[13] > i[14]:
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('green',))
+                  countp += 1              
+                elif i[12] == '1':
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('blue',))
+                  countp += 1
+                else:
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('red',))
+                  countp += 1
+                        
+              elif estcurrsymb[1] == "before amount":
+                if (i[13]) > (i[14]):
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('green',))
+                  countp += 1
+                elif i[12] == '1':
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('blue',))
+                  countp += 1
+                else:
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('red',))
+                  countp += 1
 
-          edit_est_taba = ttk.Frame(tabControl)
-          edit_est_tabb = ttk.Frame(tabControl)
-          
-          tabControl.add(edit_est_taba,compound = LEFT, text ='Product/Service')
-          tabControl.add(edit_est_tabb,compound = LEFT, text ='Product Image')
-          
-          tabControl.pack(expand = 1, fill ="both")
-          
-          edit_est_innerFrame = Frame(edit_est_taba,bg="#f5f3f2", relief=GROOVE)
-          edit_est_innerFrame.pack(side="top",fill=BOTH)
+              elif estcurrsymb[1] == "before amount with space":
+                if (i[13]) > (i[14]):
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('green',))
+                  countp += 1
+                elif i[12] == '1':
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('blue',))
+                  countp += 1
+                else:
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('red',))
+                  countp += 1
 
-          edit_est_updateframe = LabelFrame(edit_est_innerFrame,text="Product/Service",width=580,height=455)
-          edit_est_updateframe.pack(side="top",fill=BOTH,padx=10,pady=(10,45))
+              elif estcurrsymb[1] == "after amount":
+                if (i[13]) > (i[14]):
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('green',))
+                  countp += 1
+                elif i[12] == '1':
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('blue',))
+                  countp += 1
+                else:
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('red',))
+                  countp += 1
 
-          edit_est_code1=Label(edit_est_updateframe,text="Code or SKU:",fg="blue",pady=10,padx=10)
-          edit_est_code1.place(x=20,y=0)
-          edit_est_codeentry = Entry(edit_est_updateframe,width=35)
-          edit_est_codeentry.place(x=120,y=8)
-          edit_est_codeentry.insert(0, edit_est_psdata[2])
+              elif estcurrsymb[1] == "after amount with space":
+                if (i[13]) > (i[14]):
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('green',))
+                  countp += 1
+                elif i[12] == '1':
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('blue',))
+                  countp += 1
+                else:
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('red',))
+                  countp += 1
 
-          edit_est_checkvarStatus=IntVar()
-          edit_est_status1=Label(edit_est_updateframe,text="Status:")
-          edit_est_status1.place(x=400,y=8)
-          edit_est_Button1 = Checkbutton(edit_est_updateframe, 
-                            variable = edit_est_checkvarStatus,text="Active",compound="right",
-                            onvalue =1,
-                            offvalue =0,
-                            width = 10)
-          edit_est_Button1.place(x=450,y=5)
-          edit_est_sta = edit_est_psdata[6]
-          if edit_est_sta == '1':
-            edit_est_Button1.select()
-          else:
-            edit_est_Button1.deselect()
+            edit_estimate_top.destroy()
+      
+        edit_estimate_innerFrame = Frame(edit_estimate_tab1,bg="#f5f3f2", relief=GROOVE)
+        edit_estimate_innerFrame.pack(side="top",fill=BOTH)
 
+        edit_estimate_Customerlabelframe = LabelFrame(edit_estimate_innerFrame,text="Product/Service",width=580,height=455)
+        edit_estimate_Customerlabelframe.pack(side="top",fill=BOTH,padx=10,pady=(10,45))
 
+        fbcursor.execute("SELECT * FROM Productservice ORDER BY sku DESC LIMIT 1")
+        skuin = fbcursor.fetchone()
 
-          edit_est_category1=Label(edit_est_updateframe,text="Category:",pady=5,padx=10)
-          edit_est_category1.place(x=20,y=40)
-          edit_est_n = StringVar() 
-          edit_est_category = Entry(edit_est_updateframe,width=40,textvariable=edit_est_n) 
-          edit_est_category.insert(0, edit_est_psdata[3])
-          edit_est_category = ttk.Combobox(edit_est_updateframe, width = 40, textvariable = edit_est_n )
-          edit_est_category['values'] = ('Default')
-          edit_est_category.place(x=120,y=45)
-          #edit_est_category.insert(0, 'Default')
+        edit_estimate_code1=Label(edit_estimate_Customerlabelframe,text="Code or SKU:",fg="blue",pady=10,padx=10)
+        edit_estimate_code1.place(x=20,y=0)
+        edit_estimate_codeentry = Entry(edit_estimate_Customerlabelframe,width=35)
+        edit_estimate_codeentry.place(x=120,y=8)
 
+        edit_estimate_checkvarStatus=IntVar()
+        edit_estimate_status1=Label(edit_estimate_Customerlabelframe,text="Status:")
+        edit_estimate_status1.place(x=400,y=8)
+        edit_estimate_Button1 = Checkbutton(edit_estimate_Customerlabelframe,
+                          variable = edit_estimate_checkvarStatus,text="Active",compound="right",
+                          onvalue =1,
+                          offvalue =0,
+                        
+                          width = 10)
 
+        edit_estimate_Button1.place(x=450,y=5)
 
-          edit_est_name1=Label(edit_est_updateframe,text="Name :",fg="blue",pady=5,padx=10)
-          edit_est_name1.place(x=20,y=70)
-          edit_est_nameentry = Entry(edit_est_updateframe,width=70)
-          edit_est_nameentry.place(x=120,y=75)
-          edit_est_nameentry.insert(0, edit_est_psdata[4])
-
-          edit_est_des1=Label(edit_est_updateframe,text="Description :",pady=5,padx=10)
-          edit_est_des1.place(x=20,y=100)
-          edit_est_desentry = Entry(edit_est_updateframe,width=70)
-          edit_est_desentry.place(x=120,y=105)
-          edit_est_desentry.insert(0, edit_est_psdata[5])
-
-          def edit_est_set_label(name, index, mode):
-            edit_est_priceval.set(float(edit_est_uval.get()) - float(edit_est_costval.get()))
-
-          def edit_est_prdoucts_cal(S,d):
-            if d == '1': #insert
-              if not S in ['.','0','1','2','3','4','5','6','7','8','9']:
-                return False
-              return True
-            if d.isdigit():
-              return True
-          
-          edit_est_unit1=Label(edit_est_updateframe,text="Unit Price:",fg="blue",pady=5,padx=10)
-          edit_est_unit1.place(x=20,y=130)
-          
-          edit_est_uval = StringVar()
-          edit_est_unitentry = Entry(edit_est_updateframe,width=20,textvariable=edit_est_uval)
-          edit_est_unitentry.place(x=120,y=135)
-          edit_est_unitentry.delete(0,'end')
-          edit_est_unitentry.insert(0, edit_est_psdata[7])
-          edit_est_cal_unit = (edit_est_updateframe.register(edit_est_prdoucts_cal),'%S','%d')
-          edit_est_unitentry.config(validate='key',validatecommand=(edit_est_cal_unit),justify='right')
-          
-
-          edit_est_pcsval = IntVar()
-          edit_est_pcs1=Label(edit_est_updateframe,text="Pcs/Weight:",fg="blue",pady=5,padx=10)
-          edit_est_pcs1.place(x=330,y=135)
-          edit_est_pcsentry = Entry(edit_est_updateframe,width=20,textvariable=edit_est_pcsval)
-          edit_est_pcsentry.place(x=420,y=140)
-          edit_est_pcsentry.delete(0,'end')
-          edit_est_pcsentry.insert(0, edit_est_psdata[8])
-          
-
-          edit_est_costval = StringVar()
-          edit_est_cost1=Label(edit_est_updateframe,text="Cost:",pady=5,padx=10)
-          edit_est_cost1.place(x=20,y=160)
-          edit_est_costentry = Entry(edit_est_updateframe,width=20,textvariable=edit_est_costval)
-          edit_est_costentry.place(x=120,y=165)
-          edit_est_costentry.delete(0, END)
-          edit_est_costentry.insert(0, edit_est_psdata[9])
-          edit_est_cal_cost = (edit_est_updateframe.register(edit_est_prdoucts_cal),'%S','%d')
-          edit_est_costentry.config(validate='key',validatecommand=(edit_est_cal_cost),justify='right')
-          
-
-          edit_est_priceval = StringVar()
-          edit_est_price1=Label(edit_est_updateframe,text="(Price-Cost):",pady=5,padx=10)
-          edit_est_price1.place(x=20,y=190)
-          edit_est_priceentry = Entry(edit_est_updateframe,width=20,textvariable=edit_est_priceval,state=DISABLED,disabledbackground="white",disabledforeground="black")
-          edit_est_priceentry.config(justify="right")
-          edit_est_priceentry.place(x=120,y=195)
-          edit_est_priceentry.delete(0,'end')
-          edit_est_priceentry.insert(0, edit_est_psdata[11])
-
-          edit_est_uval.trace('w', edit_est_set_label)
-          edit_est_costval.trace('w', edit_est_set_label)
-          
-
-          edit_est_checkvarStatus2=IntVar()
+        edit_estimate_category1=Label(edit_estimate_Customerlabelframe,text="Category:",pady=5,padx=10)
+        edit_estimate_category1.place(x=20,y=40)
+        edit_estimate_n = StringVar()
+        edit_estimate_country0 = ttk.Combobox(edit_estimate_Customerlabelframe, width = 40, textvariable = edit_estimate_n )
         
-          edit_est_Button2 = Checkbutton(edit_est_updateframe,variable = edit_est_checkvarStatus2, 
-                            text="Taxable Tax1rate",compound="right",
-                            onvalue =1 ,
-                            offvalue =0,
-                            height=2,
-                            width = 12)
-          
-          edit_est_checkvarStatustax2=IntVar()
-          edit_est_Buttontax2 = Checkbutton(edit_est_updateframe,variable = edit_est_checkvarStatustax2, 
-                          text="Taxable Tax2rate",compound="right",
+        edit_estimate_country0['values'] = ('Default')
+        
+        edit_estimate_country0.place(x=120,y=45)
+        edit_estimate_country0.insert(0,'Default')
+
+
+        edit_estimate_name81=Label(edit_estimate_Customerlabelframe,text="Name :",fg="blue",pady=5,padx=10)
+        edit_estimate_name81.place(x=20,y=70)
+        edit_estimate_nameentry = Entry(edit_estimate_Customerlabelframe,width=60)
+        edit_estimate_nameentry.place(x=120,y=75)
+
+        edit_estimate_des1=Label(edit_estimate_Customerlabelframe,text="Description :",pady=5,padx=10)
+        edit_estimate_des1.place(x=20,y=100)
+        edit_estimate_desentry = Entry(edit_estimate_Customerlabelframe,width=60)
+        edit_estimate_desentry.place(x=120,y=105)
+
+        def editt_est_prdoucts_cal(S,d):
+          if d == '1': #insert
+            if not S in ['.','0','1','2','3','4','5','6','7','8','9']:
+              return False
+            return True
+          if d.isdigit():
+            return True
+            
+        edit_estimate_uval = StringVar()              #(value="0")
+        edit_estimate_unit1=Label(edit_estimate_Customerlabelframe,text="Unit Price:",fg="blue",pady=5,padx=10)
+        edit_estimate_unit1.place(x=20,y=130)
+        edit_estimate_unitentry = Entry(edit_estimate_Customerlabelframe,width=20,textvariable=edit_estimate_uval)
+        edit_estimate_unitentry.place(x=120,y=135)
+        editt_est_cal_unit = (edit_estimate_Customerlabelframe.register(editt_est_prdoucts_cal),'%S','%d')
+        edit_estimate_unitentry.config(validate='key',validatecommand=(editt_est_cal_unit),justify='right')
+
+        #edit_estimate_pcsval = StringVar(value="0")
+        edit_estimate_pcs1=Label(edit_estimate_Customerlabelframe,text="Pcs/Weight:",fg="blue",pady=5,padx=10)
+        edit_estimate_pcs1.place(x=330,y=135)
+        edit_estimate_pcsentry = Entry(edit_estimate_Customerlabelframe,width=20)
+        edit_estimate_pcsentry.place(x=420,y=140)
+
+        edit_estimate_costval = StringVar(value="0")
+        edit_estimate_cost1=Label(edit_estimate_Customerlabelframe,text="Cost:",pady=5,padx=10)
+        edit_estimate_cost1.place(x=20,y=160)
+        edit_estimate_costentry = Entry(edit_estimate_Customerlabelframe,width=20,textvariable=edit_estimate_costval)
+        edit_estimate_costentry.place(x=120,y=165)
+        editt_est_cal_cost = (edit_estimate_Customerlabelframe.register(editt_est_prdoucts_cal),'%S','%d')
+        edit_estimate_costentry.config(validate='key',validatecommand=(editt_est_cal_cost),justify='right')
+
+        def est_set_label_1(name, index, mode):
+          est_copr_1 = float(edit_estimate_uval.get()) - float(edit_estimate_costval.get())
+          edit_estimate_priceval.set(str(est_copr_1))
+
+        edit_estimate_priceval = StringVar()
+        edit_estimate_price1=Label(edit_estimate_Customerlabelframe,text="(Price Cost):",pady=5,padx=10)
+        edit_estimate_price1.place(x=20,y=190)
+        edit_estimate_priceentry = Entry(edit_estimate_Customerlabelframe,width=20,textvariable=edit_estimate_priceval,state=DISABLED,disabledbackground="white",disabledforeground="black")
+        edit_estimate_priceentry.config(justify="right")
+        edit_estimate_priceentry.place(x=120,y=195)
+
+        edit_estimate_uval.trace('w', est_set_label_1)
+        edit_estimate_costval.trace('w', est_set_label_1)
+
+        sql = "select taxtype from company"
+        fbcursor.execute(sql)
+        est_taxchoose_1 = fbcursor.fetchone()
+
+        edit_estimate_checkvarStatus2=IntVar()
+      
+        edit_estimate_Button92 = Checkbutton(edit_estimate_Customerlabelframe,variable = edit_estimate_checkvarStatus2,
+                          text="Taxable Tax1rate",compound="right",
                           onvalue =1 ,
                           offvalue = 0,
                           height=2,
                           width = 12)
-          
-          sql = "select taxtype from company"
-          fbcursor.execute(sql)
-          edit_est_taxchoose = fbcursor.fetchone()
-          if not edit_est_taxchoose:
-            pass
-          elif edit_est_taxchoose[0] == '1':
-            edit_est_Button2.place_forget()
-            edit_est_Buttontax2.place_forget()
-          elif edit_est_taxchoose[0] == '2':
-            edit_est_Button2.place(x=415,y=170)
-            edit_est_Buttontax2.place_forget()
-          elif edit_est_taxchoose[0] == '3':
-            edit_est_Button2.place(x=415,y=170)
-            edit_est_Buttontax2.place(x=415,y=210)
+
+        #edit_estimate_Button92.place(x=415,y=170)
+
+        
+
+        edit_estimate_checkvarStatus_2=IntVar()
+
+        edit_estimate_Button_92 = Checkbutton(edit_estimate_Customerlabelframe,variable = edit_estimate_checkvarStatus_2,
+                          text="Taxable Tax2rate",compound="right",
+                          onvalue =1,
+                          offvalue =0,
+                          height=2,
+                          width = 12)
+
+        #edit_estimate_Button_92.place(x=415,y=210)
+        if not est_taxchoose_1:
+          pass
+        elif est_taxchoose_1[0] == '1':
+          edit_estimate_Button92.place_forget()
+          edit_estimate_Button_92.place_forget()
+        elif est_taxchoose_1[0] == '2':
+          edit_estimate_Button92.place(x=415,y=170)
+          edit_estimate_Button_92.place_forget()
+        elif est_taxchoose_1[0] == '3':
+          edit_estimate_Button92.place(x=415,y=170)
+          edit_estimate_Button_92.place(x=415,y=210)
+
+        def est_switch_1():
+          if edit_estimate_checkvarStatus3.get():
+            edit_estimate_stockentry["state"] = DISABLED
+            edit_estimate_lowentry["state"] = DISABLED
+            edit_estimate_wareentry["state"] = DISABLED
+          else:
+            edit_estimate_stockentry["state"] = NORMAL
+            edit_estimate_lowentry["state"] = NORMAL
+            edit_estimate_wareentry["state"] = NORMAL
+
+
+
+        edit_estimate_checkvarStatus3=BooleanVar()
+      
+        edit_estimate_Button93 = Checkbutton(edit_estimate_Customerlabelframe,variable = edit_estimate_checkvarStatus3,command=est_switch_1,
+                          text="This is a service(no stock control)",
+                          onvalue =1 ,
+                          offvalue = 0,
+                          height=3)
+
+        edit_estimate_Button93.place(x=40,y=220)
+
+        def est_stocknum_1(input):
+          if input.isdigit():
+            return True
+          elif input is "":
+            return True
+          else:
+            return False
+
+
+        edit_estimate_stock1=Label(edit_estimate_Customerlabelframe,text="Stock:",pady=5,padx=10)
+        edit_estimate_stock1.place(x=90,y=260)
+        edit_estimate_stockentry = Entry(edit_estimate_Customerlabelframe,width=15)
+        edit_estimate_stockentry.place(x=150,y=265)
+        est_sto_1 = edit_estimate_Customerlabelframe.register(est_stocknum_1)
+        edit_estimate_stockentry.config(validate="key",validatecommand=(est_sto_1, '%S'))
+
+        
+        edit_estimate_low1=Label(edit_estimate_Customerlabelframe,text="Low Stock Warning Limit:",pady=5,padx=10)
+        edit_estimate_low1.place(x=300,y=260)
+        edit_estimate_lowentry = Entry(edit_estimate_Customerlabelframe,width=10)
+        edit_estimate_lowentry.place(x=495,y=265)
+        est_lowsto_1 = edit_estimate_Customerlabelframe.register(est_stocknum_1)
+        edit_estimate_lowentry.config(validate="key",validatecommand=(est_lowsto_1, '%S'))
 
       
-          edit_est_tax = edit_est_psdata[10]
-          if edit_est_tax == '1':
-            edit_est_Button2.select()
-          else:
-            edit_est_Button2.deselect()
+        edit_estimate_ware1=Label(edit_estimate_Customerlabelframe,text="Warehouse:",pady=5,padx=10)
+        edit_estimate_ware1.place(x=60,y=290)
+        edit_estimate_wareentry = Entry(edit_estimate_Customerlabelframe,width=50)
+        edit_estimate_wareentry.place(x=150,y=295)
 
-          if edit_est_psdata[19] == '1':
-            edit_est_Buttontax2.select()
-          else:
-            edit_est_Buttontax2.deselect()
+        edit_estimate_text10=Label(edit_estimate_Customerlabelframe,text="Private notes(not appears on invoice):",pady=5,padx=10)
+        edit_estimate_text10.place(x=20,y=330)
 
-          def edit_est_switch():
-            if edit_est_checkvarStatus3.get():
-              edit_est_stockentry["state"] = DISABLED
-              edit_est_lowentry["state"] = DISABLED
-              edit_est_wareentry["state"] = DISABLED
-            else:
-              edit_est_stockentry["state"] = NORMAL
-              edit_est_lowentry["state"] = NORMAL
-              edit_est_wareentry["state"] = NORMAL
-          edit_est_checkvarStatus3=BooleanVar()
+        edit_estimate_txt = scrolledtext.ScrolledText(edit_estimate_Customerlabelframe, undo=True,width=62,height=4)
+        edit_estimate_txt.place(x=32,y=358)
+
+
+        edit_estimate_okButton = Button(edit_estimate_innerFrame,compound = LEFT,image=tick , text ="Ok",width=60,command=est_addproducts_1)
+        edit_estimate_okButton.place(x=10,y=475)
+
+        def est_closetab_1():
+          edit_estimate_top.destroy()
+
+        edit_estimate_cancelButton = Button(edit_estimate_innerFrame,compound = LEFT,image=cancel ,text="Cancel",width=60,command=est_closetab_1)
+        edit_estimate_cancelButton.place(x=519,y=475)
+
+        edit_estimate_imageFrame = Frame(edit_estimate_tab2, relief=GROOVE,height=580)
+        edit_estimate_imageFrame.pack(side="top",fill=BOTH)
+
+        edit_estimate_browseimg=Label(edit_estimate_imageFrame,text=" Browse for product image file(recommended image type:JPG,size 480x320 pixels) ",bg='#f5f3f2')
+        edit_estimate_browseimg.place(x=15,y=35)
+
+        edit_estimate_browsebutton=Button(edit_estimate_imageFrame,text = 'Browse',command=este_upload_file_1)
+        edit_estimate_browsebutton.place(x=520,y=30,height=30,width=50)
+
         
-          edit_est_Button3 = Checkbutton(edit_est_updateframe,variable = edit_est_checkvarStatus3,command=edit_est_switch, 
-                            text="This is a service(no stock control)", 
-                            onvalue =1 ,
-                            offvalue = 0,
-                            height=3)
+        edit_estimate_removeButton = Button(edit_estimate_imageFrame,compound = LEFT,image=cancel, text ="Remove Product Image",width=150,command=lambda: b2.destroy())
+        edit_estimate_removeButton.place(x=400,y=450)
 
-          edit_est_Button3.place(x=40,y=220)
-
-          
-
-          def edit_est_stocknum(input):
-            if input.isdigit():
-              return True
-            elif input is "":
-              return True
+    # ###---------------Edit product-----------------###    
+      def est_edit_product_1(): 
+        edit_est_itemid = edit_estimate_cusventtree1.item(edit_estimate_cusventtree1.focus())["values"][0]  
+        global filename
+        filename = ""
+      
+        def edit_estupload_file_1():
+          global filename,img, b2
+          f_types =[('Png files','*.png'),('Jpg Files', '*.jpg')]
+          filename = filedialog.askopenfilename(filetypes=f_types)
+          shutil.copyfile(filename, os.getcwd()+'/images/'+filename.split('/')[-1])
+          image = Image.open(filename)
+          resize_image = image.resize((300, 300))
+          img = ImageTk.PhotoImage(resize_image)
+          edit_est_b2 = Button(edit_est_imageFrame,image=img)
+          edit_est_b2.place(x=130, y=80)
+        
+        def edit_est_updateproducts_1():
+          global img , filename 
+          sku = edit_est_codeentry.get()
+          status = edit_est_checkvarStatus.get()
+          catgory = edit_est_n.get()
+          name = edit_est_nameentry.get()
+          description = edit_est_desentry.get()
+          unitprice = edit_est_uval.get()
+          peices = edit_est_pcsentry.get()
+          cost = edit_est_costval.get()
+          price_cost = edit_est_priceval.get()
+          taxable = edit_est_checkvarStatus2.get()
+          tax2 = edit_est_checkvarStatustax2.get()
+          nostockcontrol = edit_est_checkvarStatus3.get()
+          stock = edit_est_stockval.get()
+          lowstock = edit_est_lowval.get()
+          warehouse = edit_est_wareentry.get()
+          pnotes = edit_est_sctxt.get("1.0", 'end-1c')
+          entries = [sku, name, unitprice, cost]
+          entri = []
+          for i in entries:
+            if i == '':
+              entri.append(i)
+          if len(entri) == 0:
+            if filename == "":
+              print("hello")
+              sql = "update Productservice set sku=%s, category=%s, name=%s, description=%s, status=%s, unitprice=%s, peices=%s, cost=%s, taxable=%s, priceminuscost=%s, serviceornot=%s, stock=%s, stocklimit=%s, warehouse=%s, privatenote=%s,tax2=%s where sku = %s"
+              val = (sku, catgory, name, description, status, unitprice, peices, cost, taxable, price_cost, nostockcontrol, stock, lowstock, warehouse, pnotes,tax2, edit_est_itemid)
+              fbcursor.execute(sql, val)
+              fbilldb.commit()
             else:
+              print("hai")
+              file = shutil.copyfile(filename, os.getcwd()+'/images/'+filename.split('/')[-1])
+              sql = "update Productservice set category=%s, name=%s, description=%s, status=%s, unitprice=%s, peices=%s, cost=%s, taxable=%s, priceminuscost=%s, serviceornot=%s, stock=%s, stocklimit=%s, warehouse=%s, image=%s, privatenote=%s,tax2=%s where sku = %s"
+              val = (catgory, name, description, status, unitprice, peices, cost, taxable, price_cost, nostockcontrol, stock, lowstock, warehouse,filename.split('/')[-1], pnotes,tax2, edit_est_itemid)
+              fbcursor.execute(sql, val)
+              fbilldb.commit()
+            for record in edit_estimate_cusventtree1.get_children():
+              edit_estimate_cusventtree1.delete(record)
+            fbcursor.execute("select *  from Productservice")
+            edit_est_pandsdata = fbcursor.fetchall()
+            countp = 0
+            for i in edit_est_pandsdata:
+              if i[12] == '1':
+                servi = '🗹'
+              else:
+                servi = ''
+              sql = "select currencysign,currsignplace from company"
+              fbcursor.execute(sql)
+              estcurrsymb = fbcursor.fetchone()
+              if not estcurrsymb: 
+                if i[13] > i[14]:
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('green',))
+                  countp += 1              
+                elif i[12] == '1':
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('blue',))
+                  countp += 1
+                else:
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('red',))
+                  countp += 1
+                        
+              elif estcurrsymb[1] == "before amount":
+                if (i[13]) > (i[14]):
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('green',))
+                  countp += 1
+                elif i[12] == '1':
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('blue',))
+                  countp += 1
+                else:
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('red',))
+                  countp += 1
+
+              elif estcurrsymb[1] == "before amount with space":
+                if (i[13]) > (i[14]):
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('green',))
+                  countp += 1
+                elif i[12] == '1':
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('blue',))
+                  countp += 1
+                else:
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('red',))
+                  countp += 1
+
+              elif estcurrsymb[1] == "after amount":
+                if (i[13]) > (i[14]):
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('green',))
+                  countp += 1
+                elif i[12] == '1':
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('blue',))
+                  countp += 1
+                else:
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('red',))
+                  countp += 1
+
+              elif estcurrsymb[1] == "after amount with space":
+                if (i[13]) > (i[14]):
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('green',))
+                  countp += 1
+                elif i[12] == '1':
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('blue',))
+                  countp += 1
+                else:
+                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('red',))
+                  countp += 1
+            edit_est_top.destroy()
+          else:
+            messagebox.showinfo("F-Billing Revolution", "Fields name or SKU entered is already in database.")
+            edit_est_top.destroy()
+            
+
+        sql = "select * from Productservice where sku = %s"
+        val = (edit_est_itemid, )
+        fbcursor.execute(sql, val)
+        edit_est_psdata = fbcursor.fetchone()
+        print(edit_est_itemid)
+        edit_est_top = Toplevel()  
+        edit_est_top.title("Edit Product/Service details")
+        p3 = PhotoImage(file = 'images/fbicon.png')
+        edit_est_top.iconphoto(False, p3)
+        edit_est_top.geometry("600x550+350+15")
+        tabControl = ttk.Notebook(edit_est_top)
+        s = ttk.Style()
+        s.theme_use('default')
+        s.configure('TNotebook.Tab', background="#999999", width=50, padding=10,bd=0)
+
+        edit_est_taba = ttk.Frame(tabControl)
+        edit_est_tabb = ttk.Frame(tabControl)
+        
+        tabControl.add(edit_est_taba,compound = LEFT, text ='Product/Service')
+        tabControl.add(edit_est_tabb,compound = LEFT, text ='Product Image')
+        
+        tabControl.pack(expand = 1, fill ="both")
+        
+        edit_est_innerFrame = Frame(edit_est_taba,bg="#f5f3f2", relief=GROOVE)
+        edit_est_innerFrame.pack(side="top",fill=BOTH)
+
+        edit_est_updateframe = LabelFrame(edit_est_innerFrame,text="Product/Service",width=580,height=455)
+        edit_est_updateframe.pack(side="top",fill=BOTH,padx=10,pady=(10,45))
+
+        edit_est_code1=Label(edit_est_updateframe,text="Code or SKU:",fg="blue",pady=10,padx=10)
+        edit_est_code1.place(x=20,y=0)
+        edit_est_codeentry = Entry(edit_est_updateframe,width=35)
+        edit_est_codeentry.place(x=120,y=8)
+        edit_est_codeentry.insert(0, edit_est_psdata[2])
+
+        edit_est_checkvarStatus=IntVar()
+        edit_est_status1=Label(edit_est_updateframe,text="Status:")
+        edit_est_status1.place(x=400,y=8)
+        edit_est_Button1 = Checkbutton(edit_est_updateframe, 
+                          variable = edit_est_checkvarStatus,text="Active",compound="right",
+                          onvalue =1,
+                          offvalue =0,
+                          width = 10)
+        edit_est_Button1.place(x=450,y=5)
+        edit_est_sta = edit_est_psdata[6]
+        if edit_est_sta == '1':
+          edit_est_Button1.select()
+        else:
+          edit_est_Button1.deselect()
+
+
+
+        edit_est_category1=Label(edit_est_updateframe,text="Category:",pady=5,padx=10)
+        edit_est_category1.place(x=20,y=40)
+        edit_est_n = StringVar() 
+        edit_est_category = Entry(edit_est_updateframe,width=40,textvariable=edit_est_n) 
+        edit_est_category.insert(0, edit_est_psdata[3])
+        edit_est_category = ttk.Combobox(edit_est_updateframe, width = 40, textvariable = edit_est_n )
+        edit_est_category['values'] = ('Default')
+        edit_est_category.place(x=120,y=45)
+        #edit_est_category.insert(0, 'Default')
+
+
+
+        edit_est_name1=Label(edit_est_updateframe,text="Name :",fg="blue",pady=5,padx=10)
+        edit_est_name1.place(x=20,y=70)
+        edit_est_nameentry = Entry(edit_est_updateframe,width=70)
+        edit_est_nameentry.place(x=120,y=75)
+        edit_est_nameentry.insert(0, edit_est_psdata[4])
+
+        edit_est_des1=Label(edit_est_updateframe,text="Description :",pady=5,padx=10)
+        edit_est_des1.place(x=20,y=100)
+        edit_est_desentry = Entry(edit_est_updateframe,width=70)
+        edit_est_desentry.place(x=120,y=105)
+        edit_est_desentry.insert(0, edit_est_psdata[5])
+
+        def edit_est_set_label(name, index, mode):
+          edit_est_priceval.set(float(edit_est_uval.get()) - float(edit_est_costval.get()))
+
+        def edit_est_prdoucts_cal(S,d):
+          if d == '1': #insert
+            if not S in ['.','0','1','2','3','4','5','6','7','8','9']:
               return False
-          edit_est_stockval = IntVar(edit_est_updateframe)
-          edit_est_stock1=Label(edit_est_updateframe,text="Stock:",pady=5,padx=10)
-          edit_est_stock1.place(x=90,y=260)
-          edit_est_stockentry = Entry(edit_est_updateframe,width=15,textvariable=edit_est_stockval)
-          edit_est_stockentry.place(x=150,y=265)
-          edit_est_stockentry.delete(0,'end')
-          edit_est_stockentry.insert(0, edit_est_psdata[13])
-          edit_est_sto = edit_est_updateframe.register(edit_est_stocknum)
-          edit_est_stockentry.config(validate="key",validatecommand=(edit_est_sto, '%S'))
-          
-
-          edit_est_lowval = IntVar(edit_est_updateframe)
-          edit_est_low1=Label(edit_est_updateframe,text="Low Stock Warning Limit:",pady=5,padx=10)
-          edit_est_low1.place(x=270,y=260)
-          edit_est_lowentry = Entry(edit_est_updateframe,width=15,textvariable=edit_est_lowval)
-          edit_est_lowentry.place(x=432,y=265)
-          edit_est_lowentry.delete(0,'end')
-          edit_est_lowentry.insert(0, edit_est_psdata[14])
-          edit_est_lowsto = edit_est_updateframe.register(edit_est_stocknum)
-          edit_est_lowentry.config(validate="key",validatecommand=(edit_est_lowsto, '%S'))
-          
-
+            return True
+          if d.isdigit():
+            return True
         
-          edit_est_ware1=Label(edit_est_updateframe,text="Warehouse:",pady=5,padx=10)
-          edit_est_ware1.place(x=60,y=290)
-          edit_est_wareentry = Entry(edit_est_updateframe,width=64)
-          edit_est_wareentry.place(x=150,y=295)
-          edit_est_wareentry.insert(0, edit_est_psdata[15])
+        edit_est_unit1=Label(edit_est_updateframe,text="Unit Price:",fg="blue",pady=5,padx=10)
+        edit_est_unit1.place(x=20,y=130)
+        
+        edit_est_uval = StringVar()
+        edit_est_unitentry = Entry(edit_est_updateframe,width=20,textvariable=edit_est_uval)
+        edit_est_unitentry.place(x=120,y=135)
+        edit_est_unitentry.delete(0,'end')
+        edit_est_unitentry.insert(0, edit_est_psdata[7])
+        edit_est_cal_unit = (edit_est_updateframe.register(edit_est_prdoucts_cal),'%S','%d')
+        edit_est_unitentry.config(validate='key',validatecommand=(edit_est_cal_unit),justify='right')
+        
 
-          edit_est_scr = edit_est_psdata[12]
-          if edit_est_scr == '1':
-            edit_est_Button3.select()
+        edit_est_pcsval = IntVar()
+        edit_est_pcs1=Label(edit_est_updateframe,text="Pcs/Weight:",fg="blue",pady=5,padx=10)
+        edit_est_pcs1.place(x=330,y=135)
+        edit_est_pcsentry = Entry(edit_est_updateframe,width=20,textvariable=edit_est_pcsval)
+        edit_est_pcsentry.place(x=420,y=140)
+        edit_est_pcsentry.delete(0,'end')
+        edit_est_pcsentry.insert(0, edit_est_psdata[8])
+        
+
+        edit_est_costval = StringVar()
+        edit_est_cost1=Label(edit_est_updateframe,text="Cost:",pady=5,padx=10)
+        edit_est_cost1.place(x=20,y=160)
+        edit_est_costentry = Entry(edit_est_updateframe,width=20,textvariable=edit_est_costval)
+        edit_est_costentry.place(x=120,y=165)
+        edit_est_costentry.delete(0, END)
+        edit_est_costentry.insert(0, edit_est_psdata[9])
+        edit_est_cal_cost = (edit_est_updateframe.register(edit_est_prdoucts_cal),'%S','%d')
+        edit_est_costentry.config(validate='key',validatecommand=(edit_est_cal_cost),justify='right')
+        
+
+        edit_est_priceval = StringVar()
+        edit_est_price1=Label(edit_est_updateframe,text="(Price-Cost):",pady=5,padx=10)
+        edit_est_price1.place(x=20,y=190)
+        edit_est_priceentry = Entry(edit_est_updateframe,width=20,textvariable=edit_est_priceval,state=DISABLED,disabledbackground="white",disabledforeground="black")
+        edit_est_priceentry.config(justify="right")
+        edit_est_priceentry.place(x=120,y=195)
+        edit_est_priceentry.delete(0,'end')
+        edit_est_priceentry.insert(0, edit_est_psdata[11])
+
+        edit_est_uval.trace('w', edit_est_set_label)
+        edit_est_costval.trace('w', edit_est_set_label)
+        
+
+        edit_est_checkvarStatus2=IntVar()
+      
+        edit_est_Button2 = Checkbutton(edit_est_updateframe,variable = edit_est_checkvarStatus2, 
+                          text="Taxable Tax1rate",compound="right",
+                          onvalue =1 ,
+                          offvalue =0,
+                          height=2,
+                          width = 12)
+        
+        edit_est_checkvarStatustax2=IntVar()
+        edit_est_Buttontax2 = Checkbutton(edit_est_updateframe,variable = edit_est_checkvarStatustax2, 
+                        text="Taxable Tax2rate",compound="right",
+                        onvalue =1 ,
+                        offvalue = 0,
+                        height=2,
+                        width = 12)
+        
+        sql = "select taxtype from company"
+        fbcursor.execute(sql)
+        edit_est_taxchoose = fbcursor.fetchone()
+        if not edit_est_taxchoose:
+          pass
+        elif edit_est_taxchoose[0] == '1':
+          edit_est_Button2.place_forget()
+          edit_est_Buttontax2.place_forget()
+        elif edit_est_taxchoose[0] == '2':
+          edit_est_Button2.place(x=415,y=170)
+          edit_est_Buttontax2.place_forget()
+        elif edit_est_taxchoose[0] == '3':
+          edit_est_Button2.place(x=415,y=170)
+          edit_est_Buttontax2.place(x=415,y=210)
+
+    
+        edit_est_tax = edit_est_psdata[10]
+        if edit_est_tax == '1':
+          edit_est_Button2.select()
+        else:
+          edit_est_Button2.deselect()
+
+        if edit_est_psdata[19] == '1':
+          edit_est_Buttontax2.select()
+        else:
+          edit_est_Buttontax2.deselect()
+
+        def edit_est_switch():
+          if edit_est_checkvarStatus3.get():
             edit_est_stockentry["state"] = DISABLED
             edit_est_lowentry["state"] = DISABLED
             edit_est_wareentry["state"] = DISABLED
           else:
-            edit_est_Button3.deselect()
             edit_est_stockentry["state"] = NORMAL
             edit_est_lowentry["state"] = NORMAL
             edit_est_wareentry["state"] = NORMAL
-          
-          
+        edit_est_checkvarStatus3=BooleanVar()
+      
+        edit_est_Button3 = Checkbutton(edit_est_updateframe,variable = edit_est_checkvarStatus3,command=edit_est_switch, 
+                          text="This is a service(no stock control)", 
+                          onvalue =1 ,
+                          offvalue = 0,
+                          height=3)
 
-          
+        edit_est_Button3.place(x=40,y=220)
 
-          edit_est_text1=Label(edit_est_updateframe,text="Private notes(not appears on invoice):",pady=5,padx=10)
-          edit_est_text1.place(x=20,y=330)
-          edit_est_sctxt = scrolledtext.ScrolledText(edit_est_updateframe, undo=True,width=62,height=4)
-          edit_est_sctxt.place(x=32,y=358)
-          try:
-            edit_est_sctxt.insert("1.0", edit_est_psdata[16])
-          except:
-            pass
-
-          edit_est_okButton = Button(edit_est_innerFrame, text ="Ok",image=tick,width=70,compound = LEFT,command=edit_est_updateproducts_1)
-          edit_est_okButton.place(x=10, y=475)
-
-          edit_est_cancelButton = Button(edit_est_innerFrame,image=cancel,text="Cancel",width=70,compound = LEFT, command=lambda : edit_est_top.destroy())
-          edit_est_cancelButton.place(x=519, y=475)
-          
-          
-          edit_est_imageFrame = Frame(edit_est_tabb, relief=GROOVE,height=580)
-          edit_est_imageFrame.pack(side="top",fill=BOTH)
-
-          edit_est_browseimg=Label(edit_est_imageFrame,text=" Browse for product image file(recommended image type:JPG,size 480x320 pixels) ",bg='#f5f3f2')
-          edit_est_browseimg.place(x=15,y=35)
-
-          edit_est_browsebutton=Button(edit_est_imageFrame,text = 'Browse',command=edit_estupload_file_1)
-          edit_est_browsebutton.place(x=530,y=30,height=30,width=50)
-
-          try:
-            image = Image.open("images/"+edit_est_psdata[17])
-            resize_image = image.resize((350, 350))
-            image = ImageTk.PhotoImage(resize_image)
-            edit_est_b2 = Label(edit_est_imageFrame,image=image,width=350,height=350)
-            edit_est_b2.photo = image
-            edit_est_b2.place(x=130, y=80)
-            print(image)
-          except:
-            pass
-
-          edit_est_removeButton = Button(edit_est_imageFrame,image=cancel,text="Remove Product Image",width=150,compound = LEFT,command=lambda: edit_est_b2 .destroy())
-          edit_est_removeButton.place(x=410,y=460)
-
-                        
-        edit_estimate_enter10=Label(edit_estimate_newselection, text="Enter filter text").place(x=5, y=10)
-        edit_estimate_e10=Entry(edit_estimate_newselection, width=20).place(x=110, y=10)
-        # edit_estimate_text10=Label(edit_estimate_newselection, text="Filtered column").place(x=340, y=10)
-        # edit_estimate_e20=Entry(edit_estimate_newselection, width=20).place(x=450, y=10)
-        edit_estimate_cust_filter_button=Button(edit_estimate_newselection, text='Click Here')
-        edit_estimate_cust_filter_button.place(x=240, y=9,height=20,width=60)
-
-        edit_estimate_cusventtree1=ttk.Treeview(edit_estimate_newselection, height=25)
-        edit_estimate_cusventtree1["columns"]=["1","2","3", "4","5"]
-        edit_estimate_cusventtree1.column("#0", width=35)
-        edit_estimate_cusventtree1.column("1", width=160)
-        edit_estimate_cusventtree1.column("2", width=160)
-        edit_estimate_cusventtree1.column("3", width=140)
-        edit_estimate_cusventtree1.column("4", width=70)
-        edit_estimate_cusventtree1.column("5", width=70)
-        edit_estimate_cusventtree1.heading("#0",text="")
-        edit_estimate_cusventtree1.heading("1",text="ID/SKU")
-        edit_estimate_cusventtree1.heading("2",text="Product/Service Name")
-        edit_estimate_cusventtree1.heading("3",text="Unit price")
-        edit_estimate_cusventtree1.heading("4",text="Service")
-        edit_estimate_cusventtree1.heading("5",text="Stock")
-        edit_estimate_cusventtree1.tag_configure('green', foreground='green')
-        edit_estimate_cusventtree1.tag_configure('red', foreground='red')
-        edit_estimate_cusventtree1.tag_configure('blue', foreground='blue')
-        edit_estimate_cusventtree1.place(x=5, y=45)
         
 
-        countp = 0
-        sql = 'select * from Productservice'
-        fbcursor.execute(sql)
-        estprodata = fbcursor.fetchall()
-        for i in estprodata:
-          if i[12] == '1':
-            servi = '🗹'
+        def edit_est_stocknum(input):
+          if input.isdigit():
+            return True
+          elif input is "":
+            return True
           else:
-            servi = ''
-          sql = "select currencysign,currsignplace from company"
-          fbcursor.execute(sql)
-          estcurrsymb = fbcursor.fetchone()
-          if not estcurrsymb: 
-            if i[13] > i[14]:
-              edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('green',))
-              countp += 1              
-            elif i[12] == '1':
-              edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('blue',))
-              countp += 1
-            else:
-              edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('red',))
-              countp += 1
-                    
-          elif estcurrsymb[1] == "before amount":
-            if (i[13]) > (i[14]):
-              edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('green',))
-              countp += 1
-            elif i[12] == '1':
-              edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('blue',))
-              countp += 1
-            else:
-              edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('red',))
-              countp += 1
+            return False
+        edit_est_stockval = IntVar(edit_est_updateframe)
+        edit_est_stock1=Label(edit_est_updateframe,text="Stock:",pady=5,padx=10)
+        edit_est_stock1.place(x=90,y=260)
+        edit_est_stockentry = Entry(edit_est_updateframe,width=15,textvariable=edit_est_stockval)
+        edit_est_stockentry.place(x=150,y=265)
+        edit_est_stockentry.delete(0,'end')
+        edit_est_stockentry.insert(0, edit_est_psdata[13])
+        edit_est_sto = edit_est_updateframe.register(edit_est_stocknum)
+        edit_est_stockentry.config(validate="key",validatecommand=(edit_est_sto, '%S'))
+        
 
-          elif estcurrsymb[1] == "before amount with space":
-            if (i[13]) > (i[14]):
-              edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('green',))
-              countp += 1
-            elif i[12] == '1':
-              edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('blue',))
-              countp += 1
-            else:
-              edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('red',))
-              countp += 1
+        edit_est_lowval = IntVar(edit_est_updateframe)
+        edit_est_low1=Label(edit_est_updateframe,text="Low Stock Warning Limit:",pady=5,padx=10)
+        edit_est_low1.place(x=270,y=260)
+        edit_est_lowentry = Entry(edit_est_updateframe,width=15,textvariable=edit_est_lowval)
+        edit_est_lowentry.place(x=432,y=265)
+        edit_est_lowentry.delete(0,'end')
+        edit_est_lowentry.insert(0, edit_est_psdata[14])
+        edit_est_lowsto = edit_est_updateframe.register(edit_est_stocknum)
+        edit_est_lowentry.config(validate="key",validatecommand=(edit_est_lowsto, '%S'))
+        
 
-          elif estcurrsymb[1] == "after amount":
-            if (i[13]) > (i[14]):
-              edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('green',))
-              countp += 1
-            elif i[12] == '1':
-              edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('blue',))
-              countp += 1
-            else:
-              edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('red',))
-              countp += 1
+      
+        edit_est_ware1=Label(edit_est_updateframe,text="Warehouse:",pady=5,padx=10)
+        edit_est_ware1.place(x=60,y=290)
+        edit_est_wareentry = Entry(edit_est_updateframe,width=64)
+        edit_est_wareentry.place(x=150,y=295)
+        edit_est_wareentry.insert(0, edit_est_psdata[15])
 
-          elif estcurrsymb[1] == "after amount with space":
-            if (i[13]) > (i[14]):
-              edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('green',))
-              countp += 1
-            elif i[12] == '1':
-              edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('blue',))
-              countp += 1
-            else:
-              edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('red',))
-              countp += 1
+        edit_est_scr = edit_est_psdata[12]
+        if edit_est_scr == '1':
+          edit_est_Button3.select()
+          edit_est_stockentry["state"] = DISABLED
+          edit_est_lowentry["state"] = DISABLED
+          edit_est_wareentry["state"] = DISABLED
+        else:
+          edit_est_Button3.deselect()
+          edit_est_stockentry["state"] = NORMAL
+          edit_est_lowentry["state"] = NORMAL
+          edit_est_wareentry["state"] = NORMAL
+        
+        
 
+        
 
+        edit_est_text1=Label(edit_est_updateframe,text="Private notes(not appears on invoice):",pady=5,padx=10)
+        edit_est_text1.place(x=20,y=330)
+        edit_est_sctxt = scrolledtext.ScrolledText(edit_est_updateframe, undo=True,width=62,height=4)
+        edit_est_sctxt.place(x=32,y=358)
+        try:
+          edit_est_sctxt.insert("1.0", edit_est_psdata[16])
+        except:
+          pass
 
-        edit_estimate_ctegorytree1=ttk.Treeview(edit_estimate_newselection, height=27)
-        edit_estimate_ctegorytree1["columns"]=["1"]
-        edit_estimate_ctegorytree1.column("#0", width=35, minwidth=20)
-        edit_estimate_ctegorytree1.column("1", width=205, minwidth=25, anchor=CENTER)    
-        edit_estimate_ctegorytree1.heading("#0",text="", anchor=W)
-        edit_estimate_ctegorytree1.heading("1",text="View filter by category", anchor=CENTER)
-        edit_estimate_ctegorytree1.place(x=660, y=45)
-        def edit_est_items_selected(event):
-          selected_indices = edit_cust_fil_cat_list_1.curselection()
-          selected_filter = ",".join([edit_cust_fil_cat_list_1.get(i) for i in selected_indices])
+        edit_est_okButton = Button(edit_est_innerFrame, text ="Ok",image=tick,width=70,compound = LEFT,command=edit_est_updateproducts_1)
+        edit_est_okButton.place(x=10, y=475)
 
-          sql = 'select * from Productservice'
-          fbcursor.execute(sql)
-          pandsdata1 = fbcursor.fetchall()
-          psql = "select * from Productservice where serviceornot=%s"
-          val = ('0', )
-          fbcursor.execute(psql, val)
-          pdata1 = fbcursor.fetchall()
+        edit_est_cancelButton = Button(edit_est_innerFrame,image=cancel,text="Cancel",width=70,compound = LEFT, command=lambda : edit_est_top.destroy())
+        edit_est_cancelButton.place(x=519, y=475)
+        
+        
+        edit_est_imageFrame = Frame(edit_est_tabb, relief=GROOVE,height=580)
+        edit_est_imageFrame.pack(side="top",fill=BOTH)
 
-          ssql = "select * from Productservice where serviceornot=%s"
-          val = ('1', )
-          fbcursor.execute(ssql, val)
-          sdata1 = fbcursor.fetchall()
+        edit_est_browseimg=Label(edit_est_imageFrame,text=" Browse for product image file(recommended image type:JPG,size 480x320 pixels) ",bg='#f5f3f2')
+        edit_est_browseimg.place(x=15,y=35)
 
-          if selected_filter == "View all records":
-            for record in edit_estimate_cusventtree1.get_children():
-              edit_estimate_cusventtree1.delete(record)
-            countp = 0
-            for i in pandsdata1:
-              if i[12] == '1':
-                servi = '🗹'                     #'Active'
-              else:
-                servi = ' '                         #'Inactive'
-              sql = "select currencysign,currsignplace from company"
-              fbcursor.execute(sql)
-              estcurrsymb = fbcursor.fetchone()
-              if not estcurrsymb: 
-                if i[13] > i[14]:
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('green',))
-                  countp += 1              
-                elif i[12] == '1':
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('blue',))
-                  countp += 1
-                else:
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('red',))
-                  countp += 1
-                        
-              elif estcurrsymb[1] == "before amount":
-                if (i[13]) > (i[14]):
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('green',))
-                  countp += 1
-                elif i[12] == '1':
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('blue',))
-                  countp += 1
-                else:
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('red',))
-                  countp += 1
+        edit_est_browsebutton=Button(edit_est_imageFrame,text = 'Browse',command=edit_estupload_file_1)
+        edit_est_browsebutton.place(x=530,y=30,height=30,width=50)
 
-              elif estcurrsymb[1] == "before amount with space":
-                if (i[13]) > (i[14]):
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('green',))
-                  countp += 1
-                elif i[12] == '1':
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('blue',))
-                  countp += 1
-                else:
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('red',))
-                  countp += 1
+        try:
+          image = Image.open("images/"+edit_est_psdata[17])
+          resize_image = image.resize((300, 300))
+          image = ImageTk.PhotoImage(resize_image)
+          edit_est_b2 = Label(edit_est_imageFrame,image=image,width=350,height=350)
+          edit_est_b2.photo = image
+          edit_est_b2.place(x=130, y=80)
+          print(image)
+        except:
+          pass
 
-              elif estcurrsymb[1] == "after amount":
-                if (i[13]) > (i[14]):
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('green',))
-                  countp += 1
-                elif i[12] == '1':
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('blue',))
-                  countp += 1
-                else:
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('red',))
-                  countp += 1
+        edit_est_removeButton = Button(edit_est_imageFrame,image=cancel,text="Remove Product Image",width=150,compound = LEFT,command=lambda: edit_est_b2 .destroy())
+        edit_est_removeButton.place(x=410,y=460)
 
-              elif estcurrsymb[1] == "after amount with space":
-                if (i[13]) > (i[14]):
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('green',))
-                  countp += 1
-                elif i[12] == '1':
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('blue',))
-                  countp += 1
-                else:
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('red',))
-                  countp += 1
+                      
+      edit_estimate_enter10=Label(edit_estimate_newselection, text="Enter filter text").place(x=5, y=10)
+      edit_estimate_e10=Entry(edit_estimate_newselection, width=20).place(x=110, y=10)
+      # edit_estimate_text10=Label(edit_estimate_newselection, text="Filtered column").place(x=340, y=10)
+      # edit_estimate_e20=Entry(edit_estimate_newselection, width=20).place(x=450, y=10)
+      edit_estimate_cust_filter_button=Button(edit_estimate_newselection, text='Click Here')
+      edit_estimate_cust_filter_button.place(x=240, y=9,height=20,width=60)
 
-          elif selected_filter == "View all products":
-            for record in edit_estimate_cusventtree1.get_children():
-              edit_estimate_cusventtree1.delete(record)
-            countp = 0
-            for i in pdata1:
-              if i[12] == '1':
-                servi = '🗹'                   #'Active'
-              else:
-                servi = ' '                    #'Inactive'
-              sql = "select currencysign,currsignplace from company"
-              fbcursor.execute(sql)
-              estcurrsymb = fbcursor.fetchone()
-              if not estcurrsymb: 
-                if i[13] > i[14]:
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('green',))
-                  countp += 1              
-                elif i[12] == '1':
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('blue',))
-                  countp += 1
-                else:
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('red',))
-                  countp += 1
-                        
-              elif estcurrsymb[1] == "before amount":
-                if (i[13]) > (i[14]):
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('green',))
-                  countp += 1
-                elif i[12] == '1':
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('blue',))
-                  countp += 1
-                else:
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('red',))
-                  countp += 1
-
-              elif estcurrsymb[1] == "before amount with space":
-                if (i[13]) > (i[14]):
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('green',))
-                  countp += 1
-                elif i[12] == '1':
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('blue',))
-                  countp += 1
-                else:
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('red',))
-                  countp += 1
-
-              elif estcurrsymb[1] == "after amount":
-                if (i[13]) > (i[14]):
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('green',))
-                  countp += 1
-                elif i[12] == '1':
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('blue',))
-                  countp += 1
-                else:
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('red',))
-                  countp += 1
-
-              elif estcurrsymb[1] == "after amount with space":
-                if (i[13]) > (i[14]):
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('green',))
-                  countp += 1
-                elif i[12] == '1':
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('blue',))
-                  countp += 1
-                else:
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('red',))
-                  countp += 1
-          elif selected_filter == "View all services":
-            for record in edit_estimate_cusventtree1.get_children():
-              edit_estimate_cusventtree1.delete(record)
-            countp = 0
-            for i in sdata1:
-              if i[12] == '1':
-                servi = '🗹'             #'Active'
-              else:
-                servi = ' '              #'Inactive'
-              sql = "select currencysign,currsignplace from company"
-              fbcursor.execute(sql)
-              estcurrsymb = fbcursor.fetchone()
-              if not estcurrsymb: 
-                if i[13] > i[14]:
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('green',))
-                  countp += 1              
-                elif i[12] == '1':
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('blue',))
-                  countp += 1
-                else:
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('red',))
-                  countp += 1
-                        
-              elif estcurrsymb[1] == "before amount":
-                if (i[13]) > (i[14]):
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('green',))
-                  countp += 1
-                elif i[12] == '1':
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('blue',))
-                  countp += 1
-                else:
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('red',))
-                  countp += 1
-
-              elif estcurrsymb[1] == "before amount with space":
-                if (i[13]) > (i[14]):
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('green',))
-                  countp += 1
-                elif i[12] == '1':
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('blue',))
-                  countp += 1
-                else:
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('red',))
-                  countp += 1
-
-              elif estcurrsymb[1] == "after amount":
-                if (i[13]) > (i[14]):
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('green',))
-                  countp += 1
-                elif i[12] == '1':
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('blue',))
-                  countp += 1
-                else:
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('red',))
-                  countp += 1
-
-              elif estcurrsymb[1] == "after amount with space":
-                if (i[13]) > (i[14]):
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('green',))
-                  countp += 1
-                elif i[12] == '1':
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('blue',))
-                  countp += 1
-                else:
-                  edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('red',))
-                  countp += 1
-
-        edit_cust_fil_cat_list_1 = Listbox(edit_estimate_newselection,height=34,width=40,bg="white",activestyle="dotbox",fg="black",highlightbackground="white")
-        edit_cust_fil_cat_list_1.insert(0,"View all records")
-        edit_cust_fil_cat_list_1.insert(1,"View all products")
-        edit_cust_fil_cat_list_1.insert(2,"View all services")
-        edit_cust_fil_cat_list_1.place(x=660,y=63)
-        edit_cust_fil_cat_list_1.bind('<<ListboxSelect>>',edit_est_items_selected)
-        edit_est_stockok = Label(edit_estimate_newselection,text="Green: Stock is Ok",foreground="green").place(x =15,y =580)
-        edit_est_stocko = Label(edit_estimate_newselection,text="Red: Limit <= Low Stock Limit",foreground="red").place(x =136,y=580)
-        edit_est_stock = Label(edit_estimate_newselection,text="Blue: Service,no Stock Control",foreground="blue").place(x =335,y =580)
-
-        edit_estimate_scrollbar10 = Scrollbar(edit_estimate_newselection)
-        edit_estimate_scrollbar10.place(x=640, y=45, height=520)
-        edit_estimate_scrollbar10.config( command=edit_estimate_cusventtree1.yview )
-
-        def edit_estselepro():
-          global estpriceview
-          edit_estpriceview = Label(edit_estimate_listFrame,bg="#f5f3f2")
-          edit_estpriceview.place(x=850,y=200,width=78,height=18)
-          edit_proskuid = edit_estimate_cusventtree1.item(edit_estimate_cusventtree1.focus())["values"][0]
-          sql = "select * from Productservice where sku = %s"
-          val = (edit_proskuid,)
-          fbcursor.execute(sql,val)
-          prosele = fbcursor.fetchone()
-          sql = "select * from company"
-          fbcursor.execute(sql)
-          create_maintree_insert = fbcursor.fetchone()
-          if prosele[10] == '1':
-            tax1 = 'yes'
-          else:
-            tax1 = ''
-          if prosele[19] == '1':
-            tax2 = 'yes'
-          else:
-            tax2 = ''
-          if not create_maintree_insert:
-            edit_estimate_tree.insert(parent='', index='end',text='', values=(prosele[2],prosele[4],prosele[5],prosele[7],1,prosele[8],tax1,prosele[7]*1))
-
-          elif create_maintree_insert[12] == "1":
-            edit_estimate_tree.insert(parent='', index='end',text='', values=(prosele[2],prosele[4],prosele[5],prosele[7],1,prosele[8],prosele[7]*1))
-            extracs = 0.0
-            discou = 0.0
-            total = 0.0
-            for child in edit_estimate_tree.get_children():
-              total += float(edit_estimate_tree.item(child, 'values')[6])
-            discou = (total*float(edit_estimates_disrate.get())/100)
-            extracs = (extracs+float(edit_estimates_excost.get()))
-            edit_estimate_costtt.config(text=edit_estimates_excost.get())
-            edit_estimate_discounttt1.config(text=discou)
-            edit_estpriceview.config(text=total)
-            edit_estimate_orderrr1.config(text=total-discou+extracs)
-            edit_estimate_balancee1.config(text=total-discou+extracs)
-            edit_estimate_subbb1.config(text=total-discou)
-          elif create_maintree_insert[12] == "2":
-            edit_estimate_tree.insert(parent='', index='end',text='', values=(prosele[2],prosele[4],prosele[5],prosele[7],1,prosele[8],tax1,prosele[7]*1))
-            extracs = 0.0
-            discou = 0.0
-            total = 0.0
-            for child in edit_estimate_tree.get_children():
-              total += float(edit_estimate_tree.item(child, 'values')[7])
-            discou = (total*float(edit_estimates_disrate.get())/100)
-            extracs = (extracs+float(edit_estimates_excost.get()))
-            edit_estimate_costtt.config(text=edit_estimates_excost.get())
-            edit_estimate_discounttt1.config(text=discou)
-            edit_estpriceview.config(text=total)
-            edit_estimate_subbb1.config(text=total-discou)
-
-            tot = 0.0
-            totaltax1 = 0.0
-            for child in edit_estimate_tree.get_children():
-              checktax1 = list(edit_estimate_tree.item(child, 'values'))
-              if checktax1[6] == "yes":
-                totaltax1 =(totaltax1 + float(checktax1[7]))
-                edit_estimate_ttax1label.config(text=(float(totaltax1)*float(edit_estimates_tax1.get())/100))
-                tot = (float(totaltax1)*float(edit_estimates_tax1.get())/100)
-              else:
-                pass
-            edit_estimate_orderrr1.config(text=total+tot-discou+extracs)
-            edit_estimate_balancee1.config(text=total+tot-discou+extracs)
-              
-          elif create_maintree_insert[12] == "3":
-            edit_estimate_tree.insert(parent='', index='end',text='', values=(prosele[2],prosele[4],prosele[5],prosele[7],1,prosele[8],tax1,tax2,prosele[7]*1))
-            extracs = 0.0
-            discou = 0.0
-            total = 0.0
-            for child in edit_estimate_tree.get_children():
-              total += float(edit_estimate_tree.item(child, 'values')[8])
-            extracs = (extracs+float(edit_estimates_excost.get()))
-            edit_estimate_costtt.config(text=edit_estimates_excost.get())
-            discou = (total*float(edit_estimates_disrate.get())/100)
-            edit_estimate_discounttt1.config(text=discou)
-            edit_estpriceview.config(text=total)
-            edit_estimate_subbb1.config(text=total-discou)
-              
-            tot = 0.0
-            totaltax1 = 0.0
-            for child in edit_estimate_tree.get_children():
-              checktax1 = list(edit_estimate_tree.item(child, 'values'))
-              if checktax1[6] == "yes":
-                totaltax1 =(totaltax1 + float(checktax1[8]))
-                edit_estimate_ttax1label.config(text=(float(totaltax1)*float(edit_estimates_tax1.get())/100))
-                tot = (float(totaltax1)*float(edit_estimates_tax1.get())/100)
-              else:
-                pass
-            
-            tot2 = 0.0
-            totaltax2 = 0.0
-            for child in edit_estimate_tree.get_children():
-              checktax1 = list(edit_estimate_tree.item(child, 'values'))
-              if checktax1[7] == "yes":
-                totaltax2 =(totaltax2 + float(checktax1[8]))
-                edit_estimate_ttax2label.config(text=(float(totaltax2)*float(edit_estimates_tax2.get())/100))
-                
-                tot2 = (float(totaltax2)*float(edit_estimates_tax2.get())/100)
-              else:
-                pass
-
-            edit_estimate_orderrr1.config(text=total+tot+tot2-discou+extracs)
-            edit_estimate_balancee1.config(text=total+tot+tot2-discou+extracs)
-          
-          edit_estimate_newselection.destroy()
+      edit_estimate_cusventtree1=ttk.Treeview(edit_estimate_newselection, height=25)
+      edit_estimate_cusventtree1["columns"]=["1","2","3", "4","5"]
+      edit_estimate_cusventtree1.column("#0", width=35)
+      edit_estimate_cusventtree1.column("1", width=160)
+      edit_estimate_cusventtree1.column("2", width=160)
+      edit_estimate_cusventtree1.column("3", width=140)
+      edit_estimate_cusventtree1.column("4", width=70)
+      edit_estimate_cusventtree1.column("5", width=70)
+      edit_estimate_cusventtree1.heading("#0",text="")
+      edit_estimate_cusventtree1.heading("1",text="ID/SKU")
+      edit_estimate_cusventtree1.heading("2",text="Product/Service Name")
+      edit_estimate_cusventtree1.heading("3",text="Unit price")
+      edit_estimate_cusventtree1.heading("4",text="Service")
+      edit_estimate_cusventtree1.heading("5",text="Stock")
+      edit_estimate_cusventtree1.tag_configure('green', foreground='green')
+      edit_estimate_cusventtree1.tag_configure('red', foreground='red')
+      edit_estimate_cusventtree1.tag_configure('blue', foreground='blue')
+      edit_estimate_cusventtree1.place(x=5, y=45)
       
 
-        edit_estimate_btn11=Button(edit_estimate_newselection,compound = LEFT,image=tick ,text="ok", width=60,command=edit_estselepro)
-        edit_estimate_btn11.place(x=15, y=610)
-        edit_estimate_btn11=Button(edit_estimate_newselection,compound = LEFT,image=tick , text="Edit product/Service", width=150,command=est_edit_product_1).place(x=250, y=610)
-        edit_estimate_btn11=Button(edit_estimate_newselection,compound = LEFT,image=tick , text="Add product/Service", width=150,command=edit_estimate_product).place(x=435, y=610)
-        edit_estimate_btn11=Button(edit_estimate_newselection,compound = LEFT,image=cancel ,text="Cancel", width=60).place(x=740, y=610)
-      else:
-        messagebox.showwarning("F-Billing Revolution 2022", "Customer is required, please select customer\n before adding line item to estimates.")
+      countp = 0
+      sql = 'select * from Productservice'
+      fbcursor.execute(sql)
+      estprodata = fbcursor.fetchall()
+      for i in estprodata:
+        if i[12] == '1':
+          servi = '🗹'
+        else:
+          servi = ''
+        sql = "select currencysign,currsignplace from company"
+        fbcursor.execute(sql)
+        estcurrsymb = fbcursor.fetchone()
+        if not estcurrsymb: 
+          if i[13] > i[14]:
+            edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('green',))
+            countp += 1              
+          elif i[12] == '1':
+            edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('blue',))
+            countp += 1
+          else:
+            edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('red',))
+            countp += 1
+                  
+        elif estcurrsymb[1] == "before amount":
+          if (i[13]) > (i[14]):
+            edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('green',))
+            countp += 1
+          elif i[12] == '1':
+            edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('blue',))
+            countp += 1
+          else:
+            edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('red',))
+            countp += 1
+
+        elif estcurrsymb[1] == "before amount with space":
+          if (i[13]) > (i[14]):
+            edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('green',))
+            countp += 1
+          elif i[12] == '1':
+            edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('blue',))
+            countp += 1
+          else:
+            edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('red',))
+            countp += 1
+
+        elif estcurrsymb[1] == "after amount":
+          if (i[13]) > (i[14]):
+            edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('green',))
+            countp += 1
+          elif i[12] == '1':
+            edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('blue',))
+            countp += 1
+          else:
+            edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('red',))
+            countp += 1
+
+        elif estcurrsymb[1] == "after amount with space":
+          if (i[13]) > (i[14]):
+            edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('green',))
+            countp += 1
+          elif i[12] == '1':
+            edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('blue',))
+            countp += 1
+          else:
+            edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('red',))
+            countp += 1
+
+
+
+      edit_estimate_ctegorytree1=ttk.Treeview(edit_estimate_newselection, height=27)
+      edit_estimate_ctegorytree1["columns"]=["1"]
+      edit_estimate_ctegorytree1.column("#0", width=35, minwidth=20)
+      edit_estimate_ctegorytree1.column("1", width=205, minwidth=25, anchor=CENTER)    
+      edit_estimate_ctegorytree1.heading("#0",text="", anchor=W)
+      edit_estimate_ctegorytree1.heading("1",text="View filter by category", anchor=CENTER)
+      edit_estimate_ctegorytree1.place(x=660, y=45)
+      def edit_est_items_selected(event):
+        selected_indices = edit_cust_fil_cat_list_1.curselection()
+        selected_filter = ",".join([edit_cust_fil_cat_list_1.get(i) for i in selected_indices])
+
+        sql = 'select * from Productservice'
+        fbcursor.execute(sql)
+        pandsdata1 = fbcursor.fetchall()
+        psql = "select * from Productservice where serviceornot=%s"
+        val = ('0', )
+        fbcursor.execute(psql, val)
+        pdata1 = fbcursor.fetchall()
+
+        ssql = "select * from Productservice where serviceornot=%s"
+        val = ('1', )
+        fbcursor.execute(ssql, val)
+        sdata1 = fbcursor.fetchall()
+
+        if selected_filter == "View all records":
+          for record in edit_estimate_cusventtree1.get_children():
+            edit_estimate_cusventtree1.delete(record)
+          countp = 0
+          for i in pandsdata1:
+            if i[12] == '1':
+              servi = '🗹'                     #'Active'
+            else:
+              servi = ' '                         #'Inactive'
+            sql = "select currencysign,currsignplace from company"
+            fbcursor.execute(sql)
+            estcurrsymb = fbcursor.fetchone()
+            if not estcurrsymb: 
+              if i[13] > i[14]:
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('green',))
+                countp += 1              
+              elif i[12] == '1':
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('blue',))
+                countp += 1
+              else:
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('red',))
+                countp += 1
+                      
+            elif estcurrsymb[1] == "before amount":
+              if (i[13]) > (i[14]):
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('green',))
+                countp += 1
+              elif i[12] == '1':
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('blue',))
+                countp += 1
+              else:
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('red',))
+                countp += 1
+
+            elif estcurrsymb[1] == "before amount with space":
+              if (i[13]) > (i[14]):
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('green',))
+                countp += 1
+              elif i[12] == '1':
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('blue',))
+                countp += 1
+              else:
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('red',))
+                countp += 1
+
+            elif estcurrsymb[1] == "after amount":
+              if (i[13]) > (i[14]):
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('green',))
+                countp += 1
+              elif i[12] == '1':
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('blue',))
+                countp += 1
+              else:
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('red',))
+                countp += 1
+
+            elif estcurrsymb[1] == "after amount with space":
+              if (i[13]) > (i[14]):
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('green',))
+                countp += 1
+              elif i[12] == '1':
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('blue',))
+                countp += 1
+              else:
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('red',))
+                countp += 1
+
+        elif selected_filter == "View all products":
+          for record in edit_estimate_cusventtree1.get_children():
+            edit_estimate_cusventtree1.delete(record)
+          countp = 0
+          for i in pdata1:
+            if i[12] == '1':
+              servi = '🗹'                   #'Active'
+            else:
+              servi = ' '                    #'Inactive'
+            sql = "select currencysign,currsignplace from company"
+            fbcursor.execute(sql)
+            estcurrsymb = fbcursor.fetchone()
+            if not estcurrsymb: 
+              if i[13] > i[14]:
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('green',))
+                countp += 1              
+              elif i[12] == '1':
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('blue',))
+                countp += 1
+              else:
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('red',))
+                countp += 1
+                      
+            elif estcurrsymb[1] == "before amount":
+              if (i[13]) > (i[14]):
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('green',))
+                countp += 1
+              elif i[12] == '1':
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('blue',))
+                countp += 1
+              else:
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('red',))
+                countp += 1
+
+            elif estcurrsymb[1] == "before amount with space":
+              if (i[13]) > (i[14]):
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('green',))
+                countp += 1
+              elif i[12] == '1':
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('blue',))
+                countp += 1
+              else:
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('red',))
+                countp += 1
+
+            elif estcurrsymb[1] == "after amount":
+              if (i[13]) > (i[14]):
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('green',))
+                countp += 1
+              elif i[12] == '1':
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('blue',))
+                countp += 1
+              else:
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('red',))
+                countp += 1
+
+            elif estcurrsymb[1] == "after amount with space":
+              if (i[13]) > (i[14]):
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('green',))
+                countp += 1
+              elif i[12] == '1':
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('blue',))
+                countp += 1
+              else:
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('red',))
+                countp += 1
+        elif selected_filter == "View all services":
+          for record in edit_estimate_cusventtree1.get_children():
+            edit_estimate_cusventtree1.delete(record)
+          countp = 0
+          for i in sdata1:
+            if i[12] == '1':
+              servi = '🗹'             #'Active'
+            else:
+              servi = ' '              #'Inactive'
+            sql = "select currencysign,currsignplace from company"
+            fbcursor.execute(sql)
+            estcurrsymb = fbcursor.fetchone()
+            if not estcurrsymb: 
+              if i[13] > i[14]:
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('green',))
+                countp += 1              
+              elif i[12] == '1':
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('blue',))
+                countp += 1
+              else:
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7],servi,i[13]),tags=('red',))
+                countp += 1
+                      
+            elif estcurrsymb[1] == "before amount":
+              if (i[13]) > (i[14]):
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('green',))
+                countp += 1
+              elif i[12] == '1':
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('blue',))
+                countp += 1
+              else:
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0]+i[7],servi,i[13]),tags=('red',))
+                countp += 1
+
+            elif estcurrsymb[1] == "before amount with space":
+              if (i[13]) > (i[14]):
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('green',))
+                countp += 1
+              elif i[12] == '1':
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('blue',))
+                countp += 1
+              else:
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],estcurrsymb[0] +" "+i[7],servi,i[13]),tags=('red',))
+                countp += 1
+
+            elif estcurrsymb[1] == "after amount":
+              if (i[13]) > (i[14]):
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('green',))
+                countp += 1
+              elif i[12] == '1':
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('blue',))
+                countp += 1
+              else:
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+estcurrsymb[0],servi,i[13]),tags=('red',))
+                countp += 1
+
+            elif estcurrsymb[1] == "after amount with space":
+              if (i[13]) > (i[14]):
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('green',))
+                countp += 1
+              elif i[12] == '1':
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('blue',))
+                countp += 1
+              else:
+                edit_estimate_cusventtree1.insert(parent='', index='end', iid=countp, text='', values=(i[2],i[4],i[7]+" "+estcurrsymb[0],servi,i[13]),tags=('red',))
+                countp += 1
+
+      edit_cust_fil_cat_list_1 = Listbox(edit_estimate_newselection,height=34,width=40,bg="white",activestyle="dotbox",fg="black",highlightbackground="white")
+      edit_cust_fil_cat_list_1.insert(0,"View all records")
+      edit_cust_fil_cat_list_1.insert(1,"View all products")
+      edit_cust_fil_cat_list_1.insert(2,"View all services")
+      edit_cust_fil_cat_list_1.place(x=660,y=63)
+      edit_cust_fil_cat_list_1.bind('<<ListboxSelect>>',edit_est_items_selected)
+      edit_est_stockok = Label(edit_estimate_newselection,text="Green: Stock is Ok",foreground="green").place(x =15,y =580)
+      edit_est_stocko = Label(edit_estimate_newselection,text="Red: Limit <= Low Stock Limit",foreground="red").place(x =136,y=580)
+      edit_est_stock = Label(edit_estimate_newselection,text="Blue: Service,no Stock Control",foreground="blue").place(x =335,y =580)
+
+      edit_estimate_scrollbar10 = Scrollbar(edit_estimate_newselection)
+      edit_estimate_scrollbar10.place(x=640, y=45, height=520)
+      edit_estimate_scrollbar10.config( command=edit_estimate_cusventtree1.yview )
+
+      def edit_estselepro():
+        global estpriceview
+        edit_estpriceview = Label(edit_estimate_listFrame,bg="#f5f3f2")
+        edit_estpriceview.place(x=850,y=200,width=78,height=18)
+        edit_proskuid = edit_estimate_cusventtree1.item(edit_estimate_cusventtree1.focus())["values"][0]
+        sql = "select * from Productservice where sku = %s"
+        val = (edit_proskuid,)
+        fbcursor.execute(sql,val)
+        prosele = fbcursor.fetchone()
+        sql = "select * from company"
+        fbcursor.execute(sql)
+        create_maintree_insert = fbcursor.fetchone()
+        if prosele[10] == '1':
+          tax1 = 'yes'
+        else:
+          tax1 = ''
+        if prosele[19] == '1':
+          tax2 = 'yes'
+        else:
+          tax2 = ''
+        if not create_maintree_insert:
+          edit_estimate_tree.insert(parent='', index='end',text='', values=(prosele[2],prosele[4],prosele[5],prosele[7],1,prosele[8],tax1,prosele[7]*1))
+
+        elif create_maintree_insert[12] == "1":
+          edit_estimate_tree.insert(parent='', index='end',text='', values=(prosele[2],prosele[4],prosele[5],prosele[7],1,prosele[8],prosele[7]*1))
+          extracs = 0.0
+          discou = 0.0
+          total = 0.0
+          for child in edit_estimate_tree.get_children():
+            total += float(edit_estimate_tree.item(child, 'values')[6])
+          discou = (total*float(edit_estimates_disrate.get())/100)
+          extracs = (extracs+float(edit_estimates_excost.get()))
+          edit_estimate_costtt.config(text=edit_estimates_excost.get())
+          edit_estimate_discounttt1.config(text=discou)
+          edit_estpriceview.config(text=total)
+          edit_estimate_orderrr1.config(text=total-discou+extracs)
+          edit_estimate_balancee1.config(text=total-discou+extracs)
+          edit_estimate_subbb1.config(text=total-discou)
+        elif create_maintree_insert[12] == "2":
+          edit_estimate_tree.insert(parent='', index='end',text='', values=(prosele[2],prosele[4],prosele[5],prosele[7],1,prosele[8],tax1,prosele[7]*1))
+          extracs = 0.0
+          discou = 0.0
+          total = 0.0
+          for child in edit_estimate_tree.get_children():
+            total += float(edit_estimate_tree.item(child, 'values')[7])
+          discou = (total*float(edit_estimates_disrate.get())/100)
+          extracs = (extracs+float(edit_estimates_excost.get()))
+          edit_estimate_costtt.config(text=edit_estimates_excost.get())
+          edit_estimate_discounttt1.config(text=discou)
+          edit_estpriceview.config(text=total)
+          edit_estimate_subbb1.config(text=total-discou)
+
+          tot = 0.0
+          totaltax1 = 0.0
+          for child in edit_estimate_tree.get_children():
+            checktax1 = list(edit_estimate_tree.item(child, 'values'))
+            if checktax1[6] == "yes":
+              totaltax1 =(totaltax1 + float(checktax1[7]))
+              edit_estimate_ttax1label.config(text=(float(totaltax1)*float(edit_estimates_tax1.get())/100))
+              tot = (float(totaltax1)*float(edit_estimates_tax1.get())/100)
+            else:
+              pass
+          edit_estimate_orderrr1.config(text=total+tot-discou+extracs)
+          edit_estimate_balancee1.config(text=total+tot-discou+extracs)
+            
+        elif create_maintree_insert[12] == "3":
+          edit_estimate_tree.insert(parent='', index='end',text='', values=(prosele[2],prosele[4],prosele[5],prosele[7],1,prosele[8],tax1,tax2,prosele[7]*1))
+          extracs = 0.0
+          discou = 0.0
+          total = 0.0
+          for child in edit_estimate_tree.get_children():
+            total += float(edit_estimate_tree.item(child, 'values')[8])
+          extracs = (extracs+float(edit_estimates_excost.get()))
+          edit_estimate_costtt.config(text=edit_estimates_excost.get())
+          discou = (total*float(edit_estimates_disrate.get())/100)
+          edit_estimate_discounttt1.config(text=discou)
+          edit_estpriceview.config(text=total)
+          edit_estimate_subbb1.config(text=total-discou)
+            
+          tot = 0.0
+          totaltax1 = 0.0
+          for child in edit_estimate_tree.get_children():
+            checktax1 = list(edit_estimate_tree.item(child, 'values'))
+            if checktax1[6] == "yes":
+              totaltax1 =(totaltax1 + float(checktax1[8]))
+              edit_estimate_ttax1label.config(text=(float(totaltax1)*float(edit_estimates_tax1.get())/100))
+              tot = (float(totaltax1)*float(edit_estimates_tax1.get())/100)
+            else:
+              pass
+          
+          tot2 = 0.0
+          totaltax2 = 0.0
+          for child in edit_estimate_tree.get_children():
+            checktax1 = list(edit_estimate_tree.item(child, 'values'))
+            if checktax1[7] == "yes":
+              totaltax2 =(totaltax2 + float(checktax1[8]))
+              edit_estimate_ttax2label.config(text=(float(totaltax2)*float(edit_estimates_tax2.get())/100))
+              
+              tot2 = (float(totaltax2)*float(edit_estimates_tax2.get())/100)
+            else:
+              pass
+
+          edit_estimate_orderrr1.config(text=total+tot+tot2-discou+extracs)
+          edit_estimate_balancee1.config(text=total+tot+tot2-discou+extracs)
+        
+        edit_estimate_newselection.destroy()
+    
+
+      edit_estimate_btn11=Button(edit_estimate_newselection,compound = LEFT,image=tick ,text="ok", width=60,command=edit_estselepro)
+      edit_estimate_btn11.place(x=15, y=610)
+      edit_estimate_btn11=Button(edit_estimate_newselection,compound = LEFT,image=tick , text="Edit product/Service", width=150,command=est_edit_product_1).place(x=250, y=610)
+      edit_estimate_btn11=Button(edit_estimate_newselection,compound = LEFT,image=tick , text="Add product/Service", width=150,command=edit_estimate_product).place(x=435, y=610)
+      edit_estimate_btn11=Button(edit_estimate_newselection,compound = LEFT,image=cancel ,text="Cancel", width=60).place(x=740, y=610)
+      # else:
+      #   # messagebox.showwarning("F-Billing Revolution 2022", "Customer is required, please select customer\n before adding line item to estimates.")
+      #   pass
       
 
 
@@ -28850,26 +36425,44 @@ def mainpage():
       for i in lst_data:
         if len(i.strip()[1:-1])>1:
         # print(i[0],"IMAGE")
-          with open('images/'+ i.strip()[1:-1], "rb") as attachment:
+          if (i.strip()[1:-1]).lower().endswith(('.png','.jpg','.jpeg')):
+            with open('images/'+ i.strip()[1:-1], "rb") as attachment:
               # MIME attachment is a binary file for that content type "application/octet-stream" is used
-            part = MIMEBase("application", "octet-stream")
-            part.set_payload(attachment.read())
+              part = MIMEBase("application", "octet-stream")
+              part.set_payload(attachment.read())
           # encode into base64 
-            encoders.encode_base64(part)
-            part.add_header('Content-Disposition', "attachment; filename= %s" % 'images/'+ i.strip()[1:-1]) 
+              encoders.encode_base64(part)
+              part.add_header('Content-Disposition', "attachment; filename= %s" % 'images/'+ i.strip()[1:-1]) 
 
         # attach the instance 'part' to instance 'message' 
-            msg_2.attach(part)
+              msg_2.attach(part)
         # message_body = email_body.get()
+        else:
+            with open('estimate/'+ edit_est_data[1].split('/')[0]+".pdf", "rb") as attachment:
+              pdf = MIMEBase("application", "octet-stream")
+              pdf.set_payload(attachment.read())
+              encoders.encode_base64(pdf) 
+              pdf.add_header('Content-Disposition', "attachment; filename= %s" % 'estimate/'+ edit_est_data[1].split('/')[0]+".pdf") 
+              msg_2.attach(pdf)
 
       server_2.sendmail(edit_email_from.get(),edit_estimate_emailtoent.get(),msg_2.as_string())
       server_2.sendmail(edit_email_from.get(), carbcopy_info_2,msg_2.as_string())
       print("message sent")
     def est_empsfile_image_2(event):
-      global yawn
-      for i in  edit_estimate_htcodeframe.curselection():
-        print("hloo", edit_estimate_htcodeframe.get(i))
-        yawn= edit_estimate_htcodeframe.get(i)        
+      import win32api
+      try:
+        global yawn
+        for i in  edit_estimate_htcodeframe.curselection():
+          print("hloo", edit_estimate_htcodeframe.get(i))
+          yawn= edit_estimate_htcodeframe.get(i) 
+          if yawn.lower().endswith(('.png','.jpg','.jpeg')):
+            win32api.ShellExecute(0,"",os.getcwd()+"/images/"+yawn,None,".",0)
+          else:
+            win32api.ShellExecute(0,"",os.getcwd()+"/estimate/"+yawn,None,".",0) 
+      except:
+        pass
+
+
         edit_window_img = Toplevel()
         edit_window_img.title("View Image")
         edit_window_img.geometry("700x500")
@@ -28888,6 +36481,7490 @@ def mainpage():
       edit_estimate_htcodeframe.insert(0, filenamez.split('/')[-1])
 
     def estimate_emailord_edit():
+      #def edit_estimate_print_sele(): 
+      if edit_estimates_e5.get() == 'Professional 1 (logo on left side)':
+        from reportlab.pdfgen import canvas 
+        pdf = canvas.Canvas("estimate/Estimate_Report.pdf", pagesize=letter)
+        
+
+        sql_company = "SELECT * from company"
+        fbcursor.execute(sql_company)
+        company= fbcursor.fetchone()
+        print(company)
+        
+        pdf.drawCentredString(302,770, " "+edit_estimates_e01.get())
+        pdf.drawCentredString(302,475, " "+edit_estimates_e11.get())
+        
+
+        pdf.drawImage("images/"+company[13],30,655,width=200,height=90)
+
+        pdf.drawString(30,635, " "+est_str2.get())
+        pdf.drawString(30,620, " "+est_str3.get())
+        pdf.drawString(30,605, " "+est_str4.get())
+        pdf.drawString(31,590, "Terms")
+        pdf.drawString(31,575, "Order ref.#")
+
+        pdf.drawString(140,635, " "+edit_estimate_ee01.get())
+        pdf.drawString(140,620, " "+str(edit_estimate_ee02.get_date()))
+        pdf.drawString(140,605, " "+str(edit_estimate_ee03.get_date()))
+        pdf.drawString(140,590, " "+edit_estimate_ee04.get())
+        pdf.drawString(140,575, " "+edit_estimate_ee11.get())
+
+        # pdf.setFont('Helvetica-underline',12)
+        pdf.drawString(60,550, " "+est_str5.get())
+        pdf.line(60,548,112,548)
+        pdf.drawString(300,550, "Ship to")
+        pdf.line(300,548,338,548)
+
+        pdf.drawString(60,535, " "+edit_estimate_combo.get())
+        pdf.drawString(300,535, " "+edit_estimate_ee3.get())
+
+        text1=""+edit_estimate_ee2.get("1.0",END)
+        wraped_text1="\n".join(wrap(text1,40))
+        a=wraped_text1.split('\n')      
+        addr = len(a)
+        if addr > 0:
+          pdf.drawString(60,520,a[0])
+          if addr > 1:
+            pdf.drawString(60,505,a[1])
+            if addr > 2:
+              pdf.drawString(60,490,a[2])
+              if addr > 3:
+                pdf.drawString(60,475,a[3])
+              else:
+                pass
+            else:
+              pass
+          else:
+            pass
+        else:
+          pass
+        
+        text2=""+edit_estimate_ee4.get("1.0",END)
+        wraped_text2="\n".join(wrap(text2,40))
+        a1=wraped_text2.split('\n')      
+        addr1 = len(a1)
+        if addr1 > 0:
+          pdf.drawString(300,520,a1[0])
+          if addr1 > 1:
+            pdf.drawString(300,505,a1[1])
+            if addr1 > 2:
+              pdf.drawString(300,490,a1[2])
+              if addr1 > 3:
+                pdf.drawString(300,475,a1[3])
+              else:
+                pass
+            else:
+              pass
+          else:
+            pass
+        else:
+          pass
+        
+
+        pdf.setFont('Helvetica-Bold',12)
+        pdf.drawAlignedString(580,745, company[1])
+        pdf.setFont('Helvetica',12)
+        text=company[2]
+        wraped_text="\n".join(wrap(text,30))
+        print(wraped_text)
+        htg=wraped_text.split('\n') 
+        vg=len(htg)
+        if vg>0:
+          pdf.drawAlignedString(582,730,htg[0])
+          if vg>1:
+            pdf.drawAlignedString(582,715,htg[1])
+            if vg>2:
+              pdf.drawAlignedString(582,700,htg[2])
+              if vg>3:
+                pdf.drawAlignedString(582,685,htg[3])
+              else:
+                pass
+            else:
+              pass
+          else:
+            pass
+        else:
+          pass     
+      
+
+        pdf.drawAlignedString(582,660, company[4])
+        pdf.setFont('Helvetica-Bold',16)
+        pdf.drawAlignedString(582,620, " "+est_str1.get())
+
+        pdf.setFont('Helvetica',12)
+
+        sql = "select * from company"
+        fbcursor.execute(sql)
+        est_taxcheck_1 = fbcursor.fetchone()
+
+        sql = "select currsignplace,currencysign from company"
+        fbcursor.execute(sql)
+        est_symbolcheck_1 = fbcursor.fetchone()
+
+        pdf.setLineWidth(.3)
+        pdf.line(30,470,30,450)
+        pdf.line(580,470,580,450)
+        pdf.line(130,470,130,450)
+        pdf.line(310,470,310,450) #vertical lines
+        pdf.line(400,470,400,450)
+        pdf.line(490,470,490,450)
+        #------------------------#
+        pdf.line(30,450,580,450)
+        pdf.line(30,470,580,470)
+
+        pdf.drawString(60,455,"ID/SKU")
+        pdf.drawString(140,455,"Product/Service")
+        pdf.drawString(332,455,"Quantity")
+        pdf.drawString(420,455,"Unit Price")
+        pdf.drawString(523,455,"Price")
+
+        y1 = 430 
+        y2 = 430
+        v1 = 450
+        v2 = 430
+        for i in edit_estimate_tree.get_children():
+          if y1 <= 12:
+            pdf.showPage()
+            y1 = 730
+            y2 = 730
+            v1 = 750
+            v2 = 730
+            pdf.line(30,y1,580,y2)
+            pdf.line(30,y1+20,580,y2+20)
+          pdf.line(30,y1,580,y2)
+          if company[12] == "1":
+            pdf.drawString(34,y1+5,edit_estimate_tree.item(i,'value')[0])
+            pdf.drawString(150,y1+5,edit_estimate_tree.item(i,'value')[1])
+            pdf.drawString(332,y1+5,edit_estimate_tree.item(i,'value')[4])
+            pdf.drawRightString(470,y1+5,edit_estimate_tree.item(i,'value')[3])
+            pdf.drawRightString(563,y1+5,edit_estimate_tree.item(i,'value')[6])
+            y1 -= 20
+            y2 -= 20
+            pdf.line(30,v1,30,v2)
+            pdf.line(580,v1,580,v2)
+            pdf.line(130,v1,130,v2)
+            pdf.line(310,v1,310,v2) #vertical lines
+            pdf.line(400,v1,400,v2)
+            pdf.line(490,v1,490,v2)
+            v1 -= 20
+            v2 -= 20
+          elif company[12] == "2":
+            pdf.drawString(34,y1+5,edit_estimate_tree.item(i,'value')[0])
+            pdf.drawString(150,y1+5,edit_estimate_tree.item(i,'value')[1])
+            pdf.drawString(332,y1+5,edit_estimate_tree.item(i,'value')[4])
+            pdf.drawRightString(470,y1+5,edit_estimate_tree.item(i,'value')[3])
+            pdf.drawRightString(563,y1+5,edit_estimate_tree.item(i,'value')[7])
+            y1 -= 20
+            y2 -= 20
+            pdf.line(30,v1,30,v2)
+            pdf.line(580,v1,580,v2)
+            pdf.line(130,v1,130,v2)
+            pdf.line(310,v1,310,v2) #vertical lines
+            pdf.line(400,v1,400,v2)
+            pdf.line(490,v1,490,v2)
+            v1 -= 20
+            v2 -= 20
+          elif company[12] == "3":
+            pdf.drawString(34,y1+5,edit_estimate_tree.item(i,'value')[0])
+            pdf.drawString(150,y1+5,edit_estimate_tree.item(i,'value')[1])
+            pdf.drawString(332,y1+5,edit_estimate_tree.item(i,'value')[4])
+            pdf.drawRightString(470,y1+5,edit_estimate_tree.item(i,'value')[3])
+            pdf.drawRightString(563,y1+5,edit_estimate_tree.item(i,'value')[8])
+            y1 -= 20
+            y2 -= 20
+            pdf.line(30,v1,30,v2)
+            pdf.line(580,v1,580,v2)
+            pdf.line(130,v1,130,v2)
+            pdf.line(310,v1,310,v2) #vertical lines
+            pdf.line(400,v1,400,v2)
+            pdf.line(490,v1,490,v2)
+            v1 -= 20
+            v2 -= 20
+        calc_y1 = y1
+        calc_y2 = y2
+        if company[12] == "1":
+          if calc_y1-100 <=40:
+            pdf.showPage()
+            calc_y1 = 730
+            calc_y2 = 730
+            pdf.line(350,calc_y1-60,350,calc_y1+20)
+            pdf.line(580,calc_y1-60,580,calc_y1+20)
+            #pdf.line(465,calc_y1-60,465,calc_y1+20)
+            pdf.line(490,calc_y1-60,490,calc_y1+20)
+            #-----------------------------------
+            pdf.line(350,calc_y1,580,calc_y2)
+            pdf.line(350,calc_y1-20,580,calc_y2-20)
+            pdf.line(350,calc_y1-40,580,calc_y2-40)
+            pdf.line(350,calc_y1-60,580,calc_y2-60)
+            if est_symbolcheck_1[0] == "before amount":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+str(edit_estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+str(edit_estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+str(edit_estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+str(edit_estimate_orderrr1.cget("text")))
+
+              text3=""+edit_estimates_e61.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')      
+              
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-125,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-140,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-155,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-170,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "before amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+" "+str(edit_estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+" "+str(edit_estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+" "+str(edit_estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+" "+str(edit_estimate_orderrr1.cget("text")))
+
+              text3=""+edit_estimates_e61.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')      
+              
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-125,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-140,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-155,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-170,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "after amount":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(edit_estimate_discounttt1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(edit_estimate_subbb1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(edit_estimate_costtt.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,str(edit_estimate_orderrr1.cget("text"))+""+comcursign.get())
+
+              text3=""+edit_estimates_e61.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')      
+              
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-125,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-140,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-155,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-170,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "after amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(edit_estimate_discounttt1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(edit_estimate_subbb1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(edit_estimate_costtt.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,str(edit_estimate_orderrr1.cget("text"))+" "+""+comcursign.get())
+
+              text3=""+edit_estimates_e61.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')      
+              
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-125,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-140,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-155,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-170,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+          else:
+            pdf.line(350,calc_y1-60,350,calc_y1+20)
+            pdf.line(580,calc_y1-60,580,calc_y1+20)
+            #pdf.line(465,calc_y1-60,465,calc_y1+20)
+            pdf.line(490,calc_y1-60,490,calc_y1+20)
+            #-----------------------------------
+            pdf.line(350,calc_y1,580,calc_y2)
+            pdf.line(350,calc_y1-20,580,calc_y2-20)
+            pdf.line(350,calc_y1-40,580,calc_y2-40)
+            pdf.line(350,calc_y1-60,580,calc_y2-60)
+            if est_symbolcheck_1[0] == "before amount":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+str(edit_estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+str(edit_estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+str(edit_estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+str(edit_estimate_orderrr1.cget("text")))
+
+              text3=""+edit_estimates_e61.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')    
+
+              if calc_y1-170 <= 40:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-125,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-140,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-155,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-170,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "before amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+" "+str(edit_estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+" "+str(edit_estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+" "+str(edit_estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+" "+str(edit_estimate_orderrr1.cget("text")))
+              
+              text3=""+edit_estimates_e61.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')    
+
+              if calc_y1-170 <= 40:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-125,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-140,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-155,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-170,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "after amount":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(edit_estimate_discounttt1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(edit_estimate_subbb1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(edit_estimate_costtt.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,str(edit_estimate_orderrr1.cget("text"))+""+comcursign.get())
+
+              text3=""+edit_estimates_e61.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')    
+
+              if calc_y1-170 <= 40:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-125,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-140,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-155,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-170,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "after amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(edit_estimate_discounttt1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(edit_estimate_subbb1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(edit_estimate_costtt.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,str(edit_estimate_orderrr1.cget("text"))+" "+""+comcursign.get())
+
+              text3=""+edit_estimates_e61.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')    
+
+              if calc_y1-170 <= 40:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-125,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-140,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-155,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-170,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+        elif company[12] == "2":
+          if calc_y1-120 <= 40:
+            pdf.showPage()
+            calc_y1 = 730
+            calc_y2 = 730
+            pdf.line(350,calc_y1-80,350,calc_y1+20)
+            pdf.line(580,calc_y1-80,580,calc_y1+20)
+            pdf.line(490,calc_y1-80,490,calc_y1+20)
+            #-----------------------------------
+            pdf.line(350,calc_y1+20,580,calc_y2+20)
+            pdf.line(350,calc_y1,580,calc_y2)
+            pdf.line(350,calc_y1-20,580,calc_y2-20)
+            pdf.line(350,calc_y1-40,580,calc_y2-40)
+            pdf.line(350,calc_y1-60,580,calc_y2-60)
+            pdf.line(350,calc_y1-80,580,calc_y2-80)
+            if est_symbolcheck_1[0] == "before amount":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+str(edit_estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+str(edit_estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+str(edit_estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+str(edit_estimate_ttax1label.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+str(edit_estimate_orderrr1.cget("text")))
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-145,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-160,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-175,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-190,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "before amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+" "+str(edit_estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+" "+str(edit_estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+" "+str(edit_estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+" "+str(edit_estimate_ttax1label.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+" "+str(edit_estimate_orderrr1.cget("text")))
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-145,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-160,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-175,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-190,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "after amount":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(edit_estimate_discounttt1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(edit_estimate_subbb1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(edit_estimate_costtt.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(edit_estimate_ttax1label.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,str(edit_estimate_orderrr1.cget("text"))+""+comcursign.get())
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-145,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-160,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-175,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-190,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "after amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(edit_estimate_discounttt1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(edit_estimate_subbb1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(edit_estimate_costtt.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(edit_estimate_ttax1label.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,str(edit_estimate_orderrr1.cget("text"))+" "+""+comcursign.get())
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-145,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-160,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-175,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-190,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+          else:
+            pdf.line(350,calc_y1-80,350,calc_y1+20)
+            pdf.line(580,calc_y1-80,580,calc_y1+20)
+            pdf.line(490,calc_y1-80,490,calc_y1+20)
+            #-----------------------------------
+            pdf.line(350,calc_y1+20,580,calc_y2+20)
+            pdf.line(350,calc_y1,580,calc_y2)
+            pdf.line(350,calc_y1-20,580,calc_y2-20)
+            pdf.line(350,calc_y1-40,580,calc_y2-40)
+            pdf.line(350,calc_y1-60,580,calc_y2-60)
+            pdf.line(350,calc_y1-80,580,calc_y2-80)
+            if est_symbolcheck_1[0] == "before amount":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+str(edit_estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+str(edit_estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+str(edit_estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+str(edit_estimate_ttax1label.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+str(edit_estimate_orderrr1.cget("text")))
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-190 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-145,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-160,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-175,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-190,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "before amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+" "+str(edit_estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+" "+str(edit_estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+" "+str(edit_estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+" "+str(edit_estimate_ttax1label.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+" "+str(edit_estimate_orderrr1.cget("text")))
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-190 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-145,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-160,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-175,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-190,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "after amount":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(edit_estimate_discounttt1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(edit_estimate_subbb1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(edit_estimate_costtt.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(edit_estimate_ttax1label.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,str(edit_estimate_orderrr1.cget("text"))+""+comcursign.get())
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-190 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-145,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-160,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-175,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-190,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "after amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(edit_estimate_discounttt1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(edit_estimate_subbb1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(edit_estimate_costtt.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(edit_estimate_ttax1label.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,str(edit_estimate_orderrr1.cget("text"))+" "+""+comcursign.get())
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-190 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-145,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-160,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-175,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-190,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+        elif company[12] == "3":
+          if calc_y1-140 <= 40:
+            pdf.showPage()
+            calc_y1 = 730
+            calc_y2 = 730
+            pdf.line(350,calc_y1-100,350,calc_y1+20)
+            pdf.line(580,calc_y1-100,580,calc_y1+20)
+            pdf.line(490,calc_y1-100,490,calc_y1+20)
+            #-----------------------------------
+            pdf.line(350,calc_y1,580,calc_y2)
+            pdf.line(350,calc_y1-20,580,calc_y2-20)
+            pdf.line(350,calc_y1-40,580,calc_y2-40)
+            pdf.line(350,calc_y1-60,580,calc_y2-60)
+            pdf.line(350,calc_y1-80,580,calc_y2-80)
+            pdf.line(350,calc_y1-100,580,calc_y2-100)
+            if est_symbolcheck_1[0] == "before amount":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+str(edit_estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+str(edit_estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+str(edit_estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+str(edit_estimate_ttax1label.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+str(edit_estimate_ttax2label.cget("text")))
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,""+comcursign.get()+str(edit_estimate_orderrr1.cget("text")))
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-165,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-180,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-195,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-210,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "before amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+" "+str(edit_estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+" "+str(edit_estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+" "+str(edit_estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+" "+str(edit_estimate_ttax1label.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+" "+str(edit_estimate_ttax2label.cget("text")))
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,""+comcursign.get()+" "+str(edit_estimate_orderrr1.cget("text")))
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-165,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-180,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-195,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-210,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "after amount":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(edit_estimate_discounttt1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(edit_estimate_subbb1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(edit_estimate_costtt.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(edit_estimate_ttax1label.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,str(edit_estimate_ttax2label.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,str(edit_estimate_orderrr1.cget("text"))+""+comcursign.get())
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-165,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-180,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-195,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-210,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "after amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(edit_estimate_discounttt1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(edit_estimate_subbb1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(edit_estimate_costtt.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(edit_estimate_ttax1label.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,str(edit_estimate_ttax2label.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,str(edit_estimate_orderrr1.cget("text"))+" "+""+comcursign.get())
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-165,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-180,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-195,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-210,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass 
+          else:
+            pdf.line(350,calc_y1-100,350,calc_y1+20)
+            pdf.line(580,calc_y1-100,580,calc_y1+20)
+            pdf.line(490,calc_y1-100,490,calc_y1+20)
+            #-----------------------------------
+            pdf.line(350,calc_y1,580,calc_y2)
+            pdf.line(350,calc_y1-20,580,calc_y2-20)
+            pdf.line(350,calc_y1-40,580,calc_y2-40)
+            pdf.line(350,calc_y1-60,580,calc_y2-60)
+            pdf.line(350,calc_y1-80,580,calc_y2-80)
+            pdf.line(350,calc_y1-100,580,calc_y2-100)
+            if est_symbolcheck_1[0] == "before amount":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+str(edit_estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+str(edit_estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+str(edit_estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+str(edit_estimate_ttax1label.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+str(edit_estimate_ttax2label.cget("text")))
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,""+comcursign.get()+str(edit_estimate_orderrr1.cget("text")))
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-210 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-165,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-180,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-195,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-210,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "before amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+" "+str(edit_estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+" "+str(edit_estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+" "+str(edit_estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+" "+str(edit_estimate_ttax1label.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+" "+str(edit_estimate_ttax2label.cget("text")))
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,""+comcursign.get()+" "+str(edit_estimate_orderrr1.cget("text")))
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-210 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-165,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-180,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-195,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-210,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "after amount":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(edit_estimate_discounttt1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(edit_estimate_subbb1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(edit_estimate_costtt.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(edit_estimate_ttax1label.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,str(edit_estimate_ttax2label.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,str(edit_estimate_orderrr1.cget("text"))+""+comcursign.get())
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-210 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-165,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-180,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-195,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-210,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "after amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(edit_estimate_discounttt1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(edit_estimate_subbb1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(edit_estimate_costtt.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(edit_estimate_ttax1label.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,str(edit_estimate_ttax2label.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,str(edit_estimate_orderrr1.cget("text"))+" "+""+comcursign.get())
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-210 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-165,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-180,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-195,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-210,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+
+        if (calc_y1-170)-115 <= 10 or (calc_y1-190)-115 <= 10 or (calc_y1-210)-115 <= 10:
+          pdf.drawCentredString(302,115, "Terms and Conditions")
+          pdf.line(30,110,580,110)
+          text4=""+edit_estimates_e51.get("1.0","end-1c")
+          wraped_text4="\n".join(wrap(text4,102))
+          t=wraped_text4.split('\n')      
+          term = len(t)
+          if term > 0:
+            pdf.drawString(32,95,t[0])
+            if term > 1:
+              pdf.drawString(32,80,t[1])
+              if term > 2:
+                pdf.drawString(32,65,t[2])
+                if term > 3:
+                  pdf.drawString(32,50,t[3])
+                else:
+                  pass
+              else:
+                pass
+            else:
+              pass
+          else:
+            pass
+          
+          pdf.drawString(32,30, "Sales Person:")
+          pdf.drawString(115,30, " "+edit_estimates_e6.get())
+          pdf.drawString(32,12, " "+edit_estimates_e21.get())
+        else:
+          pdf.drawCentredString(302,115, "Terms and Conditions")
+          pdf.line(30,110,580,110)
+          text4=""+edit_estimates_e51.get("1.0","end-1c")
+          wraped_text4="\n".join(wrap(text4,102))
+          t=wraped_text4.split('\n')      
+          term = len(t)
+          if term > 0:
+            pdf.drawString(32,95,t[0])
+            if term > 1:
+              pdf.drawString(32,80,t[1])
+              if term > 2:
+                pdf.drawString(32,65,t[2])
+                if term > 3:
+                  pdf.drawString(32,50,t[3])
+                else:
+                  pass
+              else:
+                pass
+            else:
+              pass
+          else:
+            pass
+          
+          pdf.drawString(32,30, "Sales Person:")
+          pdf.drawString(115,30, " "+edit_estimates_e6.get())
+          pdf.drawString(32,12, " "+edit_estimates_e21.get())
+          
+        
+        pdf.save()
+        # win32api.ShellExecute(0,"","estimate\Estimate_Report.pdf",None,".",0) 
+      elif edit_estimates_e5.get() == 'Professional 2 (logo on right side)': 
+        from reportlab.pdfgen import canvas 
+        pdf = canvas.Canvas("estimate/Estimate_Report.pdf", pagesize=letter)
+
+        sql_company = "SELECT * from company"
+        fbcursor.execute(sql_company)
+        company= fbcursor.fetchone()
+        print(company)
+        
+        pdf.setFont('Helvetica',12)
+        pdf.drawCentredString(302,770, " "+edit_estimates_e01.get())
+
+        pdf.drawCentredString(302,475, " "+edit_estimates_e11.get())
+
+
+        pdf.drawImage("images/"+company[13],380,665,width=200,height=90)
+
+        pdf.drawString(340,635, " "+est_str2.get())
+        pdf.drawString(340,620, " "+est_str3.get())
+        pdf.drawString(340,605, " "+est_str4.get())
+        pdf.drawString(341,590, "Terms")
+        pdf.drawString(341,575, "Order ref.#")
+
+        pdf.drawString(450,635, " "+edit_estimate_ee01.get())
+        pdf.drawString(450,620, " "+str(edit_estimate_ee02.get_date()))
+        pdf.drawString(450,605, " "+str(edit_estimate_ee03.get_date()))
+        pdf.drawString(450,590, " "+edit_estimate_ee04.get())
+        pdf.drawString(450,575, " "+edit_estimate_ee11.get())
+
+        # pdf.setFont('Helvetica-underline',12)
+        pdf.drawString(60,550, " "+est_str5.get())
+        pdf.line(60,548,112,548)
+        pdf.drawString(300,550, "Ship to")
+        pdf.line(300,548,338,548)
+
+        pdf.drawString(60,535, " "+edit_estimate_combo.get())
+        pdf.drawString(300,535, " "+edit_estimate_ee3.get())
+
+        text1=""+edit_estimate_ee2.get("1.0",END)
+        wraped_text1="\n".join(wrap(text1,40))
+        a=wraped_text1.split('\n')      
+        addr = len(a)
+        if addr > 0:
+          pdf.drawString(60,520,a[0])
+          if addr > 1:
+            pdf.drawString(60,505,a[1])
+            if addr > 2:
+              pdf.drawString(60,490,a[2])
+              if addr > 3:
+                pdf.drawString(60,475,a[3])
+              else:
+                pass
+            else:
+              pass
+          else:
+            pass
+        else:
+          pass
+        
+        text2=""+edit_estimate_ee4.get("1.0",END)
+        wraped_text2="\n".join(wrap(text2,40))
+        a1=wraped_text2.split('\n')      
+        addr1 = len(a1)
+        if addr1 > 0:
+          pdf.drawString(300,520,a1[0])
+          if addr1 > 1:
+            pdf.drawString(300,505,a1[1])
+            if addr1 > 2:
+              pdf.drawString(300,490,a1[2])
+              if addr1 > 3:
+                pdf.drawString(300,475,a1[3])
+              else:
+                pass
+            else:
+              pass
+          else:
+            pass
+        else:
+          pass
+        
+
+        pdf.setFont('Helvetica-Bold',12)
+        pdf.drawString(30,745, company[1])
+        pdf.setFont('Helvetica',12)
+        text=company[2]
+        wraped_text="\n".join(wrap(text,30))
+        print(wraped_text)
+        htg=wraped_text.split('\n') 
+        vg=len(htg)
+        if vg>0:
+          pdf.drawString(30,730,htg[0])
+          if vg>1:
+            pdf.drawString(30,715,htg[1])
+            if vg>2:
+              pdf.drawString(30,700,htg[2])
+              if vg>3:
+                pdf.drawString(30,685,htg[3])
+              else:
+                pass
+            else:
+              pass
+          else:
+            pass
+        else:
+          pass     
+      
+
+        pdf.drawString(30,660, company[4])
+        pdf.setFont('Helvetica-Bold',16)
+        pdf.drawString(30,620, " "+est_str1.get())
+
+        pdf.setFont('Helvetica',12)
+
+        sql = "select * from company"
+        fbcursor.execute(sql)
+        est_taxcheck_1 = fbcursor.fetchone()
+
+        sql = "select currsignplace,currencysign from company"
+        fbcursor.execute(sql)
+        est_symbolcheck_1 = fbcursor.fetchone()
+
+        pdf.setLineWidth(.3)
+        pdf.line(30,470,30,450)
+        pdf.line(580,470,580,450)
+        pdf.line(130,470,130,450)
+        pdf.line(310,470,310,450) #vertical lines
+        pdf.line(400,470,400,450)
+        pdf.line(490,470,490,450)
+        #------------------------#
+        pdf.line(30,450,580,450)
+        pdf.line(30,470,580,470)
+
+        pdf.drawString(60,455,"ID/SKU")
+        pdf.drawString(140,455,"Product/Service")
+        pdf.drawString(332,455,"Quantity")
+        pdf.drawString(420,455,"Unit Price")
+        pdf.drawString(523,455,"Price")
+
+        y1 = 430 
+        y2 = 430
+        v1 = 450
+        v2 = 430
+        for i in edit_estimate_tree.get_children():
+          if y1 <= 12:
+            pdf.showPage()
+            y1 = 730
+            y2 = 730
+            v1 = 750
+            v2 = 730
+            pdf.line(30,y1,580,y2)
+            pdf.line(30,y1+20,580,y2+20)
+          pdf.line(30,y1,580,y2)
+          if company[12] == "1":
+            pdf.drawString(34,y1+5,edit_estimate_tree.item(i,'value')[0])
+            pdf.drawString(150,y1+5,edit_estimate_tree.item(i,'value')[1])
+            pdf.drawString(332,y1+5,edit_estimate_tree.item(i,'value')[4])
+            pdf.drawRightString(470,y1+5,edit_estimate_tree.item(i,'value')[3])
+            pdf.drawRightString(563,y1+5,edit_estimate_tree.item(i,'value')[6])
+            y1 -= 20
+            y2 -= 20
+            pdf.line(30,v1,30,v2)
+            pdf.line(580,v1,580,v2)
+            pdf.line(130,v1,130,v2)
+            pdf.line(310,v1,310,v2) #vertical lines
+            pdf.line(400,v1,400,v2)
+            pdf.line(490,v1,490,v2)
+            v1 -= 20
+            v2 -= 20
+          elif company[12] == "2":
+            pdf.drawString(34,y1+5,edit_estimate_tree.item(i,'value')[0])
+            pdf.drawString(150,y1+5,edit_estimate_tree.item(i,'value')[1])
+            pdf.drawString(332,y1+5,edit_estimate_tree.item(i,'value')[4])
+            pdf.drawRightString(470,y1+5,edit_estimate_tree.item(i,'value')[3])
+            pdf.drawRightString(563,y1+5,edit_estimate_tree.item(i,'value')[7])
+            y1 -= 20
+            y2 -= 20
+            pdf.line(30,v1,30,v2)
+            pdf.line(580,v1,580,v2)
+            pdf.line(130,v1,130,v2)
+            pdf.line(310,v1,310,v2) #vertical lines
+            pdf.line(400,v1,400,v2)
+            pdf.line(490,v1,490,v2)
+            v1 -= 20
+            v2 -= 20
+          elif company[12] == "3":
+            pdf.drawString(34,y1+5,edit_estimate_tree.item(i,'value')[0])
+            pdf.drawString(150,y1+5,edit_estimate_tree.item(i,'value')[1])
+            pdf.drawString(332,y1+5,edit_estimate_tree.item(i,'value')[4])
+            pdf.drawRightString(470,y1+5,edit_estimate_tree.item(i,'value')[3])
+            pdf.drawRightString(563,y1+5,edit_estimate_tree.item(i,'value')[8])
+            y1 -= 20
+            y2 -= 20
+            pdf.line(30,v1,30,v2)
+            pdf.line(580,v1,580,v2)
+            pdf.line(130,v1,130,v2)
+            pdf.line(310,v1,310,v2) #vertical lines
+            pdf.line(400,v1,400,v2)
+            pdf.line(490,v1,490,v2)
+            v1 -= 20
+            v2 -= 20
+        calc_y1 = y1
+        calc_y2 = y2
+        if company[12] == "1":
+          if calc_y1-100 <=40:
+            pdf.showPage()
+            calc_y1 = 730
+            calc_y2 = 730
+            pdf.line(350,calc_y1-60,350,calc_y1+20)
+            pdf.line(580,calc_y1-60,580,calc_y1+20)
+            #pdf.line(465,calc_y1-60,465,calc_y1+20)
+            pdf.line(490,calc_y1-60,490,calc_y1+20)
+            #-----------------------------------
+            pdf.line(350,calc_y1,580,calc_y2)
+            pdf.line(350,calc_y1-20,580,calc_y2-20)
+            pdf.line(350,calc_y1-40,580,calc_y2-40)
+            pdf.line(350,calc_y1-60,580,calc_y2-60)
+            if est_symbolcheck_1[0] == "before amount":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+str(edit_estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+str(edit_estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+str(edit_estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+str(edit_estimate_orderrr1.cget("text")))
+
+              text3=""+edit_estimates_e61.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')      
+              
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-125,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-140,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-155,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-170,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "before amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+" "+str(edit_estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+" "+str(edit_estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+" "+str(edit_estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+" "+str(edit_estimate_orderrr1.cget("text")))
+
+              text3=""+edit_estimates_e61.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')      
+              
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-125,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-140,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-155,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-170,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "after amount":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(edit_estimate_discounttt1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(edit_estimate_subbb1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(edit_estimate_costtt.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,str(edit_estimate_orderrr1.cget("text"))+""+comcursign.get())
+
+              text3=""+edit_estimates_e61.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')      
+              
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-125,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-140,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-155,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-170,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "after amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(edit_estimate_discounttt1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(edit_estimate_subbb1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(edit_estimate_costtt.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,str(edit_estimate_orderrr1.cget("text"))+" "+""+comcursign.get())
+
+              text3=""+edit_estimates_e61.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')      
+              
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-125,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-140,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-155,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-170,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+          else:
+            pdf.line(350,calc_y1-60,350,calc_y1+20)
+            pdf.line(580,calc_y1-60,580,calc_y1+20)
+            #pdf.line(465,calc_y1-60,465,calc_y1+20)
+            pdf.line(490,calc_y1-60,490,calc_y1+20)
+            #-----------------------------------
+            pdf.line(350,calc_y1,580,calc_y2)
+            pdf.line(350,calc_y1-20,580,calc_y2-20)
+            pdf.line(350,calc_y1-40,580,calc_y2-40)
+            pdf.line(350,calc_y1-60,580,calc_y2-60)
+            if est_symbolcheck_1[0] == "before amount":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+str(edit_estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+str(edit_estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+str(edit_estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+str(edit_estimate_orderrr1.cget("text")))
+
+              text3=""+edit_estimates_e61.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')    
+
+              if calc_y1-170 <= 40:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-125,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-140,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-155,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-170,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "before amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+" "+str(edit_estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+" "+str(edit_estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+" "+str(edit_estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+" "+str(edit_estimate_orderrr1.cget("text")))
+              
+              text3=""+edit_estimates_e61.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')    
+
+              if calc_y1-170 <= 40:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-125,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-140,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-155,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-170,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "after amount":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(edit_estimate_discounttt1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(edit_estimate_subbb1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(edit_estimate_costtt.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,str(edit_estimate_orderrr1.cget("text"))+""+comcursign.get())
+
+              text3=""+edit_estimates_e61.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')    
+
+              if calc_y1-170 <= 40:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-125,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-140,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-155,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-170,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "after amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(edit_estimate_discounttt1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(edit_estimate_subbb1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(edit_estimate_costtt.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,str(edit_estimate_orderrr1.cget("text"))+" "+""+comcursign.get())
+
+              text3=""+edit_estimates_e61.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')    
+
+              if calc_y1-170 <= 40:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-125,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-140,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-155,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-170,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+        elif company[12] == "2":
+          if calc_y1-120 <= 40:
+            pdf.showPage()
+            calc_y1 = 730
+            calc_y2 = 730
+            pdf.line(350,calc_y1-80,350,calc_y1+20)
+            pdf.line(580,calc_y1-80,580,calc_y1+20)
+            pdf.line(490,calc_y1-80,490,calc_y1+20)
+            #-----------------------------------
+            pdf.line(350,calc_y1+20,580,calc_y2+20)
+            pdf.line(350,calc_y1,580,calc_y2)
+            pdf.line(350,calc_y1-20,580,calc_y2-20)
+            pdf.line(350,calc_y1-40,580,calc_y2-40)
+            pdf.line(350,calc_y1-60,580,calc_y2-60)
+            pdf.line(350,calc_y1-80,580,calc_y2-80)
+            if est_symbolcheck_1[0] == "before amount":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+str(edit_estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+str(edit_estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+str(edit_estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+str(edit_estimate_ttax1label.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+str(edit_estimate_orderrr1.cget("text")))
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-145,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-160,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-175,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-190,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "before amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+" "+str(edit_estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+" "+str(edit_estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+" "+str(edit_estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+" "+str(edit_estimate_ttax1label.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+" "+str(edit_estimate_orderrr1.cget("text")))
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-145,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-160,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-175,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-190,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "after amount":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(edit_estimate_discounttt1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(edit_estimate_subbb1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(edit_estimate_costtt.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(edit_estimate_ttax1label.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,str(edit_estimate_orderrr1.cget("text"))+""+comcursign.get())
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-145,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-160,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-175,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-190,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "after amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(edit_estimate_discounttt1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(edit_estimate_subbb1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(edit_estimate_costtt.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(edit_estimate_ttax1label.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,str(edit_estimate_orderrr1.cget("text"))+" "+""+comcursign.get())
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-145,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-160,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-175,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-190,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+          else:
+            pdf.line(350,calc_y1-80,350,calc_y1+20)
+            pdf.line(580,calc_y1-80,580,calc_y1+20)
+            pdf.line(490,calc_y1-80,490,calc_y1+20)
+            #-----------------------------------
+            pdf.line(350,calc_y1+20,580,calc_y2+20)
+            pdf.line(350,calc_y1,580,calc_y2)
+            pdf.line(350,calc_y1-20,580,calc_y2-20)
+            pdf.line(350,calc_y1-40,580,calc_y2-40)
+            pdf.line(350,calc_y1-60,580,calc_y2-60)
+            pdf.line(350,calc_y1-80,580,calc_y2-80)
+            if est_symbolcheck_1[0] == "before amount":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+str(edit_estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+str(edit_estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+str(edit_estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+str(edit_estimate_ttax1label.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+str(edit_estimate_orderrr1.cget("text")))
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-190 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-145,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-160,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-175,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-190,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "before amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+" "+str(edit_estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+" "+str(edit_estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+" "+str(edit_estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+" "+str(edit_estimate_ttax1label.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+" "+str(edit_estimate_orderrr1.cget("text")))
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-190 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-145,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-160,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-175,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-190,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "after amount":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(edit_estimate_discounttt1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(edit_estimate_subbb1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(edit_estimate_costtt.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(edit_estimate_ttax1label.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,str(edit_estimate_orderrr1.cget("text"))+""+comcursign.get())
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-190 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-145,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-160,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-175,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-190,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "after amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(edit_estimate_discounttt1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(edit_estimate_subbb1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(edit_estimate_costtt.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(edit_estimate_ttax1label.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,str(edit_estimate_orderrr1.cget("text"))+" "+""+comcursign.get())
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-190 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-145,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-160,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-175,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-190,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+        elif company[12] == "3":
+          if calc_y1-140 <= 40:
+            pdf.showPage()
+            calc_y1 = 730
+            calc_y2 = 730
+            pdf.line(350,calc_y1-100,350,calc_y1+20)
+            pdf.line(580,calc_y1-100,580,calc_y1+20)
+            pdf.line(490,calc_y1-100,490,calc_y1+20)
+            #-----------------------------------
+            pdf.line(350,calc_y1,580,calc_y2)
+            pdf.line(350,calc_y1-20,580,calc_y2-20)
+            pdf.line(350,calc_y1-40,580,calc_y2-40)
+            pdf.line(350,calc_y1-60,580,calc_y2-60)
+            pdf.line(350,calc_y1-80,580,calc_y2-80)
+            pdf.line(350,calc_y1-100,580,calc_y2-100)
+            if est_symbolcheck_1[0] == "before amount":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+str(edit_estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+str(edit_estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+str(edit_estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+str(edit_estimate_ttax1label.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+str(edit_estimate_ttax2label.cget("text")))
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,""+comcursign.get()+str(edit_estimate_orderrr1.cget("text")))
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-165,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-180,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-195,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-210,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "before amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+" "+str(edit_estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+" "+str(edit_estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+" "+str(edit_estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+" "+str(edit_estimate_ttax1label.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+" "+str(edit_estimate_ttax2label.cget("text")))
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,""+comcursign.get()+" "+str(edit_estimate_orderrr1.cget("text")))
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-165,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-180,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-195,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-210,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "after amount":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(edit_estimate_discounttt1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(edit_estimate_subbb1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(edit_estimate_costtt.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(edit_estimate_ttax1label.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,str(edit_estimate_ttax2label.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,str(edit_estimate_orderrr1.cget("text"))+""+comcursign.get())
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-165,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-180,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-195,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-210,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "after amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(edit_estimate_discounttt1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(edit_estimate_subbb1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(edit_estimate_costtt.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(edit_estimate_ttax1label.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,str(edit_estimate_ttax2label.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,str(edit_estimate_orderrr1.cget("text"))+" "+""+comcursign.get())
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-165,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-180,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-195,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-210,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass 
+          else:
+            pdf.line(350,calc_y1-100,350,calc_y1+20)
+            pdf.line(580,calc_y1-100,580,calc_y1+20)
+            pdf.line(490,calc_y1-100,490,calc_y1+20)
+            #-----------------------------------
+            pdf.line(350,calc_y1,580,calc_y2)
+            pdf.line(350,calc_y1-20,580,calc_y2-20)
+            pdf.line(350,calc_y1-40,580,calc_y2-40)
+            pdf.line(350,calc_y1-60,580,calc_y2-60)
+            pdf.line(350,calc_y1-80,580,calc_y2-80)
+            pdf.line(350,calc_y1-100,580,calc_y2-100)
+            if est_symbolcheck_1[0] == "before amount":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+str(edit_estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+str(edit_estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+str(edit_estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+str(edit_estimate_ttax1label.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+str(edit_estimate_ttax2label.cget("text")))
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,""+comcursign.get()+str(edit_estimate_orderrr1.cget("text")))
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-210 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-165,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-180,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-195,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-210,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "before amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+" "+str(edit_estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+" "+str(edit_estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+" "+str(edit_estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+" "+str(edit_estimate_ttax1label.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+" "+str(edit_estimate_ttax2label.cget("text")))
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,""+comcursign.get()+" "+str(edit_estimate_orderrr1.cget("text")))
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-210 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-165,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-180,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-195,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-210,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "after amount":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(edit_estimate_discounttt1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(edit_estimate_subbb1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(edit_estimate_costtt.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(edit_estimate_ttax1label.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,str(edit_estimate_ttax2label.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,str(edit_estimate_orderrr1.cget("text"))+""+comcursign.get())
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-210 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-165,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-180,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-195,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-210,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "after amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(edit_estimate_discounttt1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(edit_estimate_subbb1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(edit_estimate_costtt.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(edit_estimate_ttax1label.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,str(edit_estimate_ttax2label.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,str(edit_estimate_orderrr1.cget("text"))+" "+""+comcursign.get())
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-210 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-165,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-180,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-195,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-210,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+
+        if (calc_y1-170)-115 <= 10 or (calc_y1-190)-115 <= 10 or (calc_y1-210)-115 <= 10:
+          pdf.drawCentredString(302,115, "Terms and Conditions")
+          pdf.line(30,110,580,110)
+          text4=""+edit_estimates_e51.get("1.0","end-1c")
+          wraped_text4="\n".join(wrap(text4,102))
+          t=wraped_text4.split('\n')      
+          term = len(t)
+          if term > 0:
+            pdf.drawString(32,95,t[0])
+            if term > 1:
+              pdf.drawString(32,80,t[1])
+              if term > 2:
+                pdf.drawString(32,65,t[2])
+                if term > 3:
+                  pdf.drawString(32,50,t[3])
+                else:
+                  pass
+              else:
+                pass
+            else:
+              pass
+          else:
+            pass
+          
+          pdf.drawString(32,30, "Sales Person:")
+          pdf.drawString(115,30, " "+edit_estimates_e6.get())
+          pdf.drawString(32,12, " "+edit_estimates_e21.get())
+        else:
+          pdf.drawCentredString(302,115, "Terms and Conditions")
+          pdf.line(30,110,580,110)
+          text4=""+edit_estimates_e51.get("1.0","end-1c")
+          wraped_text4="\n".join(wrap(text4,102))
+          t=wraped_text4.split('\n')      
+          term = len(t)
+          if term > 0:
+            pdf.drawString(32,95,t[0])
+            if term > 1:
+              pdf.drawString(32,80,t[1])
+              if term > 2:
+                pdf.drawString(32,65,t[2])
+                if term > 3:
+                  pdf.drawString(32,50,t[3])
+                else:
+                  pass
+              else:
+                pass
+            else:
+              pass
+          else:
+            pass
+          
+          pdf.drawString(32,30, "Sales Person:")
+          pdf.drawString(115,30, " "+edit_estimates_e6.get())
+          pdf.drawString(32,12, " "+edit_estimates_e21.get())
+          
+        
+        pdf.save()
+        # win32api.ShellExecute(0,"","estimate\Estimate_Report.pdf",None,".",0)
+      elif edit_estimates_e5.get() == 'Simplified 1 (logo on left side)':
+        from reportlab.pdfgen import canvas 
+        pdf = canvas.Canvas("estimate/Estimate_Report.pdf", pagesize=letter)
+        
+
+        sql_company = "SELECT * from company"
+        fbcursor.execute(sql_company)
+        company= fbcursor.fetchone()
+        print(company)
+        
+        pdf.drawCentredString(302,770, " "+edit_estimates_e01.get())
+        pdf.drawCentredString(302,475, " "+edit_estimates_e11.get())
+        
+
+        pdf.drawImage("images/"+company[13],30,655,width=200,height=90)
+
+        pdf.drawString(30,635, " "+est_str2.get())
+        pdf.drawString(30,620, " "+est_str3.get())
+        pdf.drawString(30,605, " "+est_str4.get())
+        pdf.drawString(31,590, "Terms")
+        pdf.drawString(31,575, "Order ref.#")
+
+        pdf.drawString(140,635, " "+edit_estimate_ee01.get())
+        pdf.drawString(140,620, " "+str(edit_estimate_ee02.get_date()))
+        pdf.drawString(140,605, " "+str(edit_estimate_ee03.get_date()))
+        pdf.drawString(140,590, " "+edit_estimate_ee04.get())
+        pdf.drawString(140,575, " "+edit_estimate_ee11.get())
+
+        # pdf.setFont('Helvetica-underline',12)
+        pdf.drawString(60,550, " "+est_str5.get())
+        pdf.line(60,548,112,548)
+        pdf.drawString(300,550, "Ship to")
+        pdf.line(300,548,338,548)
+
+        pdf.drawString(60,535, " "+edit_estimate_combo.get())
+        pdf.drawString(300,535, " "+edit_estimate_ee3.get())
+
+        text1=""+edit_estimate_ee2.get("1.0",END)
+        wraped_text1="\n".join(wrap(text1,40))
+        a=wraped_text1.split('\n')      
+        addr = len(a)
+        if addr > 0:
+          pdf.drawString(60,520,a[0])
+          if addr > 1:
+            pdf.drawString(60,505,a[1])
+            if addr > 2:
+              pdf.drawString(60,490,a[2])
+              if addr > 3:
+                pdf.drawString(60,475,a[3])
+              else:
+                pass
+            else:
+              pass
+          else:
+            pass
+        else:
+          pass
+        
+        text2=""+edit_estimate_ee4.get("1.0",END)
+        wraped_text2="\n".join(wrap(text2,40))
+        a1=wraped_text2.split('\n')      
+        addr1 = len(a1)
+        if addr1 > 0:
+          pdf.drawString(300,520,a1[0])
+          if addr1 > 1:
+            pdf.drawString(300,505,a1[1])
+            if addr1 > 2:
+              pdf.drawString(300,490,a1[2])
+              if addr1 > 3:
+                pdf.drawString(300,475,a1[3])
+              else:
+                pass
+            else:
+              pass
+          else:
+            pass
+        else:
+          pass
+        
+
+        pdf.setFont('Helvetica-Bold',12)
+        pdf.drawAlignedString(580,745, company[1])
+        pdf.setFont('Helvetica',12)
+        text=company[2]
+        wraped_text="\n".join(wrap(text,30))
+        print(wraped_text)
+        htg=wraped_text.split('\n') 
+        vg=len(htg)
+        if vg>0:
+          pdf.drawAlignedString(582,730,htg[0])
+          if vg>1:
+            pdf.drawAlignedString(582,715,htg[1])
+            if vg>2:
+              pdf.drawAlignedString(582,700,htg[2])
+              if vg>3:
+                pdf.drawAlignedString(582,685,htg[3])
+              else:
+                pass
+            else:
+              pass
+          else:
+            pass
+        else:
+          pass     
+      
+
+        pdf.drawAlignedString(582,660, company[4])
+        pdf.setFont('Helvetica-Bold',16)
+        pdf.drawAlignedString(582,620, " "+est_str1.get())
+
+        pdf.setFont('Helvetica',12)
+
+        sql = "select * from company"
+        fbcursor.execute(sql)
+        est_taxcheck_1 = fbcursor.fetchone()
+
+        sql = "select currsignplace,currencysign from company"
+        fbcursor.execute(sql)
+        est_symbolcheck_1 = fbcursor.fetchone()
+
+        pdf.setLineWidth(.3)
+        pdf.line(30,470,30,450)
+        pdf.line(580,470,580,450)
+        #pdf.line(130,470,130,450)
+        #pdf.line(310,470,310,450) #vertical lines
+        pdf.line(400,470,400,450)
+        pdf.line(490,470,490,450)
+        #------------------------#
+        pdf.line(30,450,580,450)
+        pdf.line(30,470,580,470)
+
+        #pdf.drawString(60,455,"ID/SKU")
+        pdf.drawString(150,455,"Product/Service")
+        #pdf.drawString(332,455,"Quantity")
+        pdf.drawString(420,455,"Quantity")
+        pdf.drawString(523,455,"Price")
+
+        y1 = 430 
+        y2 = 430
+        v1 = 450
+        v2 = 430
+        for i in edit_estimate_tree.get_children():
+          if y1 <= 12:
+            pdf.showPage()
+            y1 = 730
+            y2 = 730
+            v1 = 750
+            v2 = 730
+            pdf.line(30,y1,580,y2)
+            pdf.line(30,y1+20,580,y2+20)
+          pdf.line(30,y1,580,y2)
+          if company[12] == "1":
+            # pdf.drawString(34,y1+5,edit_estimate_tree.item(i,'value')[0])
+            pdf.drawString(34,y1+5,edit_estimate_tree.item(i,'value')[1])
+            # pdf.drawString(332,y1+5,edit_estimate_tree.item(i,'value')[4])
+            pdf.drawRightString(450,y1+5,edit_estimate_tree.item(i,'value')[4])
+            pdf.drawRightString(563,y1+5,edit_estimate_tree.item(i,'value')[6])
+            y1 -= 20
+            y2 -= 20
+            pdf.line(30,v1,30,v2)
+            pdf.line(580,v1,580,v2)
+            #pdf.line(130,v1,130,v2)
+            #pdf.line(310,v1,310,v2) #vertical lines
+            pdf.line(400,v1,400,v2)
+            pdf.line(490,v1,490,v2)
+            v1 -= 20
+            v2 -= 20
+          elif company[12] == "2":
+            #pdf.drawString(34,y1+5,edit_estimate_tree.item(i,'value')[0])
+            pdf.drawString(34,y1+5,edit_estimate_tree.item(i,'value')[1])
+            #pdf.drawString(332,y1+5,edit_estimate_tree.item(i,'value')[4])
+            pdf.drawRightString(450,y1+5,edit_estimate_tree.item(i,'value')[4])
+            pdf.drawRightString(563,y1+5,edit_estimate_tree.item(i,'value')[7])
+            y1 -= 20
+            y2 -= 20
+            pdf.line(30,v1,30,v2)
+            pdf.line(580,v1,580,v2)
+            #pdf.line(130,v1,130,v2)
+            #pdf.line(310,v1,310,v2) #vertical lines
+            pdf.line(400,v1,400,v2)
+            pdf.line(490,v1,490,v2)
+            v1 -= 20
+            v2 -= 20
+          elif company[12] == "3":
+            #pdf.drawString(34,y1+5,edit_estimate_tree.item(i,'value')[0])
+            pdf.drawString(34,y1+5,edit_estimate_tree.item(i,'value')[1])
+            #pdf.drawString(332,y1+5,edit_estimate_tree.item(i,'value')[4])
+            pdf.drawRightString(450,y1+5,edit_estimate_tree.item(i,'value')[4])
+            pdf.drawRightString(563,y1+5,edit_estimate_tree.item(i,'value')[8])
+            y1 -= 20
+            y2 -= 20
+            pdf.line(30,v1,30,v2)
+            pdf.line(580,v1,580,v2)
+            #pdf.line(130,v1,130,v2)
+            #pdf.line(310,v1,310,v2) #vertical lines
+            pdf.line(400,v1,400,v2)
+            pdf.line(490,v1,490,v2)
+            v1 -= 20
+            v2 -= 20
+        calc_y1 = y1
+        calc_y2 = y2
+        if company[12] == "1":
+          if calc_y1-100 <=40:
+            pdf.showPage()
+            calc_y1 = 730
+            calc_y2 = 730
+            pdf.line(350,calc_y1-60,350,calc_y1+20)
+            pdf.line(580,calc_y1-60,580,calc_y1+20)
+            #pdf.line(465,calc_y1-60,465,calc_y1+20)
+            pdf.line(490,calc_y1-60,490,calc_y1+20)
+            #-----------------------------------
+            pdf.line(350,calc_y1,580,calc_y2)
+            pdf.line(350,calc_y1-20,580,calc_y2-20)
+            pdf.line(350,calc_y1-40,580,calc_y2-40)
+            pdf.line(350,calc_y1-60,580,calc_y2-60)
+            if est_symbolcheck_1[0] == "before amount":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+str(edit_estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+str(edit_estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+str(edit_estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+str(edit_estimate_orderrr1.cget("text")))
+
+              text3=""+edit_estimates_e61.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')      
+              
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-125,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-140,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-155,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-170,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "before amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+" "+str(edit_estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+" "+str(edit_estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+" "+str(edit_estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+" "+str(edit_estimate_orderrr1.cget("text")))
+
+              text3=""+edit_estimates_e61.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')      
+              
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-125,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-140,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-155,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-170,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "after amount":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(edit_estimate_discounttt1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(edit_estimate_subbb1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(edit_estimate_costtt.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,str(edit_estimate_orderrr1.cget("text"))+""+comcursign.get())
+
+              text3=""+edit_estimates_e61.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')      
+              
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-125,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-140,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-155,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-170,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "after amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(edit_estimate_discounttt1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(edit_estimate_subbb1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(edit_estimate_costtt.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,str(edit_estimate_orderrr1.cget("text"))+" "+""+comcursign.get())
+
+              text3=""+edit_estimates_e61.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')      
+              
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-125,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-140,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-155,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-170,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+          else:
+            pdf.line(350,calc_y1-60,350,calc_y1+20)
+            pdf.line(580,calc_y1-60,580,calc_y1+20)
+            #pdf.line(465,calc_y1-60,465,calc_y1+20)
+            pdf.line(490,calc_y1-60,490,calc_y1+20)
+            #-----------------------------------
+            pdf.line(350,calc_y1,580,calc_y2)
+            pdf.line(350,calc_y1-20,580,calc_y2-20)
+            pdf.line(350,calc_y1-40,580,calc_y2-40)
+            pdf.line(350,calc_y1-60,580,calc_y2-60)
+            if est_symbolcheck_1[0] == "before amount":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+str(edit_estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+str(edit_estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+str(edit_estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+str(edit_estimate_orderrr1.cget("text")))
+
+              text3=""+edit_estimates_e61.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')    
+
+              if calc_y1-170 <= 40:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-125,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-140,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-155,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-170,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "before amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+" "+str(edit_estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+" "+str(edit_estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+" "+str(edit_estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+" "+str(edit_estimate_orderrr1.cget("text")))
+              
+              text3=""+edit_estimates_e61.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')    
+
+              if calc_y1-170 <= 40:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-125,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-140,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-155,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-170,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "after amount":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(edit_estimate_discounttt1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(edit_estimate_subbb1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(edit_estimate_costtt.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,str(edit_estimate_orderrr1.cget("text"))+""+comcursign.get())
+
+              text3=""+edit_estimates_e61.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')    
+
+              if calc_y1-170 <= 40:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-125,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-140,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-155,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-170,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "after amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(edit_estimate_discounttt1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(edit_estimate_subbb1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(edit_estimate_costtt.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,str(edit_estimate_orderrr1.cget("text"))+" "+""+comcursign.get())
+
+              text3=""+edit_estimates_e61.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')    
+
+              if calc_y1-170 <= 40:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-125,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-140,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-155,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-170,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+        elif company[12] == "2":
+          if calc_y1-120 <= 40:
+            pdf.showPage()
+            calc_y1 = 730
+            calc_y2 = 730
+            pdf.line(350,calc_y1-80,350,calc_y1+20)
+            pdf.line(580,calc_y1-80,580,calc_y1+20)
+            pdf.line(490,calc_y1-80,490,calc_y1+20)
+            #-----------------------------------
+            pdf.line(350,calc_y1+20,580,calc_y2+20)
+            pdf.line(350,calc_y1,580,calc_y2)
+            pdf.line(350,calc_y1-20,580,calc_y2-20)
+            pdf.line(350,calc_y1-40,580,calc_y2-40)
+            pdf.line(350,calc_y1-60,580,calc_y2-60)
+            pdf.line(350,calc_y1-80,580,calc_y2-80)
+            if est_symbolcheck_1[0] == "before amount":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+str(edit_estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+str(edit_estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+str(edit_estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+str(edit_estimate_ttax1label.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+str(edit_estimate_orderrr1.cget("text")))
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-145,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-160,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-175,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-190,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "before amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+" "+str(edit_estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+" "+str(edit_estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+" "+str(edit_estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+" "+str(edit_estimate_ttax1label.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+" "+str(edit_estimate_orderrr1.cget("text")))
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-145,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-160,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-175,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-190,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "after amount":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(edit_estimate_discounttt1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(edit_estimate_subbb1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(edit_estimate_costtt.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(edit_estimate_ttax1label.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,str(edit_estimate_orderrr1.cget("text"))+""+comcursign.get())
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-145,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-160,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-175,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-190,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "after amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(edit_estimate_discounttt1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(edit_estimate_subbb1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(edit_estimate_costtt.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(edit_estimate_ttax1label.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,str(edit_estimate_orderrr1.cget("text"))+" "+""+comcursign.get())
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-145,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-160,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-175,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-190,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+          else:
+            pdf.line(350,calc_y1-80,350,calc_y1+20)
+            pdf.line(580,calc_y1-80,580,calc_y1+20)
+            pdf.line(490,calc_y1-80,490,calc_y1+20)
+            #-----------------------------------
+            pdf.line(350,calc_y1+20,580,calc_y2+20)
+            pdf.line(350,calc_y1,580,calc_y2)
+            pdf.line(350,calc_y1-20,580,calc_y2-20)
+            pdf.line(350,calc_y1-40,580,calc_y2-40)
+            pdf.line(350,calc_y1-60,580,calc_y2-60)
+            pdf.line(350,calc_y1-80,580,calc_y2-80)
+            if est_symbolcheck_1[0] == "before amount":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+str(edit_estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+str(edit_estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+str(edit_estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+str(edit_estimate_ttax1label.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+str(edit_estimate_orderrr1.cget("text")))
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-190 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-145,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-160,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-175,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-190,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "before amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+" "+str(edit_estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+" "+str(edit_estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+" "+str(edit_estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+" "+str(edit_estimate_ttax1label.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+" "+str(edit_estimate_orderrr1.cget("text")))
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-190 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-145,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-160,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-175,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-190,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "after amount":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(edit_estimate_discounttt1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(edit_estimate_subbb1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(edit_estimate_costtt.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(edit_estimate_ttax1label.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,str(edit_estimate_orderrr1.cget("text"))+""+comcursign.get())
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-190 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-145,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-160,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-175,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-190,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "after amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(edit_estimate_discounttt1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(edit_estimate_subbb1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(edit_estimate_costtt.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(edit_estimate_ttax1label.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,str(edit_estimate_orderrr1.cget("text"))+" "+""+comcursign.get())
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-190 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-145,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-160,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-175,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-190,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+        elif company[12] == "3":
+          if calc_y1-140 <= 40:
+            pdf.showPage()
+            calc_y1 = 730
+            calc_y2 = 730
+            pdf.line(350,calc_y1-100,350,calc_y1+20)
+            pdf.line(580,calc_y1-100,580,calc_y1+20)
+            pdf.line(490,calc_y1-100,490,calc_y1+20)
+            #-----------------------------------
+            pdf.line(350,calc_y1,580,calc_y2)
+            pdf.line(350,calc_y1-20,580,calc_y2-20)
+            pdf.line(350,calc_y1-40,580,calc_y2-40)
+            pdf.line(350,calc_y1-60,580,calc_y2-60)
+            pdf.line(350,calc_y1-80,580,calc_y2-80)
+            pdf.line(350,calc_y1-100,580,calc_y2-100)
+            if est_symbolcheck_1[0] == "before amount":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+str(edit_estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+str(edit_estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+str(edit_estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+str(edit_estimate_ttax1label.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+str(edit_estimate_ttax2label.cget("text")))
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,""+comcursign.get()+str(edit_estimate_orderrr1.cget("text")))
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-165,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-180,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-195,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-210,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "before amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+" "+str(edit_estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+" "+str(edit_estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+" "+str(edit_estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+" "+str(edit_estimate_ttax1label.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+" "+str(edit_estimate_ttax2label.cget("text")))
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,""+comcursign.get()+" "+str(edit_estimate_orderrr1.cget("text")))
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-165,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-180,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-195,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-210,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "after amount":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(edit_estimate_discounttt1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(edit_estimate_subbb1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(edit_estimate_costtt.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(edit_estimate_ttax1label.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,str(edit_estimate_ttax2label.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,str(edit_estimate_orderrr1.cget("text"))+""+comcursign.get())
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-165,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-180,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-195,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-210,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "after amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(edit_estimate_discounttt1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(edit_estimate_subbb1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(edit_estimate_costtt.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(edit_estimate_ttax1label.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,str(edit_estimate_ttax2label.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,str(edit_estimate_orderrr1.cget("text"))+" "+""+comcursign.get())
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-165,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-180,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-195,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-210,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass 
+          else:
+            pdf.line(350,calc_y1-100,350,calc_y1+20)
+            pdf.line(580,calc_y1-100,580,calc_y1+20)
+            pdf.line(490,calc_y1-100,490,calc_y1+20)
+            #-----------------------------------
+            pdf.line(350,calc_y1,580,calc_y2)
+            pdf.line(350,calc_y1-20,580,calc_y2-20)
+            pdf.line(350,calc_y1-40,580,calc_y2-40)
+            pdf.line(350,calc_y1-60,580,calc_y2-60)
+            pdf.line(350,calc_y1-80,580,calc_y2-80)
+            pdf.line(350,calc_y1-100,580,calc_y2-100)
+            if est_symbolcheck_1[0] == "before amount":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+str(edit_estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+str(edit_estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+str(edit_estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+str(edit_estimate_ttax1label.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+str(edit_estimate_ttax2label.cget("text")))
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,""+comcursign.get()+str(edit_estimate_orderrr1.cget("text")))
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-210 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-165,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-180,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-195,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-210,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "before amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+" "+str(edit_estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+" "+str(edit_estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+" "+str(edit_estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+" "+str(edit_estimate_ttax1label.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+" "+str(edit_estimate_ttax2label.cget("text")))
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,""+comcursign.get()+" "+str(edit_estimate_orderrr1.cget("text")))
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-210 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-165,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-180,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-195,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-210,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "after amount":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(edit_estimate_discounttt1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(edit_estimate_subbb1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(edit_estimate_costtt.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(edit_estimate_ttax1label.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,str(edit_estimate_ttax2label.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,str(edit_estimate_orderrr1.cget("text"))+""+comcursign.get())
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-210 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-165,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-180,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-195,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-210,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "after amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(edit_estimate_discounttt1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(edit_estimate_subbb1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(edit_estimate_costtt.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(edit_estimate_ttax1label.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,str(edit_estimate_ttax2label.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,str(edit_estimate_orderrr1.cget("text"))+" "+""+comcursign.get())
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-210 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-165,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-180,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-195,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-210,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+
+        if (calc_y1-170)-115 <= 10 or (calc_y1-190)-115 <= 10 or (calc_y1-210)-115 <= 10:
+          pdf.drawCentredString(302,115, "Terms and Conditions")
+          pdf.line(30,110,580,110)
+          text4=""+edit_estimates_e51.get("1.0","end-1c")
+          wraped_text4="\n".join(wrap(text4,102))
+          t=wraped_text4.split('\n')      
+          term = len(t)
+          if term > 0:
+            pdf.drawString(32,95,t[0])
+            if term > 1:
+              pdf.drawString(32,80,t[1])
+              if term > 2:
+                pdf.drawString(32,65,t[2])
+                if term > 3:
+                  pdf.drawString(32,50,t[3])
+                else:
+                  pass
+              else:
+                pass
+            else:
+              pass
+          else:
+            pass
+          
+          pdf.drawString(32,30, "Sales Person:")
+          pdf.drawString(115,30, " "+edit_estimates_e6.get())
+          pdf.drawString(32,12, " "+edit_estimates_e21.get())
+        else:
+          pdf.drawCentredString(302,115, "Terms and Conditions")
+          pdf.line(30,110,580,110)
+          text4=""+edit_estimates_e51.get("1.0","end-1c")
+          wraped_text4="\n".join(wrap(text4,102))
+          t=wraped_text4.split('\n')      
+          term = len(t)
+          if term > 0:
+            pdf.drawString(32,95,t[0])
+            if term > 1:
+              pdf.drawString(32,80,t[1])
+              if term > 2:
+                pdf.drawString(32,65,t[2])
+                if term > 3:
+                  pdf.drawString(32,50,t[3])
+                else:
+                  pass
+              else:
+                pass
+            else:
+              pass
+          else:
+            pass
+          
+          pdf.drawString(32,30, "Sales Person:")
+          pdf.drawString(115,30, " "+edit_estimates_e6.get())
+          pdf.drawString(32,12, " "+edit_estimates_e21.get())
+          
+        
+        pdf.save()
+        # win32api.ShellExecute(0,"","estimate\Estimate_Report.pdf",None,".",0) 
+      elif edit_estimates_e5.get() == 'Simplified 2 (logo on right side)': 
+        from reportlab.pdfgen import canvas 
+        pdf = canvas.Canvas("estimate/Estimate_Report.pdf", pagesize=letter)
+
+        sql_company = "SELECT * from company"
+        fbcursor.execute(sql_company)
+        company= fbcursor.fetchone()
+        print(company)
+        
+        pdf.setFont('Helvetica',12)
+        pdf.drawCentredString(302,770, " "+edit_estimates_e01.get())
+
+        pdf.drawCentredString(302,475, " "+edit_estimates_e11.get())
+
+
+        pdf.drawImage("images/"+company[13],380,665,width=200,height=90)
+
+        pdf.drawString(340,635, " "+est_str2.get())
+        pdf.drawString(340,620, " "+est_str3.get())
+        pdf.drawString(340,605, " "+est_str4.get())
+        pdf.drawString(341,590, "Terms")
+        pdf.drawString(341,575, "Order ref.#")
+
+        pdf.drawString(450,635, " "+edit_estimate_ee01.get())
+        pdf.drawString(450,620, " "+str(edit_estimate_ee02.get_date()))
+        pdf.drawString(450,605, " "+str(edit_estimate_ee03.get_date()))
+        pdf.drawString(450,590, " "+edit_estimate_ee04.get())
+        pdf.drawString(450,575, " "+edit_estimate_ee11.get())
+
+        # pdf.setFont('Helvetica-underline',12)
+        pdf.drawString(60,550, " "+est_str5.get())
+        pdf.line(60,548,112,548)
+        pdf.drawString(300,550, "Ship to")
+        pdf.line(300,548,338,548)
+
+        pdf.drawString(60,535, " "+edit_estimate_combo.get())
+        pdf.drawString(300,535, " "+edit_estimate_ee3.get())
+
+        text1=""+edit_estimate_ee2.get("1.0",END)
+        wraped_text1="\n".join(wrap(text1,40))
+        a=wraped_text1.split('\n')      
+        addr = len(a)
+        if addr > 0:
+          pdf.drawString(60,520,a[0])
+          if addr > 1:
+            pdf.drawString(60,505,a[1])
+            if addr > 2:
+              pdf.drawString(60,490,a[2])
+              if addr > 3:
+                pdf.drawString(60,475,a[3])
+              else:
+                pass
+            else:
+              pass
+          else:
+            pass
+        else:
+          pass
+        
+        text2=""+edit_estimate_ee4.get("1.0",END)
+        wraped_text2="\n".join(wrap(text2,40))
+        a1=wraped_text2.split('\n')      
+        addr1 = len(a1)
+        if addr1 > 0:
+          pdf.drawString(300,520,a1[0])
+          if addr1 > 1:
+            pdf.drawString(300,505,a1[1])
+            if addr1 > 2:
+              pdf.drawString(300,490,a1[2])
+              if addr1 > 3:
+                pdf.drawString(300,475,a1[3])
+              else:
+                pass
+            else:
+              pass
+          else:
+            pass
+        else:
+          pass
+        
+
+        pdf.setFont('Helvetica-Bold',12)
+        pdf.drawString(30,745, company[1])
+        pdf.setFont('Helvetica',12)
+        text=company[2]
+        wraped_text="\n".join(wrap(text,30))
+        print(wraped_text)
+        htg=wraped_text.split('\n') 
+        vg=len(htg)
+        if vg>0:
+          pdf.drawString(30,730,htg[0])
+          if vg>1:
+            pdf.drawString(30,715,htg[1])
+            if vg>2:
+              pdf.drawString(30,700,htg[2])
+              if vg>3:
+                pdf.drawString(30,685,htg[3])
+              else:
+                pass
+            else:
+              pass
+          else:
+            pass
+        else:
+          pass     
+      
+
+        pdf.drawString(30,660, company[4])
+        pdf.setFont('Helvetica-Bold',16)
+        pdf.drawString(30,620, " "+est_str1.get())
+
+        pdf.setFont('Helvetica',12)
+
+        sql = "select * from company"
+        fbcursor.execute(sql)
+        est_taxcheck_1 = fbcursor.fetchone()
+
+        sql = "select currsignplace,currencysign from company"
+        fbcursor.execute(sql)
+        est_symbolcheck_1 = fbcursor.fetchone()
+
+        pdf.setLineWidth(.3)
+        pdf.line(30,470,30,450)
+        pdf.line(580,470,580,450)
+        #pdf.line(130,470,130,450)
+        #pdf.line(310,470,310,450) #vertical lines
+        pdf.line(400,470,400,450)
+        pdf.line(490,470,490,450)
+        #------------------------#
+        pdf.line(30,450,580,450)
+        pdf.line(30,470,580,470)
+
+        #pdf.drawString(60,455,"ID/SKU")
+        pdf.drawString(150,455,"Product/Service")
+        #pdf.drawString(332,455,"Quantity")
+        pdf.drawString(420,455,"Quantity")
+        pdf.drawString(523,455,"Price")
+
+        y1 = 430 
+        y2 = 430
+        v1 = 450
+        v2 = 430
+        for i in edit_estimate_tree.get_children():
+          if y1 <= 12:
+            pdf.showPage()
+            y1 = 730
+            y2 = 730
+            v1 = 750
+            v2 = 730
+            pdf.line(30,y1,580,y2)
+            pdf.line(30,y1+20,580,y2+20)
+          pdf.line(30,y1,580,y2)
+          if company[12] == "1":
+            #pdf.drawString(34,y1+5,edit_estimate_tree.item(i,'value')[0])
+            pdf.drawString(34,y1+5,edit_estimate_tree.item(i,'value')[1])
+            #pdf.drawString(332,y1+5,edit_estimate_tree.item(i,'value')[4])
+            pdf.drawRightString(470,y1+5,edit_estimate_tree.item(i,'value')[4])
+            pdf.drawRightString(563,y1+5,edit_estimate_tree.item(i,'value')[6])
+            y1 -= 20
+            y2 -= 20
+            pdf.line(30,v1,30,v2)
+            pdf.line(580,v1,580,v2)
+            #pdf.line(130,v1,130,v2)
+            #pdf.line(310,v1,310,v2) #vertical lines
+            pdf.line(400,v1,400,v2)
+            pdf.line(490,v1,490,v2)
+            v1 -= 20
+            v2 -= 20
+          elif company[12] == "2":
+            #pdf.drawString(34,y1+5,edit_estimate_tree.item(i,'value')[0])
+            pdf.drawString(34,y1+5,edit_estimate_tree.item(i,'value')[1])
+            #pdf.drawString(332,y1+5,edit_estimate_tree.item(i,'value')[4])
+            pdf.drawRightString(470,y1+5,edit_estimate_tree.item(i,'value')[4])
+            pdf.drawRightString(563,y1+5,edit_estimate_tree.item(i,'value')[7])
+            y1 -= 20
+            y2 -= 20
+            pdf.line(30,v1,30,v2)
+            pdf.line(580,v1,580,v2)
+            #pdf.line(130,v1,130,v2)
+            #pdf.line(310,v1,310,v2) #vertical lines
+            pdf.line(400,v1,400,v2)
+            pdf.line(490,v1,490,v2)
+            v1 -= 20
+            v2 -= 20
+          elif company[12] == "3":
+            #pdf.drawString(34,y1+5,edit_estimate_tree.item(i,'value')[0])
+            pdf.drawString(34,y1+5,edit_estimate_tree.item(i,'value')[1])
+            #pdf.drawString(332,y1+5,edit_estimate_tree.item(i,'value')[4])
+            pdf.drawRightString(470,y1+5,edit_estimate_tree.item(i,'value')[4])
+            pdf.drawRightString(563,y1+5,edit_estimate_tree.item(i,'value')[8])
+            y1 -= 20
+            y2 -= 20
+            pdf.line(30,v1,30,v2)
+            pdf.line(580,v1,580,v2)
+            #pdf.line(130,v1,130,v2)
+            #pdf.line(310,v1,310,v2) #vertical lines
+            pdf.line(400,v1,400,v2)
+            pdf.line(490,v1,490,v2)
+            v1 -= 20
+            v2 -= 20
+        calc_y1 = y1
+        calc_y2 = y2
+        if company[12] == "1":
+          if calc_y1-100 <=40:
+            pdf.showPage()
+            calc_y1 = 730
+            calc_y2 = 730
+            pdf.line(350,calc_y1-60,350,calc_y1+20)
+            pdf.line(580,calc_y1-60,580,calc_y1+20)
+            #pdf.line(465,calc_y1-60,465,calc_y1+20)
+            pdf.line(490,calc_y1-60,490,calc_y1+20)
+            #-----------------------------------
+            pdf.line(350,calc_y1,580,calc_y2)
+            pdf.line(350,calc_y1-20,580,calc_y2-20)
+            pdf.line(350,calc_y1-40,580,calc_y2-40)
+            pdf.line(350,calc_y1-60,580,calc_y2-60)
+            if est_symbolcheck_1[0] == "before amount":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+str(edit_estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+str(edit_estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+str(edit_estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+str(edit_estimate_orderrr1.cget("text")))
+
+              text3=""+edit_estimates_e61.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')      
+              
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-125,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-140,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-155,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-170,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "before amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+" "+str(edit_estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+" "+str(edit_estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+" "+str(edit_estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+" "+str(edit_estimate_orderrr1.cget("text")))
+
+              text3=""+edit_estimates_e61.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')      
+              
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-125,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-140,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-155,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-170,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "after amount":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(edit_estimate_discounttt1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(edit_estimate_subbb1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(edit_estimate_costtt.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,str(edit_estimate_orderrr1.cget("text"))+""+comcursign.get())
+
+              text3=""+edit_estimates_e61.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')      
+              
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-125,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-140,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-155,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-170,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "after amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(edit_estimate_discounttt1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(edit_estimate_subbb1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(edit_estimate_costtt.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,str(edit_estimate_orderrr1.cget("text"))+" "+""+comcursign.get())
+
+              text3=""+edit_estimates_e61.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')      
+              
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-125,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-140,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-155,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-170,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+          else:
+            pdf.line(350,calc_y1-60,350,calc_y1+20)
+            pdf.line(580,calc_y1-60,580,calc_y1+20)
+            #pdf.line(465,calc_y1-60,465,calc_y1+20)
+            pdf.line(490,calc_y1-60,490,calc_y1+20)
+            #-----------------------------------
+            pdf.line(350,calc_y1,580,calc_y2)
+            pdf.line(350,calc_y1-20,580,calc_y2-20)
+            pdf.line(350,calc_y1-40,580,calc_y2-40)
+            pdf.line(350,calc_y1-60,580,calc_y2-60)
+            if est_symbolcheck_1[0] == "before amount":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+str(edit_estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+str(edit_estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+str(edit_estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+str(edit_estimate_orderrr1.cget("text")))
+
+              text3=""+edit_estimates_e61.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')    
+
+              if calc_y1-170 <= 40:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-125,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-140,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-155,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-170,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "before amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+" "+str(edit_estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+" "+str(edit_estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+" "+str(edit_estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+" "+str(edit_estimate_orderrr1.cget("text")))
+              
+              text3=""+edit_estimates_e61.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')    
+
+              if calc_y1-170 <= 40:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-125,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-140,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-155,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-170,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "after amount":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(edit_estimate_discounttt1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(edit_estimate_subbb1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(edit_estimate_costtt.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,str(edit_estimate_orderrr1.cget("text"))+""+comcursign.get())
+
+              text3=""+edit_estimates_e61.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')    
+
+              if calc_y1-170 <= 40:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-125,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-140,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-155,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-170,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "after amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(edit_estimate_discounttt1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(edit_estimate_subbb1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(edit_estimate_costtt.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,str(edit_estimate_orderrr1.cget("text"))+" "+""+comcursign.get())
+
+              text3=""+edit_estimates_e61.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')    
+
+              if calc_y1-170 <= 40:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-125,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-140,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-155,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-170,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+        elif company[12] == "2":
+          if calc_y1-120 <= 40:
+            pdf.showPage()
+            calc_y1 = 730
+            calc_y2 = 730
+            pdf.line(350,calc_y1-80,350,calc_y1+20)
+            pdf.line(580,calc_y1-80,580,calc_y1+20)
+            pdf.line(490,calc_y1-80,490,calc_y1+20)
+            #-----------------------------------
+            pdf.line(350,calc_y1+20,580,calc_y2+20)
+            pdf.line(350,calc_y1,580,calc_y2)
+            pdf.line(350,calc_y1-20,580,calc_y2-20)
+            pdf.line(350,calc_y1-40,580,calc_y2-40)
+            pdf.line(350,calc_y1-60,580,calc_y2-60)
+            pdf.line(350,calc_y1-80,580,calc_y2-80)
+            if est_symbolcheck_1[0] == "before amount":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+str(edit_estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+str(edit_estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+str(edit_estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+str(edit_estimate_ttax1label.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+str(edit_estimate_orderrr1.cget("text")))
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-145,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-160,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-175,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-190,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "before amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+" "+str(edit_estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+" "+str(edit_estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+" "+str(edit_estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+" "+str(edit_estimate_ttax1label.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+" "+str(edit_estimate_orderrr1.cget("text")))
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-145,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-160,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-175,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-190,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "after amount":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(edit_estimate_discounttt1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(edit_estimate_subbb1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(edit_estimate_costtt.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(edit_estimate_ttax1label.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,str(edit_estimate_orderrr1.cget("text"))+""+comcursign.get())
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-145,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-160,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-175,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-190,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "after amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(edit_estimate_discounttt1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(edit_estimate_subbb1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(edit_estimate_costtt.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(edit_estimate_ttax1label.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,str(edit_estimate_orderrr1.cget("text"))+" "+""+comcursign.get())
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-145,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-160,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-175,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-190,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+          else:
+            pdf.line(350,calc_y1-80,350,calc_y1+20)
+            pdf.line(580,calc_y1-80,580,calc_y1+20)
+            pdf.line(490,calc_y1-80,490,calc_y1+20)
+            #-----------------------------------
+            pdf.line(350,calc_y1+20,580,calc_y2+20)
+            pdf.line(350,calc_y1,580,calc_y2)
+            pdf.line(350,calc_y1-20,580,calc_y2-20)
+            pdf.line(350,calc_y1-40,580,calc_y2-40)
+            pdf.line(350,calc_y1-60,580,calc_y2-60)
+            pdf.line(350,calc_y1-80,580,calc_y2-80)
+            if est_symbolcheck_1[0] == "before amount":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+str(edit_estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+str(edit_estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+str(edit_estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+str(edit_estimate_ttax1label.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+str(edit_estimate_orderrr1.cget("text")))
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-190 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-145,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-160,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-175,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-190,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "before amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+" "+str(edit_estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+" "+str(edit_estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+" "+str(edit_estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+" "+str(edit_estimate_ttax1label.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+" "+str(edit_estimate_orderrr1.cget("text")))
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-190 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-145,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-160,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-175,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-190,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "after amount":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(edit_estimate_discounttt1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(edit_estimate_subbb1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(edit_estimate_costtt.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(edit_estimate_ttax1label.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,str(edit_estimate_orderrr1.cget("text"))+""+comcursign.get())
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-190 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-145,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-160,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-175,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-190,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "after amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(edit_estimate_discounttt1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(edit_estimate_subbb1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(edit_estimate_costtt.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(edit_estimate_ttax1label.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,str(edit_estimate_orderrr1.cget("text"))+" "+""+comcursign.get())
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-190 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-145,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-160,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-175,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-190,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+        elif company[12] == "3":
+          if calc_y1-140 <= 40:
+            pdf.showPage()
+            calc_y1 = 730
+            calc_y2 = 730
+            pdf.line(350,calc_y1-100,350,calc_y1+20)
+            pdf.line(580,calc_y1-100,580,calc_y1+20)
+            pdf.line(490,calc_y1-100,490,calc_y1+20)
+            #-----------------------------------
+            pdf.line(350,calc_y1,580,calc_y2)
+            pdf.line(350,calc_y1-20,580,calc_y2-20)
+            pdf.line(350,calc_y1-40,580,calc_y2-40)
+            pdf.line(350,calc_y1-60,580,calc_y2-60)
+            pdf.line(350,calc_y1-80,580,calc_y2-80)
+            pdf.line(350,calc_y1-100,580,calc_y2-100)
+            if est_symbolcheck_1[0] == "before amount":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+str(edit_estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+str(edit_estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+str(edit_estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+str(edit_estimate_ttax1label.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+str(edit_estimate_ttax2label.cget("text")))
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,""+comcursign.get()+str(edit_estimate_orderrr1.cget("text")))
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-165,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-180,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-195,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-210,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "before amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+" "+str(edit_estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+" "+str(edit_estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+" "+str(edit_estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+" "+str(edit_estimate_ttax1label.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+" "+str(edit_estimate_ttax2label.cget("text")))
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,""+comcursign.get()+" "+str(edit_estimate_orderrr1.cget("text")))
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-165,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-180,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-195,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-210,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "after amount":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(edit_estimate_discounttt1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(edit_estimate_subbb1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(edit_estimate_costtt.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(edit_estimate_ttax1label.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,str(edit_estimate_ttax2label.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,str(edit_estimate_orderrr1.cget("text"))+""+comcursign.get())
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-165,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-180,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-195,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-210,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "after amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(edit_estimate_discounttt1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(edit_estimate_subbb1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(edit_estimate_costtt.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(edit_estimate_ttax1label.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,str(edit_estimate_ttax2label.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,str(edit_estimate_orderrr1.cget("text"))+" "+""+comcursign.get())
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-165,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-180,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-195,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-210,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass 
+          else:
+            pdf.line(350,calc_y1-100,350,calc_y1+20)
+            pdf.line(580,calc_y1-100,580,calc_y1+20)
+            pdf.line(490,calc_y1-100,490,calc_y1+20)
+            #-----------------------------------
+            pdf.line(350,calc_y1,580,calc_y2)
+            pdf.line(350,calc_y1-20,580,calc_y2-20)
+            pdf.line(350,calc_y1-40,580,calc_y2-40)
+            pdf.line(350,calc_y1-60,580,calc_y2-60)
+            pdf.line(350,calc_y1-80,580,calc_y2-80)
+            pdf.line(350,calc_y1-100,580,calc_y2-100)
+            if est_symbolcheck_1[0] == "before amount":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+str(edit_estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+str(edit_estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+str(edit_estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+str(edit_estimate_ttax1label.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+str(edit_estimate_ttax2label.cget("text")))
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,""+comcursign.get()+str(edit_estimate_orderrr1.cget("text")))
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-210 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-165,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-180,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-195,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-210,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "before amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+" "+str(edit_estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+" "+str(edit_estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+" "+str(edit_estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+" "+str(edit_estimate_ttax1label.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+" "+str(edit_estimate_ttax2label.cget("text")))
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,""+comcursign.get()+" "+str(edit_estimate_orderrr1.cget("text")))
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-210 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-165,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-180,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-195,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-210,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "after amount":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(edit_estimate_discounttt1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(edit_estimate_subbb1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(edit_estimate_costtt.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(edit_estimate_ttax1label.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,str(edit_estimate_ttax2label.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,str(edit_estimate_orderrr1.cget("text"))+""+comcursign.get())
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-210 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-165,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-180,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-195,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-210,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "after amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(edit_estimate_discounttt1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(edit_estimate_subbb1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(edit_estimate_costtt.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(edit_estimate_ttax1label.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,str(edit_estimate_ttax2label.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,str(edit_estimate_orderrr1.cget("text"))+" "+""+comcursign.get())
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-210 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-165,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-180,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-195,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-210,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+
+        if (calc_y1-170)-115 <= 10 or (calc_y1-190)-115 <= 10 or (calc_y1-210)-115 <= 10:
+          pdf.drawCentredString(302,115, "Terms and Conditions")
+          pdf.line(30,110,580,110)
+          text4=""+edit_estimates_e51.get("1.0","end-1c")
+          wraped_text4="\n".join(wrap(text4,102))
+          t=wraped_text4.split('\n')      
+          term = len(t)
+          if term > 0:
+            pdf.drawString(32,95,t[0])
+            if term > 1:
+              pdf.drawString(32,80,t[1])
+              if term > 2:
+                pdf.drawString(32,65,t[2])
+                if term > 3:
+                  pdf.drawString(32,50,t[3])
+                else:
+                  pass
+              else:
+                pass
+            else:
+              pass
+          else:
+            pass
+          
+          pdf.drawString(32,30, "Sales Person:")
+          pdf.drawString(115,30, " "+edit_estimates_e6.get())
+          pdf.drawString(32,12, " "+edit_estimates_e21.get())
+        else:
+          pdf.drawCentredString(302,115, "Terms and Conditions")
+          pdf.line(30,110,580,110)
+          text4=""+edit_estimates_e51.get("1.0","end-1c")
+          wraped_text4="\n".join(wrap(text4,102))
+          t=wraped_text4.split('\n')      
+          term = len(t)
+          if term > 0:
+            pdf.drawString(32,95,t[0])
+            if term > 1:
+              pdf.drawString(32,80,t[1])
+              if term > 2:
+                pdf.drawString(32,65,t[2])
+                if term > 3:
+                  pdf.drawString(32,50,t[3])
+                else:
+                  pass
+              else:
+                pass
+            else:
+              pass
+          else:
+            pass
+          
+          pdf.drawString(32,30, "Sales Person:")
+          pdf.drawString(115,30, " "+edit_estimates_e6.get())
+          pdf.drawString(32,12, " "+edit_estimates_e21.get())
+          
+        
+        pdf.save()
+        # win32api.ShellExecute(0,"","estimate\Estimate_Report.pdf",None,".",0)
+      elif edit_estimates_e5.get() == 'Business Classic': 
+        from reportlab.pdfgen import canvas 
+        pdf = canvas.Canvas("estimate/Estimate_Report.pdf", pagesize=letter)
+        
+
+        sql_company = "SELECT * from company"
+        fbcursor.execute(sql_company)
+        company= fbcursor.fetchone()
+        print(company)
+        pdf.setStrokeColorRGB(255,10,0)
+        pdf.line(30,762,580,762)
+        pdf.setFont('Helvetica',12)
+        pdf.drawCentredString(302,770,edit_estimates_e01.get())
+        pdf.drawCentredString(302,585,edit_estimates_e11.get())
+        pdf.drawImage("images/"+company[13],30,660,width=200,height=90)
+
+        pdf.setFont('Helvetica-Bold',12)
+        pdf.drawString(240,735, company[1])
+        pdf.setFont('Helvetica',12)
+        text=company[2]
+        wraped_text="\n".join(wrap(text,30))
+        htg=wraped_text.split('\n')
+            
+        vg=len(htg)
+        if vg>0:
+          pdf.drawString(240,720,htg[0])
+          if vg>1:
+            pdf.drawString(240,705,htg[1])
+            if vg>2:
+              pdf.drawString(240,690,htg[2])
+              if vg>3:
+                pdf.drawString(240,675,htg[3])
+              else:
+                pass
+            else:
+              pass
+          else:
+            pass
+        else:
+          pass
+
+        pdf.drawString(240,650, company[4])
+
+        pdf.drawString(390,665, " "+est_str2.get())
+        pdf.drawString(390,650, " "+est_str3.get())
+        pdf.drawString(390,635, " "+est_str4.get())
+  
+        pdf.drawString(480,665, " "+edit_estimate_ee01.get())
+        pdf.drawString(480,650, " "+str(edit_estimate_ee02.get_date()))
+        pdf.drawString(480,635, " "+str(edit_estimate_ee03.get_date()))
+
+        pdf.drawString(390,735, " "+edit_estimate_ee3.get())
+
+        text2=""+edit_estimate_ee4.get("1.0",END)
+        wraped_text2="\n".join(wrap(text2,30))
+        a1=wraped_text2.split('\n')      
+        addr = len(a1)
+        if addr > 0:
+          pdf.drawString(390,720,a1[0])
+          if addr > 1:
+            pdf.drawString(390,705,a1[1])
+            if addr > 2:
+              pdf.drawString(390,590,a1[2])
+              if addr > 3:
+                pdf.drawString(390,575,a1[3])
+              else:
+                pass
+            else:
+              pass
+          else:
+            pass
+        else:
+          pass
+
+        pdf.setStrokeColorRGB(0,0,0)
+        pdf.setLineWidth(.3)
+       
+        pdf.setFont('Helvetica',12)
+
+        sql = "select * from company"
+        fbcursor.execute(sql)
+        est_taxcheck_1 = fbcursor.fetchone()
+
+        sql = "select currsignplace,currencysign from company"
+        fbcursor.execute(sql)
+        est_symbolcheck_1 = fbcursor.fetchone()
+
+        pdf.setLineWidth(.3)
+        pdf.line(30,470,30,450)
+        pdf.line(580,470,580,450)
+        pdf.line(190,470,190,450)
+        pdf.line(310,470,310,450) #vertical lines
+        pdf.line(400,470,400,450)
+        pdf.line(490,470,490,450)
+        #------------------------#
+        pdf.line(30,450,580,450)
+        pdf.line(30,470,580,470)
+
+        pdf.drawString(60,455,"Product/Service")
+        pdf.drawString(220,455,"Description")
+        pdf.drawString(332,455,"Unit Price")
+        pdf.drawString(420,455,"Quantity")
+        pdf.drawString(523,455,"Price")
+
+        y1 = 430 
+        y2 = 430
+        v1 = 450
+        v2 = 430
+        for i in edit_estimate_tree.get_children():
+          if y1 <= 12:
+            pdf.showPage()
+            y1 = 730
+            y2 = 730
+            v1 = 750
+            v2 = 730
+            pdf.line(30,y1,580,y2)
+            pdf.line(30,y1+20,580,y2+20)
+          pdf.line(30,y1,580,y2)
+          if company[12] == "1":
+            pdf.drawString(34,y1+5,edit_estimate_tree.item(i,'value')[1])
+            pdf.drawString(210,y1+5,edit_estimate_tree.item(i,'value')[2])
+            pdf.drawString(332,y1+5,edit_estimate_tree.item(i,'value')[3])
+            pdf.drawString(450,y1+5,edit_estimate_tree.item(i,'value')[4])
+            pdf.drawRightString(563,y1+5,edit_estimate_tree.item(i,'value')[6])
+            y1 -= 20
+            y2 -= 20
+            pdf.line(30,v1,30,v2)
+            pdf.line(580,v1,580,v2)
+            pdf.line(190,v1,190,v2)
+            pdf.line(310,v1,310,v2) #vertical lines
+            pdf.line(400,v1,400,v2)
+            pdf.line(490,v1,490,v2)
+            v1 -= 20
+            v2 -= 20
+          elif company[12] == "2":
+            pdf.drawString(34,y1+5,edit_estimate_tree.item(i,'value')[1])
+            pdf.drawString(210,y1+5,edit_estimate_tree.item(i,'value')[2])
+            pdf.drawString(332,y1+5,edit_estimate_tree.item(i,'value')[3])
+            pdf.drawString(450,y1+5,edit_estimate_tree.item(i,'value')[4])
+            pdf.drawRightString(563,y1+5,edit_estimate_tree.item(i,'value')[7])
+            y1 -= 20
+            y2 -= 20
+            pdf.line(30,v1,30,v2)
+            pdf.line(580,v1,580,v2)
+            pdf.line(190,v1,190,v2)
+            pdf.line(310,v1,310,v2) #vertical lines
+            pdf.line(400,v1,400,v2)
+            pdf.line(490,v1,490,v2)
+            v1 -= 20
+            v2 -= 20
+          elif company[12] == "3":
+            pdf.drawString(34,y1+5,edit_estimate_tree.item(i,'value')[1])
+            pdf.drawString(210,y1+5,edit_estimate_tree.item(i,'value')[2])
+            pdf.drawString(332,y1+5,edit_estimate_tree.item(i,'value')[3])
+            pdf.drawString(450,y1+5,edit_estimate_tree.item(i,'value')[4])
+            pdf.drawRightString(563,y1+5,edit_estimate_tree.item(i,'value')[8])
+            y1 -= 20
+            y2 -= 20
+            pdf.line(30,v1,30,v2)
+            pdf.line(580,v1,580,v2)
+            pdf.line(190,v1,190,v2)
+            pdf.line(310,v1,310,v2) #vertical lines
+            pdf.line(400,v1,400,v2)
+            pdf.line(490,v1,490,v2)
+            v1 -= 20
+            v2 -= 20
+        calc_y1 = y1
+        calc_y2 = y2
+        if company[12] == "1":
+          if calc_y1-100 <=40:
+            pdf.showPage()
+            calc_y1 = 730
+            calc_y2 = 730
+            pdf.line(350,calc_y1-60,350,calc_y1+20)
+            pdf.line(580,calc_y1-60,580,calc_y1+20)
+            #pdf.line(465,calc_y1-60,465,calc_y1+20)
+            pdf.line(490,calc_y1-60,490,calc_y1+20)
+            #-----------------------------------
+            pdf.line(350,calc_y1,580,calc_y2)
+            pdf.line(350,calc_y1-20,580,calc_y2-20)
+            pdf.line(350,calc_y1-40,580,calc_y2-40)
+            pdf.line(350,calc_y1-60,580,calc_y2-60)
+            if est_symbolcheck_1[0] == "before amount":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+str(edit_estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+str(edit_estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+str(edit_estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+str(edit_estimate_orderrr1.cget("text")))
+
+              pdf.setStrokeColorRGB(255,10,0)
+              pdf.line(30,(calc_y1-130),580,(calc_y1-130))
+
+              text3=""+edit_estimates_e61.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')      
+              
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-125,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-140,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-155,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-170,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "before amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+" "+str(edit_estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+" "+str(edit_estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+" "+str(edit_estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+" "+str(edit_estimate_orderrr1.cget("text")))
+
+              pdf.setStrokeColorRGB(255,10,0)
+              pdf.line(30,(calc_y1-130),580,(calc_y1-130))
+
+              text3=""+edit_estimates_e61.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')      
+              
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-125,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-140,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-155,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-170,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "after amount":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(edit_estimate_discounttt1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(edit_estimate_subbb1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(edit_estimate_costtt.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,str(edit_estimate_orderrr1.cget("text"))+""+comcursign.get())
+
+              pdf.setStrokeColorRGB(255,10,0)
+              pdf.line(30,(calc_y1-130),580,(calc_y1-130))
+
+              text3=""+edit_estimates_e61.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')      
+              
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-125,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-140,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-155,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-170,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "after amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(edit_estimate_discounttt1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(edit_estimate_subbb1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(edit_estimate_costtt.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,str(edit_estimate_orderrr1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.setStrokeColorRGB(255,10,0)
+              pdf.line(30,(calc_y1-130),580,(calc_y1-130))
+
+              text3=""+edit_estimates_e61.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')      
+              
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-125,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-140,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-155,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-170,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+          else:
+            pdf.line(350,calc_y1-60,350,calc_y1+20)
+            pdf.line(580,calc_y1-60,580,calc_y1+20)
+            #pdf.line(465,calc_y1-60,465,calc_y1+20)
+            pdf.line(490,calc_y1-60,490,calc_y1+20)
+            #-----------------------------------
+            pdf.line(350,calc_y1,580,calc_y2)
+            pdf.line(350,calc_y1-20,580,calc_y2-20)
+            pdf.line(350,calc_y1-40,580,calc_y2-40)
+            pdf.line(350,calc_y1-60,580,calc_y2-60)
+            if est_symbolcheck_1[0] == "before amount":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+str(edit_estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+str(edit_estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+str(edit_estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+str(edit_estimate_orderrr1.cget("text")))
+
+              pdf.setStrokeColorRGB(255,10,0)
+              pdf.line(30,(calc_y1-130),580,(calc_y1-130))
+
+              text3=""+edit_estimates_e61.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')    
+
+              if calc_y1-170 <= 40:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-125,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-140,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-155,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-170,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "before amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+" "+str(edit_estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+" "+str(edit_estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+" "+str(edit_estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+" "+str(edit_estimate_orderrr1.cget("text")))
+
+              pdf.setStrokeColorRGB(255,10,0)
+              pdf.line(30,(calc_y1-130),580,(calc_y1-130))
+              
+              text3=""+edit_estimates_e61.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')    
+
+              if calc_y1-170 <= 40:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-125,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-140,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-155,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-170,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "after amount":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(edit_estimate_discounttt1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(edit_estimate_subbb1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(edit_estimate_costtt.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,str(edit_estimate_orderrr1.cget("text"))+""+comcursign.get())
+
+              pdf.setStrokeColorRGB(255,10,0)
+              pdf.line(30,(calc_y1-130),580,(calc_y1-130))
+
+              text3=""+edit_estimates_e61.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')    
+
+              if calc_y1-170 <= 40:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-125,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-140,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-155,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-170,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "after amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(edit_estimate_discounttt1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(edit_estimate_subbb1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(edit_estimate_costtt.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-60)+5,str(edit_estimate_orderrr1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.setStrokeColorRGB(255,10,0)
+              pdf.line(30,(calc_y1-130),580,(calc_y1-130))
+
+              text3=""+edit_estimates_e61.get("1.0","end-1c")
+              wraped_text3="\n".join(wrap(text3,102))
+              c=wraped_text3.split('\n')    
+
+              if calc_y1-170 <= 40:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-125,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-140,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-155,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-170,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+        elif company[12] == "2":
+          if calc_y1-120 <= 40:
+            pdf.showPage()
+            calc_y1 = 730
+            calc_y2 = 730
+            pdf.line(350,calc_y1-80,350,calc_y1+20)
+            pdf.line(580,calc_y1-80,580,calc_y1+20)
+            pdf.line(490,calc_y1-80,490,calc_y1+20)
+            #-----------------------------------
+            pdf.line(350,calc_y1+20,580,calc_y2+20)
+            pdf.line(350,calc_y1,580,calc_y2)
+            pdf.line(350,calc_y1-20,580,calc_y2-20)
+            pdf.line(350,calc_y1-40,580,calc_y2-40)
+            pdf.line(350,calc_y1-60,580,calc_y2-60)
+            pdf.line(350,calc_y1-80,580,calc_y2-80)
+            if est_symbolcheck_1[0] == "before amount":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+str(edit_estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+str(edit_estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+str(edit_estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+str(edit_estimate_ttax1label.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+str(edit_estimate_orderrr1.cget("text")))
+
+              pdf.setStrokeColorRGB(255,10,0)
+              pdf.line(30,(calc_y1-130),580,(calc_y1-130))
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-145,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-160,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-175,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-190,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "before amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+" "+str(edit_estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+" "+str(edit_estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+" "+str(edit_estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+" "+str(edit_estimate_ttax1label.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+" "+str(edit_estimate_orderrr1.cget("text")))
+
+              pdf.setStrokeColorRGB(255,10,0)
+              pdf.line(30,(calc_y1-130),580,(calc_y1-130))
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-145,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-160,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-175,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-190,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "after amount":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(edit_estimate_discounttt1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(edit_estimate_subbb1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(edit_estimate_costtt.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(edit_estimate_ttax1label.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,str(edit_estimate_orderrr1.cget("text"))+""+comcursign.get())
+
+              pdf.setStrokeColorRGB(255,10,0)
+              pdf.line(30,(calc_y1-130),580,(calc_y1-130))
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-145,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-160,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-175,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-190,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "after amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(edit_estimate_discounttt1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(edit_estimate_subbb1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(edit_estimate_costtt.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(edit_estimate_ttax1label.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,str(edit_estimate_orderrr1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.setStrokeColorRGB(255,10,0)
+              pdf.line(30,(calc_y1-130),580,(calc_y1-130))
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-145,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-160,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-175,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-190,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+          else:
+            pdf.line(350,calc_y1-80,350,calc_y1+20)
+            pdf.line(580,calc_y1-80,580,calc_y1+20)
+            pdf.line(490,calc_y1-80,490,calc_y1+20)
+            #-----------------------------------
+            pdf.line(350,calc_y1+20,580,calc_y2+20)
+            pdf.line(350,calc_y1,580,calc_y2)
+            pdf.line(350,calc_y1-20,580,calc_y2-20)
+            pdf.line(350,calc_y1-40,580,calc_y2-40)
+            pdf.line(350,calc_y1-60,580,calc_y2-60)
+            pdf.line(350,calc_y1-80,580,calc_y2-80)
+            if est_symbolcheck_1[0] == "before amount":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+str(edit_estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+str(edit_estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+str(edit_estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+str(edit_estimate_ttax1label.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+str(edit_estimate_orderrr1.cget("text")))
+
+              pdf.setStrokeColorRGB(255,10,0)
+              pdf.line(30,(calc_y1-130),580,(calc_y1-130))
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-190 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-145,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-160,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-175,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-190,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "before amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+" "+str(edit_estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+" "+str(edit_estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+" "+str(edit_estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+" "+str(edit_estimate_ttax1label.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+" "+str(edit_estimate_orderrr1.cget("text")))
+
+              pdf.setStrokeColorRGB(255,10,0)
+              pdf.line(30,(calc_y1-130),580,(calc_y1-130))
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-190 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-145,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-160,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-175,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-190,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "after amount":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(edit_estimate_discounttt1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(edit_estimate_subbb1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(edit_estimate_costtt.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(edit_estimate_ttax1label.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,str(edit_estimate_orderrr1.cget("text"))+""+comcursign.get())
+
+              pdf.setStrokeColorRGB(255,10,0)
+              pdf.line(30,(calc_y1-130),580,(calc_y1-130))
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-190 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-145,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-160,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-175,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-190,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "after amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(edit_estimate_discounttt1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(edit_estimate_subbb1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(edit_estimate_costtt.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(edit_estimate_ttax1label.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-80)+5,str(edit_estimate_orderrr1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.setStrokeColorRGB(255,10,0)
+              pdf.line(30,(calc_y1-130),580,(calc_y1-130))
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-190 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-145,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-160,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-175,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-190,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+        elif company[12] == "3":
+          if calc_y1-140 <= 40:
+            pdf.showPage()
+            calc_y1 = 730
+            calc_y2 = 730
+            pdf.line(350,calc_y1-100,350,calc_y1+20)
+            pdf.line(580,calc_y1-100,580,calc_y1+20)
+            pdf.line(490,calc_y1-100,490,calc_y1+20)
+            #-----------------------------------
+            pdf.line(350,calc_y1,580,calc_y2)
+            pdf.line(350,calc_y1-20,580,calc_y2-20)
+            pdf.line(350,calc_y1-40,580,calc_y2-40)
+            pdf.line(350,calc_y1-60,580,calc_y2-60)
+            pdf.line(350,calc_y1-80,580,calc_y2-80)
+            pdf.line(350,calc_y1-100,580,calc_y2-100)
+            if est_symbolcheck_1[0] == "before amount":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+str(edit_estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+str(edit_estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+str(edit_estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+str(edit_estimate_ttax1label.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+str(edit_estimate_ttax2label.cget("text")))
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,""+comcursign.get()+str(edit_estimate_orderrr1.cget("text")))
+
+              pdf.setStrokeColorRGB(255,10,0)
+              pdf.line(30,(calc_y1-130),580,(calc_y1-130))
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-165,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-180,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-195,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-210,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "before amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+" "+str(edit_estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+" "+str(edit_estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+" "+str(edit_estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+" "+str(edit_estimate_ttax1label.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+" "+str(edit_estimate_ttax2label.cget("text")))
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,""+comcursign.get()+" "+str(edit_estimate_orderrr1.cget("text")))
+
+              pdf.setStrokeColorRGB(255,10,0)
+              pdf.line(30,(calc_y1-130),580,(calc_y1-130))
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-165,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-180,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-195,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-210,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "after amount":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(edit_estimate_discounttt1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(edit_estimate_subbb1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(edit_estimate_costtt.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(edit_estimate_ttax1label.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,str(edit_estimate_ttax2label.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,str(edit_estimate_orderrr1.cget("text"))+""+comcursign.get())
+
+              pdf.setStrokeColorRGB(255,10,0)
+              pdf.line(30,(calc_y1-130),580,(calc_y1-130))
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-165,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-180,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-195,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-210,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass
+            elif est_symbolcheck_1[0] == "after amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(edit_estimate_discounttt1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(edit_estimate_subbb1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(edit_estimate_costtt.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(edit_estimate_ttax1label.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,str(edit_estimate_ttax2label.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,str(edit_estimate_orderrr1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.setStrokeColorRGB(255,10,0)
+              pdf.line(30,(calc_y1-130),580,(calc_y1-130))
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              comm = len(c)
+              if comm > 0:
+                pdf.drawString(32,calc_y1-165,c[0])
+                if comm > 1:
+                  pdf.drawString(32,calc_y1-180,c[1])
+                  if comm > 2:
+                    pdf.drawString(32,calc_y1-195,c[2])
+                    if comm > 3:
+                      pdf.drawString(32,calc_y1-210,c[3])
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                pass 
+          else:
+            pdf.line(350,calc_y1-100,350,calc_y1+20)
+            pdf.line(580,calc_y1-100,580,calc_y1+20)
+            pdf.line(490,calc_y1-100,490,calc_y1+20)
+            #-----------------------------------
+            pdf.line(350,calc_y1,580,calc_y2)
+            pdf.line(350,calc_y1-20,580,calc_y2-20)
+            pdf.line(350,calc_y1-40,580,calc_y2-40)
+            pdf.line(350,calc_y1-60,580,calc_y2-60)
+            pdf.line(350,calc_y1-80,580,calc_y2-80)
+            pdf.line(350,calc_y1-100,580,calc_y2-100)
+            if est_symbolcheck_1[0] == "before amount":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+str(edit_estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+str(edit_estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+str(edit_estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+str(edit_estimate_ttax1label.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+str(edit_estimate_ttax2label.cget("text")))
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,""+comcursign.get()+str(edit_estimate_orderrr1.cget("text")))
+
+              pdf.setStrokeColorRGB(255,10,0)
+              pdf.line(30,(calc_y1-130),580,(calc_y1-130))
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-210 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-165,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-180,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-195,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-210,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "before amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,""+comcursign.get()+" "+str(edit_estimate_discounttt1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,""+comcursign.get()+" "+str(edit_estimate_subbb1.cget("text")))
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,""+comcursign.get()+" "+str(edit_estimate_costtt.cget("text")))
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,""+comcursign.get()+" "+str(edit_estimate_ttax1label.cget("text")))
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,""+comcursign.get()+" "+str(edit_estimate_ttax2label.cget("text")))
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,""+comcursign.get()+" "+str(edit_estimate_orderrr1.cget("text")))
+
+              pdf.setStrokeColorRGB(255,10,0)
+              pdf.line(30,(calc_y1-130),580,(calc_y1-130))
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-210 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-165,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-180,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-195,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-210,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "after amount":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(edit_estimate_discounttt1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(edit_estimate_subbb1.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(edit_estimate_costtt.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(edit_estimate_ttax1label.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,str(edit_estimate_ttax2label.cget("text"))+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,str(edit_estimate_orderrr1.cget("text"))+""+comcursign.get())
+
+              pdf.setStrokeColorRGB(255,10,0)
+              pdf.line(30,(calc_y1-130),580,(calc_y1-130))
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-210 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-165,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-180,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-195,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-210,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+            elif est_symbolcheck_1[0] == "after amount with space":
+              pdf.drawString(360,calc_y1+5,str(float(edit_estimates_disrate.get())) + "" +"% Discount")
+              pdf.drawString(510,calc_y1+5,str(edit_estimate_discounttt1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-20)+5,"Subtotal")
+              pdf.drawString(510,(calc_y1-20)+5,str(edit_estimate_subbb1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-40)+5,edit_estimates_e1.get())
+              pdf.drawString(510,(calc_y1-40)+5,str(edit_estimate_costtt.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-60)+5,"TAX1")
+              pdf.drawString(510,(calc_y1-60)+5,str(edit_estimate_ttax1label.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-80)+5,"TAX2")
+              pdf.drawString(510,(calc_y1-80)+5,str(edit_estimate_ttax2label.cget("text"))+" "+""+comcursign.get())
+
+              pdf.drawString(360,(calc_y1-100)+5,est_str6.get())
+              pdf.drawString(510,(calc_y1-100)+5,str(edit_estimate_orderrr1.cget("text"))+" "+""+comcursign.get())
+
+              pdf.setStrokeColorRGB(255,10,0)
+              pdf.line(30,(calc_y1-130),580,(calc_y1-130))
+
+              comment_text = edit_estimates_e61.get("1.0","end-1c")
+              wraped_text = "\n".join(wrap(comment_text,102))
+              c  = wraped_text.split('\n')
+                  
+              if calc_y1-210 <= 45:
+                pdf.showPage()
+                calc_y1 = 730
+                calc_y2 = 730  
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-15,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-30,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-45,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+              else:
+                comm = len(c)
+                if comm > 0:
+                  pdf.drawString(32,calc_y1-165,c[0])
+                  if comm > 1:
+                    pdf.drawString(32,calc_y1-180,c[1])
+                    if comm > 2:
+                      pdf.drawString(32,calc_y1-195,c[2])
+                      if comm > 3:
+                        pdf.drawString(32,calc_y1-210,c[3])
+                      else:
+                        pass
+                    else:
+                      pass
+                  else:
+                    pass
+                else:
+                  pass
+
+        if (calc_y1-170)-115 <= 10 or (calc_y1-190)-115 <= 10 or (calc_y1-210)-115 <= 10:
+          pdf.drawCentredString(302,115, "Terms and Conditions")
+          pdf.setStrokeColorRGB(255,10,0)
+          pdf.line(30,110,580,110)
+          text4=""+edit_estimates_e51.get("1.0","end-1c")
+          wraped_text4="\n".join(wrap(text4,102))
+          t=wraped_text4.split('\n')      
+          term = len(t)
+          if term > 0:
+            pdf.drawString(32,95,t[0])
+            if term > 1:
+              pdf.drawString(32,80,t[1])
+              if term > 2:
+                pdf.drawString(32,65,t[2])
+                if term > 3:
+                  pdf.drawString(32,50,t[3])
+                else:
+                  pass
+              else:
+                pass
+            else:
+              pass
+          else:
+            pass
+          
+          pdf.drawString(32,30, "Sales Person:")
+          pdf.drawString(115,30, " "+edit_estimates_e6.get())
+          pdf.drawString(32,12, " "+edit_estimates_e21.get())
+        else:
+          pdf.drawCentredString(302,115, "Terms and Conditions")
+          pdf.setStrokeColorRGB(255,10,0)
+          pdf.line(30,110,580,110)
+          text4=""+edit_estimates_e51.get("1.0","end-1c")
+          wraped_text4="\n".join(wrap(text4,102))
+          t=wraped_text4.split('\n')      
+          term = len(t)
+          if term > 0:
+            pdf.drawString(32,95,t[0])
+            if term > 1:
+              pdf.drawString(32,80,t[1])
+              if term > 2:
+                pdf.drawString(32,65,t[2])
+                if term > 3:
+                  pdf.drawString(32,50,t[3])
+                else:
+                  pass
+              else:
+                pass
+            else:
+              pass
+          else:
+            pass
+          
+          pdf.drawString(32,30, "Sales Person:")
+          pdf.drawString(115,30, " "+edit_estimates_e6.get())
+          pdf.drawString(32,12, " "+edit_estimates_e21.get())
+          
+        
+        pdf.save()
+        # win32api.ShellExecute(0,"","estimate\Estimate_Report.pdf",None,".",0)
       edit_estimate_mailDetail=Toplevel()
       edit_estimate_mailDetail.title("E-Mail")
       estimate_ep2 = PhotoImage(file = "images/fbicon.png")
@@ -29191,10 +44268,16 @@ def mainpage():
     
       edit_estimate_attachlbframe=LabelFrame(edit_estimate_email_Frame,text="Attachment(s)", height=365, width=280)
       edit_estimate_attachlbframe.place(x=740, y=5)
+
+
       edit_estframe = StringVar()
       edit_estimate_htcodeframe=Listbox(edit_estimate_attachlbframe, height=13, width=43, bg="white",listvariable=edit_estframe)
       edit_estimate_htcodeframe.place(x=5, y=5)
+      edit_estimate_htcodeframe.insert(0,edit_est_data[1].split('/')[0]+".pdf")
       edit_estimate_htcodeframe.bind('<Double-Button-1>',est_empsfile_image_2)
+
+
+
       edit_estimate_lbl_btn_info=Label(edit_estimate_attachlbframe, text="Double click on attachment to view")
       edit_estimate_lbl_btn_info.place(x=30, y=230)
       edit_estimate_e_btn17=Button(edit_estimate_attachlbframe,compound = LEFT,width=20,text="Add attacment file...",command=est_UploadAction_2)
@@ -29230,11 +44313,13 @@ def mainpage():
     edit_estimate_w4.pack(side="left", padx=5)
 
     def edit_on_click():
-      text.set("Accepted")
+      edit_estimates_draft.config(text="Accepted",fg="green")
+      edit_estimates_draft.place(x=40, y=3)
         
 
     def edit_eston_click():
-      text.set("Declined")
+      edit_estimates_draft.config(text="Declined",fg="red")
+      edit_estimates_draft.place(x=40, y=3)
 
     edit_estimate_smss1= Button(edit_estimate_firFrame,compound="top", text="Set Status\nto Accepted",relief=RAISED, image=mark1,bg="#f5f3f2", fg="black", height=55, bd=1, width=55,command=edit_on_click)
     edit_estimate_smss1.pack(side="left", pady=3, ipadx=4)
@@ -29248,7 +44333,7 @@ def mainpage():
     edit_estimate_calc= Button(edit_estimate_firFrame,compound="top", text="Open\nCalculator",relief=RAISED, image=photo9,bg="#f5f3f2", fg="black", height=55, bd=1, width=55, command=edit_calcu)
     edit_estimate_calc.pack(side="left", pady=3, ipadx=4)
 
-    edit_estimate_save= Button(edit_estimate_firFrame,compound="top", text="Save",relief=RAISED, image=tick,bg="#f5f3f2", fg="black", height=55, bd=1, width=55)
+    edit_estimate_save= Button(edit_estimate_firFrame,compound="top", text="Save",relief=RAISED, image=tick,bg="#f5f3f2", fg="black", height=55, bd=1, width=55,command=edit_new_estimate)
     edit_estimate_save.pack(side="right", pady=3, ipadx=4)
 
 
@@ -29267,8 +44352,10 @@ def mainpage():
     
     edit_estimate_statusfrme = LabelFrame(edit_estimate_labelfram1,text="Status",font=("arial",15))
     edit_estimate_statusfrme.place(x=540,y=0,width=160,height=160)
+
     edit_estimates_draft=Label(edit_estimate_statusfrme, text=""+edit_est_data[4],font=("arial", 15, "bold"), fg="grey")
-    edit_estimates_draft.place(x=50, y=3)
+    edit_estimates_draft.place(x=47, y=3)
+
     edit_estimates_on1=Label(edit_estimate_statusfrme, text="Emailed on:").place( y=50)
     edit_estimates_nev1=Label(edit_estimate_statusfrme, text="Never")
     edit_estimates_nev1.place(x=100,y=50)
@@ -29427,35 +44514,35 @@ def mainpage():
     tax_data1 = fbcursor.fetchone()
     edit_estimate_discounttt=Label(edit_estimate_summaryfrme, text="Discount")
     
-    edit_estimate_discounttt1=Label(edit_estimate_summaryfrme, text="$0.00")
+    edit_estimate_discounttt1=Label(edit_estimate_summaryfrme, text=""+str(edit_est_data[38]))  #"0.00")
     
     edit_estimate_subbb=Label(edit_estimate_summaryfrme, text="Subtotal")
     
-    edit_estimate_subbb1=Label(edit_estimate_summaryfrme, text="$0.00")
+    edit_estimate_subbb1=Label(edit_estimate_summaryfrme, text=""+str(edit_est_data[36]))  #"0.00")
     
     edit_estimate_txa1label=Label(edit_estimate_summaryfrme, text="Tax1")
     
-    edit_estimate_ttax1label=Label(edit_estimate_summaryfrme, text="$0.00")
+    edit_estimate_ttax1label=Label(edit_estimate_summaryfrme, text=""+str(edit_est_data[39]))  #"0.00")
     
     edit_estimate_txa2label=Label(edit_estimate_summaryfrme, text="Tax2")
     
-    edit_estimate_ttax2label=Label(edit_estimate_summaryfrme, text="$0.00")
+    edit_estimate_ttax2label=Label(edit_estimate_summaryfrme, text=""+str(edit_est_data[40])) #"0.00")
     
     edit_estimate_costt=Label(edit_estimate_summaryfrme, text="Extra cost")
     
-    edit_estimate_costtt=Label(edit_estimate_summaryfrme, text="$0.00")
+    edit_estimate_costtt=Label(edit_estimate_summaryfrme, text=""+str(edit_est_data[37]))  #"0.00")
     
     edit_estimate_orderrr=Label(edit_estimate_summaryfrme, text="Estimate total")
     
-    edit_estimate_orderrr1=Label(edit_estimate_summaryfrme, text="$0.00")
+    edit_estimate_orderrr1=Label(edit_estimate_summaryfrme, text=""+str(edit_est_data[8]))  #"0.00")
     
     edit_estimate_totalll=Label(edit_estimate_summaryfrme, text="Total paid")
     
-    edit_estimate_totalll1=Label(edit_estimate_summaryfrme, text="$0.00")
+    edit_estimate_totalll1=Label(edit_estimate_summaryfrme, text=""+str(edit_est_data[9]))  #"0.00")
     
     edit_estimate_balancee=Label(edit_estimate_summaryfrme, text="Balance")
     
-    edit_estimate_balancee1=Label(edit_estimate_summaryfrme, text="$0.00")
+    edit_estimate_balancee1=Label(edit_estimate_summaryfrme, text=""+str(edit_est_data[10]))  #"0.00")
     
     if tax_data1[12] == "1":
       edit_estimate_discounttt.place(x=0 ,y=0)
@@ -29502,6 +44589,52 @@ def mainpage():
       edit_estimate_totalll1.place(x=130 ,y=90)
       edit_estimate_balancee.place(x=0 ,y=105)
       edit_estimate_balancee1.place(x=130 ,y=105)
+
+    sql = "select taxtype from company"
+    fbcursor.execute(sql)
+    taxsummarysym = fbcursor.fetchone()
+    sql = "select currencysign,currsignplace from company"
+    fbcursor.execute(sql)
+    symbollabal = fbcursor.fetchone()
+    edit_estimate_discounttt1_1=Label(edit_estimate_summaryfrme, text=symbollabal[0])
+    edit_estimate_subbb1_1=Label(edit_estimate_summaryfrme, text=symbollabal[0])
+    edit_estimate_ttax1label_1=Label(edit_estimate_summaryfrme, text=symbollabal[0])
+    edit_estimate_ttax2label_1=Label(edit_estimate_summaryfrme,text=symbollabal[0])
+    edit_estimate_costtt_1=Label(edit_estimate_summaryfrme, text=symbollabal[0])
+    edit_estimate_orderrr1_1=Label(edit_estimate_summaryfrme, text=symbollabal[0])
+    edit_estimate_totalll1_1=Label(edit_estimate_summaryfrme, text=symbollabal[0])
+    edit_estimate_balancee1_1=Label(edit_estimate_summaryfrme, text=symbollabal[0])
+    if not taxsummarysym:
+      edit_estimate_discounttt1_1.place(x=105 ,y=0)
+      edit_estimate_subbb1_1.place(x=105 ,y=15)
+      edit_estimate_costtt_1.place(x=105 ,y=30)
+      edit_estimate_orderrr1_1.place(x=105 ,y=45)
+      edit_estimate_totalll1_1.place(x=105 ,y=60)
+      edit_estimate_balancee1_1.place(x=105 ,y=75)
+    elif taxsummarysym[0] == "1":
+      edit_estimate_discounttt1_1.place(x=105 ,y=0)
+      edit_estimate_subbb1_1.place(x=105 ,y=15)
+      edit_estimate_costtt_1.place(x=105 ,y=30)
+      edit_estimate_orderrr1_1.place(x=105 ,y=45)
+      edit_estimate_totalll1_1.place(x=105 ,y=60)
+      edit_estimate_balancee1_1.place(x=105 ,y=75)
+    elif taxsummarysym[0] == "2":
+      edit_estimate_discounttt1_1.place(x=105 ,y=0)
+      edit_estimate_subbb1_1.place(x=105 ,y=15)
+      edit_estimate_ttax1label_1.place(x=105 ,y=30)
+      edit_estimate_costtt_1.place(x=105 ,y=45)
+      edit_estimate_orderrr1_1.place(x=105 ,y=60)
+      edit_estimate_totalll1_1.place(x=105 ,y=75)
+      edit_estimate_balancee1_1.place(x=105 ,y=90)
+    elif taxsummarysym[0] == "3":
+      edit_estimate_discounttt1_1.place(x=105 ,y=0)
+      edit_estimate_subbb1_1.place(x=105 ,y=15)
+      edit_estimate_ttax1label_1.place(x=105 ,y=30)
+      edit_estimate_ttax2label_1.place(x=105 ,y=45)
+      edit_estimate_costtt_1.place(x=105 ,y=60)
+      edit_estimate_orderrr1_1.place(x=105 ,y=75)
+      edit_estimate_totalll1_1.place(x=105,y=90)
+      edit_estimate_balancee1_1.place(x=105 ,y=105)
 
 
 
@@ -41462,22 +56595,19 @@ def mainpage():
   estimate_chkbtnn1 = Checkbutton(estimate_lbframe, text = "Apply filter", variable = estimate_checkvarr1, onvalue = 1, offvalue = 0, height = 2, width = 8, bg="#f8f8f2",command=est_filterby_date)
   estimate_chkbtnn1.grid(row=0, column=2, rowspan=2, padx=(5,5))
 
-  # def refreshbttn1():
-  #   for record in est_tree.get_children():
-  #     est_tree.delete(record)
-  #   fbcursor.execute("select * from estimate")
-  #   ref_data = fbcursor.fetchall()
-  #   rfrs=0
-  #   countp = 0
-  #   for i in ref_data:
-  #     est_tree.insert(parent='', index='end', iid=countp, text='', values=('',i[1],i[2],i[3],i[18],i[4],i[5],i[6],i[7],i[8]))
-  #     for line in est_tree.get_children():
-  #       idsaverefrsh=est_tree.item(line)['values'][9]
-  #     rfrs+=idsaverefrsh
-  #   countp += 1
+  def refreshbttn1():
+    for record in est_tree.get_children():
+      est_tree.delete(record)
+    sql="select * from estimate"
+    fbcursor.execute(sql)
+    refresh_data = fbcursor.fetchall()
+    countp = 0
+    for i in refresh_data:
+      est_tree.insert(parent='', index='end', iid=countp, text='', values=('',i[1],i[2],i[3],i[18],i[4],i[5],i[6],i[7],i[8]))
+      countp += 1
    
 
-  estimate_productLabel = Button(estimate_midFrame,compound="top", text="Refresh\nEstimates",relief=RAISED, image=photo8,fg="black", height=55, bd=1, width=55)
+  estimate_productLabel = Button(estimate_midFrame,compound="top", text="Refresh\nEstimates",relief=RAISED, image=photo8,fg="black", height=55, bd=1, width=55,command=refreshbttn1)
   estimate_productLabel.pack(side="left")
 
   estimate_w7 = Canvas(estimate_midFrame, width=1, height=55, bg="#b3b3b3", bd=0)
@@ -41485,7 +56615,7 @@ def mainpage():
 
   
 
-  estimate_productLabell = Button(estimate_midFrame,compound="top", text="Hide totals\nSum",relief=RAISED, image=photo9,bg="#f8f8f2", fg="black", height=55, bd=1, width=55)
+  estimate_productLabell = Button(estimate_midFrame,compound="top",text="Hide totals\nSum", relief=RAISED, image=photo9,bg="#f8f8f2", fg="black", height=55, bd=1, width=55)
   estimate_productLabell.pack(side="left")
 
   estimate_labelall = Label(estimate_mainFrame, text="Estimate(All)", font=("arial", 18), bg="#f8f8f2")
@@ -41728,6 +56858,7 @@ def mainpage():
         
 
       ######### show total sum #############
+      
       def est_showtotsum():
         estimate_productLabell.config(text="Hide totals\nSum",command=est_hidetotsum)
 
